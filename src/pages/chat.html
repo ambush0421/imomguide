@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 전문가 상담 | 아이맘가이드</title>
+    <meta name="description" content="소아과 의사, 베테랑 맘, 아동심리 전문가 AI에게 육아 고민을 상담하세요">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/chat.css">
+    
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911"
+     crossorigin="anonymous"></script>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC34J0R1FS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FC34J0R1FS');
+    </script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav container">
+            <a href="/" class="logo">
+                <span class="logo-icon">👶</span>
+                <span class="logo-text">아이맘가이드</span>
+            </a>
+            <div class="nav-links">
+                <span class="usage-badge" id="usageBadge">
+                    오늘 남은 상담: <strong id="remainingCount">3</strong>회
+                </span>
+                <a href="/pages/login.html" class="btn btn-outline" id="authBtn">로그인</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Chat Container -->
+    <main class="chat-container">
+        <!-- Welcome Screen -->
+        <div class="chat-welcome" id="welcomeScreen">
+            <div class="welcome-content">
+                <h1>👋 안녕하세요!</h1>
+                <p>3명의 AI 전문가가 육아 고민에 답변해 드려요</p>
+                
+                <div class="expert-intro">
+                    <div class="expert-mini">
+                        <span class="avatar">👩‍⚕️</span>
+                        <span>김소아 원장</span>
+                    </div>
+                    <div class="expert-mini">
+                        <span class="avatar">🤱</span>
+                        <span>박경험 맘</span>
+                    </div>
+                    <div class="expert-mini">
+                        <span class="avatar">🧠</span>
+                        <span>이심리 박사</span>
+                    </div>
+                </div>
+
+                <div class="quick-questions">
+                    <p>자주 묻는 질문으로 시작해 보세요:</p>
+                    <button class="quick-btn" data-question="아기가 밤에 자주 깨요. 어떻게 해야 할까요?">
+                        🌙 아기가 밤에 자주 깨요
+                    </button>
+                    <button class="quick-btn" data-question="모유 수유 중인데 젖이 부족한 것 같아요.">
+                        🍼 모유가 부족한 것 같아요
+                    </button>
+                    <button class="quick-btn" data-question="생후 6개월인데 이유식을 언제 시작해야 하나요?">
+                        🥣 이유식 시작 시기가 궁금해요
+                    </button>
+                    <button class="quick-btn" data-question="아기 열이 38도예요. 병원에 가야 할까요?">
+                        🤒 아기가 열이 나요
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be inserted here -->
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator" style="display: none;">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <span>전문가들이 답변을 준비하고 있어요...</span>
+        </div>
+    </main>
+
+    <!-- Chat Input -->
+    <div class="chat-input-container">
+        <div class="chat-input-wrapper">
+            <textarea 
+                id="chatInput" 
+                placeholder="육아 고민을 자유롭게 입력하세요..."
+                rows="1"
+                maxlength="1000"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+        <p class="input-hint">
+            ⚠️ 응급 상황 시 119에 연락하거나 가까운 응급실을 방문하세요
+        </p>
+    </div>
+
+    <!-- Limit Reached Modal -->
+    <div class="modal" id="limitModal" style="display: none;">
+        <div class="modal-content">
+            <h2>오늘 무료 상담을 모두 사용했어요 😢</h2>
+            <p>프리미엄으로 업그레이드하면 무제한으로 상담받을 수 있어요!</p>
+            <div class="modal-price">
+                <span class="price">₩9,900</span>
+                <span class="period">/월</span>
+            </div>
+            <ul class="modal-features">
+                <li>✓ 무제한 AI 전문가 상담</li>
+                <li>✓ 광고 완전 제거</li>
+                <li>✓ 주간 맞춤 리포트</li>
+            </ul>
+            <a href="/pages/login.html?plan=premium" class="btn btn-primary btn-full">
+                프리미엄 시작하기
+            </a>
+            <button class="btn btn-text" onclick="closeLimitModal()">
+                내일 다시 올게요
+            </button>
+        </div>
+    </div>
+
+    <script src="../utils/firebase-config.js" type="module"></script>
+    <script src="../api/gemini.js"></script>
+    <script src="../chat.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출산예정일 계산기 - 임신 주수 확인 | 아이맘가이드</title>
+    <meta name="description" content="마지막 생리 시작일로 출산예정일과 현재 임신 주수를 정확하게 계산하세요.">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="../../styles/tools.css">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC34J0R1FS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FC34J0R1FS');
+    </script>
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <a href="../../index.html" class="logo">아이맘가이드</a>
+            <div class="nav-links">
+                <a href="../chat.html">AI 상담</a>
+                <a href="../guides.html">육아 가이드</a>
+                <a href="../tools.html" class="active">계산기</a>
+                <a href="../login.html" class="btn-login">로그인</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="calculator-container">
+        <div class="calculator-header">
+            <div class="tool-icon">🗓️</div>
+            <h1>출산예정일 계산기</h1>
+            <p>마지막 생리 시작일을 입력하면 출산예정일을 계산해 드립니다.</p>
+        </div>
+
+        <div class="calculator-form">
+            <div class="form-group">
+                <label for="lmp-date">마지막 생리 시작일 (LMP)</label>
+                <input type="date" id="lmp-date" required>
+            </div>
+            <button type="button" class="calculate-btn" onclick="calculateDueDate()">계산하기</button>
+        </div>
+
+        <div class="calculator-result" id="result">
+            <div class="result-main">
+                <span class="big-number" id="due-date-result">-</span>
+                <span class="result-label">출산예정일</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    function calculateDueDate() {
+        const lmpInput = document.getElementById('lmp-date').value;
+        if (!lmpInput) return;
+        const lmpDate = new Date(lmpInput);
+        const dueDate = new Date(lmpDate);
+        dueDate.setDate(dueDate.getDate() + 280);
+        document.getElementById('due-date-result').textContent = dueDate.toLocaleDateString('ko-KR');
+        document.getElementById('result').classList.add('show');
+    }
+    </script>
+</body>
+</html>

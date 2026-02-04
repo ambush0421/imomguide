@@ -1,14 +1,91 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iMomGuide - AI 육아 전문가 패널 상담실</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC34J0R1FS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FC34J0R1FS');
+    </script>
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+
+<header class="main-header">
+    <div class="logo">
+        <i class="fa-solid fa-baby-carriage"></i> iMomGuide
+    </div>
+    <nav class="main-nav">
+        <a href="#" class="active">전문가 상담</a>
+        <a href="#">임신/육아 가이드</a>
+        <a href="#">성장 계산기</a>
+        <a href="#">커뮤니티</a>
+    </nav>
+    <div class="user-status">
+        <span id="usage-counter">무료 이용: 3/3회 남음</span>
+        <button id="premium-btn" class="btn-premium">프리미엄 구독</button>
+    </div>
+</header>
+
+<main class="consultation-room">
+    <section class="experts-intro">
+        <h2>AI 전문가 패널</h2>
+        <div class="experts-grid">
+            <div class="expert-card" data-expert="doctor">
+                <div class="expert-avatar doctor-bg">🩺</div>
+                <div class="expert-info">
+                    <h3>김소아 원장</h3>
+                    <p>소아청소년과 전문의 (15년)</p>
+                    <span class="tag">의학적 팩트</span>
+                </div>
+            </div>
+            <div class="expert-card" data-expert="mom">
+                <div class="expert-avatar mom-bg">🤱</div>
+                <div class="expert-info">
+                    <h3>박경험 맘</h3>
+                    <p>삼남매 육아 베테랑</p>
+                    <span class="tag">현실 육아꿀팁</span>
+                </div>
+            </div>
+            <div class="expert-card" data-expert="psych">
+                <div class="expert-avatar psych-bg">🧠</div>
+                <div class="expert-info">
+                    <h3>이심리 박사</h3>
+                    <p>아동심리 전문가</p>
+                    <span class="tag">마음 읽기</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="chat-interface">
+        <div id="chat-history" class="chat-history">
+            <div class="message system-message">
+                <p>안녕하세요! 육아 고민이 있으신가요? 3명의 전문가가 함께 고민해 드립니다.<br>
+                궁금한 점을 자세히 적어주세요.</p>
+            </div>
+        </div>
+        
+        <div class="chat-input-area">
+            <textarea id="user-input" placeholder="예: 아이가 3일째 열이 나고 밥을 안 먹어요. 어떻게 해야 할까요?" rows="3"></textarea>
+            <button id="send-btn" class="btn-send"><i class="fa-solid fa-paper-plane"></i> 상담 시작</button>
+        </div>
+    </section>
+</main>
+
+<footer class="main-footer">
+    <p>&copy; 2026 iMomGuide. All rights reserved. | <a href="#">이용약관</a> | <a href="#">개인정보처리방침</a></p>
+</footer>
+
+<script type="module" src="main.js"></script>
 </body>
 </html>

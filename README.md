@@ -1,1 +1,20 @@
-A simple HTML/JS/CSS starter template
+# iMomGuide (아이맘가이드)
+
+AI 기반 육아 전문가 패널 상담 플랫폼입니다.
+
+## 주요 기능 (MVP)
+1.  **AI 전문가 패널 상담**:
+    -   **김소아 원장**: 소아청소년과 전문의 페르소나 (의학적 조언)
+    -   **박경험 맘**: 베테랑 육아맘 페르소나 (공감 및 경험담)
+    -   **이심리 박사**: 아동심리 전문가 페르소나 (정서 발달 조언)
+2.  **수익화 모델**:
+    -   **프리미엄 구독**: 일일 무료 상담 횟수 제한 (3회) 및 해제 기능
+    -   **제품 추천**: 상담 내용 내 키워드(예: 열, 기저귀) 감지 시 관련 제품 추천 카드 노출
+
+## 기술 스택
+-   HTML5, CSS3 (Modern Flexbox/Grid)
+-   Vanilla JavaScript (ES Modules)
+-   Local Storage (사용량 추적)
+
+## 실행 방법
+Firebase Studio 또는 Live Server 환경에서 `index.html`을 실행하세요.

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 | 아이맘가이드</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/mypage.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911"
+     crossorigin="anonymous"></script>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC34J0R1FS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FC34J0R1FS');
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav container">
+            <a href="/" class="logo">
+                <span class="logo-icon">👶</span>
+                <span class="logo-text">아이맘가이드</span>
+            </a>
+            <div class="nav-links">
+                <a href="/pages/chat.html">AI 상담</a>
+                <a href="#" id="logoutBtn" class="btn btn-outline">로그아웃</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mypage-container">
+        <!-- Profile Section -->
+        <section class="profile-section">
+            <div class="profile-card">
+                <div class="profile-avatar" id="profileAvatar">
+                    <span>👤</span>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profileName">로딩 중...</h1>
+                    <p id="profileEmail">-</p>
+                    <span class="membership-badge" id="membershipBadge">무료 회원</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">💬</span>
+                    <div class="stat-info">
+                        <span class="stat-value" id="totalChats">0</span>
+                        <span class="stat-label">총 상담 횟수</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📅</span>
+                    <div class="stat-info">
+                        <span class="stat-value" id="joinDate">-</span>
+                        <span class="stat-label">가입일</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🎯</span>
+                    <div class="stat-info">
+                        <span class="stat-value" id="todayRemaining">3</span>
+                        <span class="stat-label">오늘 남은 상담</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upgrade CTA (for free users) -->
+        <section class="upgrade-section" id="upgradeSection">
+            <div class="upgrade-card">
+                <h2>🚀 프리미엄으로 업그레이드</h2>
+                <p>무제한 상담과 광고 제거 혜택을 누리세요!</p>
+                <ul>
+                    <li>✓ 무제한 AI 전문가 상담</li>
+                    <li>✓ 광고 완전 제거</li>
+                    <li>✓ 상담 기록 영구 저장</li>
+                    <li>✓ 주간 맞춤 리포트</li>
+                </ul>
+                <a href="/pages/pricing.html" class="btn btn-primary">
+                    월 9,900원으로 시작하기
+                </a>
+            </div>
+        </section>
+
+        <!-- Chat History -->
+        <section class="history-section">
+            <h2>최근 상담 기록</h2>
+            <div class="history-list" id="historyList">
+                <p class="empty-message">상담 기록이 없습니다. AI 전문가에게 첫 질문을 해보세요!</p>
+            </div>
+            <a href="/pages/chat.html" class="btn btn-primary">새 상담 시작하기</a>
+        </section>
+
+        <!-- Baby Info Section -->
+        <section class="baby-section">
+            <h2>👶 아기 정보</h2>
+            <div class="baby-card" id="babyCard">
+                <p class="empty-message">아기 정보를 등록하면 더 맞춤화된 상담을 받을 수 있어요.</p>
+                <button class="btn btn-outline" id="addBabyBtn">아기 정보 등록하기</button>
+            </div>
+        </section>
+
+        <!-- Account Section -->
+        <section class="account-section">
+            <h2>계정 설정</h2>
+            <div class="account-options">
+                <button class="account-option" id="changePasswordBtn">
+                    <span>🔒</span>
+                    <span>비밀번호 변경</span>
+                </button>
+                <button class="account-option" id="notificationSettingsBtn">
+                    <span>🔔</span>
+                    <span>알림 설정</span>
+                </button>
+                <button class="account-option danger" id="deleteAccountBtn">
+                    <span>⚠️</span>
+                    <span>계정 삭제</span>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Baby Info Modal -->
+    <div class="modal" id="babyModal" style="display: none;">
+        <div class="modal-content">
+            <h2>아기 정보 등록</h2>
+            <form id="babyForm">
+                <div class="form-group">
+                    <label for="babyNickname">아기 별명</label>
+                    <input type="text" id="babyNickname" placeholder="예: 콩이, 첫째" required>
+                </div>
+                <div class="form-group">
+                    <label for="babyBirthdate">생년월일</label>
+                    <input type="date" id="babyBirthdate" required>
+                </div>
+                <div class="form-group">
+                    <label>성별</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="babyGender" value="male"> 남아
+                        </label>
+                        <label>
+                            <input type="radio" name="babyGender" value="female"> 여아
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-outline" onclick="closeBabyModal()">취소</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>로딩 중...</p>
+    </div>
+
+    <script src="../utils/firebase-config.js"></script>
+    <script src="../mypage.js"></script>
+</body>
+</html>

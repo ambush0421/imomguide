@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>아이맘가이드 - AI 육아 정보 플랫폼</title>
+        <link>https://imomguide.pages.dev</link>
+        <description>AI 전문가 패널과 함께하는 임신, 출산, 육아 정보. 소아과 의사, 경험 많은 엄마, 아동발달 전문가가 답변합니다.</description>
+        <language>ko</language>
+        <lastBuildDate>Tue, 04 Feb 2026 00:00:00 +0900</lastBuildDate>
+        <atom:link href="https://imomguide.pages.dev/rss.xml" rel="self" type="application/rss+xml"/>
+        
+        <item>
+            <title>임신 8주차 증상과 태아 발달 - 심장 소리가 들려요</title>
+            <link>https://imomguide.pages.dev/pages/pregnancy/week-8.html</link>
+            <description>임신 8주차에는 태아의 심장 박동을 확인할 수 있습니다. 입덧 대처법, 태아 크기, 필수 검사, 엄마의 신체 변화까지 소아과 의사와 경험맘이 알려드립니다.</description>
+            <pubDate>Tue, 04 Feb 2026 00:00:00 +0900</pubDate>
+            <guid>https://imomguide.pages.dev/pages/pregnancy/week-8.html</guid>
+            <category>임신</category>
+        </item>
+        
+        <item>
+            <title>출산예정일 계산기 - 임신 주수 확인</title>
+            <link>https://imomguide.pages.dev/pages/tools/due-date.html</link>
+            <description>마지막 생리 시작일로 출산예정일과 현재 임신 주수를 정확하게 계산하세요. 분기별 중요 검사 일정도 함께 확인할 수 있습니다.</description>
+            <pubDate>Tue, 04 Feb 2026 00:00:00 +0900</pubDate>
+            <guid>https://imomguide.pages.dev/pages/tools/due-date.html</guid>
+            <category>도구</category>
+        </item>
+        
+        <item>
+            <title>아기 성장 백분위 계산기 - WHO 기준</title>
+            <link>https://imomguide.pages.dev/pages/tools/growth-percentile.html</link>
+            <description>아기의 키, 몸무게, 머리둘레를 WHO 성장 기준과 비교하여 백분위를 확인하세요. 0-36개월 아기 성장 발달 체크.</description>
+            <pubDate>Tue, 04 Feb 2026 00:00:00 +0900</pubDate>
+            <guid>https://imomguide.pages.dev/pages/tools/growth-percentile.html</guid>
+            <category>도구</category>
+        </item>
+        
+        <item>
+            <title>수유량 계산기 - 적정 분유량, 수유 간격</title>
+            <link>https://imomguide.pages.dev/pages/tools/feeding-calculator.html</link>
+            <description>아기의 월령과 체중에 맞는 적정 수유량과 수유 간격을 계산하세요. 모유, 분유 수유 가이드.</description>
+            <pubDate>Tue, 04 Feb 2026 00:00:00 +0900</pubDate>
+            <guid>https://imomguide.pages.dev/pages/tools/feeding-calculator.html</guid>
+            <category>도구</category>
+        </item>
+    </channel>
+</rss>
