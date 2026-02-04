@@ -435,8 +435,7 @@ async function generateAllContent() {
         }
     }
     
-    console.log('
-🎉 콘텐츠 생성 완료!');
+    console.log('\n🎉 콘텐츠 생성 완료!');
 }
 
 /**
