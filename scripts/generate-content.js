@@ -489,8 +489,7 @@ ${urls.map(url => `    <url>
         <lastmod>${today}</lastmod>
         <changefreq>${url.changefreq}</changefreq>
         <priority>${url.priority}</priority>
-    </url>`).join('
-')}
+    </url>`).join('\n')}
 </urlset>`;
     
     fs.writeFileSync(path.join(__dirname, '../src/sitemap.xml'), xml);
