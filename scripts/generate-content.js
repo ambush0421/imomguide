@@ -60,6 +60,45 @@ const babyMonthData = {
 };
 
 /**
+ * Gemini API 호출 함수
+ */
+async function callGeminiAPI(prompt) {
+    if (GEMINI_API_KEY === 'YOUR_API_KEY') {
+        console.warn('⚠️ GEMINI_API_KEY가 설정되지 않았습니다. 더미 데이터를 반환합니다.');
+        return "<p>API 키가 설정되지 않아 AI 콘텐츠를 생성할 수 없습니다. 환경 변수를 설정해주세요.</p>";
+    }
+
+    try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 2000,
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const text = data.candidates[0].content.parts[0].text;
+        
+        // 마크다운 제거 및 HTML 태그 정리 (간단히)
+        return text.replace(/```html/g, '').replace(/```/g, '').trim();
+    } catch (error) {
+        console.error('Gemini API 호출 실패:', error);
+        return "<p>콘텐츠 생성 중 오류가 발생했습니다.</p>";
+    }
+}
+
+/**
  * 임신 주차별 콘텐츠 생성
  */
 async function generatePregnancyContent(week) {
@@ -69,39 +108,60 @@ async function generatePregnancyContent(week) {
         return null;
     }
 
-    // AI로 상세 콘텐츠 생성 (실제 구현 시)
-    const prompt = `
-    당신은 한국의 임산부를 위한 육아 정보 전문가입니다.
-    임신 ${week}주차에 대한 상세 가이드를 작성해주세요.
-    
-    핵심 정보:
-    - 태아 크기: ${data.size}
-    - 태아 무게: ${data.weight}
-    - 주요 이정표: ${data.milestone}
-    - 엄마 증상: ${data.symptoms}
-    
-    다음 섹션을 포함해주세요:
-    1. 태아 발달 상황 (300자)
-    2. 엄마의 신체 변화 (300자)
-    3. 이 시기 필요한 검사 (해당 시)
-    4. 영양 관리 팁
-    5. 실전 조언
-    6. FAQ 3개
-    
-    출처: 대한산부인과학회, 질병관리청, WHO
-    의료 면책 고지 포함
+    console.log(`Generating content for Pregnancy Week ${week}...`);
+
+    // 섹션 1: 태아 발달 상세
+    const promptFetus = `
+    임신 ${week}주차 태아의 발달 상황에 대해 300자 내외로 서술형으로 작성해줘.
+    전문적이지만 이해하기 쉽게.
+    핵심 키워드: 크기 ${data.size}, 무게 ${data.weight}, ${data.milestone}
+    HTML <p> 태그로 감싸서 출력해줘.
     `;
+    const contentFetus = await callGeminiAPI(promptFetus);
+
+    // 섹션 2: 엄마의 변화 상세
+    const promptMom = `
+    임신 ${week}주차 임신부(엄마)의 신체 변화와 증상에 대해 300자 내외로 서술형으로 작성해줘.
+    증상: ${data.symptoms}
+    HTML <p> 태그로 감싸서 출력해줘.
+    `;
+    const contentMom = await callGeminiAPI(promptMom);
 
     // 템플릿 기반 HTML 생성
-    const html = generatePregnancyHTML(week, data);
+    const html = generatePregnancyHTML(week, data, contentFetus, contentMom);
     
     return html;
 }
 
 /**
+ * 월령별 콘텐츠 생성
+ */
+async function generateBabyContent(month) {
+    const data = babyMonthData[month];
+    if (!data) return null;
+
+    console.log(`Generating content for Baby Month ${month}...`);
+
+    const promptDev = `
+    생후 ${month}개월 아기의 발달 특징에 대해 300자 내외로 설명해줘.
+    키워드: ${data.milestone}, ${data.skills}
+    HTML <p> 태그로 감싸서 출력해줘.
+    `;
+    const contentDev = await callGeminiAPI(promptDev);
+
+    const promptPlay = `
+    생후 ${month}개월 아기와 놀아주는 방법과 돌봄 팁을 300자 내외로 설명해줘.
+    HTML <p> 태그로 감싸서 출력해줘.
+    `;
+    const contentPlay = await callGeminiAPI(promptPlay);
+
+    return generateBabyHTML(month, data, contentDev, contentPlay);
+}
+
+/**
  * 임신 주차 HTML 템플릿 생성
  */
-function generatePregnancyHTML(week, data) {
+function generatePregnancyHTML(week, data, contentFetus, contentMom) {
     const trimester = week <= 12 ? '1분기' : week <= 27 ? '2분기' : '3분기';
     const prevWeek = week > 1 ? week - 1 : null;
     const nextWeek = week < 40 ? week + 1 : null;
@@ -113,33 +173,39 @@ function generatePregnancyHTML(week, data) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>임신 ${week}주차 증상과 태아 발달 | 아이맘가이드</title>
     <meta name="description" content="임신 ${week}주차 태아 크기 ${data.size}, ${data.milestone}. 이 시기 엄마 증상과 주의사항을 확인하세요.">
-    <meta name="keywords" content="임신 ${week}주차, 임신 ${week}주, 태아 발달, ${data.milestone}">
     
+    <!-- Open Graph -->
     <meta property="og:title" content="임신 ${week}주차 증상과 태아 발달 | 아이맘가이드">
     <meta property="og:description" content="임신 ${week}주차 완벽 가이드 - ${data.milestone}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://imomguide.pages.dev/src/pages/pregnancy/week-${week}.html">
     
-    <link rel="canonical" href="https://imomguide.pages.dev/pages/pregnancy/week-${week}.html">
+    <link rel="canonical" href="https://imomguide.pages.dev/src/pages/pregnancy/week-${week}.html">
     <link rel="stylesheet" href="../../styles/main.css">
     <link rel="stylesheet" href="../../styles/article.css">
     
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": "임신 ${week}주차 증상과 태아 발달",
-        "datePublished": "${new Date().toISOString().split('T')[0]}"
-    }
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911" crossorigin="anonymous"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC34J0R1FS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FC34J0R1FS');
     </script>
 </head>
 <body>
     <header class="header">
-        <nav class="nav">
+        <nav class="nav container">
             <a href="../../index.html" class="logo">아이맘가이드</a>
             <div class="nav-links">
-                <a href="../chat.html">AI 상담</a>
-                <a href="../guides.html" class="active">육아 가이드</a>
+                <a href="../guides.html">육아 가이드</a>
                 <a href="../tools.html">계산기</a>
-                <a href="../login.html" class="btn-login">로그인</a>
+                <a href="../community.html">커뮤니티</a>
+                <a href="../login.html" class="btn btn-outline">로그인</a>
             </div>
         </nav>
     </header>
@@ -159,14 +225,9 @@ function generatePregnancyHTML(week, data) {
                 <span class="category-tag">임신 ${trimester}</span>
                 <h1>임신 ${week}주차: ${data.milestone}</h1>
                 <p class="article-meta">
-                    <span>📅 ${new Date().toLocaleDateString('ko-KR')}</span>
-                    <span>⏱️ 읽는 시간 8분</span>
+                    <span>📅 업데이트: ${new Date().toLocaleDateString('ko-KR')}</span>
+                    <span>⏱️ 읽는 시간 5분</span>
                 </p>
-                <div class="article-summary">
-                    <p>임신 ${week}주차, ${data.milestone} 시기입니다. 
-                    태아는 ${data.size} 크기로 자라고 있으며, 
-                    엄마는 ${data.symptoms} 등의 증상을 경험할 수 있습니다.</p>
-                </div>
             </header>
 
             <section class="article-section">
@@ -188,13 +249,13 @@ function generatePregnancyHTML(week, data) {
                         </div>
                     </div>
                 </div>
-                <p><!-- AI 생성 콘텐츠 들어갈 자리 --></p>
+                ${contentFetus}
             </section>
 
             <section class="article-section">
                 <h2>🤰 엄마의 신체 변화</h2>
                 <p>이 시기 주요 증상: ${data.symptoms}</p>
-                <p><!-- AI 생성 콘텐츠 들어갈 자리 --></p>
+                ${contentMom}
             </section>
 
             <section class="article-cta">
@@ -208,27 +269,130 @@ function generatePregnancyHTML(week, data) {
                 <a href="index.html" class="list-link">목록</a>
                 ${nextWeek ? `<a href="week-${nextWeek}.html" class="next-link">${nextWeek}주차 →</a>` : '<span></span>'}
             </div>
-
-            <section class="references">
-                <h3>📚 참고 자료</h3>
-                <ul>
-                    <li>대한산부인과학회 (2024)</li>
-                    <li>질병관리청 (2024)</li>
-                    <li>WHO</li>
-                </ul>
-                <p class="disclaimer">본 콘텐츠는 일반적인 정보 제공 목적이며, 
-                의료적 진단이나 처방을 대체하지 않습니다.</p>
-            </section>
         </article>
     </main>
 
     <footer class="footer">
         <div class="footer-content">
             <p>&copy; 2026 아이맘가이드. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="../terms.html">이용약관</a>
-                <a href="../privacy.html">개인정보처리방침</a>
+        </div>
+    </footer>
+</body>
+</html>`;
+}
+
+/**
+ * 월령별 HTML 템플릿 생성
+ */
+function generateBabyHTML(month, data, contentDev, contentPlay) {
+    const prevMonth = month > 0 ? month - 1 : null;
+    const nextMonth = month < 36 ? month + 1 : null;
+
+    return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생후 ${month}개월 아기 발달과 육아 | 아이맘가이드</title>
+    <meta name="description" content="생후 ${month}개월 아기 발달, ${data.milestone}. 수유량, 수면시간, 놀이법 등 필수 육아 정보를 확인하세요.">
+    
+    <meta property="og:title" content="생후 ${month}개월 아기 발달 | 아이맘가이드">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://imomguide.pages.dev/src/pages/baby/month-${month}.html">
+    
+    <link rel="canonical" href="https://imomguide.pages.dev/src/pages/baby/month-${month}.html">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="../../styles/article.css">
+    
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911" crossorigin="anonymous"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC34J0R1FS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FC34J0R1FS');
+    </script>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <a href="../../index.html" class="logo">아이맘가이드</a>
+            <div class="nav-links">
+                <a href="../guides.html">육아 가이드</a>
+                <a href="../tools.html">계산기</a>
+                <a href="../community.html">커뮤니티</a>
+                <a href="../login.html" class="btn btn-outline">로그인</a>
             </div>
+        </nav>
+    </header>
+
+    <main class="article-container">
+        <nav class="breadcrumb">
+            <ol>
+                <li><a href="../../index.html">홈</a></li>
+                <li><a href="../guides.html">육아 가이드</a></li>
+                <li><a href="index.html">월령별 가이드</a></li>
+                <li aria-current="page">${month}개월</li>
+            </ol>
+        </nav>
+
+        <article class="article-content">
+            <header class="article-header">
+                <span class="category-tag">생후 ${month}개월</span>
+                <h1>생후 ${month}개월: ${data.milestone}</h1>
+                <p class="article-meta">
+                    <span>📅 업데이트: ${new Date().toLocaleDateString('ko-KR')}</span>
+                </p>
+            </header>
+
+            <section class="article-section">
+                <h2>👶 이달의 발달 포인트</h2>
+                <div class="info-box highlight">
+                    <h3>핵심 발달 사항</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">체중 (남)</span>
+                            <span class="value">${data.weight}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">키 (남)</span>
+                            <span class="value">${data.height}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">주요 기술</span>
+                            <span class="value">${data.skills}</span>
+                        </div>
+                    </div>
+                </div>
+                ${contentDev}
+            </section>
+
+            <section class="article-section">
+                <h2>🧸 놀이와 돌봄 팁</h2>
+                ${contentPlay}
+            </section>
+
+            <section class="article-cta">
+                <h2>우리 아기 잘 크고 있나요?</h2>
+                <p>성장 발달 궁금증, AI 전문가에게 물어보세요</p>
+                <a href="../chat.html" class="cta-btn">AI 상담 시작하기</a>
+            </section>
+
+            <div class="navigation-links">
+                ${prevMonth !== null ? `<a href="month-${prevMonth}.html" class="prev-link">← ${prevMonth}개월</a>` : '<span></span>'}
+                <a href="index.html" class="list-link">목록</a>
+                ${nextMonth !== null ? `<a href="month-${nextMonth}.html" class="next-link">${nextMonth}개월 →</a>` : '<span></span>'}
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 아이맘가이드. All rights reserved.</p>
         </div>
     </footer>
 </body>
