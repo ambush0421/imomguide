@@ -178,3 +178,18 @@
     .article-header h1 { font-size: 1.8rem; }
     .info-grid { grid-template-columns: 1fr; }
 }
+
+.section-divider {
+    border: 0;
+    height: 1px;
+    background: #eee;
+    margin: 60px 0 40px 0;
+}
+
+.tool-content h2 {
+    margin-top: 0;
+}
+
+.tool-content p {
+    margin-bottom: 20px;
+}
