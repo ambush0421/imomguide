@@ -3,9 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iMomGuide - AI 육아 전문가 패널 상담실</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>아이맘가이드 | AI 육아 전문가 상담</title>
+    <meta name="description" content="소아과 의사, 베테랑 맘, 아동심리 전문가 AI가 함께 답변하는 육아 상담 서비스">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="src/styles/main.css">
+    
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911"
+     crossorigin="anonymous"></script>
+    
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC34J0R1FS"></script>
     <script>
@@ -15,77 +27,272 @@
 
       gtag('config', 'G-FC34J0R1FS');
     </script>
-    <!-- Google AdSense -->
-    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
+    
+    <!-- Firebase (Compat version as requested) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">👶</span>
+                <span class="logo-text">아이맘가이드</span>
+            </a>
+            <div class="nav-links">
+                <a href="src/pages/guides.html">육아 가이드</a>
+                <a href="src/pages/tools.html">계산기</a>
+                <a href="src/pages/community.html">커뮤니티</a>
+                <a href="src/pages/login.html" class="btn btn-outline">로그인</a>
+                <a href="src/pages/chat.html" class="btn btn-primary">무료 상담</a>
+            </div>
+        </nav>
+    </header>
 
-<header class="main-header">
-    <div class="logo">
-        <i class="fa-solid fa-baby-carriage"></i> iMomGuide
-    </div>
-    <nav class="main-nav">
-        <a href="#" class="active">전문가 상담</a>
-        <a href="#">임신/육아 가이드</a>
-        <a href="#">성장 계산기</a>
-        <a href="#">커뮤니티</a>
-    </nav>
-    <div class="user-status">
-        <span id="usage-counter">무료 이용: 3/3회 남음</span>
-        <button id="premium-btn" class="btn-premium">프리미엄 구독</button>
-    </div>
-</header>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">
+                맘카페 정보,<br>
+                <span class="highlight">정말 믿을 수 있나요?</span>
+            </h1>
+            <p class="hero-subtitle">
+                소아과 의사 × 베테랑 맘 × 아동심리 전문가<br>
+                <strong>3명의 AI 전문가</strong>가 함께 답변합니다
+            </p>
+            <div class="hero-cta">
+                <a href="src/pages/chat.html" class="btn btn-primary btn-large">
+                    무료로 상담받기
+                </a>
+                <p class="hero-note">가입 없이 바로 이용 가능 · 일 3회 무료</p>
+            </div>
+        </div>
+    </section>
 
-<main class="consultation-room">
-    <section class="experts-intro">
-        <h2>AI 전문가 패널</h2>
-        <div class="experts-grid">
-            <div class="expert-card" data-expert="doctor">
-                <div class="expert-avatar doctor-bg">🩺</div>
-                <div class="expert-info">
+    <!-- Problem Section -->
+    <section class="problem" id="problem">
+        <div class="container">
+            <h2 class="section-title">육아 정보, 이런 경험 있으시죠?</h2>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <span class="problem-icon">😵</span>
+                    <h3>정보 혼란</h3>
+                    <p>맘카페에서 찾은 정보, 서로 다른 말을 해서 뭘 믿어야 할지 모르겠어요</p>
+                </div>
+                <div class="problem-card">
+                    <span class="problem-icon">😰</span>
+                    <h3>병원 판단 어려움</h3>
+                    <p>병원 가기엔 애매하고, 그냥 넘기기엔 불안해요</p>
+                </div>
+                <div class="problem-card">
+                    <span class="problem-icon">🌙</span>
+                    <h3>새벽 육아</h3>
+                    <p>새벽에 급하게 검색해도 믿을 만한 정보가 없어요</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution" id="features">
+        <div class="container">
+            <h2 class="section-title">3명의 AI 전문가가 함께 답변합니다</h2>
+            <div class="expert-grid">
+                <!-- Expert 1 -->
+                <div class="expert-card">
+                    <div class="expert-avatar">👩‍⚕️</div>
                     <h3>김소아 원장</h3>
-                    <p>소아청소년과 전문의 (15년)</p>
-                    <span class="tag">의학적 팩트</span>
+                    <p class="expert-title">소아청소년과 전문의 15년</p>
+                    <p class="expert-desc">
+                        의학적 근거를 바탕으로 정확한 정보를 제공합니다.
+                        언제 병원에 가야 하는지, 가정에서 어떻게 대처해야 하는지 알려드려요.
+                    </p>
+                    <div class="expert-quote">
+                        "의학적으로 보면, 이 증상은 일반적으로..."
+                    </div>
                 </div>
-            </div>
-            <div class="expert-card" data-expert="mom">
-                <div class="expert-avatar mom-bg">🤱</div>
-                <div class="expert-info">
+                
+                <!-- Expert 2 -->
+                <div class="expert-card">
+                    <div class="expert-avatar">🤱</div>
                     <h3>박경험 맘</h3>
-                    <p>삼남매 육아 베테랑</p>
-                    <span class="tag">현실 육아꿀팁</span>
+                    <p class="expert-title">세 아이 엄마 (15세, 12세, 8세)</p>
+                    <p class="expert-desc">
+                        실제 육아 경험을 바탕으로 실용적인 팁을 드립니다.
+                        같은 엄마의 마음으로 공감하고 위로해 드려요.
+                    </p>
+                    <div class="expert-quote">
+                        "저도 그때 정말 힘들었어요. 이렇게 해보세요..."
+                    </div>
                 </div>
-            </div>
-            <div class="expert-card" data-expert="psych">
-                <div class="expert-avatar psych-bg">🧠</div>
-                <div class="expert-info">
+                
+                <!-- Expert 3 -->
+                <div class="expert-card">
+                    <div class="expert-avatar">🧠</div>
                     <h3>이심리 박사</h3>
-                    <p>아동심리 전문가</p>
-                    <span class="tag">마음 읽기</span>
+                    <p class="expert-title">아동발달심리학 박사</p>
+                    <p class="expert-desc">
+                        아이의 행동 뒤에 숨은 심리를 설명해 드립니다.
+                        부모님의 마음 건강도 함께 챙겨드려요.
+                    </p>
+                    <div class="expert-quote">
+                        "이 시기 아이들은 발달 특성상..."
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="chat-interface">
-        <div id="chat-history" class="chat-history">
-            <div class="message system-message">
-                <p>안녕하세요! 육아 고민이 있으신가요? 3명의 전문가가 함께 고민해 드립니다.<br>
-                궁금한 점을 자세히 적어주세요.</p>
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">이렇게 이용하세요</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>고민을 입력하세요</h3>
+                    <p>아기 건강, 발달, 수유, 수면 등 무엇이든 물어보세요</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>전문가들이 토론해요</h3>
+                    <p>3명의 전문가가 각자 관점에서 답변을 드립니다</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>종합 가이드를 받으세요</h3>
+                    <p>핵심 포인트와 실천 방법을 정리해 드립니다</p>
+                </div>
             </div>
         </div>
-        
-        <div class="chat-input-area">
-            <textarea id="user-input" placeholder="예: 아이가 3일째 열이 나고 밥을 안 먹어요. 어떻게 해야 할까요?" rows="3"></textarea>
-            <button id="send-btn" class="btn-send"><i class="fa-solid fa-paper-plane"></i> 상담 시작</button>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2 class="section-title">요금 안내</h2>
+            <div class="pricing-grid">
+                <!-- Free Plan -->
+                <div class="pricing-card">
+                    <h3>무료</h3>
+                    <div class="price">
+                        <span class="amount">₩0</span>
+                        <span class="period">/월</span>
+                    </div>
+                    <ul class="features-list">
+                        <li>✓ 일 3회 AI 전문가 상담</li>
+                        <li>✓ 기본 육아 가이드 접근</li>
+                        <li>✓ 육아 계산기 도구</li>
+                        <li class="disabled">✗ 광고 포함</li>
+                    </ul>
+                    <a href="src/pages/chat.html" class="btn btn-outline btn-full">무료로 시작</a>
+                </div>
+                
+                <!-- Premium Plan -->
+                <div class="pricing-card featured">
+                    <div class="badge">추천</div>
+                    <h3>프리미엄</h3>
+                    <div class="price">
+                        <span class="amount">₩9,900</span>
+                        <span class="period">/월</span>
+                    </div>
+                    <ul class="features-list">
+                        <li>✓ <strong>무제한</strong> AI 전문가 상담</li>
+                        <li>✓ 전체 육아 가이드 접근</li>
+                        <li>✓ 육아 계산기 도구</li>
+                        <li>✓ 광고 완전 제거</li>
+                        <li>✓ 주간 맞춤 리포트</li>
+                        <li>✓ 우선 응답</li>
+                    </ul>
+                    <a href="src/pages/login.html?plan=premium" class="btn btn-primary btn-full">
+                        14일 무료 체험
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
-</main>
 
-<footer class="main-footer">
-    <p>&copy; 2026 iMomGuide. All rights reserved. | <a href="#">이용약관</a> | <a href="#">개인정보처리방침</a></p>
-</footer>
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section-title">자주 묻는 질문</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        정말 의사가 답변하는 건가요?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>AI가 소아과 전문의의 진료 패턴과 대한소아청소년과학회, 질병관리청의 의학 가이드라인을 학습하여 답변합니다. 단, 이는 의료 진단이 아닌 정보 제공 목적이며, 정확한 진단과 치료를 위해서는 반드시 전문의 상담을 권장합니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        개인정보는 안전한가요?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>네, 질문 내용은 암호화되어 저장되며 마케팅 목적으로 사용되지 않습니다. Firebase의 보안 인프라를 사용하며, 개인정보처리방침에 따라 안전하게 관리됩니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        환불은 가능한가요?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>결제 후 7일 이내 100% 환불 가능합니다. 고객센터로 문의해 주시면 빠르게 처리해 드립니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        응급 상황에도 사용할 수 있나요?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>응급 상황(고열, 호흡곤란, 경련, 의식 저하 등)에서는 즉시 119에 연락하거나 가까운 응급실을 방문하세요. 저희 서비스는 응급 의료 서비스를 대체할 수 없습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<script type="module" src="main.js"></script>
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>지금 바로 AI 전문가에게 물어보세요</h2>
+            <p>가입 없이 무료로 시작할 수 있어요</p>
+            <a href="src/pages/chat.html" class="btn btn-primary btn-large">무료 상담 시작하기</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo-icon">👶</span>
+                    <span class="logo-text">아이맘가이드</span>
+                    <p>AI 육아 전문가 상담 서비스</p>
+                </div>
+                <div class="footer-links">
+                    <a href="src/pages/terms.html">이용약관</a>
+                    <a href="src/pages/privacy.html">개인정보처리방침</a>
+                    <a href="mailto:support@imomguide.kr">문의하기</a>
+                </div>
+            </div>
+            <div class="footer-disclaimer">
+                <p>⚠️ 본 서비스는 의료 진단을 대체하지 않습니다. 정확한 진단과 치료를 위해서는 전문의 상담을 권장합니다.</p>
+                <p>© 2026 아이맘가이드. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="src/app.js"></script>
 </body>
 </html>
