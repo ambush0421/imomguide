@@ -31,7 +31,7 @@ function init() {
                 hideLoading();
             } else {
                 // Redirect to login
-                window.location.href = '/pages/login.html?redirect=/pages/mypage.html';
+                window.location.href = '/pages/login.html?redirect=/src/pages/mypage.html';
             }
         });
     }

@@ -22,13 +22,13 @@ if (typeof firebase !== 'undefined') {
             // User is signed in
             if (loginBtn) {
                 loginBtn.textContent = '마이페이지';
-                loginBtn.href = '/pages/mypage.html';
+                loginBtn.href = '/src/pages/mypage.html';
             }
         } else {
             // User is signed out
             if (loginBtn) {
                 loginBtn.textContent = '로그인';
-                loginBtn.href = '/pages/login.html';
+                loginBtn.href = '/src/pages/login.html';
             }
         }
     });

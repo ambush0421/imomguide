@@ -248,5 +248,5 @@ window.closeLimitModal = function() {
 };
 
 window.showPremiumInfo = function() {
-    window.location.href = '/pages/pricing.html';
+    window.location.href = '/src/pages/pricing.html';
 };

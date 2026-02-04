@@ -323,7 +323,7 @@ function redirectAfterAuth() {
     const plan = urlParams.get('plan');
     
     if (plan === 'premium') {
-        window.location.href = '/pages/pricing.html';
+        window.location.href = '/src/pages/pricing.html';
     } else {
         window.location.href = redirect;
     }
