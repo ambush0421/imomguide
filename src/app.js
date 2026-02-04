@@ -13,6 +13,7 @@ if (typeof firebase !== 'undefined') {
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const functions = firebase.functions();
 
     // ===== Auth State Observer =====
     auth.onAuthStateChanged(user => {
