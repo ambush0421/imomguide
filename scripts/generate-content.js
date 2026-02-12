@@ -13,7 +13,7 @@ const path = require('path');
 
 // Gemini API 설정 (실제 사용 시)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'YOUR_API_KEY';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // 템플릿 데이터
 const pregnancyWeekData = {
@@ -60,13 +60,21 @@ const babyMonthData = {
 };
 
 /**
- * Gemini API 호출 함수
+ * 지연 함수 (Rate Limit 방지)
  */
-async function callGeminiAPI(prompt) {
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Gemini API 호출 함수 (재시도 로직 포함)
+ */
+async function callGeminiAPI(prompt, retryCount = 0) {
     if (GEMINI_API_KEY === 'YOUR_API_KEY') {
         console.warn('⚠️ GEMINI_API_KEY가 설정되지 않았습니다. 더미 데이터를 반환합니다.');
         return "<p>API 키가 설정되지 않아 AI 콘텐츠를 생성할 수 없습니다. 환경 변수를 설정해주세요.</p>";
     }
+
+    // 호출 간 충분한 지연 (Free Tier: 15 RPM 미만 권장)
+    await sleep(15000); 
 
     try {
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
@@ -78,10 +86,17 @@ async function callGeminiAPI(prompt) {
                 }],
                 generationConfig: {
                     temperature: 0.7,
-                    maxOutputTokens: 2000,
+                    maxOutputTokens: 2048,
                 }
             })
         });
+
+        if (response.status === 429 && retryCount < 3) {
+            const waitTime = (retryCount + 1) * 10000;
+            console.warn(`⚠️ Rate Limit 발생. ${waitTime/1000}초 후 재시도합니다... (시도 ${retryCount + 1}/3)`);
+            await sleep(waitTime);
+            return callGeminiAPI(prompt, retryCount + 1);
+        }
 
         if (!response.ok) {
             throw new Error(`API Error: ${response.status}`);
@@ -90,7 +105,6 @@ async function callGeminiAPI(prompt) {
         const data = await response.json();
         const text = data.candidates[0].content.parts[0].text;
         
-        // 마크다운 제거 및 HTML 태그 정리 (간단히)
         return text.replace(/```html/g, '').replace(/```/g, '').trim();
     } catch (error) {
         console.error('Gemini API 호출 실패:', error);
@@ -110,25 +124,24 @@ async function generatePregnancyContent(week) {
 
     console.log(`Generating content for Pregnancy Week ${week}...`);
 
-    // 섹션 1: 태아 발달 상세
-    const promptFetus = `
-    임신 ${week}주차 태아의 발달 상황에 대해 300자 내외로 서술형으로 작성해줘.
-    전문적이지만 이해하기 쉽게.
-    핵심 키워드: 크기 ${data.size}, 무게 ${data.weight}, ${data.milestone}
-    HTML <p> 태그로 감싸서 출력해줘.
+    const prompt = `
+    임신 ${week}주차에 대한 상세 가이드를 작성해줘. 
+    다음 두 섹션의 내용을 각각 300자 내외로 작성하고, 각 섹션은 <div> 태그로 구분해줘.
+    
+    섹션 1: [태아 발달 상황]
+    키워드: 크기 ${data.size}, 무게 ${data.weight}, ${data.milestone}
+    
+    섹션 2: [엄마의 신체 변화]
+    키워드: ${data.symptoms}
+    
+    전문적이지만 따뜻한 말투로 작성해줘. HTML 형식으로 반환해줘.
     `;
-    const contentFetus = await callGeminiAPI(promptFetus);
-
-    // 섹션 2: 엄마의 변화 상세
-    const promptMom = `
-    임신 ${week}주차 임신부(엄마)의 신체 변화와 증상에 대해 300자 내외로 서술형으로 작성해줘.
-    증상: ${data.symptoms}
-    HTML <p> 태그로 감싸서 출력해줘.
-    `;
-    const contentMom = await callGeminiAPI(promptMom);
-
-    // 템플릿 기반 HTML 생성
-    const html = generatePregnancyHTML(week, data, contentFetus, contentMom);
+    
+    const combinedContent = await callGeminiAPI(prompt);
+    
+    // 간단하게 내용 분리 (AI가 div로 나눠주길 기대하거나 통째로 넣기)
+    // 여기서는 통째로 넣고 템플릿 수정
+    const html = generatePregnancyHTML(week, data, combinedContent);
     
     return html;
 }
@@ -142,26 +155,27 @@ async function generateBabyContent(month) {
 
     console.log(`Generating content for Baby Month ${month}...`);
 
-    const promptDev = `
-    생후 ${month}개월 아기의 발달 특징에 대해 300자 내외로 설명해줘.
+    const prompt = `
+    생후 ${month}개월 아기의 발달 특징과 돌봄 팁에 대해 작성해줘.
+    다음 두 섹션을 각각 300자 내외로 작성하고 <div> 태그로 구분해줘.
+    
+    섹션 1: [발달 특징]
     키워드: ${data.milestone}, ${data.skills}
-    HTML <p> 태그로 감싸서 출력해줘.
+    
+    섹션 2: [놀이와 돌봄 팁]
+    
+    부모님께 조언하는 따뜻한 말투로 작성해줘. HTML 형식으로 반환해줘.
     `;
-    const contentDev = await callGeminiAPI(promptDev);
+    
+    const combinedContent = await callGeminiAPI(prompt);
 
-    const promptPlay = `
-    생후 ${month}개월 아기와 놀아주는 방법과 돌봄 팁을 300자 내외로 설명해줘.
-    HTML <p> 태그로 감싸서 출력해줘.
-    `;
-    const contentPlay = await callGeminiAPI(promptPlay);
-
-    return generateBabyHTML(month, data, contentDev, contentPlay);
+    return generateBabyHTML(month, data, combinedContent);
 }
 
 /**
  * 임신 주차 HTML 템플릿 생성
  */
-function generatePregnancyHTML(week, data, contentFetus, contentMom) {
+function generatePregnancyHTML(week, data, content) {
     const trimester = week <= 12 ? '1분기' : week <= 27 ? '2분기' : '3분기';
     const prevWeek = week > 1 ? week - 1 : null;
     const nextWeek = week < 40 ? week + 1 : null;
@@ -231,17 +245,12 @@ function generatePregnancyHTML(week, data, contentFetus, contentMom) {
             </header>
 
             <section class="article-section">
-                <h2>👶 태아 발달 상황</h2>
+                <h2>👶 태아/엄마 핵심 정보</h2>
                 <div class="info-box highlight">
-                    <h3>${week}주차 태아 핵심 정보</h3>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="label">크기</span>
-                            <span class="value">${data.size}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">무게</span>
-                            <span class="value">${data.weight || '-'}</span>
+                            <span class="label">크기/무게</span>
+                            <span class="value">${data.size} / ${data.weight || '-'}</span>
                         </div>
                         <div class="info-item">
                             <span class="label">주요 발달</span>
@@ -249,13 +258,9 @@ function generatePregnancyHTML(week, data, contentFetus, contentMom) {
                         </div>
                     </div>
                 </div>
-                ${contentFetus}
-            </section>
-
-            <section class="article-section">
-                <h2>🤰 엄마의 신체 변화</h2>
-                <p>이 시기 주요 증상: ${data.symptoms}</p>
-                ${contentMom}
+                <div class="ai-generated-content">
+                    ${content}
+                </div>
             </section>
 
             <section class="article-cta">
@@ -284,7 +289,7 @@ function generatePregnancyHTML(week, data, contentFetus, contentMom) {
 /**
  * 월령별 HTML 템플릿 생성
  */
-function generateBabyHTML(month, data, contentDev, contentPlay) {
+function generateBabyHTML(month, data, content) {
     const prevMonth = month > 0 ? month - 1 : null;
     const nextMonth = month < 36 ? month + 1 : null;
 
@@ -350,17 +355,12 @@ function generateBabyHTML(month, data, contentDev, contentPlay) {
             </header>
 
             <section class="article-section">
-                <h2>👶 이달의 발달 포인트</h2>
+                <h2>👶 발달 포인트 및 가이드</h2>
                 <div class="info-box highlight">
-                    <h3>핵심 발달 사항</h3>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="label">체중 (남)</span>
-                            <span class="value">${data.weight}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">키 (남)</span>
-                            <span class="value">${data.height}</span>
+                            <span class="label">체중/키 (남)</span>
+                            <span class="value">${data.weight} / ${data.height}</span>
                         </div>
                         <div class="info-item">
                             <span class="label">주요 기술</span>
@@ -368,12 +368,9 @@ function generateBabyHTML(month, data, contentDev, contentPlay) {
                         </div>
                     </div>
                 </div>
-                ${contentDev}
-            </section>
-
-            <section class="article-section">
-                <h2>🧸 놀이와 돌봄 팁</h2>
-                ${contentPlay}
+                <div class="ai-generated-content">
+                    ${content}
+                </div>
             </section>
 
             <section class="article-cta">
@@ -400,19 +397,19 @@ function generateBabyHTML(month, data, contentDev, contentPlay) {
 }
 
 /**
- * 전체 콘텐츠 일괄 생성
+ * 전체 콘텐츠 일괄 생성 (또는 범위 생성)
  */
-async function generateAllContent() {
+async function generateAllContent(startWeek = 4, endWeek = 40, startMonth = 0, endMonth = 36) {
     const outputDir = path.join(__dirname, '../src/pages');
     
-    // 임신 주차별 (4-40주)
-    console.log('📝 임신 가이드 생성 중...');
+    // 임신 주차별
+    console.log(`📝 임신 가이드 생성 중... (${startWeek}~${endWeek}주)`);
     const pregnancyDir = path.join(outputDir, 'pregnancy');
     if (!fs.existsSync(pregnancyDir)) {
         fs.mkdirSync(pregnancyDir, { recursive: true });
     }
     
-    for (let week = 4; week <= 40; week++) {
+    for (let week = startWeek; week <= endWeek; week++) {
         if (pregnancyWeekData[week]) {
             const html = await generatePregnancyContent(week);
             const filePath = path.join(pregnancyDir, `week-${week}.html`);
@@ -421,17 +418,21 @@ async function generateAllContent() {
         }
     }
     
-    // 월령별 (0-36개월)
-    console.log('📝 월령별 가이드 생성 중...');
+    // 월령별
+    console.log(`📝 월령별 가이드 생성 중... (${startMonth}~${endMonth}개월)`);
     const babyDir = path.join(outputDir, 'baby');
     if (!fs.existsSync(babyDir)) {
         fs.mkdirSync(babyDir, { recursive: true });
     }
     
-    for (let month = 0; month <= 36; month++) {
+    for (let month = startMonth; month <= endMonth; month++) {
         if (babyMonthData[month]) {
-            // 유사하게 HTML 생성
-            console.log(`  ✅ month-${month}.html 생성 완료`);
+            const html = await generateBabyContent(month);
+            if (html) {
+                const filePath = path.join(babyDir, `month-${month}.html`);
+                fs.writeFileSync(filePath, html);
+                console.log(`  ✅ month-${month}.html 생성 완료`);
+            }
         }
     }
     
@@ -500,7 +501,7 @@ const args = process.argv.slice(2);
 const argMap = {};
 args.forEach(arg => {
     const [key, value] = arg.replace('--', '').split('=');
-    argMap[key] = value;
+    argMap[key] = value === undefined ? true : value;
 });
 
 if (argMap.type === 'pregnancy' && argMap.week) {
@@ -511,7 +512,12 @@ if (argMap.type === 'pregnancy' && argMap.week) {
         }
     });
 } else if (argMap.all) {
-    generateAllContent().then(() => {
+    const sw = parseInt(argMap.startWeek) || 4;
+    const ew = parseInt(argMap.endWeek) || 40;
+    const sm = parseInt(argMap.startMonth) || 0;
+    const em = parseInt(argMap.endMonth) || 36;
+    
+    generateAllContent(sw, ew, sm, em).then(() => {
         updateSitemap();
     });
 } else if (argMap.sitemap) {
@@ -523,6 +529,7 @@ if (argMap.type === 'pregnancy' && argMap.week) {
 사용법:
   node generate-content.js --type=pregnancy --week=20  특정 주차 생성
   node generate-content.js --all                       전체 콘텐츠 생성
+  node generate-content.js --all --startWeek=4 --endWeek=10  범위 지정 생성
   node generate-content.js --sitemap                   사이트맵 업데이트
     `);
 }
