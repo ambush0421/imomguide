@@ -1346,7 +1346,22 @@ npm run test
 
 ### 검증
 
-- 검증은 아직 진행 중이다.
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-DsJ3FP3B.css`
+  - `dist/assets/index-CzY_qXcO.js`
+- Git 커밋 `335d3fa` (`feat: add adsense script and side banners`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+- Cloudflare Pages Production Active: `https://6211b9b1.imomguide.pages.dev` (`335d3fa`)
+- 운영 도메인 `https://loopincode.com`의 최신 HTML과 번들에서 아래 항목을 모두 확인했다.
+  - `google-adsense-account` meta 1회
+  - AdSense async script `pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911`
+  - `ads.txt` 응답 `google.com, pub-2916041253392911, DIRECT, f08c47fec0942fa0`
+  - 번들 `index-CzY_qXcO.js` 안의 `https://link.coupang.com/a/d7pcAe`
+  - 번들 `index-CzY_qXcO.js` 안의 `쿠팡 파트너스 사이드 배너`
 
 ### 결과 요약
 

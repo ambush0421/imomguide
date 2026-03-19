@@ -394,7 +394,7 @@
 - [x] `index.html`에 AdSense async script 1회 추가
 - [x] `2xl` 이상에서만 보이는 좌우 고정 쿠팡 배너 추가
 - [x] 메인 제휴 섹션과 충돌하지 않도록 작은 화면 숨김 처리
-- [ ] lint/test/build 재검증
-- [ ] 원격 저장소 반영
-- [ ] Cloudflare Pages 재배포
-- [ ] walkthrough.md 갱신
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
