@@ -1366,3 +1366,34 @@ npm run test
 ### 결과 요약
 
 - AdSense 식별 요소는 `meta + ads.txt + script` 3종 구성이 맞춰지게 됐고, 초대형 화면에서는 좌우 고정 배너가 추가로 노출되도록 준비됐다.
+
+---
+
+## 2026-03-19 지식산업센터 기본값 조정
+
+### 작업 배경
+
+- 사용자는 `구역 또는 건물 유형`의 기본값이 `지식산업센터`로 시작하길 원했다.
+- 이번 단계의 목적은 첫 화면과 입력 초기화 이후 상태 모두에서 `지식산업센터`를 기본값으로 유지하는 것이다.
+
+### 반영 내용
+
+- [eligibility-store.ts](C:/projects/imomguide_remote_20260319/src/store/eligibility-store.ts)
+  - `defaultInput.zoneType`을 `industrialFacility`에서 `knowledgeIndustryCenter`로 변경했다.
+- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+  - 초기 렌더링 시 `지식산업센터`가 화면에 보이는지 검증을 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-zpFHZgKx.css`
+  - `dist/assets/index-0bqty4mx.js`
+
+### 결과 요약
+
+- 사용자가 처음 진입하거나 `입력 초기화`를 눌렀을 때 기본 구역이 `지식산업센터`로 일관되게 유지되도록 조정했다.

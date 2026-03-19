@@ -608,6 +608,30 @@ src/
 
 ---
 
+## 2026-03-19 지식산업센터 기본값 조정 계획
+
+### 변경 목표
+
+- 첫 방문 사용자가 세부 보정 섹션을 열지 않아도 현재 판정 기본 구역이 `지식산업센터`임을 바로 보게 한다.
+- `입력 초기화`를 눌렀을 때도 같은 기본값으로 돌아오게 유지한다.
+
+### 구현 메모
+
+1. `src/store/eligibility-store.ts`
+   - `defaultInput.zoneType` 기본값을 `knowledgeIndustryCenter`로 변경한다.
+2. `src/App.test.tsx`
+   - 초기 렌더링 시 `지식산업센터`가 보이는지 검증을 추가한다.
+3. 문서
+   - `task.md`, `walkthrough.md`에 기본값 변경과 검증 결과를 기록한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
 ## 2026-03-19 AdSense 스크립트 및 좌우 고정 배너 반영 계획
 
 ### 변경 목표

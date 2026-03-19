@@ -19,6 +19,7 @@ describe('App', () => {
     expect(
       screen.getByText('업종을 고르면 결과가 여기에 바로 나옵니다.'),
     ).toBeInTheDocument()
+    expect(screen.getAllByText('지식산업센터').length).toBeGreaterThan(0)
     expect(screen.getByText('업무용 추천 상품')).toBeInTheDocument()
     expect(screen.getByText('제휴 안내')).toBeInTheDocument()
     expect(screen.getByText('문의: contact.loopinlab@gmail.com')).toBeInTheDocument()

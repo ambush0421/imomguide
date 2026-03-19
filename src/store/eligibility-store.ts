@@ -39,7 +39,7 @@ interface EligibilityStore {
 const defaultInput: EligibilityInput = {
   companyName: '',
   address: '',
-  zoneType: 'industrialFacility',
+  zoneType: 'knowledgeIndustryCenter',
   ksicCode: '',
   ksicName: '',
   applicantType: 'company',

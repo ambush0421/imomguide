@@ -398,3 +398,13 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 지식산업센터 기본값 조정
+
+- [x] 현재 기본 구역 값이 잡히는 스토어 위치 확인
+- [x] 기본값을 `지식산업센터`로 변경
+- [x] 초기 렌더링 테스트에 기본값 노출 검증 추가
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
