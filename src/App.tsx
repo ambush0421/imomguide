@@ -1,12 +1,15 @@
 import {
   ArrowRight,
+  CircleUserRound,
   Building2,
   CheckCircle2,
   ClipboardCheck,
   FileSearch,
   Landmark,
   Link2,
+  MailQuestion,
   MonitorSmartphone,
+  ShieldCheck,
 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
@@ -81,6 +84,38 @@ const coupangApprovalChecklist = [
 
 const coupangDisclosureText =
   '이 게시물은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.'
+
+const approvalFooterCards = [
+  {
+    icon: CircleUserRound,
+    title: '운영자 정보',
+    description:
+      '서비스 운영 주체와 실제 활동 페이지를 한눈에 확인할 수 있게 푸터에 고정해 두는 것이 안전합니다.',
+    points: ['운영자: Loopin Lab', '서비스: 마곡 코드찾기', '활동 페이지: https://loopincode.com'],
+  },
+  {
+    icon: MailQuestion,
+    title: '문의 안내',
+    description:
+      '현재 공개 문의 채널은 확인되지 않아 자리만 마련했습니다. 최종 승인 제출 전 실제 이메일이나 카카오톡 채널을 넣어 두세요.',
+    points: [
+      '권장 항목: 문의 이메일 또는 오픈채팅 링크',
+      '스크린샷에는 문의 경로가 보이도록 함께 캡처',
+      '실제 연락 가능한 채널이 없으면 승인에 불리할 수 있음',
+    ],
+  },
+  {
+    icon: ShieldCheck,
+    title: '쿠팡 파트너스 안내',
+    description:
+      '활동 페이지, 스크린샷, 대가성 문구가 서로 일치해야 최종승인 검토가 훨씬 수월합니다.',
+    points: [
+      '활동 페이지는 현재 사이트 주소와 같게 유지',
+      '링크 또는 배너와 대가성 문구를 한 화면에 배치',
+      '최종승인용 스크린샷은 PC와 모바일 1장씩 준비',
+    ],
+  },
+]
 
 function App() {
   const {
@@ -483,7 +518,7 @@ function App() {
             <RulebookTabs />
           </section>
 
-          <footer className="rounded-[32px] border border-[var(--border)] bg-white/88 px-6 py-6 shadow-[0_20px_50px_rgba(28,33,43,0.06)]">
+          <footer className="space-y-6 rounded-[32px] border border-[var(--border)] bg-white/88 px-6 py-6 shadow-[0_20px_50px_rgba(28,33,43,0.06)]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="text-xs font-semibold tracking-[0.16em] text-[var(--foreground-subtle)]">
@@ -503,6 +538,45 @@ function App() {
                 <Badge variant="muted">입주 예비판정</Badge>
                 <Badge variant="muted">법령 근거 정리</Badge>
               </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              {approvalFooterCards.map((card) => {
+                const Icon = card.icon
+
+                return (
+                  <div
+                    key={card.title}
+                    className="rounded-[26px] border border-[var(--border)] bg-[rgba(255,255,255,0.76)] p-5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+                        <Icon className="size-4" />
+                      </div>
+                      <div className="text-base font-semibold text-[var(--foreground)]">
+                        {card.title}
+                      </div>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                      {card.description}
+                    </p>
+                    <ul className="mt-4 space-y-2">
+                      {card.points.map((point) => (
+                        <li
+                          key={point}
+                          className="rounded-[18px] bg-[rgba(246,242,235,0.9)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
+                        >
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="rounded-[26px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-900">
+              대가성 문구 예시: {coupangDisclosureText}
             </div>
           </footer>
         </main>

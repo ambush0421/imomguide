@@ -575,6 +575,38 @@ src/
    - `npm run test -- --run`
    - `npm run build`
 
+---
+
+## 2026-03-19 쿠팡 최종승인용 푸터 및 제출 문안 보강 계획
+
+### 변경 목표
+
+쿠팡 파트너스 최종승인 관점에서 현재 랜딩은 본문 안내는 갖췄지만, 푸터에 `운영자 정보`, `문의 안내`, `파트너스 안내`가 명확히 정리돼 있지 않다. 이번 단계에서는 실제 승인 제출 화면처럼 보이도록 푸터를 보강하고, 운영자가 그대로 복붙할 수 있는 `활동 페이지 등록 문안`과 `스크린샷 체크리스트`를 별도 문서로 정리한다.
+
+### 구현 메모
+
+1. `src/App.tsx`
+   - 기존 얇은 브랜드 푸터를 승인용 정보 카드 구조로 확장
+   - `운영자 정보`, `문의 안내`, `쿠팡 파트너스 안내` 3개 카드 추가
+   - 대가성 문구 예시를 푸터 하단에도 한 번 더 고정
+2. `src/App.test.tsx`
+   - 푸터 승인 안내 텍스트가 렌더링되는지 기본 검증 추가
+3. `docs/codex-brain/coupang_final_approval_submission_checklist.md`
+   - 활동 페이지 등록 문안 초안 작성
+   - PC/모바일 스크린샷 체크리스트 작성
+   - 제출 전 최종 점검 항목 작성
+4. 실배포 점검
+   - `loopincode.com` HTML과 번들에서 쿠팡 섹션 문자열이 실제로 응답되는지 확인
+   - `imomguide.pages.dev`가 같은 배포본을 응답하는지 점검
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+- `Invoke-WebRequest https://loopincode.com`
+- `Invoke-WebRequest https://imomguide.pages.dev`
+
 ### UX 방향
 
 1. 첫 화면에서 서비스 정체가 바로 보이도록 `마곡 업종코드 찾기` 메시지를 전면에 둔다.

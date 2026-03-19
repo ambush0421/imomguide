@@ -19,5 +19,7 @@ describe('App', () => {
     expect(
       screen.getByText('업종을 고르면 결과가 여기에 바로 나옵니다.'),
     ).toBeInTheDocument()
+    expect(screen.getByText('운영자 정보')).toBeInTheDocument()
+    expect(screen.getByText('쿠팡 파트너스 안내')).toBeInTheDocument()
   })
 })

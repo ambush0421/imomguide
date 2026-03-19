@@ -862,3 +862,61 @@ npm run test
 - 첫 화면에서 해야 할 행동이 더 빨리 보이도록 흐름이 정리됐다.
 - 안내 카드 수와 시각적 무게를 줄여 전체 밀도가 낮아졌다.
 - 섹션별 의미가 선명해져 `이게 어떤 페이지인지`에 대한 혼란이 줄어든 구조로 바뀌었다.
+
+---
+
+## 2026-03-19 쿠팡 최종승인용 푸터 및 제출 문안 보강
+
+### 작업 배경
+
+- 사용자는 쿠팡 파트너스 최종승인 관점에서 사이트를 한 번 더 다듬고, `운영자 정보 / 문의 / 쿠팡 파트너스 안내`가 푸터에 명확히 보이길 원했다.
+- 이전 단계에서 본문 중간에 `최종승인 준비` 섹션은 추가됐지만, 실제 승인 제출 화면처럼 보이기에는 푸터의 실무 정보가 부족했다.
+- 동시에 라이브 배포가 실제로 반영됐는지 `loopincode.com`과 `imomguide.pages.dev` 응답도 다시 확인할 필요가 있었다.
+
+### 반영 내용
+
+- [App.tsx](C:/projects/magok/src/App.tsx)의 푸터를 승인용 3열 카드 구조로 확장했다.
+  - `운영자 정보`
+  - `문의 안내`
+  - `쿠팡 파트너스 안내`
+- 문의 채널은 현재 공개된 실제 연락처를 확인하지 못했으므로, `실제 이메일 또는 카카오톡 채널을 승인 제출 전 반영해야 한다`는 운영 메모를 명시했다.
+- 푸터 하단에 대가성 문구 예시를 다시 한 번 고정해, 스크린샷 캡처 시 함께 보일 수 있게 했다.
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 푸터의 승인 안내 텍스트 렌더링 검증을 추가했다.
+- [coupang_final_approval_submission_checklist.md](C:/projects/magok/docs/codex-brain/coupang_final_approval_submission_checklist.md)를 새로 만들어 아래 내용을 정리했다.
+  - 활동 페이지 등록 문안 초안
+  - 최종승인용 스크린샷 체크리스트
+  - 제출 전 최종 점검 항목
+
+### 실배포 점검
+
+- `Invoke-WebRequest https://loopincode.com` 결과, HTML 응답은 최신 `google-adsense-account` meta와 현재 번들 파일(`index-mKuFBYf3.js`)을 가리키고 있었다.
+- 같은 응답의 `cf-cache-status`는 `DYNAMIC`으로 확인돼, 이전에 의심했던 오래된 정적 캐시 고정 상태는 아니라는 점을 확인했다.
+- `loopincode.com/assets/index-mKuFBYf3.js` 안에서 아래 문자열이 실제로 확인됐다.
+  - `쿠팡 파트너스`
+  - `권장 예시`
+  - `활동 페이지를 모두 등록하세요`
+- `https://imomguide.pages.dev`도 현재는 같은 HTML 응답을 반환하고 있다.
+- 다만 `imomguide.pages.dev -> loopincode.com` 리다이렉트는 여전히 별도 운영 작업으로 남아 있다.
+
+### 구현 파일
+
+- [App.tsx](C:/projects/magok/src/App.tsx)
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
+- [coupang_final_approval_submission_checklist.md](C:/projects/magok/docs/codex-brain/coupang_final_approval_submission_checklist.md)
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-Bxe6FHC4.css`
+  - `dist/assets/index-BmWSm7St.js`
+
+### 결과
+
+- 사이트 하단만 봐도 쿠팡 승인 준비에 필요한 핵심 정보 구조가 보이도록 정리됐다.
+- 운영자가 바로 사용할 수 있는 제출용 문안과 체크리스트가 별도 문서로 생겨, 승인 신청 준비가 쉬워졌다.
+- 라이브 도메인의 현재 응답과 번들 안에서도 쿠팡 관련 섹션이 실제 포함된 것을 확인했다.
