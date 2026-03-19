@@ -530,6 +530,32 @@ src/
    - `npm run test -- --run`
    - `npm run build`
 
+---
+
+## 2026-03-19 기준 탭 검색 최적화 및 AdSense 403 정리 계획
+
+### 변경 목표
+
+`판정 기준` 영역은 내부 스크롤 제거 이후에도 규칙 수가 많아 길게 느껴질 수 있다. 이번 단계에서는 긴 목록을 `검색형 필터 + 요약 카드` 구조로 다시 정리해 필요한 규칙만 빠르게 찾게 만든다. 동시에 현재 `loopincode.com`에서 보이는 AdSense `403` 요청은 광고 송출 코드가 검토 단계에서 먼저 호출되면서 생길 가능성이 높으므로, 공식 가이드상 허용되는 `meta + ads.txt` 검토 방식으로 정리해 콘솔 노이즈를 줄인다.
+
+### 구현 메모
+
+1. `src/features/eligibility/components/rulebook-tabs.tsx`
+   - 탭별 검색 입력 추가
+   - 규칙 수 요약 카드 추가
+   - 결과 없음 상태 추가
+   - 모바일에서 패딩과 카드 간격 축소
+2. `src/components/ui/tabs.tsx`
+   - 모바일에서 세로 스택처럼 보이도록 조정
+3. `index.html`
+   - AdSense 검토용 `meta`는 유지
+   - `ads.txt`는 유지
+   - 실제 광고 송출 전까지 `adsbygoogle.js` 로더는 제거
+4. 검증
+   - `npm run lint`
+   - `npm run test -- --run`
+   - `npm run build`
+
 ### UX 방향
 
 1. 첫 화면에서 서비스 정체가 바로 보이도록 `마곡 업종코드 찾기` 메시지를 전면에 둔다.

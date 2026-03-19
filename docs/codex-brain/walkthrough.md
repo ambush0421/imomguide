@@ -725,6 +725,51 @@ npm run test
 
 ---
 
+## 2026-03-19 기준 탭 검색 최적화 및 AdSense 403 정리
+
+### 작업 배경
+
+- 내부 스크롤을 없앤 뒤에도 `판정 기준` 영역은 규칙 수가 많아 길게 느껴질 수 있었다.
+- 사용자는 `더 단순화`와 `모바일 최적화`를 원했고, 동시에 브라우저 콘솔에서 AdSense `403` 요청 오류를 확인했다.
+- 로컬 코드 기준으로는 실제 광고 슬롯 컴포넌트 없이 `head`의 AdSense 로더 스크립트만 있었기 때문에, 검토 단계에서 광고 요청이 먼저 발생하고 있을 가능성이 높았다.
+
+### 반영 내용
+
+- [rulebook-tabs.tsx](C:/projects/magok/src/features/eligibility/components/rulebook-tabs.tsx)에 탭별 검색 필터를 추가해 긴 규칙 목록을 바로 찾을 수 있게 바꿨다.
+- 각 탭 상단에 현재 표시 수와 핵심 요약 카드도 함께 배치했다.
+- 결과가 없을 때는 빈 상태 메시지를 보여주도록 정리했다.
+- 모바일에서 탭 버튼이 한 줄에 눌려 보이지 않도록 [tabs.tsx](C:/projects/magok/src/components/ui/tabs.tsx)를 `세로 스택형`에 가깝게 조정했다.
+- AdSense는 검토 단계용으로 [index.html](C:/projects/magok/index.html)에서 `google-adsense-account` meta는 유지하고, `adsbygoogle.js` 로더는 제거했다.
+- `ads.txt`는 유지한다.
+
+### AdSense 403 해석
+
+- 현재 페이지 소스에는 실제 광고 슬롯 마크업이 없고, 검토용 계정 식별 메타만 남아 있다.
+- 따라서 기존 `403`은 코드 자체가 깨진 오류라기보다, 승인 전 단계에서 AdSense 광고 요청이 거절되던 상황으로 보는 것이 타당하다.
+- 이 판단은 로컬 코드 구조와 Google AdSense의 `사이트 연결` 및 `사이트 준비 상태` 안내를 바탕으로 한 추론이다.
+
+### 구현 파일
+
+- [rulebook-tabs.tsx](C:/projects/magok/src/features/eligibility/components/rulebook-tabs.tsx)
+- [tabs.tsx](C:/projects/magok/src/components/ui/tabs.tsx)
+- [index.html](C:/projects/magok/index.html)
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+
+### 결과
+
+- `판정 기준` 영역이 긴 카드 나열에서 `검색해서 바로 찾는 참고 영역`으로 더 단순해졌다.
+- 모바일에서도 탭 버튼과 카드 간격이 덜 답답하게 보이도록 정리됐다.
+- 검토 단계에서 불필요한 AdSense 광고 요청을 줄여 브라우저 콘솔의 `403` 노이즈가 완화될 가능성이 높아졌다.
+
+---
+
 ## 2026-03-19 UI/UX 단순화 및 섹션 구조 업그레이드
 
 ### 작업 배경

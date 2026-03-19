@@ -1,5 +1,13 @@
-import { AlertTriangle, Layers3, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import {
+  AlertTriangle,
+  Layers3,
+  Search,
+  Sparkles,
+  X,
+} from 'lucide-react'
 
+import { AsyncState } from '@/components/async-state'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -8,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
 import { KNOWLEDGE_CENTER_EXACT_RULE_COUNTS } from '@/features/eligibility/data/knowledge-center-exact-codes'
 import {
   BLOCKING_SCENARIOS,
@@ -17,57 +25,224 @@ import {
   REVIEW_SCENARIOS,
 } from '@/features/eligibility/data/rules'
 import { formatRuleCount } from '@/utils/format'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+type TabKey = 'industrial' | 'knowledge' | 'review'
+
+function normalizeQuery(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function matchesText(targets: string[], query: string) {
+  const normalizedQuery = normalizeQuery(query)
+
+  if (!normalizedQuery) {
+    return true
+  }
+
+  return targets.some((target) => target.toLowerCase().includes(normalizedQuery))
+}
+
+function Toolbar({
+  value,
+  placeholder,
+  summary,
+  onChange,
+  onClear,
+}: {
+  value: string
+  placeholder: string
+  summary: string
+  onChange: (value: string) => void
+  onClear: () => void
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-[20px] border border-[var(--border)] bg-white p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+      <div className="text-sm leading-6 text-[var(--foreground-muted)]">{summary}</div>
+      <div className="flex w-full items-center gap-2 sm:max-w-sm">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--foreground-subtle)]" />
+          <Input
+            value={value}
+            placeholder={placeholder}
+            className="h-11 pl-10 pr-10"
+            onChange={(event) => onChange(event.target.value)}
+          />
+          {value ? (
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 inline-flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-[var(--foreground-subtle)] transition hover:bg-[rgba(239,109,30,0.08)] hover:text-[var(--foreground)]"
+              onClick={onClear}
+              aria-label="검색어 지우기"
+            >
+              <X className="size-3.5" />
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SummaryCards({
+  items,
+}: {
+  items: Array<{ label: string; value: string }>
+}) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="rounded-[18px] border border-[var(--border)] bg-white px-4 py-3"
+        >
+          <div className="text-xs text-[var(--foreground-subtle)]">{item.label}</div>
+          <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+            {item.value}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export function RulebookTabs() {
+  const [activeTab, setActiveTab] = useState<TabKey>('industrial')
+  const [queries, setQueries] = useState<Record<TabKey, string>>({
+    industrial: '',
+    knowledge: '',
+    review: '',
+  })
+
+  const industrialRules = MAGOK_INDUSTRIAL_RULES.filter((rule) =>
+    matchesText(
+      [rule.label, rule.group, rule.summary, rule.prefixes.join(', ')],
+      queries.industrial,
+    ),
+  )
+
+  const knowledgeRules = KNOWLEDGE_CENTER_EXTRA_RULES.filter((rule) =>
+    matchesText(
+      [rule.label, rule.group, rule.summary, rule.prefixes.join(', ')],
+      queries.knowledge,
+    ),
+  )
+
+  const reviewRules = REVIEW_SCENARIOS.filter((scenario) =>
+    matchesText([scenario.label, scenario.summary], queries.review),
+  )
+
+  const blockingRules = BLOCKING_SCENARIOS.filter((scenario) =>
+    matchesText([scenario.label, scenario.summary], queries.review),
+  )
+
+  function setQuery(tab: TabKey, value: string) {
+    setQueries((current) => ({
+      ...current,
+      [tab]: value,
+    }))
+  }
+
+  const currentQuery = queries[activeTab]
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>필요하면 기준도 확인할 수 있습니다</CardTitle>
         <CardDescription>
-          자동 판정에 쓰는 업종 규칙과 심의·제한 조건을 정리해 둔 참고 영역입니다.
+          자동 판정에 쓰는 업종 규칙과 심의·제한 조건을 검색하면서 확인할 수 있는
+          참고 영역입니다.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="industrial">
+      <CardContent className="space-y-5">
+        <Tabs
+          defaultValue="industrial"
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as TabKey)}
+        >
           <TabsList>
             <TabsTrigger value="industrial">산업시설구역</TabsTrigger>
             <TabsTrigger value="knowledge">지식산업센터</TabsTrigger>
             <TabsTrigger value="review">심의·제한</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="industrial">
-            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-4">
+          <TabsContent value="industrial" className="space-y-4">
+            <Toolbar
+              value={queries.industrial}
+              placeholder="업종명, 그룹, prefix로 찾기"
+              summary={`내장 규칙 ${formatRuleCount(MAGOK_INDUSTRIAL_RULES.length)} 중 ${formatRuleCount(industrialRules.length)} 표시`}
+              onChange={(value) => setQuery('industrial', value)}
+              onClear={() => setQuery('industrial', '')}
+            />
+            <SummaryCards
+              items={[
+                { label: '전체 규칙', value: formatRuleCount(MAGOK_INDUSTRIAL_RULES.length) },
+                { label: '현재 표시', value: formatRuleCount(industrialRules.length) },
+                { label: '검색어', value: currentQuery || '없음' },
+              ]}
+            />
+            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-3 sm:p-4">
               <div className="flex items-center gap-3 text-sm text-[var(--foreground-muted)]">
                 <Layers3 className="size-4 text-[var(--accent)]" />
-                <span>내장 규칙 {formatRuleCount(MAGOK_INDUSTRIAL_RULES.length)}</span>
+                <span>산업시설구역 허용 업종 목록</span>
               </div>
-              {MAGOK_INDUSTRIAL_RULES.map((rule) => (
-                <article
-                  key={rule.id}
-                  className="rounded-2xl border border-[var(--border)] bg-white p-4"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge>{rule.group}</Badge>
-                    <h4 className="font-medium text-[var(--foreground)]">{rule.label}</h4>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                    {rule.summary}
-                  </p>
-                  <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
-                    prefix: {rule.prefixes.join(', ')}
-                  </p>
-                </article>
-              ))}
+              {industrialRules.length === 0 ? (
+                <AsyncState
+                  variant="empty"
+                  title="맞는 규칙을 찾지 못했습니다."
+                  description="검색어를 조금 더 짧게 바꾸거나 prefix 숫자로 다시 찾아보세요."
+                  className="min-h-44 bg-white"
+                />
+              ) : (
+                industrialRules.map((rule) => (
+                  <article
+                    key={rule.id}
+                    className="rounded-2xl border border-[var(--border)] bg-white p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge>{rule.group}</Badge>
+                      <h4 className="font-medium text-[var(--foreground)]">{rule.label}</h4>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                      {rule.summary}
+                    </p>
+                    <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
+                      prefix: {rule.prefixes.join(', ')}
+                    </p>
+                  </article>
+                ))
+              )}
             </div>
           </TabsContent>
 
-          <TabsContent value="knowledge">
-            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-4">
+          <TabsContent value="knowledge" className="space-y-4">
+            <Toolbar
+              value={queries.knowledge}
+              placeholder="특례 업종명, 요약, prefix로 찾기"
+              summary={`지식산업센터 특례 ${formatRuleCount(KNOWLEDGE_CENTER_EXTRA_RULES.length)} 중 ${formatRuleCount(knowledgeRules.length)} 표시`}
+              onChange={(value) => setQuery('knowledge', value)}
+              onClear={() => setQuery('knowledge', '')}
+            />
+            <SummaryCards
+              items={[
+                {
+                  label: 'exact 5자리',
+                  value: `${KNOWLEDGE_CENTER_EXACT_RULE_COUNTS.autoAllowed}개 자동 허용`,
+                },
+                {
+                  label: '특례 규칙',
+                  value: formatRuleCount(KNOWLEDGE_CENTER_EXTRA_RULES.length),
+                },
+                {
+                  label: '심의·추가확인',
+                  value: `${KNOWLEDGE_CENTER_EXACT_RULE_COUNTS.reviewRequired + KNOWLEDGE_CENTER_EXACT_RULE_COUNTS.additionalCheck}개`,
+                },
+              ]}
+            />
+            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-3 sm:p-4">
               <div className="flex items-center gap-3 text-sm text-[var(--foreground-muted)]">
                 <Sparkles className="size-4 text-[var(--accent)]" />
-                <span>
-                  기본 허용업종 + 특례 {formatRuleCount(KNOWLEDGE_CENTER_EXTRA_RULES.length)}
-                </span>
+                <span>지식산업센터 특례와 exact 5자리 규칙</span>
               </div>
               <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                 <div className="flex flex-wrap items-center gap-2">
@@ -89,23 +264,32 @@ export function RulebookTabs() {
                   필요 규칙을 우선 적용합니다.
                 </p>
               </article>
-              {KNOWLEDGE_CENTER_EXTRA_RULES.map((rule) => (
-                <article
-                  key={rule.id}
-                  className="rounded-2xl border border-[var(--border)] bg-white p-4"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge>{rule.group}</Badge>
-                    <h4 className="font-medium text-[var(--foreground)]">{rule.label}</h4>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                    {rule.summary}
-                  </p>
-                  <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
-                    prefix: {rule.prefixes.join(', ')}
-                  </p>
-                </article>
-              ))}
+              {knowledgeRules.length === 0 ? (
+                <AsyncState
+                  variant="empty"
+                  title="맞는 특례 규칙을 찾지 못했습니다."
+                  description="업종명이나 prefix로 다시 찾아보면 더 빠르게 확인할 수 있습니다."
+                  className="min-h-44 bg-white"
+                />
+              ) : (
+                knowledgeRules.map((rule) => (
+                  <article
+                    key={rule.id}
+                    className="rounded-2xl border border-[var(--border)] bg-white p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge>{rule.group}</Badge>
+                      <h4 className="font-medium text-[var(--foreground)]">{rule.label}</h4>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                      {rule.summary}
+                    </p>
+                    <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
+                      prefix: {rule.prefixes.join(', ')}
+                    </p>
+                  </article>
+                ))
+              )}
               <article className="rounded-2xl border border-dashed border-[var(--border)] bg-white/70 p-4">
                 <h4 className="font-medium text-[var(--foreground)]">수동 보조 분류</h4>
                 <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
@@ -116,13 +300,35 @@ export function RulebookTabs() {
             </div>
           </TabsContent>
 
-          <TabsContent value="review">
-            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-4">
+          <TabsContent value="review" className="space-y-4">
+            <Toolbar
+              value={queries.review}
+              placeholder="심의 조건, 제한 업종으로 찾기"
+              summary={`심의 ${formatRuleCount(REVIEW_SCENARIOS.length)}개 / 불가 ${formatRuleCount(BLOCKING_SCENARIOS.length)}개 중 검색 결과 표시`}
+              onChange={(value) => setQuery('review', value)}
+              onClear={() => setQuery('review', '')}
+            />
+            <SummaryCards
+              items={[
+                { label: '심의 필요', value: formatRuleCount(reviewRules.length) },
+                { label: '명시 제한', value: formatRuleCount(blockingRules.length) },
+                { label: '검색어', value: queries.review || '없음' },
+              ]}
+            />
+            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-3 sm:p-4">
               <div className="flex items-center gap-3 text-sm text-[var(--foreground-muted)]">
                 <AlertTriangle className="size-4 text-[var(--accent)]" />
                 <span>심의 필요와 명시 제한 조건</span>
               </div>
-              {REVIEW_SCENARIOS.map((scenario) => (
+              {reviewRules.length === 0 && blockingRules.length === 0 ? (
+                <AsyncState
+                  variant="empty"
+                  title="맞는 심의·제한 조건을 찾지 못했습니다."
+                  description="업종명이나 키워드를 조금 더 짧게 바꿔 다시 검색해 보세요."
+                  className="min-h-44 bg-white"
+                />
+              ) : null}
+              {reviewRules.map((scenario) => (
                 <article
                   key={scenario.id}
                   className="rounded-2xl border border-amber-200 bg-amber-50 p-4"
@@ -138,7 +344,7 @@ export function RulebookTabs() {
                   </p>
                 </article>
               ))}
-              {BLOCKING_SCENARIOS.map((scenario) => (
+              {blockingRules.map((scenario) => (
                 <article
                   key={scenario.id}
                   className="rounded-2xl border border-rose-200 bg-rose-50 p-4"
