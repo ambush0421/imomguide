@@ -46,7 +46,38 @@ function getManualFitLabel(regulatoryFit: RegulatoryFit) {
     return '기타 시행령 허용업종'
   }
 
+  if (regulatoryFit === 'higherEducationResearchInstitute') {
+    return '고등교육법 제25조 연구소의 연구개발업'
+  }
+
+  if (regulatoryFit === 'basicResearchInstitution') {
+    return '기초연구법 제14조 기관·단체의 연구개발업'
+  }
+
+  if (regulatoryFit === 'elearningIndustry') {
+    return '이러닝법상 업'
+  }
+
+  if (regulatoryFit === 'managedTechnicalService') {
+    return '관리기관 인정 기타 전문·과학·기술 서비스업'
+  }
+
   return null
+}
+
+function isManualResearchInstitution(regulatoryFit: RegulatoryFit) {
+  return (
+    regulatoryFit === 'higherEducationResearchInstitute' ||
+    regulatoryFit === 'basicResearchInstitution'
+  )
+}
+
+function isManualElearningIndustry(regulatoryFit: RegulatoryFit) {
+  return regulatoryFit === 'elearningIndustry'
+}
+
+function isManualManagedTechnicalService(regulatoryFit: RegulatoryFit) {
+  return regulatoryFit === 'managedTechnicalService'
 }
 
 function isSpecialOperator(applicantType: ApplicantType) {
@@ -77,6 +108,11 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
     normalizedCode,
   )
   const manualFitLabel = getManualFitLabel(input.regulatoryFit)
+  const hasManualResearchInstitution = isManualResearchInstitution(input.regulatoryFit)
+  const hasManualElearningIndustry = isManualElearningIndustry(input.regulatoryFit)
+  const hasManualManagedTechnicalService = isManualManagedTechnicalService(
+    input.regulatoryFit,
+  )
   const hasSpecialOperator = isSpecialOperator(input.applicantType)
   const hasPublicBody = isPublicBody(input.applicantType)
   const hasUniversityLab = input.applicantType === 'universityLab'
@@ -248,23 +284,73 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
     })
   }
 
-  if (
-    input.zoneType === 'knowledgeIndustryCenter' &&
-    knowledgeCenterCodeOnlyUncertain
-  ) {
+  if (input.zoneType === 'knowledgeIndustryCenter' && hasManualResearchInstitution) {
     return buildResult({
-      verdict: 'insufficient',
-      title: '코드만으로는 바로 확정하기 어렵습니다.',
+      verdict: 'conditional',
+      title: '지식산업센터 조건부 검토 대상입니다.',
       summary:
-        `${knowledgeCenterCodeOnlyUncertain.label}은 기관 성격과 운영 형태를 함께 확인해야 지식산업센터 판정이 가능합니다.`,
-      matchedRules: [knowledgeCenterCodeOnlyUncertain.label, '코드만으로 확정 불가'],
-      reasons: [knowledgeCenterCodeOnlyUncertain.note],
+        `${manualFitLabel}은 KSIC 코드만으로 확정할 수 없고, 기관 설치 근거와 실제 연구개발 수행 계획을 함께 검토해야 합니다.`,
+      matchedRules: [manualFitLabel ?? '연구기관 요건 검토'],
+      reasons: [
+        input.regulatoryFit === 'higherEducationResearchInstitute'
+          ? '고등교육법 제25조 연구소에 해당한다면 연구소 설치 근거와 실제 연구개발 수행 여부를 함께 확인해야 합니다.'
+          : '기초연구법 제14조 기관·단체에 해당한다면 기관 설립 근거와 실제 연구개발 수행 여부를 함께 확인해야 합니다.',
+      ],
       requiredActions: [
-        '교육기관, 연구시설, 지원시설 중 어느 요건에 해당하는지 설명자료를 준비해 주세요.',
-        '법령상 허용업종 분류를 수동으로 선택했다면 해당 근거도 함께 확인해 주세요.',
+        '연구소 또는 기관·단체 설치 근거 문서와 실제 연구개발 수행 계획을 준비해 주세요.',
+        '대학이 포함되면 산학융합지구 입주, 연면적 2만㎡ 이하, 연구시설 50% 이상 등 추가 요건도 함께 확인해 주세요.',
         ...commonActions,
       ],
       legalBasisIds: ['magokKnowledgeCenterExtra', 'decreeKnowledgeIndustry'],
+    })
+  }
+
+  if (input.zoneType === 'knowledgeIndustryCenter' && hasManualElearningIndustry) {
+    return buildResult({
+      verdict: 'conditional',
+      title: '이러닝업 조건을 추가 확인해야 합니다.',
+      summary:
+        '이러닝업은 직접 대응 KSIC 코드만으로 판정하지 않고, 제7호·제10호 또는 시행령 제6조제3항 산업을 경영하는 입주기업체가 운영하는지까지 확인해야 합니다.',
+      matchedRules: [manualFitLabel ?? '이러닝업'],
+      reasons: [
+        '이러닝법상 업은 운영 주체와 기존 입주기업체 업종의 연결성을 함께 확인해야 하는 조건부 항목입니다.',
+      ],
+      requiredActions: [
+        '현재 영위 중인 출판업, 교육서비스업 또는 정보통신산업과의 연결성을 설명하는 자료를 준비해 주세요.',
+        '강의 콘텐츠 제작 방식, 플랫폼 운영 구조, 실제 사용면적 계획을 함께 정리해 주세요.',
+        ...commonActions,
+      ],
+      legalBasisIds: [
+        'magokKnowledgeCenterExtra',
+        'decreeKnowledgeIndustry',
+        'decreeInformationIndustry',
+      ],
+    })
+  }
+
+  if (
+    input.zoneType === 'knowledgeIndustryCenter' &&
+    hasManualManagedTechnicalService
+  ) {
+    return buildResult({
+      verdict: 'insufficient',
+      title: '관리기관 인정 여부를 먼저 확인해야 합니다.',
+      summary:
+        '관리기관 인정 기타 전문·과학·기술 서비스업은 관리기관 인정과 홈페이지 게시 여부를 확인해야 해서 자동 확정이 어렵습니다.',
+      matchedRules: [manualFitLabel ?? '관리기관 인정 업종'],
+      reasons: [
+        '시행령 제6조제2항제27호 업종은 일반 KSIC 코드만으로 자동 허용 여부를 확정할 수 없습니다.',
+      ],
+      requiredActions: [
+        '관리기관 홈페이지에 해당 업종이 인정 산업으로 게시되어 있는지 먼저 확인해 주세요.',
+        '필요하면 사전 질의나 위원회 검토 대상으로 문의하는 편이 안전합니다.',
+        ...commonActions,
+      ],
+      legalBasisIds: [
+        'magokKnowledgeCenterExtra',
+        'decreeKnowledgeIndustry',
+        'decreeDiscretion',
+      ],
     })
   }
 
@@ -290,6 +376,57 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
         ...commonActions,
       ],
       legalBasisIds: ['magokKnowledgeCenterExtra', 'decreeOtherIndustry'],
+    })
+  }
+
+  if (
+    input.zoneType === 'knowledgeIndustryCenter' &&
+    knowledgeCenterCodeOnlyUncertain
+  ) {
+    const manualBasisIds =
+      input.regulatoryFit === 'informationIndustry'
+        ? ['decreeInformationIndustry']
+        : input.regulatoryFit === 'otherPermittedIndustry'
+          ? ['decreeOtherIndustry']
+          : ['decreeKnowledgeIndustry']
+
+    if (manualFitLabel) {
+      return buildResult({
+        verdict: 'conditional',
+        title: '코드만으로는 확정하기 어렵지만 조건부 검토 대상입니다.',
+        summary:
+          `${knowledgeCenterCodeOnlyUncertain.label}은 코드만으로 자동 확정하기 어렵지만, 사용자가 ${manualFitLabel} 분류를 선택한 만큼 해당 조문 요건을 함께 검토해야 합니다.`,
+        matchedRules: [
+          knowledgeCenterCodeOnlyUncertain.label,
+          '코드만으로 확정 불가',
+          manualFitLabel,
+        ],
+        reasons: [
+          knowledgeCenterCodeOnlyUncertain.note,
+          `사용자가 법령상 ${manualFitLabel} 분류를 직접 선택했습니다.`,
+        ],
+        requiredActions: [
+          '운영 형태와 실제 교육·연구·지원 기능이 해당 조문 요건에 맞는지 설명자료를 준비해 주세요.',
+          '코드 분류와 함께 실제 프로그램 또는 서비스 운영 방식을 확인해 주세요.',
+          ...commonActions,
+        ],
+        legalBasisIds: ['magokKnowledgeCenterExtra', ...manualBasisIds],
+      })
+    }
+
+    return buildResult({
+      verdict: 'insufficient',
+      title: '코드만으로는 바로 확정하기 어렵습니다.',
+      summary:
+        `${knowledgeCenterCodeOnlyUncertain.label}은 기관 성격과 운영 형태를 함께 확인해야 지식산업센터 판정이 가능합니다.`,
+      matchedRules: [knowledgeCenterCodeOnlyUncertain.label, '코드만으로 확정 불가'],
+      reasons: [knowledgeCenterCodeOnlyUncertain.note],
+      requiredActions: [
+        '교육기관, 연구시설, 지원시설 중 어느 요건에 해당하는지 설명자료를 준비해 주세요.',
+        '법령상 허용업종 분류를 수동으로 선택했다면 해당 근거도 함께 확인해 주세요.',
+        ...commonActions,
+      ],
+      legalBasisIds: ['magokKnowledgeCenterExtra', 'decreeKnowledgeIndustry'],
     })
   }
 

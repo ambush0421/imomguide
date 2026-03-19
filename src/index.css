@@ -3,18 +3,18 @@
 
 :root {
   color-scheme: light;
-  --background: #f6f2eb;
-  --surface: rgba(255, 255, 255, 0.84);
+  --background: #eef4ff;
+  --surface: rgba(255, 255, 255, 0.88);
   --surface-strong: #ffffff;
-  --foreground: #18202b;
-  --foreground-muted: #556070;
-  --foreground-subtle: #7a8494;
-  --border: rgba(24, 32, 43, 0.12);
-  --ring: rgba(239, 109, 30, 0.28);
-  --accent: #ef6d1e;
-  --accent-strong: #d55b11;
-  --accent-soft: #f7b386;
-  --accent-foreground: #fffaf6;
+  --foreground: #15253a;
+  --foreground-muted: #586b86;
+  --foreground-subtle: #8293ad;
+  --border: rgba(21, 37, 58, 0.12);
+  --ring: rgba(43, 109, 255, 0.28);
+  --accent: #2b6dff;
+  --accent-strong: #1658db;
+  --accent-soft: #9cc0ff;
+  --accent-foreground: #f7fbff;
 }
 
 @layer base {
@@ -33,9 +33,9 @@
     font-family: 'IBM Plex Sans KR', sans-serif;
     color: var(--foreground);
     background:
-      radial-gradient(circle at top left, rgba(239, 109, 30, 0.12), transparent 22%),
-      radial-gradient(circle at right top, rgba(255, 204, 153, 0.2), transparent 18%),
-      linear-gradient(180deg, #f8f5ef 0%, #f3eee6 48%, #efe8de 100%);
+      radial-gradient(circle at top left, rgba(43, 109, 255, 0.16), transparent 24%),
+      radial-gradient(circle at right top, rgba(120, 182, 255, 0.2), transparent 20%),
+      linear-gradient(180deg, #f8fbff 0%, #edf4ff 50%, #e5eefc 100%);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -72,7 +72,7 @@
   }
 
   ::selection {
-    background: rgba(239, 109, 30, 0.2);
+    background: rgba(43, 109, 255, 0.2);
     color: var(--foreground);
   }
 }

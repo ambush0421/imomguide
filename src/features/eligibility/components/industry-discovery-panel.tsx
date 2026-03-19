@@ -29,6 +29,7 @@ interface IndustryDiscoveryPanelProps {
   onDiscover: () => void
   onSuggestionSelect: (suggestion: IndustrySuggestion) => void
   onExampleSelect: (value: string) => void
+  onContinueManual: () => void
 }
 
 function getVerdictBadgeVariant(verdict: ReturnType<typeof evaluateEligibility>['verdict']) {
@@ -102,7 +103,7 @@ function SuggestionCard({
           onClick={() => onSelect(suggestion)}
         >
           <ArrowRight className="size-4" />
-          이 업종으로 결과 보기
+          이 업종으로 계속
         </Button>
       </div>
     </article>
@@ -119,6 +120,7 @@ export function IndustryDiscoveryPanel({
   onDiscover,
   onSuggestionSelect,
   onExampleSelect,
+  onContinueManual,
 }: IndustryDiscoveryPanelProps) {
   const isLoading = status === 'loading'
   const exactSuggestions = suggestions.filter(
@@ -142,9 +144,9 @@ export function IndustryDiscoveryPanel({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.8)] p-5">
+        <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.86)] p-5">
           <div className="flex items-start gap-3">
-            <div className="mt-1 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+            <div className="mt-1 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
               <SearchCheck className="size-4" />
             </div>
             <div>
@@ -181,12 +183,17 @@ export function IndustryDiscoveryPanel({
           </div>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Button disabled={isLoading || !query.trim()} onClick={onDiscover}>
-              <SearchCheck className="size-4" />
-              {isLoading ? '업종코드 찾는 중...' : '업종코드 찾기'}
-            </Button>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button disabled={isLoading || !query.trim()} onClick={onDiscover}>
+                <SearchCheck className="size-4" />
+                {isLoading ? '업종코드 찾는 중...' : '업종코드 찾기'}
+              </Button>
+              <Button variant="secondary" onClick={onContinueManual}>
+                직접 입력으로 계속
+              </Button>
+            </div>
             <p className="text-sm leading-6 text-[var(--foreground-subtle)]">
-              정확한 코드가 없으면 가장 가까운 관련 업종을 추천합니다.
+              정확한 코드가 없으면 가장 가까운 관련 업종을 추천하고, 원하면 바로 2단계로 넘어갈 수 있습니다.
             </p>
           </div>
         </section>

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { KNOWLEDGE_CENTER_EXACT_RULE_COUNTS } from '@/features/eligibility/data/knowledge-center-exact-codes'
+import { KNOWLEDGE_INDUSTRY_REVIEW_ROWS } from '@/features/eligibility/data/knowledge-industry-review-table'
 import {
   BLOCKING_SCENARIOS,
   KNOWLEDGE_CENTER_EXTRA_RULES,
@@ -41,6 +42,22 @@ function matchesText(targets: string[], query: string) {
   }
 
   return targets.some((target) => target.toLowerCase().includes(normalizedQuery))
+}
+
+function getVerdictBadgeVariant(verdict: string) {
+  if (verdict === '가능') {
+    return 'success' as const
+  }
+
+  if (verdict === '조건부') {
+    return 'warning' as const
+  }
+
+  if (verdict === '불가') {
+    return 'danger' as const
+  }
+
+  return 'muted' as const
 }
 
 function Toolbar({
@@ -71,7 +88,7 @@ function Toolbar({
           {value ? (
             <button
               type="button"
-              className="absolute right-3 top-1/2 inline-flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-[var(--foreground-subtle)] transition hover:bg-[rgba(239,109,30,0.08)] hover:text-[var(--foreground)]"
+              className="absolute right-3 top-1/2 inline-flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-[var(--foreground-subtle)] transition hover:bg-[rgba(43,109,255,0.08)] hover:text-[var(--foreground)]"
               onClick={onClear}
               aria-label="검색어 지우기"
             >
@@ -136,6 +153,13 @@ export function RulebookTabs() {
     matchesText([scenario.label, scenario.summary], queries.review),
   )
 
+  const knowledgeReviewRows = KNOWLEDGE_INDUSTRY_REVIEW_ROWS.filter((row) =>
+    matchesText(
+      [row.clause, row.label, row.ksic, row.verdict, row.note],
+      queries.knowledge,
+    ),
+  )
+
   function setQuery(tab: TabKey, value: string) {
     setQueries((current) => ({
       ...current,
@@ -181,7 +205,7 @@ export function RulebookTabs() {
                 { label: '검색어', value: currentQuery || '없음' },
               ]}
             />
-            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-3 sm:p-4">
+            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.86)] p-3 sm:p-4">
               <div className="flex items-center gap-3 text-sm text-[var(--foreground-muted)]">
                 <Layers3 className="size-4 text-[var(--accent)]" />
                 <span>산업시설구역 허용 업종 목록</span>
@@ -230,8 +254,8 @@ export function RulebookTabs() {
                   value: `${KNOWLEDGE_CENTER_EXACT_RULE_COUNTS.autoAllowed}개 자동 허용`,
                 },
                 {
-                  label: '특례 규칙',
-                  value: formatRuleCount(KNOWLEDGE_CENTER_EXTRA_RULES.length),
+                  label: '입주검토 표',
+                  value: `${formatRuleCount(KNOWLEDGE_INDUSTRY_REVIEW_ROWS.length)}개 조문`,
                 },
                 {
                   label: '심의·추가확인',
@@ -239,12 +263,12 @@ export function RulebookTabs() {
                 },
               ]}
             />
-            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-3 sm:p-4">
+            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.86)] p-3 sm:p-4">
               <div className="flex items-center gap-3 text-sm text-[var(--foreground-muted)]">
                 <Sparkles className="size-4 text-[var(--accent)]" />
                 <span>지식산업센터 특례와 exact 5자리 규칙</span>
               </div>
-              <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+              <article className="rounded-2xl border border-[rgba(43,109,255,0.16)] bg-[rgba(239,245,255,0.92)] p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="success">exact 5자리</Badge>
                   <h4 className="font-medium text-[var(--foreground)]">
@@ -263,6 +287,67 @@ export function RulebookTabs() {
                   `63111 자료 처리업` 자동 허용, `63112 호스팅 및 관련 서비스업` 심의
                   필요 규칙을 우선 적용합니다.
                 </p>
+              </article>
+              <article className="rounded-2xl border border-[var(--border)] bg-white p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="muted">입주검토용 표</Badge>
+                  <h4 className="font-medium text-[var(--foreground)]">
+                    시행령 제6조제2항 1~27호 대응표
+                  </h4>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                  조문 기준 업종, 현재 KSIC 대응, 마곡 지식산업센터 적용 결과를 한
+                  표로 다시 정리했습니다. 검색창에 조문 번호, 업종명, 코드, 메모를
+                  넣으면 함께 좁혀집니다.
+                </p>
+                {knowledgeReviewRows.length === 0 ? (
+                  <AsyncState
+                    variant="empty"
+                    title="입주검토용 표에서 일치하는 항목을 찾지 못했습니다."
+                    description="조문 번호, 업종명, KSIC 코드 일부로 다시 검색해 보세요."
+                    className="mt-4 min-h-40 bg-[rgba(239,245,255,0.88)]"
+                  />
+                ) : (
+                  <div className="mt-4 overflow-x-auto rounded-[20px] border border-[var(--border)]">
+                    <table className="min-w-[880px] border-collapse text-left text-sm">
+                      <thead className="bg-[rgba(239,245,255,0.88)] text-[var(--foreground-muted)]">
+                        <tr>
+                          <th className="px-4 py-3 font-medium">호</th>
+                          <th className="px-4 py-3 font-medium">시행령 업종</th>
+                          <th className="px-4 py-3 font-medium">현재 KSIC 대응</th>
+                          <th className="px-4 py-3 font-medium">마곡 적용</th>
+                          <th className="px-4 py-3 font-medium">확인 포인트</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {knowledgeReviewRows.map((row) => (
+                          <tr
+                            key={row.clause}
+                            className="border-t border-[var(--border)] align-top"
+                          >
+                            <td className="px-4 py-3 text-[var(--foreground-muted)]">
+                              {row.clause}
+                            </td>
+                            <td className="px-4 py-3 font-medium text-[var(--foreground)]">
+                              {row.label}
+                            </td>
+                            <td className="px-4 py-3 text-[var(--foreground-muted)]">
+                              {row.ksic}
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge variant={getVerdictBadgeVariant(row.verdict)}>
+                                {row.verdict}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 leading-6 text-[var(--foreground-muted)]">
+                              {row.note}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </article>
               {knowledgeRules.length === 0 ? (
                 <AsyncState
@@ -315,7 +400,7 @@ export function RulebookTabs() {
                 { label: '검색어', value: queries.review || '없음' },
               ]}
             />
-            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-3 sm:p-4">
+            <div className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.86)] p-3 sm:p-4">
               <div className="flex items-center gap-3 text-sm text-[var(--foreground-muted)]">
                 <AlertTriangle className="size-4 text-[var(--accent)]" />
                 <span>심의 필요와 명시 제한 조건</span>

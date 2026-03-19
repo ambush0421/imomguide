@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { getEligibilityScreenInsight } from '@/features/eligibility/data/screen-insights'
 import type {
   EligibilityInput,
   EligibilityResult,
@@ -28,6 +29,9 @@ interface ResultPanelProps {
   status: 'idle' | 'loading' | 'ready' | 'error'
   error: string | null
   onEvaluate: () => void
+  onAdjust?: () => void
+  sticky?: boolean
+  stepLabel?: string
 }
 
 function getBadgeVariant(verdict: EligibilityResult['verdict']) {
@@ -52,16 +56,20 @@ export function ResultPanel({
   status,
   error,
   onEvaluate,
+  onAdjust,
+  sticky = true,
+  stepLabel = '2단계',
 }: ResultPanelProps) {
   const hasManualInput = Boolean(input.ksicCode.trim() || input.ksicName.trim())
+  const screenInsight = getEligibilityScreenInsight(input, result)
 
   return (
-    <Card className="sticky top-6 overflow-hidden bg-white/96">
+    <Card className={sticky ? 'sticky top-6 overflow-hidden bg-white/96' : 'overflow-hidden bg-white/96'}>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div>
             <Badge variant="muted" className="mb-3 w-fit">
-              2단계
+              {stepLabel}
             </Badge>
             <CardTitle>결과 확인</CardTitle>
             <CardDescription>
@@ -75,6 +83,13 @@ export function ResultPanel({
             </Badge>
           ) : null}
         </div>
+        {status === 'ready' && result && onAdjust ? (
+          <div className="pt-3">
+            <Button variant="secondary" onClick={onAdjust}>
+              조건 다시 수정
+            </Button>
+          </div>
+        ) : null}
       </CardHeader>
       <CardContent>
         {status === 'idle' ? (
@@ -113,7 +128,7 @@ export function ResultPanel({
 
         {status === 'ready' && result ? (
           <div className="space-y-4">
-            <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.78)] p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.84)] p-5">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={getBadgeVariant(result.verdict)}>
                   {formatVerdictLabel(result.verdict)}
@@ -138,6 +153,45 @@ export function ResultPanel({
               ) : null}
             </section>
 
+            {screenInsight ? (
+              <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={screenInsight.tone}>업종코드 상세 해설</Badge>
+                  <Badge variant="muted">화면 기준 재정리</Badge>
+                </div>
+                <h4 className="mt-4 font-display text-lg font-semibold text-[var(--foreground)]">
+                  {screenInsight.title}
+                </h4>
+                <div className="mt-4 grid gap-3">
+                  {screenInsight.fields.map((field) => (
+                    <div
+                      key={`${field.label}-${field.value}`}
+                      className="rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] px-4 py-3"
+                    >
+                      <div className="text-xs text-[var(--foreground-subtle)]">
+                        {field.label}
+                      </div>
+                      <div className="mt-1 text-sm font-medium leading-6 text-[var(--foreground)]">
+                        {field.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {screenInsight.bullets.length > 0 ? (
+                  <div className="mt-4 space-y-3">
+                    {screenInsight.bullets.map((bullet) => (
+                      <div
+                        key={bullet}
+                        className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.8)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
+                      >
+                        {bullet}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
+
             <div className="grid gap-4 md:grid-cols-2">
               <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -148,7 +202,7 @@ export function ResultPanel({
                   {result.reasons.map((reason) => (
                     <li
                       key={reason}
-                      className="rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.75)] px-4 py-3"
+                      className="rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] px-4 py-3"
                     >
                       {reason}
                     </li>
@@ -185,7 +239,7 @@ export function ResultPanel({
                 {result.legalBases.map((basis) => (
                   <article
                     key={basis.id}
-                    className="rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.75)] p-4"
+                    className="rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4"
                   >
                     <div className="text-xs uppercase tracking-[0.14em] text-[var(--foreground-subtle)]">
                       {basis.source === 'magokPlan' ? '고시문' : '시행령'} ·{' '}

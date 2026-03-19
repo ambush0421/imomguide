@@ -11,6 +11,7 @@ import type {
 
 type EvaluationStatus = 'idle' | 'loading' | 'ready' | 'error'
 type DiscoveryStatus = 'idle' | 'loading' | 'ready' | 'error'
+export type EligibilityStep = 'discover' | 'adjust' | 'result'
 
 interface EligibilityStore {
   input: EligibilityInput
@@ -21,6 +22,7 @@ interface EligibilityStore {
   industrySuggestions: IndustrySuggestion[]
   discoveryStatus: DiscoveryStatus
   discoveryError: string | null
+  currentStep: EligibilityStep
   setField: <K extends keyof EligibilityInput>(
     field: K,
     value: EligibilityInput[K],
@@ -29,6 +31,7 @@ interface EligibilityStore {
     field: K,
     value: EligibilityFlags[K],
   ) => void
+  setCurrentStep: (step: EligibilityStep) => void
   setIndustryQuery: (value: string) => void
   discoverIndustry: () => Promise<void>
   applyIndustrySuggestion: (suggestion: IndustrySuggestion) => Promise<void>
@@ -71,12 +74,26 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
   industrySuggestions: [],
   discoveryStatus: 'idle',
   discoveryError: null,
+  currentStep: 'discover',
   setField: (field, value) =>
     set((state) => ({
       input: {
         ...state.input,
         [field]: value,
       },
+      result:
+        state.currentStep === 'adjust' || state.currentStep === 'result'
+          ? null
+          : state.result,
+      status:
+        state.currentStep === 'adjust' || state.currentStep === 'result'
+          ? 'idle'
+          : state.status,
+      error:
+        state.currentStep === 'adjust' || state.currentStep === 'result'
+          ? null
+          : state.error,
+      currentStep: state.currentStep === 'result' ? 'adjust' : state.currentStep,
     })),
   setFlag: (field, value) =>
     set((state) => ({
@@ -87,7 +104,30 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
           [field]: value,
         },
       },
+      result:
+        state.currentStep === 'adjust' || state.currentStep === 'result'
+          ? null
+          : state.result,
+      status:
+        state.currentStep === 'adjust' || state.currentStep === 'result'
+          ? 'idle'
+          : state.status,
+      error:
+        state.currentStep === 'adjust' || state.currentStep === 'result'
+          ? null
+          : state.error,
+      currentStep: state.currentStep === 'result' ? 'adjust' : state.currentStep,
     })),
+  setCurrentStep: (step) =>
+    set((state) => {
+      if (step === 'result' && !(state.status === 'ready' && state.result)) {
+        return state
+      }
+
+      return {
+        currentStep: step,
+      }
+    }),
   setIndustryQuery: (value) =>
     set({
       industryQuery: value,
@@ -134,27 +174,11 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
 
     set({
       input: nextInput,
-      status: 'loading',
+      result: null,
+      status: 'idle',
       error: null,
+      currentStep: 'adjust',
     })
-
-    try {
-      await wait(240)
-      const result = evaluateEligibility(nextInput)
-
-      set({
-        status: 'ready',
-        result,
-      })
-    } catch (error) {
-      set({
-        status: 'error',
-        error:
-          error instanceof Error
-            ? error.message
-            : '추천 업종 적용 중 알 수 없는 오류가 발생했습니다.',
-      })
-    }
   },
   evaluate: async () => {
     set({ status: 'loading', error: null })
@@ -166,6 +190,7 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
       set({
         status: 'ready',
         result,
+        currentStep: 'result',
       })
     } catch (error) {
       set({
@@ -187,5 +212,6 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
       industrySuggestions: [],
       discoveryStatus: 'idle',
       discoveryError: null,
+      currentStep: 'discover',
     }),
 }))

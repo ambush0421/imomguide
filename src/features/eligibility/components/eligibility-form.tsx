@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   Building2,
+  ChevronLeft,
   ChevronDown,
   ChevronUp,
   Factory,
@@ -62,6 +63,10 @@ interface EligibilityFormProps {
   ) => void
   onEvaluate: () => void
   onReset: () => void
+  onPrevious?: () => void
+  primaryActionLabel?: string
+  secondaryActionLabel?: string
+  defaultExpanded?: boolean
 }
 
 const switchRows: Array<{
@@ -113,9 +118,13 @@ export function EligibilityForm({
   onFlagChange,
   onEvaluate,
   onReset,
+  onPrevious,
+  primaryActionLabel = '현재 설정으로 다시 판정',
+  secondaryActionLabel,
+  defaultExpanded = false,
 }: EligibilityFormProps) {
   const isLoading = status === 'loading'
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const enabledFlagCount = switchRows.filter((row) => input.flags[row.key]).length
 
   return (
@@ -128,10 +137,10 @@ export function EligibilityForm({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-5">
+        <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.86)] p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+              <div className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
                 <SearchCheck className="size-4" />
               </div>
               <div>
@@ -195,17 +204,29 @@ export function EligibilityForm({
               onClick={onEvaluate}
             >
               <SearchCheck className="size-4" />
-              {isLoading ? '판정 계산 중...' : '현재 설정으로 다시 판정'}
+              {isLoading ? '판정 계산 중...' : primaryActionLabel}
             </Button>
-            <Button
-              className="sm:flex-1"
-              variant="secondary"
-              disabled={isLoading}
-              onClick={onReset}
-            >
-              <RefreshCcw className="size-4" />
-              입력 초기화
-            </Button>
+            {onPrevious ? (
+              <Button
+                className="sm:flex-1"
+                variant="secondary"
+                disabled={isLoading}
+                onClick={onPrevious}
+              >
+                <ChevronLeft className="size-4" />
+                {secondaryActionLabel ?? '이전 단계'}
+              </Button>
+            ) : (
+              <Button
+                className="sm:flex-1"
+                variant="secondary"
+                disabled={isLoading}
+                onClick={onReset}
+              >
+                <RefreshCcw className="size-4" />
+                {secondaryActionLabel ?? '입력 초기화'}
+              </Button>
+            )}
           </div>
         </section>
 
@@ -213,7 +234,7 @@ export function EligibilityForm({
           <>
             <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
                   <Building2 className="size-4" />
                 </div>
                 <div>
@@ -322,10 +343,22 @@ export function EligibilityForm({
                     <SelectItem value="otherPermittedIndustry">
                       기타 시행령 허용업종
                     </SelectItem>
+                    <SelectItem value="higherEducationResearchInstitute">
+                      고등교육법 제25조 연구소(2호)
+                    </SelectItem>
+                    <SelectItem value="basicResearchInstitution">
+                      기초연구법 제14조 기관·단체(3호)
+                    </SelectItem>
+                    <SelectItem value="elearningIndustry">
+                      이러닝법상 업(26호)
+                    </SelectItem>
+                    <SelectItem value="managedTechnicalService">
+                      관리기관 인정 업종(27호)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs leading-5 text-[var(--foreground-subtle)]">
-                  KSIC 코드만으로 분류가 애매할 때만 수동 선택해 주세요.
+                  주로 지식산업센터에서 KSIC 코드만으로 분류가 애매할 때만 수동 선택해 주세요.
                 </p>
               </div>
             </section>
@@ -353,7 +386,7 @@ export function EligibilityForm({
 
             <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
                   <Factory className="size-4" />
                 </div>
                 <div>
@@ -370,7 +403,7 @@ export function EligibilityForm({
                 {switchRows.map((row) => (
                   <label
                     key={row.key}
-                    className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.72)] px-4 py-3"
+                    className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] px-4 py-3"
                   >
                     <div className="space-y-1 pr-4">
                       <span className="block text-sm font-medium text-[var(--foreground)]">
@@ -392,7 +425,7 @@ export function EligibilityForm({
 
             <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
                   <FlaskConical className="size-4" />
                 </div>
                 <div>

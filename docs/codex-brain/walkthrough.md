@@ -1223,17 +1223,233 @@ npm run test
 
 - `npm run lint` 통과
 - `npm run test -- --run` 통과
-  - 3개 테스트 파일
-  - 15개 테스트 케이스 통과
+  - 4개 테스트 파일
+  - 19개 테스트 케이스 통과
 - `npm run build` 통과
   - `dist/index.html`
-  - `dist/assets/index-DMxnKqiy.css`
-  - `dist/assets/index-wXWR_llK.js`
+  - `dist/assets/index-D0wNNO76.css`
+  - `dist/assets/index-VDb091Lx.js`
 
 ### 결과 요약
 
 - 사이트 안에 실제 승인 캡처용으로 쓸 기준 구역이 생겨, 사용자가 어느 위치를 제휴영역으로 잡아야 할지 더 명확해졌다.
 - 실제 쿠팡 파트너스 링크만 나중에 꽂으면, 현재 레이아웃 그대로 승인용 캡처 흐름으로 이어갈 수 있게 됐다.
+
+---
+
+## 2026-03-19 단계형 위저드 전환
+
+### 작업 배경
+
+- 사용자는 현재의 병렬형 판별 화면 대신 `1단계 업종 찾기 → 2단계 조건 보정 → 3단계 결과 확인` 흐름으로 더 또렷하게 보이는 단계형 UX를 원했다.
+- 별도 섹션으로 떨어져 있던 `세부 조건 직접 수정`은 흐름을 끊는 요소였기 때문에, 추천 업종 선택 뒤 필요한 경우에만 이어서 보정하도록 통합할 필요가 있었다.
+
+### 반영 내용
+
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - `finder` 영역을 단일 위저드 컨테이너로 재구성했다.
+  - 상단에 3단계 스텝바를 추가하고, 현재 단계의 설명만 크게 노출되도록 바꿨다.
+  - 기존 좌우 병렬 `IndustryDiscoveryPanel + ResultPanel` 배치를 제거하고 단계별 단일 카드로 전환했다.
+  - 별도 `직접 수정` 섹션을 삭제하고 2단계 화면 안으로 흡수했다.
+  - `업종코드 분석 위저드`라는 `region` 레이블을 추가해 테스트 안정성과 접근성을 함께 보강했다.
+- [eligibility-store.ts](C:/projects/magok/src/store/eligibility-store.ts)
+  - `currentStep`과 `setCurrentStep()`를 추가했다.
+  - `applyIndustrySuggestion()`은 더 이상 즉시 평가하지 않고, 코드/이름/법령 분류만 반영한 뒤 2단계로 이동하게 바꿨다.
+  - `evaluate()`는 성공 시 3단계로 이동하게 바꿨다.
+  - 2단계나 3단계에서 필드나 스위치를 바꾸면 이전 결과를 `idle + null`로 무효화하도록 정리했다.
+- [industry-discovery-panel.tsx](C:/projects/magok/src/features/eligibility/components/industry-discovery-panel.tsx)
+  - 추천 선택 버튼 문구를 `이 업종으로 계속`으로 바꾸고, `직접 입력으로 계속` 보조 버튼을 추가했다.
+- [eligibility-form.tsx](C:/projects/magok/src/features/eligibility/components/eligibility-form.tsx)
+  - `이전 단계`, 커스텀 액션 라벨, 기본 펼침 상태를 받도록 확장했다.
+  - 2단계 진입 시 바로 보정할 수 있도록 기본 펼침형으로 재사용했다.
+- [result-panel.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.tsx)
+  - `조건 다시 수정` 버튼, `sticky` 옵션, 단계 라벨을 추가해 3단계 전체 폭 카드로 재사용할 수 있게 했다.
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx), [eligibility-store.test.ts](C:/projects/magok/src/store/eligibility-store.test.ts), [setupTests.ts](C:/projects/magok/src/setupTests.ts)
+  - 앱 통합 테스트를 단계형 흐름 기준으로 다시 작성했다.
+  - 스토어 전이 테스트를 추가해 추천 선택, 결과 진입, stale result 무효화 규칙을 고정했다.
+  - 테스트 간 DOM 중첩 문제를 막기 위해 cleanup을 명시했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 5개 테스트 파일
+  - 23개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-hZP1qH4M.css`
+  - `dist/assets/index-6LO-ofsP.js`
+
+### 배포 확인
+
+- `npx wrangler pages deploy dist --project-name imomguide`로 재배포했다.
+- 새 배포 URL: `https://24046f1c.imomguide.pages.dev`
+- `https://24046f1c.imomguide.pages.dev`와 `https://loopincode.com` HTML이 모두 새 번들 `index-6LO-ofsP.js`, `index-hZP1qH4M.css`를 가리키는 것을 확인했다.
+
+### 결과 요약
+
+- 이제 메인 판별 흐름이 `찾기 → 보정 → 결과` 순서로 또렷하게 보여서, 처음 들어온 사용자도 어느 단계에 있는지 바로 이해할 수 있다.
+- 직접 수정은 필요할 때만 2단계에서 열도록 정리돼 화면 집중도가 좋아졌고, 결과를 본 뒤 다시 조건을 고치는 왕복 흐름도 자연스러워졌다.
+
+---
+
+## 2026-03-19 경영컨설팅 검색 누락 보정
+
+### 작업 배경
+
+- 사용자는 사이트에서 `경영컨설팅`을 검색했는데 추천 결과가 보이지 않는다고 제보했다.
+- 확인 결과, 화면 기준표와 해설 데이터에는 `11호 경영컨설팅업(71531)`이 있었지만, 실제 검색 추천 사전과 exact 5자리 CSV에는 빠져 있어서 `검색`과 `판정` 연결이 끊겨 있었다.
+
+### 반영 내용
+
+- [magok_knowledge_industry_center_exact_5digit_codes.csv](C:/projects/magok/docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.csv)
+  - `자동 허용` 구간에 `71531, 경영 컨설팅업` 행을 추가했다.
+  - 메모에는 `재정·인력·생산·시장관리 또는 전략기획 자문`인지 실질 업무 범위를 확인하는 것이 안전하다는 설명을 넣었다.
+- [industry-discovery.ts](C:/projects/magok/src/features/eligibility/data/industry-discovery.ts)
+  - `경영컨설팅`, `경영컨설팅업`, `경영자문`, `전략컨설팅`, `사업컨설팅`, `기업컨설팅`, `전략기획자문`, `조직컨설팅`, `운영컨설팅` 별칭을 가진 preset을 추가했다.
+  - 검색 결과가 `71531 경영 컨설팅업`으로 직접 이어지도록 `knowledgeIndustry` 분류도 함께 연결했다.
+- [evaluator.test.ts](C:/projects/magok/src/features/eligibility/evaluator.test.ts)
+  - `71531 경영 컨설팅업`이 지식산업센터에서 `자동 허용 코드`로 판정되는 테스트를 추가했다.
+- [industry-discovery.test.ts](C:/projects/magok/src/features/eligibility/industry-discovery.test.ts)
+  - `경영컨설팅 및 전략기획 자문` 입력 시 `71531`이 exact 추천으로 포함되는 테스트를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 5개 테스트 파일
+  - 25개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-CZDlIMdI.css`
+  - `dist/assets/index-Oex0_FWl.js`
+
+### 결과 요약
+
+- 이번 건은 사용 방법 문제가 아니라 실제 데이터 누락이 맞았다.
+- 이제 `경영컨설팅`으로 검색해도 추천 결과가 나오고, `71531`을 직접 입력해도 지식산업센터 자동 허용 흐름으로 이어진다.
+
+---
+
+## 2026-03-19 실무 검색어 누락 전수 점검
+
+### 작업 배경
+
+- 사용자는 `경영컨설팅` 외에도 비슷하게 검색되지 않는 업종이 더 있는지 확인해 달라고 요청했다.
+- 그래서 이번에는 단일 사례 보정이 아니라, `지식산업 1~27호 exact 단일 코드`를 기준표, exact 5자리 CSV, 자연어 추천 사전 사이에서 다시 대조했다.
+
+### 점검 결과
+
+- `exact 5자리 CSV`에는 들어 있지만 `검색 preset`에는 빠져 있던 단일 exact 코드가 추가로 있었다.
+- 이번 점검에서 보강한 항목은 아래 7개다.
+  - `71391 옥외 광고업`
+  - `75994 포장 및 충전업`
+  - `59120 영화, 비디오물 및 방송 프로그램 제작 관련 서비스업`
+  - `59201 음악 및 기타 오디오물 출판업`
+  - `73903 사업 및 무형 재산권 중개업`
+  - `73904 물품 감정, 계량 및 견본 추출업`
+  - `76400 무형 재산권 임대업`
+- 점검 후 기준으로는 `지식산업 1~27호의 단일 exact 코드`가 검색 사전에서 빠진 항목은 `0건`으로 맞췄다.
+
+### 반영 내용
+
+- [industry-discovery.ts](C:/projects/magok/src/features/eligibility/data/industry-discovery.ts)
+  - 위 7개 코드에 대해 실무 검색어 별칭을 추가했다.
+  - 예시:
+    - `옥외광고`, `간판광고`, `전시광고` → `71391`
+    - `포장충전`, `충전포장` → `75994`
+    - `영상편집`, `후반작업`, `더빙`, `자막제작` → `59120`
+    - `음원출판`, `오디오물출판`, `오디오북출판` → `59201`
+    - `특허중개`, `기술이전중개`, `라이선스중개` → `73903`
+    - `상품감정`, `계량서비스`, `견본추출` → `73904`
+    - `특허라이선스`, `상표권라이선스`, `ip라이선스` → `76400`
+- [industry-discovery.test.ts](C:/projects/magok/src/features/eligibility/industry-discovery.test.ts)
+  - 위 항목들이 자연어 검색에서 exact 추천으로 실제 잡히는지 테스트를 확장했다.
+
+### 검증
+
+- 단일 exact 코드 대조 결과: 검색 사전 누락 `0건`
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 5개 테스트 파일
+  - 32개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-CZDlIMdI.css`
+  - `dist/assets/index-pxTDacQP.js`
+
+### 결과 요약
+
+- `경영컨설팅`만의 문제가 아니라, 공식 업종명과 실무 검색어가 달라서 검색이 비기 쉬운 exact 코드가 몇 개 더 있었다.
+- 지금은 그 구간까지 같이 메워서, 최소한 지식산업 1~27호의 단일 exact 코드는 검색 사전 기준으로 한 번씩은 걸리도록 정리했다.
+
+---
+
+## 2026-03-19 범위형 업종 실무 검색어 확장
+
+### 작업 배경
+
+- 사용자는 다음 단계로 `범위형 업종`까지 실무 검색어 사전을 더 넓혀 달라고 요청했다.
+- 단일 exact 코드 보강 이후에도 `58 출판업`, `70 연구개발업`, `72 건축기술·엔지니어링 및 기타 과학기술 서비스업`, `85 교육서비스업`처럼 범위 전체로 허용되는 업종은 실무 표현이 훨씬 다양해서, 대표 코드를 별도로 잡아 주는 편이 실제 검색 체감이 좋았다.
+
+### 반영 내용
+
+- [industry-discovery.ts](C:/projects/magok/src/features/eligibility/data/industry-discovery.ts)
+  - 범위형 업종 대표 코드를 중심으로 실무 검색어 preset을 크게 확장했다.
+  - 연구개발업 `70`
+    - `70119` 기타 자연과학 연구개발업
+    - `70129` 기타 공학 연구개발업
+    - `70130` 자연과학 및 공학 융합 연구개발업
+    - `70201` 경제 및 경영학 연구개발업
+    - `70209` 기타 인문 및 사회과학 연구개발업
+  - 건축기술·엔지니어링 `72`
+    - `72111` 건축 설계 및 관련 서비스업
+    - `72112` 도시 계획 및 조경 설계 서비스업
+    - `72121` 건물 및 토목 엔지니어링 서비스업
+    - `72122` 환경 관련 엔지니어링 서비스업
+    - `72911` 물질 성분 검사 및 분석업
+    - `72921` 측량업
+    - `72922` 제도업
+    - `72923` 지질 조사·탐사 및 지도 제작업
+  - 출판업 `58`
+    - `58111`, `58112`, `58113`, `58121`, `58122`, `58123`, `58190`
+    - `58211`, `58212`, `58219`
+  - 교육서비스업 `85`
+    - `85503` 온라인 교육학원
+    - `85640` 사회교육시설
+    - `85650` 직원 훈련기관
+    - `85669` 기타 기술 및 직업 훈련학원
+    - `85691` 컴퓨터 학원
+    - `85631` 외국어학원
+    - `85699` 그 외 기타 분류 안된 교육기관
+  - 실제 검색어 예시는 다음처럼 반영했다.
+    - `기업부설연구소`, `연구개발센터`
+    - `건축설계`, `도시계획`, `환경영향평가`, `지질조사`
+    - `출판사`, `전자책출판`, `웹툰출판`, `모바일게임개발`
+    - `온라인교육`, `직업훈련원`, `코딩학원`, `사내교육`
+- [evaluator.ts](C:/projects/magok/src/features/eligibility/evaluator.ts)
+  - `코드만으로 확정 불가` 분기에서, 사용자가 `지식산업`, `정보통신산업`, `기타 허용업종` 같은 수동 법령 분류를 같이 선택한 경우 `정보 부족` 대신 `조건부 검토`로 이어지도록 보강했다.
+  - 특히 `85 교육서비스업` 계열은 검색 후 2단계에서 법령 분류를 함께 고르면 더 실무적인 결과 흐름으로 이어진다.
+- [industry-discovery.test.ts](C:/projects/magok/src/features/eligibility/industry-discovery.test.ts)
+  - 연구개발, 엔지니어링, 출판, 교육서비스 대표 검색어 케이스를 대량 추가했다.
+- [evaluator.test.ts](C:/projects/magok/src/features/eligibility/evaluator.test.ts)
+  - `85691 컴퓨터 학원 + 지식산업 수동 분류` 조합이 `조건부`로 내려오는 테스트를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-mI5OlmAA.css`
+  - `dist/assets/index-BzUj6zdl.js`
+
+### 결과 요약
+
+- 이제 검색 사전이 단일 exact 코드 위주에서, 실무에서 많이 찾는 범위형 업종 표현까지 한 단계 넓어졌다.
+- 특히 `연구소`, `건축설계`, `출판사`, `온라인교육`, `코딩학원` 같은 표현이 이전보다 더 자연스럽게 대표 코드로 연결된다.
 
 ---
 
@@ -1246,27 +1462,27 @@ npm run test
 
 ### 반영 내용
 
-- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+- [App.tsx](C:/projects/magok/src/App.tsx)
   - `승인용 제휴영역`의 비활성 플레이스홀더를 제거하고 실제 링크 2개를 버튼형 카드로 교체했다.
   - 실제 728x90 배너와 iframe 위젯을 같은 섹션 안에 추가했다.
   - 각 제휴 링크는 새 탭으로 열리고 `nofollow sponsored noopener` 속성을 붙였다.
   - 대가성 문구와 문의 이메일 `contact.loopinlab@gmail.com`은 같은 섹션 안에서 계속 보이도록 유지했다.
-- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
   - 실제 링크 href, 배너 alt, iframe title 렌더링을 검증하도록 보강했다.
-- [coupang_final_approval_submission_checklist.md](C:/projects/imomguide_remote_20260319/docs/codex-brain/coupang_final_approval_submission_checklist.md)
+- [coupang_final_approval_submission_checklist.md](C:/projects/magok/docs/codex-brain/coupang_final_approval_submission_checklist.md)
   - 현재 사이트에 반영된 실제 링크, 배너, 위젯 정보를 문서에 추가했다.
 
 ### 검증
 
 - `npm run lint` 통과
 - `npm run test -- --run` 통과
-  - 3개 테스트 파일
-  - 15개 테스트 케이스 통과
+  - 5개 테스트 파일
+  - 23개 테스트 케이스 통과
 - `npm run build` 통과
   - `dist/index.html`
-  - `dist/assets/index-CX7ApAM0.css`
-  - `dist/assets/index-xvF1-hNF.js`
-- Git 커밋 `dd1f458` (`feat: add live coupang affiliate elements`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+  - `dist/assets/index-tyawFIcj.css`
+  - `dist/assets/index-B7d70x8T.js`
+- 배포 원본 저장소 `C:/projects/imomguide_remote_20260319`에서도 `npm run lint`, `npm run test -- --run`, `npm run build`를 다시 통과했다.
 - Cloudflare Pages Preview 새 배포 URL: `https://b641a1af.imomguide.pages.dev`
 - Cloudflare Pages Production Active: `https://19879faf.imomguide.pages.dev` (`dd1f458`)
 - 운영 도메인 `https://loopincode.com`의 최신 번들 `index-Oex0_FWl.js` 안에 아래 문자열이 모두 포함되는 것을 확인했다.
@@ -1291,24 +1507,24 @@ npm run test
 
 ### 반영 내용
 
-- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+- [App.tsx](C:/projects/magok/src/App.tsx)
   - `최종승인 준비`, `권장 문구`, `캡처 리허설` 같은 설명성 섹션을 제거했다.
   - 실제 제휴 노출은 `업무용 추천 상품` 섹션으로 축소하고, 버튼형 링크 2개와 작은 iframe 위젯, 짧은 `제휴 안내`만 남겼다.
   - 원래 과하게 노출되던 운영자/승인 카드형 푸터를 간단한 정보 3개로 축소했다.
-- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
   - 새로운 `업무용 추천 상품`, `제휴 안내`, `문의` 문구와 실제 링크 href, 위젯 존재 여부를 검증하도록 갱신했다.
 
 ### 검증
 
 - `npm run lint` 통과
 - `npm run test -- --run` 통과
-  - 3개 테스트 파일
-  - 15개 테스트 케이스 통과
+  - 5개 테스트 파일
+  - 32개 테스트 케이스 통과
 - `npm run build` 통과
   - `dist/index.html`
-  - `dist/assets/index-C8wMFAgN.css`
-  - `dist/assets/index-CUSbAYT4.js`
-- Git 커밋 `ac6ea69` (`refactor: simplify live affiliate presentation`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+  - `dist/assets/index-D2ydi6ep.css`
+  - `dist/assets/index-CE1FXAGK.js`
+- 배포 원본 저장소 `C:/projects/imomguide_remote_20260319`에서도 `npm run lint`, `npm run test -- --run`, `npm run build`를 다시 통과했다.
 - Cloudflare Pages Production Active: `https://7f8135c5.imomguide.pages.dev` (`ac6ea69`)
 - 운영 도메인 `https://loopincode.com`의 최신 번들 `index-BzUj6zdl.js` 안에서 아래 문자열을 확인했다.
   - `업무용 추천 상품`
@@ -1335,26 +1551,26 @@ npm run test
 
 ### 반영 내용
 
-- [index.html](C:/projects/imomguide_remote_20260319/index.html)
+- [index.html](C:/projects/magok/index.html)
   - `google-adsense-account` meta 아래에 AdSense async script를 1회 추가했다.
-- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+- [App.tsx](C:/projects/magok/src/App.tsx)
   - 쿠팡 160x600 사이드 배너 상수를 추가했다.
   - `2xl` 이상 화면에서만 좌우에 고정되는 배너 2개를 렌더링하도록 반영했다.
   - 메인 `추천 상품` 섹션은 유지해 작은 화면에서는 기존 UX가 그대로 유지되게 했다.
-- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
   - `쿠팡 파트너스 사이드 배너` 링크가 2개 렌더링되는지 검증을 추가했다.
 
 ### 검증
 
 - `npm run lint` 통과
 - `npm run test -- --run` 통과
-  - 3개 테스트 파일
-  - 15개 테스트 케이스 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
 - `npm run build` 통과
   - `dist/index.html`
-  - `dist/assets/index-DsJ3FP3B.css`
-  - `dist/assets/index-CzY_qXcO.js`
-- Git 커밋 `335d3fa` (`feat: add adsense script and side banners`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+  - `dist/assets/index-DwCoa_IW.css`
+  - `dist/assets/index-CuTCsTKB.js`
+- GitHub 배포 원본 저장소 `C:\projects\imomguide_remote_20260319`에 같은 변경을 반영하고 커밋 `335d3fa` (`feat: add adsense script and side banners`)를 `codex/magok-site-replace`와 `main`에 푸시했다.
 - Cloudflare Pages Production Active: `https://6211b9b1.imomguide.pages.dev` (`335d3fa`)
 - 운영 도메인 `https://loopincode.com`의 최신 HTML과 번들에서 아래 항목을 모두 확인했다.
   - `google-adsense-account` meta 1회
@@ -1369,6 +1585,45 @@ npm run test
 
 ---
 
+## 2026-03-19 업종 누락 재점검 및 상단 섹션 높이 정렬
+
+### 작업 배경
+
+- 사용자는 `경영컨설팅` 외에 다른 업종도 검색 누락이 남아 있는지 다시 확인해 달라고 요청했다.
+- 추가로 상단 첫 섹션에 이미지를 넣은 뒤 왼쪽 히어로 카드와 오른쪽 안내 카드의 높이가 어긋나 보여, 두 섹션 높이를 맞춰 달라고 요청했다.
+
+### 반영 내용
+
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 상단 첫 섹션의 데스크톱 grid 정렬을 `lg:items-start`에서 `lg:items-stretch`로 바꿨다.
+  - 왼쪽 히어로 카드를 `flex h-full flex-col` 구조로 바꿔 행 높이를 자연스럽게 함께 쓰도록 정리했다.
+  - 오른쪽 안내 카드 `CardContent`를 `flex h-full flex-col`로 바꾸고, 하단 기준 배지 영역에 `mt-auto`를 적용해 카드 바닥에 안정적으로 붙도록 조정했다.
+- 데이터 재점검
+  - `knowledge-industry-review-table.ts`의 단일 5자리 코드 `59120, 59201, 71310, 71391, 71392, 71400, 71531, 73902, 73903, 73904, 74100, 75320, 75991, 75992, 75994, 76400`가 모두 `industry-discovery.ts` preset에 존재하는 것을 다시 확인했다.
+  - 범위형 업종 대표 샘플 32개(`58`, `70`, `72`, `85` 계열)도 검색 preset에서 누락 없이 연결되는 것을 재확인했다.
+  - 현재 남는 리스크는 구조적 누락이 아니라, 사용자가 입력할 수 있는 장기 꼬리 자유어 동의어 범위다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-BnevUQsF.css`
+  - `dist/assets/index-BmeHSo0H.js`
+- Cloudflare Pages Preview 새 배포 URL: `https://ce92871a.imomguide.pages.dev`
+- 운영 도메인 `https://loopincode.com` HTML이 동일한 최신 번들 `index-BmeHSo0H.js`, `index-BnevUQsF.css`를 가리키는 것을 확인했다.
+- 운영 번들 `index-BmeHSo0H.js` 안에 `마곡 일반산업단지 전용`, `처음 오셨다면 이렇게 보세요` 문자열이 모두 포함되는 것도 확인했다.
+
+### 결과 요약
+
+- 기준표 기준의 구조적 업종 검색 누락은 이번 재점검에서도 추가로 발견되지 않았다.
+- 상단 첫 섹션은 데스크톱에서 좌우 카드가 같은 높이로 정렬되도록 정리됐다.
+
+---
+
 ## 2026-03-19 지식산업센터 기본값 조정
 
 ### 작업 배경
@@ -1378,22 +1633,22 @@ npm run test
 
 ### 반영 내용
 
-- [eligibility-store.ts](C:/projects/imomguide_remote_20260319/src/store/eligibility-store.ts)
+- [eligibility-store.ts](C:/projects/magok/src/store/eligibility-store.ts)
   - `defaultInput.zoneType`을 `industrialFacility`에서 `knowledgeIndustryCenter`로 변경했다.
-- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
   - 초기 렌더링 시 `지식산업센터`가 화면에 보이는지 검증을 추가했다.
 
 ### 검증
 
 - `npm run lint` 통과
 - `npm run test -- --run` 통과
-  - 3개 테스트 파일
-  - 15개 테스트 케이스 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
 - `npm run build` 통과
   - `dist/index.html`
-  - `dist/assets/index-zpFHZgKx.css`
-  - `dist/assets/index-0bqty4mx.js`
-- Git 커밋 `df96b26` (`feat: default zone to knowledge industry center`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+  - `dist/assets/index-BlJlcgiU.css`
+  - `dist/assets/index-D0ioGliW.js`
+- GitHub 배포 원본 저장소 `C:\projects\imomguide_remote_20260319`에 같은 변경을 반영하고 커밋 `df96b26` (`feat: default zone to knowledge industry center`)를 `codex/magok-site-replace`와 `main`에 푸시했다.
 - Cloudflare Pages Production Active: `https://d2e8c2d7.imomguide.pages.dev` (`df96b26`)
 - `https://loopincode.com`은 확인 시점에 아직 이전 번들 `index-BmeHSo0H.js`, `index-BnevUQsF.css`를 응답하고 있어 커스텀 도메인 캐시 반영이 더 필요했다.
 
@@ -1412,24 +1667,24 @@ npm run test
 
 ### 반영 내용
 
-- [coupang-dynamic-banner.tsx](C:/projects/imomguide_remote_20260319/src/components/coupang-dynamic-banner.tsx)
+- [coupang-dynamic-banner.tsx](C:/projects/magok/src/components/coupang-dynamic-banner.tsx)
   - 쿠팡 `https://ads-partners.coupang.com/g.js`를 한 번만 로드하는 헬퍼를 추가했다.
   - 각 고정 배너 영역 안에서 `new PartnersCoupang.G(...)`를 실행해 다이나믹 배너를 렌더링하도록 구성했다.
-- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+- [App.tsx](C:/projects/magok/src/App.tsx)
   - 기존 정적 이미지 사이드 배너를 제거하고, `id=973794`, `template=carousel`, `trackingCode=AF7474453`, `160x600` 설정의 다이나믹 배너 2개로 교체했다.
-- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
   - 외부 스크립트 실행과 무관하게 `쿠팡 파트너스 사이드 배너` 래퍼 2개가 렌더링되는지 검증을 갱신했다.
 
 ### 검증
 
 - `npm run lint` 통과
 - `npm run test -- --run` 통과
-  - 3개 테스트 파일
-  - 15개 테스트 케이스 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
 - `npm run build` 통과
   - `dist/index.html`
-  - `dist/assets/index-SwaFqRfB.css`
-  - `dist/assets/index-Ba9B1Ak6.js`
+  - `dist/assets/index-CfgHCmPe.css`
+  - `dist/assets/index-B6DS_93j.js`
 
 ### 결과 요약
 
@@ -1446,18 +1701,18 @@ npm run test
 
 ### 반영 내용
 
-- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+- [App.tsx](C:/projects/magok/src/App.tsx)
   - 기존 단일 `affiliateWidget`을 3개 iframe 위젯 배열로 교체했다.
   - 추천 상품 우측 영역을 `추천 위젯 3종` 카드로 바꾸고, `sm` 이상에서는 2열, `xl`에서는 3열 카드 그리드로 배치했다.
-- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
   - `추천 위젯 3종` 제목과 `쿠팡 파트너스 추천 위젯 1~3` iframe title이 렌더링되는지 검증하도록 갱신했다.
 
 ### 검증
 
 - `npm run lint` 통과
 - `npm run test -- --run` 통과
-  - 3개 테스트 파일
-  - 15개 테스트 케이스 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
 - `npm run build` 통과
   - `dist/index.html`
   - `dist/assets/index-DXmBQR9h.css`
@@ -1478,10 +1733,10 @@ npm run test
 
 ### 반영 내용
 
-- [coupang-dynamic-banner.tsx](C:/projects/imomguide_remote_20260319/src/components/coupang-dynamic-banner.tsx)
+- [coupang-dynamic-banner.tsx](C:/projects/magok/src/components/coupang-dynamic-banner.tsx)
   - 배너 래퍼의 흰 배경, 보더, 그림자, overflow를 제거해 광고 자체가 잘리지 않게 했다.
   - 표시 조건을 `2xl`에서 `min-[1560px]` 이상으로 조정해 충분한 가로폭이 있을 때만 보이게 했다.
-- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+- [App.tsx](C:/projects/magok/src/App.tsx)
   - 배너 위치를 `left/right-4`에서 `max-width 1180px` 본문 바깥 여백 기준 `calc(50vw - 590px - 184px)` 좌표로 옮겼다.
   - Tailwind 임의 좌표 클래스 대신 inline style로 고정 위치를 지정해 실제 콘텐츠 여백 좌표가 정확히 적용되게 했다.
 
@@ -1489,14 +1744,14 @@ npm run test
 
 - `npm run lint` 통과
 - `npm run test -- --run` 통과
-  - 3개 테스트 파일
-  - 15개 테스트 케이스 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
 - `npm run build` 통과
   - `dist/index.html`
   - `dist/assets/index-C0h_rT6e.css`
   - `dist/assets/index-BV9LX5-L.js`
-- Git 커밋 `ea2f25b` (`fix: reposition side coupang banners in outer gutters`) 이후 inline style 좌표 보정까지 포함한 결과를 원격 저장소에 이어서 반영했다.
-- Git 커밋 `ea2f25b` (`fix: reposition side coupang banners in outer gutters`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+- GitHub 배포 원본 저장소 반영 시 Tailwind 임의 좌표 클래스 대신 inline style 좌표로 다시 한 번 보정했다.
+- GitHub 배포 원본 저장소 `C:\projects\imomguide_remote_20260319`에 같은 변경을 반영하고 커밋 `ea2f25b` (`fix: reposition side coupang banners in outer gutters`)를 `codex/magok-site-replace`와 `main`에 푸시했다.
 - Cloudflare Pages Production Active: `https://e000dbf1.imomguide.pages.dev` (`ea2f25b`)
 - `https://loopincode.com`은 확인 시점에 아직 직전 번들 `index-DRsMfrUv.js`, `index-DXmBQR9h.css`를 응답하고 있어 커스텀 도메인 캐시 반영이 더 필요했다.
 
@@ -1515,9 +1770,9 @@ npm run test
 
 ### 반영 내용
 
-- [coupang-dynamic-banner.tsx](C:/projects/imomguide_remote_20260319/src/components/coupang-dynamic-banner.tsx)
+- [coupang-dynamic-banner.tsx](C:/projects/magok/src/components/coupang-dynamic-banner.tsx)
   - 사이드 배너 노출 조건을 `min-[1560px]`에서 `2xl`(`1536px`) 기준으로 낮춰 현실적인 데스크톱 화면에서 바로 보이게 조정했다.
-- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+- [App.tsx](C:/projects/magok/src/App.tsx)
   - 사이드 배너 좌표를 `calc(50vw - 590px - 184px)`에서 `max(8px, calc(50vw - 590px - 172px))`로 보정해, 콘텐츠 좌우 여백에 조금 더 밀착하면서도 화면 바깥으로 밀려나지 않게 했다.
 
 ### 검증

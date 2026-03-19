@@ -68,6 +68,18 @@ describe('evaluateEligibility', () => {
     expect(result.summary).toContain('exact 5자리 허용 코드')
   })
 
+  it('71531 경영 컨설팅업은 지식산업센터 자동 허용 코드로 판정한다', () => {
+    const result = evaluateEligibility({
+      ...baseInput,
+      zoneType: 'knowledgeIndustryCenter',
+      ksicCode: '71531',
+      ksicName: '경영 컨설팅업',
+    })
+
+    expect(result.verdict).toBe('eligible')
+    expect(result.summary).toContain('exact 5자리 허용 코드')
+  })
+
   it('63112 호스팅 및 관련 서비스업은 심의 필요로 판정한다', () => {
     const result = evaluateEligibility({
       ...baseInput,
@@ -113,6 +125,18 @@ describe('evaluateEligibility', () => {
     expect(result.verdict).toBe('insufficient')
   })
 
+  it('73905 고고유산 조사연구 서비스업은 추가 확인 대상으로 판정한다', () => {
+    const result = evaluateEligibility({
+      ...baseInput,
+      zoneType: 'knowledgeIndustryCenter',
+      ksicCode: '73905',
+      ksicName: '고고유산 조사연구 서비스업',
+    })
+
+    expect(result.verdict).toBe('insufficient')
+    expect(result.summary).toContain('자동 확정하기 어렵습니다')
+  })
+
   it('지원시설구역은 정보 부족으로 안내한다', () => {
     const result = evaluateEligibility({
       ...baseInput,
@@ -132,5 +156,44 @@ describe('evaluateEligibility', () => {
     })
 
     expect(result.verdict).toBe('conditional')
+  })
+
+  it('이러닝업 수동 분류는 조건부 확인 대상으로 판정한다', () => {
+    const result = evaluateEligibility({
+      ...baseInput,
+      zoneType: 'knowledgeIndustryCenter',
+      ksicCode: '85503',
+      ksicName: '온라인 교육학원',
+      regulatoryFit: 'elearningIndustry',
+    })
+
+    expect(result.verdict).toBe('conditional')
+    expect(result.summary).toContain('제7호·제10호')
+  })
+
+  it('교육서비스업 코드를 지식산업으로 수동 분류하면 조건부 검토 대상으로 판정한다', () => {
+    const result = evaluateEligibility({
+      ...baseInput,
+      zoneType: 'knowledgeIndustryCenter',
+      ksicCode: '85691',
+      ksicName: '컴퓨터 학원',
+      regulatoryFit: 'knowledgeIndustry',
+    })
+
+    expect(result.verdict).toBe('conditional')
+    expect(result.summary).toContain('코드만으로 자동 확정하기 어렵지만')
+  })
+
+  it('관리기관 인정 업종 수동 분류는 추가 확인 대상으로 판정한다', () => {
+    const result = evaluateEligibility({
+      ...baseInput,
+      zoneType: 'knowledgeIndustryCenter',
+      ksicCode: '73909',
+      ksicName: '그 외 기타 분류 안된 전문, 과학 및 기술 서비스업',
+      regulatoryFit: 'managedTechnicalService',
+    })
+
+    expect(result.verdict).toBe('insufficient')
+    expect(result.title).toContain('관리기관 인정 여부')
   })
 })

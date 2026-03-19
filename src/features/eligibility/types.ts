@@ -24,6 +24,10 @@ export type RegulatoryFit =
   | 'knowledgeIndustry'
   | 'informationIndustry'
   | 'otherPermittedIndustry'
+  | 'higherEducationResearchInstitute'
+  | 'basicResearchInstitution'
+  | 'elearningIndustry'
+  | 'managedTechnicalService'
 
 export interface EligibilityFlags {
   isPackagingAndFilling: boolean

@@ -15,7 +15,10 @@ import { EligibilityForm } from '@/features/eligibility/components/eligibility-f
 import { IndustryDiscoveryPanel } from '@/features/eligibility/components/industry-discovery-panel'
 import { ResultPanel } from '@/features/eligibility/components/result-panel'
 import { RulebookTabs } from '@/features/eligibility/components/rulebook-tabs'
-import { useEligibilityStore } from '@/store/eligibility-store'
+import {
+  type EligibilityStep,
+  useEligibilityStore,
+} from '@/store/eligibility-store'
 import { formatKoreanDate } from '@/utils/format'
 
 const introFacts = [
@@ -42,6 +45,35 @@ const steps = [
     title: '입주 가능성을 바로 봅니다',
     description:
       '선택한 업종 기준으로 가능, 조건부 가능, 심의 필요, 불가를 한 화면에서 확인합니다.',
+  },
+]
+
+const wizardSteps: Array<{
+  id: EligibilityStep
+  badge: string
+  title: string
+  description: string
+}> = [
+  {
+    id: 'discover',
+    badge: '1단계',
+    title: '업종 찾기',
+    description:
+      '사업 설명이나 사업자등록증 업태·종목을 넣고 가장 가까운 업종코드를 먼저 찾습니다.',
+  },
+  {
+    id: 'adjust',
+    badge: '2단계',
+    title: '조건 보정',
+    description:
+      '선택한 업종을 기준으로 구역, 신청 주체, 예외 조건을 확인하고 필요하면 보정합니다.',
+  },
+  {
+    id: 'result',
+    badge: '3단계',
+    title: '결과 확인',
+    description:
+      '가능 여부, 연결 조문, 업종코드 상세 해설과 추가 확인 포인트를 한 화면에서 봅니다.',
   },
 ]
 
@@ -117,8 +149,10 @@ function App() {
     industrySuggestions,
     discoveryStatus,
     discoveryError,
+    currentStep,
     setField,
     setFlag,
+    setCurrentStep,
     setIndustryQuery,
     discoverIndustry,
     applyIndustrySuggestion,
@@ -139,6 +173,15 @@ function App() {
       right: 'max(8px, calc(50vw - 590px - 172px))',
     },
   } as const
+
+  const canShowResult = Boolean(status === 'ready' && result)
+  const safeCurrentStep =
+    currentStep === 'result' && !canShowResult ? 'adjust' : currentStep
+  const currentWizardStep =
+    wizardSteps.find((step) => step.id === safeCurrentStep) ?? wizardSteps[0]
+  const currentWizardIndex = wizardSteps.findIndex(
+    (step) => step.id === safeCurrentStep,
+  )
 
   return (
     <div className="min-h-screen">
@@ -199,8 +242,8 @@ function App() {
         </header>
 
         <main id="top" className="space-y-8 pb-12 pt-6 lg:space-y-10 lg:pt-8">
-          <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_380px] lg:items-start">
-            <div className="rounded-[36px] border border-[var(--border)] bg-white/88 px-6 py-8 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:px-8 lg:px-10 lg:py-10">
+          <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_380px] lg:items-stretch">
+            <div className="flex h-full flex-col rounded-[36px] border border-[var(--border)] bg-white/88 px-6 py-8 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:px-8 lg:px-10 lg:py-10">
               <Badge variant="muted">마곡 일반산업단지 전용</Badge>
               <h1 className="mt-5 max-w-4xl font-display text-4xl font-semibold tracking-[-0.06em] text-[var(--foreground)] sm:text-5xl lg:text-6xl">
                 업종코드 찾기부터
@@ -244,7 +287,7 @@ function App() {
             </div>
 
             <Card className="h-full bg-[linear-gradient(180deg,rgba(243,248,255,0.98),rgba(255,255,255,0.94))]">
-              <CardContent className="space-y-5 p-6">
+              <CardContent className="flex h-full flex-col space-y-5 p-6">
                 <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
                   <FileSearch className="size-6" />
                 </div>
@@ -278,7 +321,7 @@ function App() {
                   ))}
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="mt-auto flex flex-wrap gap-2">
                   <Badge variant="muted">
                     시행령 기준일 {formatKoreanDate('2026-01-02')}
                   </Badge>
@@ -360,6 +403,7 @@ function App() {
 
           <section
             id="finder"
+            aria-label="업종코드 분석 위저드"
             className="rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(242,247,255,0.94))] p-6 shadow-[0_24px_70px_rgba(28,33,43,0.08)] sm:p-8"
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -379,61 +423,157 @@ function App() {
               </div>
             </div>
 
-            <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.04fr)_minmax(360px,0.96fr)]">
-              <IndustryDiscoveryPanel
-                input={input}
-                query={industryQuery}
-                suggestions={industrySuggestions}
-                status={discoveryStatus}
-                error={discoveryError}
-                onQueryChange={setIndustryQuery}
-                onDiscover={discoverIndustry}
-                onSuggestionSelect={applyIndustrySuggestion}
-                onExampleSelect={runQuickSearch}
-              />
-              <ResultPanel
-                input={input}
-                result={result}
-                status={status}
-                error={error}
-                onEvaluate={evaluate}
-              />
+            <div className="mt-8 space-y-6">
+              <div className="grid gap-3 lg:grid-cols-3">
+                {wizardSteps.map((step, index) => {
+                  const isActive = step.id === safeCurrentStep
+                  const isComplete = currentWizardIndex > index
+
+                  return (
+                    <div
+                      key={step.id}
+                      className={`rounded-[24px] border px-4 py-4 transition ${
+                        isActive
+                          ? 'border-[rgba(43,109,255,0.2)] bg-[rgba(239,245,255,0.96)] shadow-[0_18px_32px_rgba(43,109,255,0.08)]'
+                          : isComplete
+                            ? 'border-[rgba(43,109,255,0.16)] bg-white'
+                            : 'border-[var(--border)] bg-white/72'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold ${
+                            isActive || isComplete
+                              ? 'bg-[rgba(43,109,255,0.12)] text-[var(--accent)]'
+                              : 'bg-[rgba(130,147,173,0.18)] text-[var(--foreground-subtle)]'
+                          }`}
+                        >
+                          {isComplete ? <CheckCircle2 className="size-4" /> : index + 1}
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-[var(--foreground-subtle)]">
+                            {step.badge}
+                          </div>
+                          <div className="text-sm font-semibold text-[var(--foreground)]">
+                            {step.title}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <Card className="bg-white/92">
+                <CardContent className="space-y-6 p-6">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                      <Badge variant="muted">{currentWizardStep.badge}</Badge>
+                      <h3 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+                        {currentWizardStep.title}
+                      </h3>
+                      <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
+                        {currentWizardStep.description}
+                      </p>
+                    </div>
+                    {safeCurrentStep !== 'discover' ? (
+                      <Button
+                        variant="secondary"
+                        onClick={() => setCurrentStep('discover')}
+                      >
+                        처음 단계로 돌아가기
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  {safeCurrentStep === 'discover' ? (
+                    <IndustryDiscoveryPanel
+                      input={input}
+                      query={industryQuery}
+                      suggestions={industrySuggestions}
+                      status={discoveryStatus}
+                      error={discoveryError}
+                      onQueryChange={setIndustryQuery}
+                      onDiscover={discoverIndustry}
+                      onSuggestionSelect={applyIndustrySuggestion}
+                      onExampleSelect={runQuickSearch}
+                      onContinueManual={() => setCurrentStep('adjust')}
+                    />
+                  ) : null}
+
+                  {safeCurrentStep === 'adjust' ? (
+                    <div className="space-y-5">
+                      <Card className="bg-[rgba(239,245,255,0.86)]">
+                        <CardContent className="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-4">
+                          <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+                            <div className="text-xs text-[var(--foreground-subtle)]">
+                              선택한 업종코드
+                            </div>
+                            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                              {input.ksicCode.trim() || '직접 입력 예정'}
+                            </div>
+                          </div>
+                          <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+                            <div className="text-xs text-[var(--foreground-subtle)]">
+                              선택한 업종명
+                            </div>
+                            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                              {input.ksicName.trim() || '아직 선택 전'}
+                            </div>
+                          </div>
+                          <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+                            <div className="text-xs text-[var(--foreground-subtle)]">
+                              현재 구역
+                            </div>
+                            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                              {input.zoneType === 'industrialFacility'
+                                ? '산업시설구역'
+                                : input.zoneType === 'knowledgeIndustryCenter'
+                                  ? '지식산업센터'
+                                  : '지원시설구역'}
+                            </div>
+                          </div>
+                          <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+                            <div className="text-xs text-[var(--foreground-subtle)]">
+                              안내
+                            </div>
+                            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                              필요하면 조건만 보정하고 결과 보기로 이동
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <EligibilityForm
+                        input={input}
+                        status={status}
+                        onFieldChange={setField}
+                        onFlagChange={setFlag}
+                        onEvaluate={evaluate}
+                        onReset={reset}
+                        onPrevious={() => setCurrentStep('discover')}
+                        primaryActionLabel="결과 보기"
+                        secondaryActionLabel="이전 단계"
+                        defaultExpanded
+                      />
+                    </div>
+                  ) : null}
+
+                  {safeCurrentStep === 'result' ? (
+                    <ResultPanel
+                      input={input}
+                      result={result}
+                      status={status}
+                      error={error}
+                      onEvaluate={evaluate}
+                      onAdjust={() => setCurrentStep('adjust')}
+                      sticky={false}
+                      stepLabel="3단계"
+                    />
+                  ) : null}
+                </CardContent>
+              </Card>
             </div>
-          </section>
-
-          <section className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
-            <Card>
-              <CardContent className="space-y-4 p-6">
-                <Badge variant="muted">직접 수정</Badge>
-                <h2 className="font-display text-3xl font-semibold text-[var(--foreground)]">
-                  예외 조건이 있으면
-                  <br />
-                  여기서만 보정하세요.
-                </h2>
-                <p className="text-sm leading-7 text-[var(--foreground-muted)]">
-                  대부분은 추천 업종을 고른 뒤 결과만 보면 충분합니다. 구역, 신청 주체,
-                  호스팅 여부처럼 예외가 있는 경우에만 아래 보정 폼을 열어 다시 판정하면
-                  됩니다.
-                </p>
-                <div className="space-y-3">
-                  <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
-                    추천 업종과 예외 조건이 다르면 직접 바꿔도 됩니다.
-                  </div>
-                  <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
-                    수정 후에는 같은 화면에서 바로 다시 판정됩니다.
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <EligibilityForm
-              input={input}
-              status={status}
-              onFieldChange={setField}
-              onFlagChange={setFlag}
-              onEvaluate={evaluate}
-              onReset={reset}
-            />
           </section>
 
           <section

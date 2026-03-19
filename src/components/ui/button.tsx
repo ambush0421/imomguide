@@ -10,11 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[var(--accent)] px-5 py-3 text-[var(--accent-foreground)] shadow-[0_16px_34px_rgba(239,109,30,0.18)] hover:-translate-y-0.5 hover:bg-[var(--accent-strong)]',
+          'bg-[var(--accent)] px-5 py-3 text-[var(--accent-foreground)] shadow-[0_16px_34px_rgba(43,109,255,0.2)] hover:-translate-y-0.5 hover:bg-[var(--accent-strong)]',
         secondary:
-          'bg-white px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-[rgba(239,109,30,0.05)]',
+          'bg-white px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-[rgba(43,109,255,0.05)]',
         ghost:
-          'px-4 py-3 text-[var(--foreground-muted)] hover:bg-[rgba(239,109,30,0.06)] hover:text-[var(--foreground)]',
+          'px-4 py-3 text-[var(--foreground-muted)] hover:bg-[rgba(43,109,255,0.06)] hover:text-[var(--foreground)]',
         outline:
           'bg-transparent px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-white/60',
       },

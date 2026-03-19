@@ -709,6 +709,32 @@ src/
 
 ---
 
+## 2026-03-19 업종 누락 재점검 및 상단 섹션 높이 정렬 계획
+
+### 변경 목표
+
+- 현재 지식산업센터 업종 검색기가 리뷰표 기준으로 놓친 exact 코드나 범위형 대표 코드가 남아 있는지 다시 확인한다.
+- 상단 첫 섹션에서 왼쪽 히어로 카드와 오른쪽 안내 카드의 높이를 데스크톱 기준으로 맞춰, 이미지 추가 이후에도 시각 균형이 무너지지 않게 한다.
+
+### 구현 메모
+
+1. 데이터 재점검
+   - `src/features/eligibility/data/knowledge-industry-review-table.ts`의 단일 5자리 코드와 `src/features/eligibility/data/industry-discovery.ts` preset 코드를 재대조한다.
+   - `58`, `70`, `72`, `85` 범위형 업종에서 현재 대표 검색어로 쓰는 샘플 코드도 함께 재대조한다.
+   - 구조적 누락이 없으면 결과를 작업 문서와 최종 보고에 명시하고, 남는 리스크는 자유어 동의어의 장기 꼬리 구간으로 한정해 적는다.
+2. 레이아웃 수정
+   - `src/App.tsx` 상단 히어로 섹션의 데스크톱 grid 정렬을 `stretch` 기준으로 바꾼다.
+   - 왼쪽 히어로 카드와 오른쪽 안내 카드 내부를 `h-full` + `flex-col` 구조로 정리해 카드 외곽 높이가 맞도록 조정한다.
+   - 오른쪽 카드 하단 배지 영역은 `mt-auto`로 아래에 고정해, 내용이 조금 늘어나도 카드 균형이 유지되게 만든다.
+3. 검증
+   - `npm run lint`
+   - `npm run test`
+   - `npm run build`
+   - `npx wrangler pages deploy dist --project-name imomguide`
+   - 운영 번들이 새 CSS/JS를 가리키는지 확인한다.
+
+---
+
 ## 2026-03-19 AdSense 스크립트 및 좌우 고정 배너 반영 계획
 
 ### 변경 목표
@@ -728,7 +754,7 @@ src/
 3. `src/App.test.tsx`
    - 사이드 배너 링크가 2개 렌더링되는지 확인한다.
 4. 배포
-   - `main`까지 푸시하고 `loopincode.com` HTML에서 script/meta/ads.txt를 다시 확인한다.
+   - 원격 저장소에 같은 변경을 반영한 뒤 `main`까지 푸시하고 `loopincode.com` HTML에서 script/meta/ads.txt를 다시 확인한다.
 
 ### 검증 메모
 
@@ -940,6 +966,275 @@ src/
 
 ---
 
+## 2026-03-19 지식산업센터 입주검토용 표 및 CSV/사이트 반영 계획
+
+### 변경 목표
+
+- 시행령 제6조제2항 1호부터 27호까지를 `입주검토용 표` 형태로 다시 정리해, 코드가 있는 항목과 기관요건으로 판단해야 하는 항목을 한눈에 구분할 수 있게 한다.
+- 기존 `exact 5자리` CSV에는 누락되기 쉬운 `연구소`, `기관·단체`, `이러닝`, `관리기관 인정 산업` 같은 비정형 판정 항목을 보강한다.
+- 사이트 기준 탭에도 같은 검토 표를 노출해 사용자가 화면에서 바로 확인할 수 있게 한다.
+
+### 구현 메모
+
+1. `docs/codex-brain/magok_knowledge_industry_center_allowed_codes.md`
+   - 시행령 제6조제2항 1호~27호 기준의 `입주검토용 표`를 추가한다.
+   - 각 행에는 `호`, `시행령 업종`, `현재 KSIC 대응`, `자동판정 가능 여부`, `실무 확인사항`을 적는다.
+2. `docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.csv`
+   - 헤더를 사람이 바로 읽기 쉬운 `입주검토용` 표현으로 정리한다.
+   - 기존 exact 5자리 코드 행은 유지하되, `코드만으로 확정 불가` 행에 `고등교육법상 연구소`, `기초연구법상 기관·단체`, `이러닝업`, `7390 중 관리기관 인정 산업`을 보강한다.
+3. `src/features/eligibility/data`
+   - 사이트에 노출할 `시행령 제6조제2항 1~27호 입주검토용 표` 데이터를 추가한다.
+4. `src/features/eligibility/components/rulebook-tabs.tsx`
+   - 지식산업센터 탭에 검색 가능한 `입주검토용 표` 섹션을 추가한다.
+   - 작은 화면에서도 읽기 쉽도록 카드형 또는 가로 스크롤 가능한 표 구조로 구현한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- 사이트 기준 탭에서 `입주검토용 표`와 CSV 기반 기존 판정이 함께 보이는지 확인
+
+---
+
+## 2026-03-19 레퍼런스 PDF 최종 반영 및 업종코드 분석기 완료 계획
+
+### 변경 목표
+
+- 사용자가 추가한 `마곡 관리기본계획 고시문`, `시행령`, `KSIC 11차 해설서`를 다시 기준 문서로 삼아 업종코드 분석기의 누락 항목을 최종 보강한다.
+- 문서에만 적혀 있고 실제 엔진에는 덜 반영돼 있던 `연구소(2호)`, `기관·단체(3호)`, `이러닝업(26호)`, `관리기관 인정 업종(27호)` 흐름을 판정 로직과 폼 선택지에 연결한다.
+- `73905`, `73909`처럼 관리기관 인정 산업으로 봐야 하는 세세분류도 direct code 입력 시 보수적으로 안내되도록 맞춘다.
+
+### 구현 메모
+
+1. `docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.csv/.md`
+   - `73905`, `73909`를 `추가 확인` 행으로 명시해 exact code 기반 분석기가 직접 읽을 수 있게 한다.
+2. `src/features/eligibility/data/knowledge-center-exact-codes.ts`
+   - CSV의 `코드만으로 확정 불가` 행을 파싱해 prefix 기반 불확실 판정에 재사용한다.
+3. `src/features/eligibility/types.ts`, `src/features/eligibility/components/eligibility-form.tsx`
+   - 수동 법령 분류 선택지에 `2호`, `3호`, `26호`, `27호` 항목을 추가한다.
+4. `src/features/eligibility/evaluator.ts`
+   - 위 선택지를 실제 결과에 반영하고, `관리기관 인정` 항목은 자동 허용이 아니라 `추가 확인`으로 보수적으로 안내한다.
+5. `src/features/eligibility/evaluator.test.ts`
+   - `73905`, `이러닝업`, `관리기관 인정 업종` 시나리오를 테스트로 고정한다.
+6. 배포
+   - `wrangler pages deploy`로 새 번들을 다시 올리고 `loopincode.com`이 같은 번들을 가리키는지 확인한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- `Invoke-WebRequest https://loopincode.com`
+- `Invoke-WebRequest https://<pages-dev-url>`
+
+---
+
+## 2026-03-19 업종코드 상세 해설 화면 반영 계획
+
+### 변경 목표
+
+- 사용자가 선택한 업종코드가 화면에서 바로 어떤 조문과 규칙에 연결되는지 확인할 수 있게 한다.
+- 결과 패널 안에서 `입력 코드`, `연결 조문`, `현재 KSIC 대응`, `판정 기준`, `실무 메모`를 한 번에 보여준다.
+
+### 구현 메모
+
+1. `src/features/eligibility/data/screen-insights.ts`
+   - 결과 화면 전용 인사이트 헬퍼를 만든다.
+   - `exact 5자리`, `코드만으로 확정 불가`, `수동 법령 분류`, `산업시설구역 기본업종`, `지식산업센터 특례`를 한 객체로 합친다.
+2. `src/features/eligibility/components/result-panel.tsx`
+   - `업종코드 상세 해설` 카드를 추가한다.
+   - 사용자가 선택한 코드의 조문 연결과 실무 메모를 카드 형태로 바로 보이게 한다.
+3. 테스트
+   - 관리기관 인정 검토 코드(`73905`)를 예시로 상세 해설 카드가 실제 렌더링되는지 UI 테스트를 추가한다.
+4. 배포
+   - 새 번들을 다시 배포하고 `loopincode.com`이 동일 번들을 가리키는지 확인한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- `Invoke-WebRequest https://loopincode.com`
+- 번들 안에 `업종코드 상세 해설` 문자열 포함 여부 확인
+
+---
+
+## 2026-03-19 블루 테마 UI/UX 개편 계획
+
+### 변경 목표
+
+- 현재 주황 계열 브랜드 톤을 푸른 계열로 전환해 더 차분하고 신뢰감 있는 화면으로 정리한다.
+- 단순 포인트 컬러 변경이 아니라, 배경 그라데이션, 정보 카드, hover 상태, 아이콘 배경까지 함께 맞춰 전체 인상을 통일한다.
+
+### 구현 메모
+
+1. `src/index.css`
+   - 전역 색 토큰(`--background`, `--accent`, `--ring` 등)을 블루 계열로 조정한다.
+   - body 배경 그라데이션과 selection 색도 함께 바꾼다.
+2. 공용 UI 컴포넌트
+   - `badge.tsx`, `button.tsx`, `select.tsx`, `switch.tsx`, `async-state.tsx`의 브랜드 관련 색을 새 토큰에 맞춘다.
+3. 화면 컴포넌트
+   - `App.tsx`, `eligibility-form.tsx`, `industry-discovery-panel.tsx`, `result-panel.tsx`, `rulebook-tabs.tsx`에서 남아 있는 웜톤 카드와 hover 배경을 블루 계열로 정리한다.
+   - 상태 의미가 있는 `warning/danger`는 의미 전달을 위해 유지하고, 브랜드 포인트 색만 블루로 전환한다.
+4. 배포
+   - 새 CSS 번들을 다시 배포하고 운영 도메인이 같은 파일을 가리키는지 확인한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- `Invoke-WebRequest https://loopincode.com`
+- 운영 CSS 번들 안에 `#2b6dff`, `#eef4ff` 포함 여부 확인
+
+---
+
+## 2026-03-19 단계형 위저드 전환 계획
+
+### 변경 목표
+
+- `finder` 영역을 `1단계 업종 찾기 → 2단계 조건 보정 → 3단계 결과 확인` 흐름의 단일 위저드로 재구성한다.
+- 기존 별도 섹션이던 `세부 조건 직접 수정`을 2단계 안으로 흡수해, 업종 선택 뒤 필요한 경우에만 조건을 만지도록 UX를 단순화한다.
+- 참고 섹션인 `최종승인 준비`, `판정 기준`, 푸터는 현재 위치를 유지해 메인 흐름과 참고 정보를 분리한다.
+
+### 구현 메모
+
+1. `src/store/eligibility-store.ts`
+   - `currentStep: 'discover' | 'adjust' | 'result'`를 추가한다.
+   - `applyIndustrySuggestion()`은 자동 판정 대신 `ksicCode`, `ksicName`, `regulatoryFit`만 반영하고 2단계로 이동한다.
+   - `evaluate()`는 성공 시 3단계로 이동하게 바꾼다.
+   - `setField()`와 `setFlag()`는 2단계 또는 3단계에서 수정되면 이전 결과를 `idle + null`로 무효화한다.
+2. `src/App.tsx`
+   - `finder`를 단일 위저드 컨테이너로 바꾸고, 상단에 3단계 스텝바를 추가한다.
+   - 1단계에서는 `IndustryDiscoveryPanel`, 2단계에서는 `EligibilityForm`, 3단계에서는 `ResultPanel`만 보이도록 상태 기반으로 전환한다.
+   - `직접 입력으로 계속`, `이전 단계`, `조건 다시 수정`, `처음 단계로 돌아가기` 액션을 단계 흐름에 맞게 배치한다.
+3. `src/features/eligibility/components`
+   - `industry-discovery-panel.tsx`에 `직접 입력으로 계속` 버튼을 추가한다.
+   - `eligibility-form.tsx`는 단계 카드 안에서 재사용할 수 있도록 `이전 단계`, 커스텀 액션 라벨, 기본 펼침 상태를 받는다.
+   - `result-panel.tsx`는 전체 폭 단계 화면에서 쓸 수 있도록 `조건 다시 수정`, `sticky` 옵션, 단계 라벨을 받는다.
+4. 테스트
+   - `src/App.test.tsx`를 위저드 플로우 기준으로 다시 작성한다.
+   - `src/store/eligibility-store.test.ts`를 추가해 추천 선택, 결과 이동, stale result 무효화 규칙을 고정한다.
+   - `src/setupTests.ts`에 cleanup을 명시해 테스트 간 DOM 중첩을 막는다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- `npx wrangler pages deploy dist --project-name imomguide`
+- `Invoke-WebRequest https://24046f1c.imomguide.pages.dev`
+- `Invoke-WebRequest https://loopincode.com`
+
+---
+
+## 2026-03-19 경영컨설팅 검색 누락 보정 계획
+
+### 변경 목표
+
+- 사용자가 `경영컨설팅`, `경영컨설팅업`, `전략기획 자문`처럼 입력했을 때 추천 결과에 `71531 경영 컨설팅업`이 실제로 노출되게 한다.
+- 검색 추천뿐 아니라, 코드 직접 입력 시에도 `지식산업센터 자동 허용` 판정과 연결되도록 exact 5자리 데이터셋을 보강한다.
+
+### 구현 메모
+
+1. `docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.csv`
+   - `자동 허용` 구간에 `71531, 경영 컨설팅업` 행을 추가한다.
+   - 메모에는 시행령 제6조제2항제11호 취지에 맞게 `재정·인력·생산·시장관리·전략기획 자문` 성격 확인 필요를 적는다.
+2. `src/features/eligibility/data/industry-discovery.ts`
+   - `경영컨설팅`, `경영컨설팅업`, `경영자문`, `전략컨설팅`, `전략기획자문` 등 별칭을 가진 preset을 추가한다.
+   - `suggestedRegulatoryFit`은 `knowledgeIndustry`로 연결한다.
+3. 테스트
+   - `src/features/eligibility/industry-discovery.test.ts`에 자연어 검색 테스트를 추가한다.
+   - `src/features/eligibility/evaluator.test.ts`에 `71531` 지식산업센터 자동 허용 판정 테스트를 추가한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- `npx wrangler pages deploy dist --project-name imomguide`
+- 운영 페이지에서 `index-Oex0_FWl.js` 반영 여부 확인
+
+---
+
+## 2026-03-19 실무 검색어 누락 전수 점검 계획
+
+### 변경 목표
+
+- `경영컨설팅`처럼 공식 KSIC 명칭과 사용자의 실제 검색 표현이 달라서 추천이 비는 항목을 전수 점검한다.
+- 지식산업 1~27호 중 `단일 exact 코드`에 해당하는 항목은 최소한 검색 사전에서 모두 한 번은 걸리게 보강한다.
+
+### 구현 메모
+
+1. 대조 기준
+   - `src/features/eligibility/data/knowledge-industry-review-table.ts`의 단일 exact 코드
+   - `docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.csv`
+   - `src/features/eligibility/data/industry-discovery.ts`
+2. 점검 포인트
+   - CSV에는 있는데 검색 preset이 없는 exact 코드 식별
+   - 공백, 점, 쉼표, `및` 같은 공식 명칭 차이 때문에 실무 검색어로는 안 잡히는 항목 우선 보강
+3. 예상 보강 대상
+   - `71391 옥외 광고업`
+   - `75994 포장 및 충전업`
+   - `59120 영화, 비디오물 및 방송 프로그램 제작 관련 서비스업`
+   - `59201 음악 및 기타 오디오물 출판업`
+   - `73903 사업 및 무형 재산권 중개업`
+   - `73904 물품 감정, 계량 및 견본 추출업`
+   - `76400 무형 재산권 임대업`
+4. 테스트
+   - `industry-discovery.test.ts`에 위 항목들의 자연어/실무어 입력 케이스를 추가한다.
+   - 대조 결과 기준으로 지식산업 단일 exact 코드 누락이 남지 않았는지 재확인한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- 단일 exact 코드 검색 사전 누락 0건 확인
+
+---
+
+## 2026-03-19 범위형 업종 실무 검색어 확장 계획
+
+### 변경 목표
+
+- `58 출판업`, `70 연구개발업`, `72 건축기술·엔지니어링 및 기타 과학기술 서비스업`, `85 교육서비스업`처럼 코드 범위로 허용되는 업종이 실무 검색어에서도 잘 걸리게 만든다.
+- 특히 교육서비스업처럼 `코드만으로 확정 불가`인 범위는 검색 후에도 전부 `정보 부족`으로 끝나지 않도록, 수동 법령 분류와 결합되면 `조건부 검토` 흐름으로 이어지게 보완한다.
+
+### 구현 메모
+
+1. 대표 exact 코드 선정
+   - 로컬 KSIC 해설 텍스트 `ksic11.txt`를 기준으로 범위형 업종 내부 대표 코드를 다시 확인한다.
+   - 범위별 대표 코드 예:
+     - `70`: `70119`, `70129`, `70130`, `70201`, `70209`
+     - `72`: `72111`, `72112`, `72121`, `72122`, `72911`, `72921`, `72922`, `72923`
+     - `58`: `58111`, `58112`, `58113`, `58121`, `58122`, `58123`, `58190`, `58211`, `58212`, `58219`
+     - `85`: `85503`, `85640`, `85650`, `85669`, `85691`, `85631`, `85699`
+2. `src/features/eligibility/data/industry-discovery.ts`
+   - 대표 코드별로 사용자가 실제로 치는 검색어 별칭을 추가한다.
+   - 예:
+     - `기업부설연구소`, `연구개발센터`
+     - `건축설계`, `도시계획`, `환경영향평가`, `지질조사`
+     - `출판사`, `전자책출판`, `웹툰출판`, `모바일게임개발`
+     - `온라인교육`, `직업훈련원`, `코딩학원`, `사내교육`
+3. `src/features/eligibility/evaluator.ts`
+   - `codeOnlyUncertain` 분기에서 사용자가 `지식산업/정보통신산업/기타 허용업종` 수동 분류를 같이 선택한 경우 `insufficient` 대신 `conditional`로 안내한다.
+   - 교육서비스 계열 검색 후 2단계에서 수동 분류를 보정했을 때 결과가 더 실무적으로 이어지게 한다.
+4. 테스트
+   - `industry-discovery.test.ts`에 범위형 업종 대표 검색어 케이스를 대량 추가한다.
+   - `evaluator.test.ts`에 교육서비스 코드 + 수동 법령 분류 조합의 조건부 판정 테스트를 추가한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- `npx wrangler pages deploy dist --project-name imomguide`
+- 운영 페이지에서 `index-BzUj6zdl.js` 반영 여부 확인
+
+---
+
 ## 2026-03-19 쿠팡 실제 제휴 링크 반영 계획
 
 ### 변경 목표
@@ -991,7 +1286,7 @@ src/
 3. 문서
    - `task.md`, `walkthrough.md`에 실서비스형 축소 의도와 검증 결과를 추가한다.
 4. 배포
-   - Git 푸시 후 Pages Production과 `loopincode.com`이 새 UI를 가리키는지 확인한다.
+   - 원격 저장소에도 동일 반영 후 lint/test/build, Git 푸시, Pages 배포 상태를 다시 확인한다.
 
 ### 검증 메모
 

@@ -34,9 +34,10 @@ export type KnowledgeCenterExactCodeKind =
   | 'blocked'
 
 interface KnowledgeCenterCodeOnlyUncertainEntry {
-  prefix: string
+  codePattern: string
   label: string
   note: string
+  prefix?: string
 }
 
 function parseCsvLine(line: string) {
@@ -117,6 +118,9 @@ const conditionalOnlyRows = conditionalRows.filter((row) => row.code !== '63112'
 const additionalCheckRows = knowledgeCenterRows.filter((row) => row.verdict === '추가 확인')
 const blockedRows = knowledgeCenterRows.filter((row) => row.verdict === '불가')
 const blockedCodeRows = blockedRows.filter((row) => /^\d{5}$/.test(row.code))
+const codeOnlyUncertainRows = knowledgeCenterRows.filter(
+  (row) => row.verdict === '코드만으로 확정 불가',
+)
 
 export const KNOWLEDGE_CENTER_EXACT_AUTO_ALLOWED_CODES = new Set(
   autoAllowedRows.map((row) => row.code),
@@ -131,6 +135,32 @@ export const KNOWLEDGE_CENTER_EXACT_ADDITIONAL_CHECK_CODE_MAP = toEntryMap(
   additionalCheckRows,
 )
 export const KNOWLEDGE_CENTER_EXACT_BLOCKED_CODE_MAP = toEntryMap(blockedCodeRows)
+
+const knowledgeCenterCodeOnlyUncertainCodeMap = codeOnlyUncertainRows.reduce<
+  Record<string, KnowledgeCenterCodeOnlyUncertainEntry>
+>((map, row) => {
+  const codes = [...new Set(row.code.match(/\d{5}/g) ?? [])]
+
+  for (const code of codes) {
+    if (
+      KNOWLEDGE_CENTER_EXACT_AUTO_ALLOWED_CODES.has(code) ||
+      KNOWLEDGE_CENTER_EXACT_REVIEW_CODE_MAP[code] ||
+      KNOWLEDGE_CENTER_EXACT_CONDITIONAL_CODE_MAP[code] ||
+      KNOWLEDGE_CENTER_EXACT_ADDITIONAL_CHECK_CODE_MAP[code] ||
+      KNOWLEDGE_CENTER_EXACT_BLOCKED_CODE_MAP[code]
+    ) {
+      continue
+    }
+
+    map[code] = {
+      codePattern: row.code,
+      label: row.name,
+      note: row.note,
+    }
+  }
+
+  return map
+}, {})
 
 export const KNOWLEDGE_CENTER_EXACT_RULE_COUNTS = {
   autoAllowed: autoAllowedRows.length,
@@ -153,14 +183,14 @@ export const KNOWLEDGE_CENTER_DISCOVERY_ENTRIES: KnowledgeCenterDiscoveryEntry[]
     }))
 
 export const KNOWLEDGE_CENTER_CODE_ONLY_UNCERTAIN_PREFIXES: KnowledgeCenterCodeOnlyUncertainEntry[] =
-  [
-    {
-      prefix: '85',
-      label: '교육서비스업(85*)',
-      note:
-        '교육서비스업은 시행령 제6조제2항제10호 각 목 요건 충족 여부를 확인해야 하므로 코드만으로 자동 확정할 수 없습니다.',
-    },
-  ]
+  codeOnlyUncertainRows
+    .filter((row) => /^\d+\*$/.test(row.code) && row.code !== '70*')
+    .map((row) => ({
+      codePattern: row.code,
+      prefix: row.code.slice(0, -1),
+      label: row.name,
+      note: row.note,
+    }))
 
 export function getKnowledgeCenterExactCodeMatch(normalizedCode: string): {
   kind: KnowledgeCenterExactCodeKind
@@ -218,9 +248,15 @@ export function getKnowledgeCenterExactCodeMatch(normalizedCode: string): {
 }
 
 export function getKnowledgeCenterCodeOnlyUncertainMatch(normalizedCode: string) {
+  const exactMatch = knowledgeCenterCodeOnlyUncertainCodeMap[normalizedCode]
+
+  if (exactMatch) {
+    return exactMatch
+  }
+
   return (
     KNOWLEDGE_CENTER_CODE_ONLY_UNCERTAIN_PREFIXES.find((entry) =>
-      normalizedCode.startsWith(entry.prefix),
+      entry.prefix ? normalizedCode.startsWith(entry.prefix) : false,
     ) ?? null
   )
 }
