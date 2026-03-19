@@ -495,3 +495,42 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 쿠팡 사이드 배너 미노출 보정
+
+- [x] 사용자 화면 기준 미노출 원인 재확인
+- [x] 사이드 배너 노출 breakpoint를 더 현실적인 데스크톱 폭으로 완화
+- [x] 콘텐츠 여백 좌표를 더 안쪽으로 보정
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
+
+## 2026-03-19 쿠팡 사이드 배너 안정화
+
+- [x] 다이나믹 사이드 배너의 비정상 렌더링 원인 정리
+- [x] 좌우 사이드 배너를 정적 160x600 배너 방식으로 전환
+- [x] 콘텐츠 좌우 여백 고정 구조는 유지
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
+
+## 2026-03-19 쿠팡 사이드 배너 iframe 재전환
+
+- [x] 사용자 제공 `widgets.html` iframe 태그 확인
+- [x] 좌우 사이드 배너를 쿠팡 iframe 위젯 방식으로 교체
+- [x] 콘텐츠 좌우 여백 고정 구조 유지
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
+
+## 2026-03-19 loopincode 전용 소스 정리
+
+- [x] 현재 엔트리 기준으로 미사용 정적 소스와 유지 대상 분류
+- [x] 예전 `imomguide` 정적 HTML/JS/CSS와 임시 파일 제거
+- [x] 루트 중복 정적 파일과 추적 중인 `dist` 정리
+- [x] `.gitignore`, `README.md`를 현재 구조 기준으로 정리
+- [x] lint/test/build 재검증
+- [x] walkthrough.md 갱신

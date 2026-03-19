@@ -1758,3 +1758,136 @@ npm run test
 ### 결과 요약
 
 - 사이드 배너는 이제 화면 모서리가 아니라 본문 양옆의 빈 여백을 기준으로 고정되도록 정리됐다.
+
+---
+
+## 2026-03-19 쿠팡 사이드 배너 미노출 보정
+
+### 작업 배경
+
+- 사용자는 실제 데스크톱 화면에서 `왼쪽 오른쪽에 광고가 없다`고 판단했고, 제공한 스크린샷에서도 사이드 배너가 렌더링되지 않았다.
+- 원인을 다시 확인해 보니 사이드 배너 노출 breakpoint가 지나치게 높아 일부 데스크톱 폭에서 광고가 통째로 숨겨지고 있었다.
+
+### 반영 내용
+
+- [coupang-dynamic-banner.tsx](C:/projects/magok/src/components/coupang-dynamic-banner.tsx)
+  - 사이드 배너 노출 조건을 `min-[1560px]`에서 `2xl`(`1536px`) 기준으로 낮춰 현실적인 데스크톱 화면에서 바로 보이게 조정했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 사이드 배너 좌표를 `calc(50vw - 590px - 184px)`에서 `max(8px, calc(50vw - 590px - 172px))`로 보정해, 콘텐츠 좌우 여백에 조금 더 밀착하면서도 화면 바깥으로 밀려나지 않게 했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+- `npm run build` 통과
+
+### 결과 요약
+
+- 이전보다 더 넓은 데스크톱 폭에서 좌우 사이드 배너가 실제로 노출되도록 조건을 완화했고, 콘텐츠 여백 기준 위치도 함께 보정했다.
+
+---
+
+## 2026-03-19 쿠팡 사이드 배너 안정화
+
+### 작업 배경
+
+- 사용자는 쿠팡 사이드 광고가 여전히 `왼쪽 하단에 짱박혀` 보인다고 판단했고, 실제 화면에서도 다이나믹 태그가 의도한 좌우 고정 위치를 따르지 않았다.
+- 현재 증상은 CSS 좌표 문제라기보다 쿠팡 다이나믹 태그가 사이드 2개 복제 배치와 잘 맞지 않는 구조에 가까웠다.
+
+### 반영 내용
+
+- [coupang-side-banner.tsx](C:/projects/magok/src/components/coupang-side-banner.tsx)
+  - 쿠팡 다이나믹 스크립트 기반 컴포넌트를 제거하고, 정적 `160x600` 배너 이미지를 감싼 고정 사이드 배너 컴포넌트로 교체했다.
+  - 링크는 `https://link.coupang.com/a/d7pcAe`, 이미지는 `973791` 배너 자산을 사용했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 좌우 사이드 광고 렌더링을 `CoupangDynamicBanner`에서 `CoupangSideBanner`로 전환했다.
+  - 기존 콘텐츠 여백 기준 좌표는 유지해, 스크롤 시에도 좌우에 안정적으로 붙도록 구성했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+- `npm run build` 통과
+
+### 결과 요약
+
+- 좌우 사이드 광고는 더 이상 쿠팡 다이나믹 스크립트에 의존하지 않고, 고정된 정적 160x600 배너로 안정적으로 렌더링되도록 바뀌었다.
+
+---
+
+## 2026-03-19 쿠팡 사이드 배너 iframe 재전환
+
+### 작업 배경
+
+- 사용자는 정적 이미지 배너 대신 쿠팡이 제공한 `widgets.html` iframe 태그로 좌우 사이드 광고를 다시 교체해 보길 원했다.
+- iframe 방식은 다이나믹 스크립트보다 부모 레이아웃을 더 잘 따를 가능성이 높아, 콘텐츠 좌우 여백 고정 구조와의 궁합을 다시 검증할 가치가 있었다.
+
+### 반영 내용
+
+- [coupang-side-banner.tsx](C:/projects/magok/src/components/coupang-side-banner.tsx)
+  - 정적 이미지 링크 기반 구현을 제거하고, `160x600` 쿠팡 iframe 위젯을 직접 렌더링하도록 변경했다.
+  - 좌우 래퍼의 보더, 라운드, 그림자는 유지해 레일 광고처럼 보이도록 정리했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 사이드 배너 데이터 소스를 `href + imageSrc`에서 `iframeSrc`로 교체했다.
+  - 좌우 모두 동일한 `widgets.html?id=973794&template=carousel&trackingCode=AF7474453...` iframe을 사용한다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+- `npm run build` 통과
+
+### 결과 요약
+
+- 좌우 사이드 광고는 다시 쿠팡 공식 iframe 위젯 기반으로 교체됐고, 위치 제어는 기존 콘텐츠 여백 고정 레일 구조를 그대로 사용한다.
+
+---
+
+## 2026-03-19 loopincode 전용 소스 정리
+
+### 작업 배경
+
+- 사용자는 더 이상 필요하지 않은 예전 `imomguide` 사이트 제작 흔적을 제거하고, 현재 운영 중인 loopincode 관련 소스만 남겨 달라고 요청했다.
+- 현재 웹 엔트리는 `index.html -> src/main.tsx -> src/App.tsx`, 데스크톱 엔트리는 `electron/main.mjs`인데, 루트에는 과거 정적 HTML/JS/CSS와 중복 정적 파일, 추적 중인 `dist` 산출물이 함께 남아 있었다.
+
+### 반영 내용
+
+- [README.md](C:/projects/magok/README.md)
+  - 예전 정적 소스가 제거됐고 이제 React/Electron 기반 loopincode 소스만 관리한다는 현재 구조로 설명을 정리했다.
+  - Cloudflare Pages 프로젝트명 `imomguide`는 기존 운영 인프라 식별자라서 이번 정리에서는 유지한다는 점을 명시했다.
+- [.gitignore](C:/projects/magok/.gitignore)
+  - `dist`와 `tmp_*`를 추가해 빌드 산출물과 임시 파일이 다시 추적되지 않게 정리했다.
+- 삭제한 과거 정적/중복/임시 파일
+  - 루트 정적 페이지와 템플릿:
+    - `infant.html`, `postpartum.html`, `pregnancy.html`, `preschool.html`, `pricing.html`, `privacy.html`, `roadmap.html`, `toddler.html`, `tools.html`
+    - `nav_template.html`, `mobile_nav_template.html`
+    - `main.js`, `style.css`
+  - 루트 중복 정적 파일:
+    - `ads.txt`, `robots.txt`, `sitemap.xml`
+  - 임시/미사용 파일:
+    - `tmp_coupang_guide.pdf`, `tmp_coupang_partners_main.js`
+    - `src/assets/hero.png`, `src/assets/react.svg`, `src/assets/vite.svg`
+  - 추적 중이던 빌드 산출물:
+    - `dist/` 내부 파일 전체
+- 유지한 항목
+  - 현재 앱 소스 `src/`
+  - 정적 자산 원본 `public/`
+  - 데스크톱 진입점 `electron/`
+  - 법령/작업 문서 `docs/codex-brain/`
+  - 배포 설정 `wrangler.toml`
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-DCsMlPyE.css`
+  - `dist/assets/index-SrEU6g-x.js`
+
+### 결과 요약
+
+- 저장소 루트에서 예전 `imomguide` 정적 사이트 흔적은 제거되고, 현재 loopincode 운영에 필요한 소스 중심 구조만 남게 됐다.
+- `dist`는 더 이상 저장소에 추적되지 않고, 필요할 때 `npm run build`로만 다시 생성되는 구조로 정리됐다.
