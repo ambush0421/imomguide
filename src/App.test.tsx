@@ -10,11 +10,11 @@ describe('App', () => {
     expect(screen.getAllByText('마곡 코드찾기').length).toBeGreaterThan(0)
     expect(
       screen.getByRole('heading', {
-        name: /마곡 업종코드,\s*설명만 넣으면 바로 찾습니다\./,
+        name: /업종코드 찾기부터\s*입주 가능성 확인까지\s*한 화면에서 끝냅니다\./,
       }),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('지금 바로 업종코드를 찾아보세요'),
+      screen.getByText('지금 바로 업종코드를 찾고 결과를 확인하세요'),
     ).toBeInTheDocument()
     expect(
       screen.getByText('업종을 고르면 결과가 여기에 바로 나옵니다.'),

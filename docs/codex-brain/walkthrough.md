@@ -610,3 +610,123 @@ npm run test
 - `ads.txt`: 기존 값 그대로 사용
 - `AdSense script`: 추가하는 것이 맞음
 - `google-adsense-account` meta: 추가하는 것이 맞음
+
+---
+
+## 2026-03-19 UI/UX 단순화 및 섹션 구조 업그레이드
+
+### 작업 배경
+
+- 기존 랜딩은 기능은 충분했지만 카드 수와 설명량이 많아, 첫 화면에서 사용자가 무엇을 먼저 해야 하는지 빠르게 파악하기 어려웠다.
+- 다크 글래스 스타일이 강해서 핵심 행동보다 장식과 보조 정보가 먼저 보이는 느낌이 있었다.
+- 이번 작업 목표는 `심플하고 직관적이며 섹션별 역할이 분명한 UI`로 재구성하는 것이었다.
+
+### 반영 내용
+
+- 메인 화면 구조를 `소개`, `이용 방법`, `코드 찾기`, `직접 수정`, `판정 기준` 5개 섹션으로 단순화했다.
+- 히어로 영역은 서비스 설명과 시작 버튼 중심으로 줄이고, 첫 행동이 바로 보이게 정리했다.
+- 전체 컬러 시스템을 밝은 뉴트럴 배경과 오렌지 포인트 중심으로 바꿔 시각적 부담을 낮췄다.
+- `IndustryDiscoveryPanel`은 입력 안내와 추천 카드 구조를 더 짧고 직관적으로 바꿨다.
+- `ResultPanel`은 결과 요약, 판단 이유, 다음 확인사항, 세부 근거를 단계적으로 보이게 재배열했다.
+- `EligibilityForm`은 세부 보정용 보조 흐름이라는 인상이 더 분명하게 보이도록 정리했다.
+- 공통 UI 컴포넌트 기본값도 새 톤에 맞게 손봤다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `src/index.css`
+- `src/components/ui/card.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/ui/button.tsx`
+- `src/components/ui/input.tsx`
+- `src/components/ui/textarea.tsx`
+- `src/components/ui/select.tsx`
+- `src/components/ui/switch.tsx`
+- `src/components/async-state.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/App.test.tsx`
+
+### 적용 스킬
+
+- `pdca`
+- `ui-ux-pro-max`
+- `frontend-ui-ux-engineer`
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/*.css`
+  - `dist/assets/*.js`
+
+### 결과 요약
+
+- 첫 화면에서 해야 할 행동이 더 빨리 보이도록 정보 흐름이 정리됐다.
+- 설명 카드 수와 시각적 무게를 줄여 전체 밀도가 낮아졌다.
+- 처음 보는 사용자도 페이지 목적을 더 쉽게 이해할 수 있는 구조로 바뀌었다.
+
+---
+
+## 2026-03-19 UI/UX 단순화 및 섹션 구조 업그레이드
+
+### 작업 배경
+
+- 기존 랜딩은 기능은 충분했지만, 카드 수와 설명량이 많아 첫 화면에서 `무엇을 먼저 해야 하는지` 즉시 파악하기 어려웠다.
+- 전체가 다크 글래스 스타일에 가깝다 보니, 핵심 행동보다 장식과 정보가 먼저 보이는 느낌이 있었다.
+- 사용자는 `심플하고 직관적이며, 섹션별로 정리된 화면`을 원했다.
+
+### 반영 내용
+
+- 첫 화면 구조를 `한 줄 설명 → 바로 시작 → 사용 흐름` 중심으로 다시 구성했다.
+- 메인 섹션을 `소개`, `이용 방법`, `코드 찾기`, `직접 수정`, `판정 기준` 순으로 단순화했다.
+- 페이지 전체를 밝은 뉴트럴 배경과 오렌지 포인트 중심으로 재정리해 가독성을 높였다.
+- `IndustryDiscoveryPanel`은 설명과 상태 문구를 더 짧게 줄이고, 추천 카드도 더 가볍게 정리했다.
+- `ResultPanel`은 결과 요약을 먼저 보여주고 `이유 / 다음 확인 / 세부 근거`를 깔끔하게 분리했다.
+- `EligibilityForm`은 세부 보정용 보조 섹션이라는 인상이 더 명확하도록 톤과 문구를 정리했다.
+- 공통 UI 컴포넌트(`card`, `badge`, `button`, `input`, `textarea`, `select`, `switch`, `async-state`)의 기본 스타일도 함께 조정했다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `src/index.css`
+- `src/components/ui/card.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/ui/button.tsx`
+- `src/components/ui/input.tsx`
+- `src/components/ui/textarea.tsx`
+- `src/components/ui/select.tsx`
+- `src/components/ui/switch.tsx`
+- `src/components/async-state.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/App.test.tsx`
+
+### 적용 스킬
+
+- `pdca`
+- `ui-ux-pro-max`
+- `frontend-ui-ux-engineer`
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-BRKOEdRh.css`
+  - `dist/assets/index-CQ-j8fUs.js`
+
+### 결과 요약
+
+- 첫 화면에서 해야 할 행동이 더 빨리 보이도록 흐름이 정리됐다.
+- 안내 카드 수와 시각적 무게를 줄여 전체 밀도가 낮아졌다.
+- 섹션별 의미가 선명해져 `이게 어떤 페이지인지`에 대한 혼란이 줄어든 구조로 바뀌었다.

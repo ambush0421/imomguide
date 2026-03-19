@@ -56,13 +56,16 @@ export function ResultPanel({
   const hasManualInput = Boolean(input.ksicCode.trim() || input.ksicName.trim())
 
   return (
-    <Card className="sticky top-6 overflow-hidden">
+    <Card className="sticky top-6 overflow-hidden bg-white/96">
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle>바로 결과 보기</CardTitle>
+            <Badge variant="muted" className="mb-3 w-fit">
+              2단계
+            </Badge>
+            <CardTitle>결과 확인</CardTitle>
             <CardDescription>
-              선택한 업종과 현재 설정 기준으로 입주 가능성을 보여드립니다.
+              선택한 업종과 현재 설정 기준으로 입주 가능성을 바로 보여드립니다.
             </CardDescription>
           </div>
           {input.address.trim() ? (
@@ -110,7 +113,7 @@ export function ResultPanel({
 
         {status === 'ready' && result ? (
           <div className="space-y-4">
-            <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.78)] p-5">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={getBadgeVariant(result.verdict)}>
                   {formatVerdictLabel(result.verdict)}
@@ -135,41 +138,43 @@ export function ResultPanel({
               ) : null}
             </section>
 
-            <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
-              <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
-                <ArrowRight className="size-4 text-[var(--accent-soft)]" />
-                왜 이렇게 판단했나요?
-              </div>
-              <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                {result.reasons.map((reason) => (
-                  <li
-                    key={reason}
-                    className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3"
-                  >
-                    {reason}
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <div className="grid gap-4 md:grid-cols-2">
+              <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+                <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                  <ArrowRight className="size-4 text-[var(--accent)]" />
+                  왜 이렇게 판단했나요?
+                </div>
+                <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                  {result.reasons.map((reason) => (
+                    <li
+                      key={reason}
+                      className="rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.75)] px-4 py-3"
+                    >
+                      {reason}
+                    </li>
+                  ))}
+                </ul>
+              </section>
 
-            <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
-              <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
-                <FileStack className="size-4 text-[var(--accent-soft)]" />
-                다음에 확인할 것
-              </div>
-              <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                {result.requiredActions.map((action) => (
-                  <li
-                    key={action}
-                    className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3"
-                  >
-                    {action}
-                  </li>
-                ))}
-              </ul>
-            </section>
+              <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+                <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                  <FileStack className="size-4 text-[var(--accent)]" />
+                  다음에 확인할 것
+                </div>
+                <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                  {result.requiredActions.map((action) => (
+                    <li
+                      key={action}
+                      className="rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.75)] px-4 py-3"
+                    >
+                      {action}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
 
-            <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
               <div className="flex items-center justify-between gap-3">
                 <h4 className="font-display text-lg font-semibold text-[var(--foreground)]">
                   세부 근거
@@ -180,7 +185,7 @@ export function ResultPanel({
                 {result.legalBases.map((basis) => (
                   <article
                     key={basis.id}
-                    className="rounded-2xl border border-white/8 bg-white/4 p-4"
+                    className="rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.75)] p-4"
                   >
                     <div className="text-xs uppercase tracking-[0.14em] text-[var(--foreground-subtle)]">
                       {basis.source === 'magokPlan' ? '고시문' : '시행령'} ·{' '}

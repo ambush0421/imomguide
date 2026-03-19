@@ -72,7 +72,7 @@ function SuggestionCard({
   const previewResult = buildPreviewResult(input, suggestion)
 
   return (
-    <article className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+    <article className="rounded-[24px] border border-[var(--border)] bg-white p-5 shadow-[0_12px_24px_rgba(24,32,43,0.04)]">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={suggestion.matchKind === 'exact' ? 'success' : 'muted'}>
           {suggestion.matchKind === 'exact' ? '바로 선택 가능' : '비슷한 업종'}
@@ -96,8 +96,11 @@ function SuggestionCard({
         </p>
       ) : null}
 
-      <div className="mt-4">
-        <Button onClick={() => onSelect(suggestion)}>
+      <div className="mt-5">
+        <Button
+          variant={suggestion.matchKind === 'exact' ? 'default' : 'secondary'}
+          onClick={() => onSelect(suggestion)}
+        >
           <ArrowRight className="size-4" />
           이 업종으로 결과 보기
         </Button>
@@ -126,22 +129,22 @@ export function IndustryDiscoveryPanel({
   )
 
   return (
-    <Card className="overflow-hidden border-white/12 bg-white/[0.05]">
+    <Card className="overflow-hidden bg-white/92">
       <CardHeader>
         <Badge variant="muted" className="w-fit">
           1단계
         </Badge>
         <CardTitle className="pt-1">업종코드 찾기</CardTitle>
         <CardDescription className="max-w-3xl">
-          사업 설명이나 사업자등록증의 `업태 / 종목`을 넣어 주세요. 가장 가까운
-          업종코드를 먼저 찾고, 바로 입주 판정으로 이어집니다.
+          사업 설명이나 사업자등록증의 `업태 / 종목`을 넣어 주세요. 먼저 가장 가까운
+          업종코드를 보여드리고, 선택 즉시 결과 확인으로 이어집니다.
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+        <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.8)] p-5">
           <div className="flex items-start gap-3">
-            <div className="mt-1 inline-flex size-10 items-center justify-center rounded-2xl bg-white/8 text-[var(--foreground)]">
+            <div className="mt-1 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
               <SearchCheck className="size-4" />
             </div>
             <div>
@@ -183,7 +186,7 @@ export function IndustryDiscoveryPanel({
               {isLoading ? '업종코드 찾는 중...' : '업종코드 찾기'}
             </Button>
             <p className="text-sm leading-6 text-[var(--foreground-subtle)]">
-              정확한 코드가 없으면 가장 가까운 업종을 추천해 드립니다.
+              정확한 코드가 없으면 가장 가까운 관련 업종을 추천합니다.
             </p>
           </div>
         </section>
@@ -228,8 +231,8 @@ export function IndustryDiscoveryPanel({
           <div className="space-y-6">
             {exactSuggestions.length > 0 ? (
               <section className="space-y-3">
-                <div className="text-sm font-medium text-[var(--foreground)]">
-                  바로 선택해도 되는 업종
+                <div className="text-sm font-semibold text-[var(--foreground)]">
+                  정확히 찾은 후보
                 </div>
                 <div className="space-y-3">
                   {exactSuggestions.map((suggestion) => (
@@ -246,8 +249,8 @@ export function IndustryDiscoveryPanel({
 
             {relatedSuggestions.length > 0 ? (
               <section className="space-y-3">
-                <div className="text-sm font-medium text-[var(--foreground)]">
-                  비슷한 업종 후보
+                <div className="text-sm font-semibold text-[var(--foreground)]">
+                  관련 업종 추천
                 </div>
                 <div className="space-y-3">
                   {relatedSuggestions.map((suggestion) => (

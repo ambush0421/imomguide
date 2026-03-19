@@ -119,19 +119,19 @@ export function EligibilityForm({
   const enabledFlagCount = switchRows.filter((row) => input.flags[row.key]).length
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden bg-white/96">
       <CardHeader className="relative">
-        <CardTitle>직접 수정이 필요할 때만 열어보세요</CardTitle>
+        <CardTitle>세부 조건 직접 수정</CardTitle>
         <CardDescription>
-          대부분은 위에서 업종을 고른 뒤 결과만 확인하면 됩니다. 구역이나 예외조건을
-          직접 바꾸고 싶을 때만 이 섹션을 사용해 주세요.
+          대부분은 위에서 업종을 고른 뒤 결과만 보면 됩니다. 구역이나 예외 조건을
+          직접 바꾸고 싶을 때만 이 섹션을 열어 주세요.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+        <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,249,243,0.82)] p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-white/8 text-[var(--foreground)]">
+              <div className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
                 <SearchCheck className="size-4" />
               </div>
               <div>
@@ -162,25 +162,25 @@ export function EligibilityForm({
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
               <div className="text-xs text-[var(--foreground-subtle)]">구역</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {zoneTypeLabels[input.zoneType]}
               </div>
             </div>
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
               <div className="text-xs text-[var(--foreground-subtle)]">신청 주체</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {applicantTypeLabels[input.applicantType]}
               </div>
             </div>
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
               <div className="text-xs text-[var(--foreground-subtle)]">선택된 업종코드</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {input.ksicCode.trim() || '아직 선택 전'}
               </div>
             </div>
-            <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
               <div className="text-xs text-[var(--foreground-subtle)]">예외조건</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {enabledFlagCount > 0 ? `${enabledFlagCount}개 적용 중` : '없음'}
@@ -211,9 +211,9 @@ export function EligibilityForm({
 
         {isExpanded ? (
           <>
-            <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-white/8 text-[var(--foreground)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
                   <Building2 className="size-4" />
                 </div>
                 <div>
@@ -351,9 +351,9 @@ export function EligibilityForm({
               </div>
             </section>
 
-            <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-white/8 text-[var(--foreground)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
                   <Factory className="size-4" />
                 </div>
                 <div>
@@ -370,7 +370,7 @@ export function EligibilityForm({
                 {switchRows.map((row) => (
                   <label
                     key={row.key}
-                    className="flex items-start justify-between gap-4 rounded-2xl border border-white/8 bg-white/4 px-4 py-3"
+                    className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.72)] px-4 py-3"
                   >
                     <div className="space-y-1 pr-4">
                       <span className="block text-sm font-medium text-[var(--foreground)]">
@@ -390,9 +390,9 @@ export function EligibilityForm({
               </div>
             </section>
 
-            <section className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-white/8 text-[var(--foreground)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
                   <FlaskConical className="size-4" />
                 </div>
                 <div>
