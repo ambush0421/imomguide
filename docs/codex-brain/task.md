@@ -244,5 +244,5 @@
 - [x] 세부 보정 폼을 보조 흐름으로 더 가볍게 정리
 - [x] lint/test/build 재검증
 - [x] 원격 저장소 동기화
-- [ ] Git 커밋 및 푸시
+- [x] Git 커밋 및 푸시
 - [x] walkthrough.md 갱신

@@ -671,6 +671,27 @@ npm run test
 - 설명 카드 수와 시각적 무게를 줄여 전체 밀도가 낮아졌다.
 - 처음 보는 사용자도 페이지 목적을 더 쉽게 이해할 수 있는 구조로 바뀌었다.
 
+### Git 반영
+
+- 원격 저장소 `ambush0421/imomguide`
+- UI 변경 커밋: `2ad0b39` (`feat: simplify magok finder ui`)
+- 브랜치 반영
+  - `codex/magok-site-replace` -> `2ad0b39`
+  - `main` -> `2ad0b39`
+
+### Cloudflare 반영
+
+- Preview 배포
+  - 브랜치: `codex/magok-site-replace`
+  - 커밋: `2ad0b39`
+  - 상태: `Active`
+  - URL: `https://e2312105.imomguide.pages.dev`
+- Production 배포
+  - 브랜치: `main`
+  - 커밋: `2ad0b39`
+  - 상태: `Active`
+  - URL: `https://28c24081.imomguide.pages.dev`
+
 ---
 
 ## 2026-03-19 UI/UX 단순화 및 섹션 구조 업그레이드
