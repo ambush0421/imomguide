@@ -2,8 +2,11 @@ import {
   ArrowRight,
   Building2,
   CheckCircle2,
+  ClipboardCheck,
   FileSearch,
   Landmark,
+  Link2,
+  MonitorSmartphone,
 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
@@ -54,6 +57,30 @@ const trustPoints = [
   '애매한 업종은 무리하게 가능으로 찍지 않습니다.',
   '세부 조건 수정과 재판정을 같은 화면에서 이어서 할 수 있습니다.',
 ]
+
+const coupangApprovalChecklist = [
+  {
+    icon: Link2,
+    title: '활동 페이지를 모두 등록하세요',
+    description:
+      '가입 시 등록한 활동 페이지와 실제로 링크나 배너를 노출하는 페이지가 일치해야 합니다.',
+  },
+  {
+    icon: MonitorSmartphone,
+    title: '활동 스크린샷을 준비하세요',
+    description:
+      '링크·배너·위젯과 대가성 문구가 한 화면에서 함께 보이는 대표 이미지를 등록하는 것이 좋습니다.',
+  },
+  {
+    icon: ClipboardCheck,
+    title: '대가성 문구를 빠뜨리지 마세요',
+    description:
+      '쿠팡 파트너스 링크가 들어간 모든 게시물은 사용자가 쉽게 인식할 수 있게 대가성 문구를 표시해야 합니다.',
+  },
+]
+
+const coupangDisclosureText =
+  '이 게시물은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.'
 
 function App() {
   const {
@@ -364,6 +391,82 @@ function App() {
               onEvaluate={evaluate}
               onReset={reset}
             />
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+            <Card>
+              <CardContent className="space-y-4 p-6">
+                <Badge variant="muted">최종승인 준비</Badge>
+                <h2 className="font-display text-3xl font-semibold text-[var(--foreground)]">
+                  쿠팡 파트너스 심사를 준비한다면
+                  <br />
+                  이 세 가지만 먼저 맞추세요.
+                </h2>
+                <p className="text-sm leading-7 text-[var(--foreground-muted)]">
+                  쿠팡 공식 가이드 기준으로 최종승인에서 반복해서 확인하는 항목을
+                  요약했습니다. 실제 링크나 배너를 붙이는 페이지라면 아래 기준을 함께
+                  맞춰 두는 것이 안전합니다.
+                </p>
+                <div className="space-y-3">
+                  {coupangApprovalChecklist.map((item) => {
+                    const Icon = item.icon
+
+                    return (
+                      <div
+                        key={item.title}
+                        className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+                            <Icon className="size-4" />
+                          </div>
+                          <div className="text-sm font-semibold text-[var(--foreground)]">
+                            {item.title}
+                          </div>
+                        </div>
+                        <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                          {item.description}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="space-y-4 p-6">
+                <Badge variant="muted">권장 문구</Badge>
+                <h2 className="font-display text-3xl font-semibold text-[var(--foreground)]">
+                  대가성 문구는
+                  <br />
+                  눈에 잘 띄게 함께 보여주세요.
+                </h2>
+                <p className="text-sm leading-7 text-[var(--foreground-muted)]">
+                  공식 가이드에서는 파트너스 링크가 있는 게시물마다 사용자가 쉽게
+                  인식할 수 있는 대가성 문구를 함께 표시하라고 안내합니다. 아래 문구를
+                  그대로 참고해도 됩니다.
+                </p>
+                <div className="rounded-[28px] border border-amber-200 bg-amber-50 p-5">
+                  <div className="text-xs font-semibold tracking-[0.14em] text-amber-700">
+                    권장 예시
+                  </div>
+                  <p className="mt-3 text-base font-semibold leading-8 text-[var(--foreground)]">
+                    {coupangDisclosureText}
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
+                    활동 스크린샷에는 링크나 배너뿐 아니라 위 문구까지 같이 보이게
+                    캡처하는 것이 좋습니다.
+                  </div>
+                  <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
+                    등록한 활동 페이지와 실제 매출이 발생하는 페이지가 다르면 승인에
+                    불리할 수 있으니, 활동 채널을 모두 최신 상태로 관리해 주세요.
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </section>
 
           <section id="criteria" className="space-y-4">
