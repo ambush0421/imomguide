@@ -1,0 +1,64 @@
+    <!-- Navigation -->
+    <nav class="glass-nav fixed w-full top-0 z-50 h-20 flex justify-between items-center px-6 sm:px-16">
+        <div class="flex items-center">
+            <div
+                class="w-11 h-11 gradient-bg rounded-2xl flex items-center justify-center mr-3 shadow-lg shadow-rose-200 transition hover:scale-105 hover:rotate-3">
+                <i class="fas fa-heart text-white text-lg"></i>
+            </div>
+            <a href="index.html" class="text-2xl font-black text-slate-900 tracking-tighter">
+                IMOM<span class="gradient-text">GUIDE</span>
+            </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden lg:flex items-center space-x-8 font-bold text-sm text-slate-600">
+            <a href="index.html" class="hover:text-rose-500 transition">홈</a>
+            <a href="roadmap.html" class="text-indigo-600 hover:text-indigo-700 transition flex items-center gap-1">
+                <i class="fas fa-calculator"></i> 지원금 계산기
+            </a>
+
+            <!-- Guide Dropdown -->
+            <div class="relative group">
+                <button class="flex items-center gap-1 hover:text-rose-500 transition py-4">
+                    가이드
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <div
+                    class="absolute top-full -left-4 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0">
+                    <a href="pregnancy.html" class="block px-4 py-3 rounded-xl bg-rose-50 text-rose-600 font-bold">
+                        <span class="text-lg mr-2">🤰</span> 임신 가이드
+                    </a>
+                    <a href="postpartum.html"
+                        class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">🤱</span> 산후 회복
+                    </a>
+                    <a href="infant.html"
+                        class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">👶</span> 영아 케어
+                    </a>
+                    <a href="toddler.html"
+                        class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">🏃</span> 유아 발달
+                    </a>
+                    <a href="preschool.html"
+                        class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">🏫</span> 취학 전
+                    </a>
+                </div>
+            </div>
+
+            <a href="tools.html" class="hover:text-rose-500 transition">스마트 도구</a>
+        </div>
+
+        <!-- CTA & Mobile Button -->
+        <div class="flex items-center gap-4">
+            <a href="pricing.html"
+                class="hidden sm:flex px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition">
+                <i class="fas fa-crown mr-2 text-yellow-400"></i>프리미엄
+            </a>
+            <button class="lg:hidden w-10 h-10 flex items-center justify-center text-slate-700" id="mobileMenuBtn"
+                aria-label="메뉴 열기">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>

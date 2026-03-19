@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-2916041253392911">
+
+    <!-- SEO Meta Tags -->
+    <title>?§Îßà???°ÏïÑ Î°úÎìúÎß?- AI Í∏∞Î∞ò ÎßûÏ∂§??Î≥µÏ? ?ÑÎûµ ?úÎ??àÏù¥??| ?ÑÏù¥Îß?Í∞Ä?¥Îìú</title>
+    <meta name="description"
+        content="2026??ÏµúÏã† ?ïÏ±Ö??Î∞òÏòÅ??AI ?°ÏïÑ ?ÑÎûµ ?úÎ??àÏù¥?? ?êÎ????ùÎÖÑ?îÏùºÍ≥?Í±∞Ï£º Ï°∞Í±¥??Î∂ÑÏÑù?òÏó¨ ÎßûÏ∂§??Î≥µÏ? Î°úÎìúÎß? ?àÏÉÅ ÏßÄ?êÍ∏à, Ï§ëÏöî ?ºÏ†ï???úÍ≥µ?©Îãà??">
+    <meta name="keywords" content="?°ÏïÑ Î°úÎìúÎß? Î∂ÄÎ™®Í∏â?? ?ÑÎèô?òÎãπ, ?°ÏïÑ?¥ÏßÅ, Î≥¥Ïú°Î£?ÏßÄ?? Ï≤´Îßå?®Ïù¥?©Í∂å, ?°ÏïÑ Î≥µÏ?, Ï∂úÏÇ∞ ÏßÄ?êÍ∏à">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="?§Îßà???°ÏïÑ Î°úÎìúÎß?| ?ÑÏù¥Îß?Í∞Ä?¥Îìú">
+    <meta property="og:description" content="AI Í∏∞Î∞ò ÎßûÏ∂§???°ÏïÑ Î≥µÏ? ?ÑÎûµ ?úÎ??àÏù¥?? 2026??ÏµúÏã† ?ïÏ±Ö Î∞òÏòÅ.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=1200">
+    <meta property="og:url" content="https://imomguide.pages.dev/roadmap.html">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="?§Îßà???°ÏïÑ Î°úÎìúÎß?| ?ÑÏù¥Îß?Í∞Ä?¥Îìú">
+    <meta name="twitter:description" content="AI Í∏∞Î∞ò ÎßûÏ∂§???°ÏïÑ Î≥µÏ? ?ÑÎûµ ?úÎ??àÏù¥??>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>?ë∂</text></svg>">
+
+    <!-- External Resources -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911"
+        crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gradient-start: #6366f1;
+            --gradient-mid: #8b5cf6;
+            --gradient-end: #ec4899;
+        }
+
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        @keyframes float-reverse {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(-5deg);
+            }
+        }
+
+        @keyframes gradient-shift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes reveal {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+            }
+        }
+
+        @keyframes count-up {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-float-reverse {
+            animation: float-reverse 5s ease-in-out infinite;
+        }
+
+        .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        .animate-reveal {
+            animation: reveal 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .animate-count-up {
+            animation: count-up 0.5s ease-out forwards;
+        }
+
+        /* Glass Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .glass-dark {
+            background: rgba(30, 27, 75, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Content Card */
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .content-card:hover {
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.2);
+            border-color: #c7d2fe;
+            transform: translateY(-2px);
+        }
+
+        /* KPI Card */
+        .kpi-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            border-radius: 20px 0 0 20px;
+        }
+
+        .kpi-card.emerald::before {
+            background: linear-gradient(180deg, #10b981, #059669);
+        }
+
+        .kpi-card.blue::before {
+            background: linear-gradient(180deg, #3b82f6, #2563eb);
+        }
+
+        .kpi-card.purple::before {
+            background: linear-gradient(180deg, #8b5cf6, #7c3aed);
+        }
+
+        .kpi-card.pink::before {
+            background: linear-gradient(180deg, #ec4899, #db2777);
+        }
+
+        .kpi-card:hover {
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.2);
+            transform: translateY(-4px);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            color: white;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            position: relative;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 23px;
+            width: 2px;
+            background: linear-gradient(180deg, #c7d2fe, #e2e8f0);
+            z-index: 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 56px;
+            padding-bottom: 24px;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.4s ease;
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .timeline-item.past {
+            opacity: 0.5;
+        }
+
+        .timeline-icon {
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-content {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            box-shadow: 0 8px 30px -10px rgba(99, 102, 241, 0.2);
+            border-color: #c7d2fe;
+        }
+
+        /* Input Fields */
+        .input-field {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: white;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        /* Checklist Item */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            background: #f1f5f9;
+        }
+
+        .checklist-item.checked {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border: 1px solid #a7f3d0;
+        }
+
+        .checklist-item.checked .check-icon {
+            color: #10b981;
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 320px;
+            height: 100vh;
+            background: white;
+            z-index: 200;
+            transition: right 0.3s ease;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.open {
+            right: 0;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 199;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .menu-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Scroll Reveal */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Back to Top */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 50;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Print Styles */
+        @media print {
+
+            nav,
+            .back-to-top,
+            .btn-primary,
+            .mobile-menu,
+            footer {
+                display: none !important;
+            }
+
+            .kpi-card,
+            .timeline-content {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="glass-nav fixed w-full top-0 z-50 h-20 flex justify-between items-center px-6 sm:px-16">
+        <div class="flex items-center">
+            <div
+                class="w-11 h-11 gradient-bg rounded-2xl flex items-center justify-center mr-3 shadow-lg shadow-rose-200 transition hover:scale-105 hover:rotate-3">
+                <i class="fas fa-heart text-white text-lg"></i>
+            </div>
+            <a href="index.html" class="text-2xl font-black text-slate-900 tracking-tighter">
+                IMOM<span class="gradient-text">GUIDE</span>
+            </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden lg:flex items-center space-x-8 font-bold text-sm text-slate-600">
+            <a href="index.html" class="hover:text-rose-500 transition">??/a>
+            <a href=\"roadmap.html\" class=\"text-rose-500 font-bold hover:text-rose-600 transition flex items-center gap-1\">
+                <i class="fas fa-calculator"></i> ÏßÄ?êÍ∏à Í≥ÑÏÇ∞Í∏?            </a>
+
+            <!-- Guide Dropdown -->
+            <div class="relative group">
+                <button class="flex items-center gap-1 hover:text-rose-500 transition py-4">
+                    Í∞Ä?¥Îìú
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <div
+                    class="absolute top-full -left-4 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0">
+                    <a href="pregnancy.html" class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">?§∞</span> ?ÑÏã† Í∞Ä?¥Îìú
+                    </a>
+                    <a href="postpartum.html"
+                        class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">?§±</span> ?∞ÌõÑ ?åÎ≥µ
+                    </a>
+                    <a href="infant.html"
+                        class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">?ë∂</span> ?ÅÏïÑ ÏºÄ??                    </a>
+                    <a href="toddler.html"
+                        class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">?èÉ</span> ?†ÏïÑ Î∞úÎã¨
+                    </a>
+                    <a href="preschool.html"
+                        class="block px-4 py-3 rounded-xl hover:bg-slate-50 transition text-slate-600">
+                        <span class="text-lg mr-2">?è´</span> Ï∑®Ìïô ??                    </a>
+                </div>
+            </div>
+
+            <a href="tools.html" class="hover:text-rose-500 transition">?§Îßà???ÑÍµ¨</a>
+        </div>
+
+        <!-- CTA & Mobile Button -->
+        <div class="flex items-center gap-4">
+            <a href="pricing.html"
+                class="hidden sm:flex px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition">
+                <i class="fas fa-crown mr-2 text-yellow-400"></i>?ÑÎ¶¨ÎØ∏ÏóÑ
+            </a>
+            <button class="lg:hidden w-10 h-10 flex items-center justify-center text-slate-700" id="mobileMenuBtn"
+                aria-label="Î©îÎâ¥ ?¥Í∏∞">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="menu-overlay"></div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-50 p-8" id="mobileMenu">
+        <button
+            class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-700"
+            id="mobileMenuClose" aria-label="Î©îÎâ¥ ?´Í∏∞">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+        <div class="mt-16 space-y-6">
+            <a href="index.html" class="block text-lg font-bold text-slate-800 hover:text-rose-500 transition">?è† ??/a>
+            <a href="roadmap.html" class="block text-lg font-bold text-indigo-600 hover:text-indigo-700 transition">?í∞ ÏßÄ?êÍ∏à Í≥ÑÏÇ∞Í∏?/a>
+            <hr class="border-slate-100">
+            <a href="pregnancy.html" class="block text-lg font-bold text-slate-800 hover:text-rose-500 transition">?§∞ ?ÑÏã† Í∞Ä?¥Îìú</a>
+            <a href="postpartum.html"
+                class="block text-lg font-bold text-slate-800 hover:text-rose-500 transition">?§± ?∞ÌõÑ ?åÎ≥µ</a>
+            <a href="infant.html"
+                class="block text-lg font-bold text-slate-800 hover:text-rose-500 transition">?ë∂ ?ÅÏïÑ ÏºÄ??/a>
+            <a href="toddler.html"
+                class="block text-lg font-bold text-slate-800 hover:text-rose-500 transition">?èÉ ?†ÏïÑ Î∞úÎã¨</a>
+            <a href="preschool.html"
+                class="block text-lg font-bold text-slate-800 hover:text-rose-500 transition">?è´ Ï∑®Ìïô ??/a>
+            <hr class="border-slate-100">
+            <a href="tools.html" class="block text-lg font-bold text-slate-800 hover:text-rose-500 transition">
+                <i class="fas fa-tools mr-2"></i>?§Îßà???ÑÍµ¨
+            </a>
+            <a href="pricing.html"
+                class="block w-full py-4 bg-slate-900 text-white rounded-xl font-black text-center mt-4">
+                <i class="fas fa-crown mr-2 text-yellow-400"></i>?ÑÎ¶¨ÎØ∏ÏóÑ Î©§Î≤Ñ??            </a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative pt-24 pb-16 overflow-hidden">
+        <!-- Background -->
+        <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800"></div>
+
+        <!-- Floating Elements -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="particle w-64 h-64 bg-purple-500/10 top-20 -left-20 animate-float"></div>
+            <div class="particle w-48 h-48 bg-pink-500/10 top-10 right-10 animate-float-reverse"></div>
+            <div class="particle w-32 h-32 bg-indigo-500/10 bottom-20 left-1/4 animate-float"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center max-w-3xl mx-auto">
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white/90 text-sm font-medium mb-6 animate-reveal">
+                    <i class="fas fa-robot text-cyan-400"></i>
+                    <span>AI-Powered Strategy Simulator</span>
+                </div>
+
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 animate-reveal"
+                    style="animation-delay: 0.1s">
+                    ?§Îßà???°ÏïÑ<br>
+                    <span
+                        class="bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
+                        Î°úÎìúÎß?                    </span>
+                </h1>
+
+                <p class="text-xl text-white/70 mb-8 animate-reveal" style="animation-delay: 0.2s">
+                    2026??ÏµúÏã† ?ïÏ±Ö??Î∞òÏòÅ??AI Í∏∞Î∞ò ÎßûÏ∂§??Î≥µÏ? ?ÑÎûµ ?úÎ??àÏù¥??br>
+                    Ï∂úÏÇ∞Î∂Ä??Ï¥àÎì±?ôÍµê ?ÖÌïôÍπåÏ? Î∞õÏùÑ ???àÎäî Î™®Îì† ÏßÄ?êÏùÑ ?úÎàà??                </p>
+
+                <!-- Quick Stats -->
+                <div class="flex flex-wrap justify-center gap-6 md:gap-12 animate-reveal" style="animation-delay: 0.3s">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-white">50+</div>
+                        <div class="text-white/60 text-sm">Î≥µÏ? ?ïÏ±Ö DB</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-white">17Í∞?/div>
+                        <div class="text-white/60 text-sm">Í¥ëÏó≠?úÎèÑ ÏßÄ??/div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-white">?§ÏãúÍ∞?/div>
+                        <div class="text-white/60 text-sm">?ïÏ±Ö ?ÖÎç∞?¥Ìä∏</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Configuration Panel -->
+    <section class="py-12 bg-white border-b">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="content-card p-6 md:p-8 scroll-reveal">
+                <div class="flex items-center gap-3 mb-6">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                        <i class="fas fa-sliders-h text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">?úÎ??àÏù¥???§Ï†ï</h2>
+                        <p class="text-sm text-gray-500">?ïÌôï??Î∂ÑÏÑù???ÑÌï¥ ?ïÎ≥¥Î•??ÖÎ†•??Ï£ºÏÑ∏??/p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Child's Birthdate -->
+                    <div>
+                        <label class="input-label">
+                            <i class="fas fa-calendar-alt mr-1 text-indigo-500"></i>
+                            ?êÎ? ?ùÎÖÑ?îÏùº
+                        </label>
+                        <input type="date" id="input-birthdate" class="input-field">
+                    </div>
+
+                    <!-- Child Count -->
+                    <div>
+                        <label class="input-label">
+                            <i class="fas fa-users mr-1 text-purple-500"></i>
+                            ?êÎ? ?úÏÑú
+                        </label>
+                        <select id="input-child-order" class="input-field">
+                            <option value="1">Ï≤´Ïß∏</option>
+                            <option value="2">?òÏß∏</option>
+                            <option value="3">?ãÏß∏ ?¥ÏÉÅ</option>
+                        </select>
+                    </div>
+
+                    <!-- Nationality -->
+                    <div>
+                        <label class="input-label">
+                            <i class="fas fa-flag mr-1 text-pink-500"></i>
+                            Íµ?†Å Íµ¨Î∂Ñ
+                        </label>
+                        <select id="input-nationality" class="input-field">
+                            <option value="korean">?¥Íµ≠??(Korean)</option>
+                            <option value="foreigner">?∏Íµ≠??(Foreigner)</option>
+                            <option value="multicultural">?§Î¨∏??Í∞Ä??(Mixed)</option>
+                        </select>
+                    </div>
+
+                    <!-- Region -->
+                    <div>
+                        <label class="input-label">
+                            <i class="fas fa-map-marker-alt mr-1 text-emerald-500"></i>
+                            Í±∞Ï£º ÏßÄ??                        </label>
+                        <select id="input-region" class="input-field">
+                            <option value="general">?ÑÍµ≠ Í≥µÌÜµ</option>
+                            <option value="seoul">?úÏö∏?πÎ≥Ñ??/option>
+                            <option value="gyeonggi">Í≤ΩÍ∏∞??/option>
+                            <option value="incheon">?∏Ï≤úÍ¥ëÏó≠??/option>
+                            <option value="busan">Î∂Ä?∞Í¥ë??ãú</option>
+                            <option value="daegu">?ÄÍµ¨Í¥ë??ãú</option>
+                            <option value="daejeon">?Ä?ÑÍ¥ë??ãú</option>
+                            <option value="gwangju">Í¥ëÏ£ºÍ¥ëÏó≠??/option>
+                            <option value="sejong">?∏Ï¢Ö?πÎ≥Ñ?êÏπò??/option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-xl">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Ï∂îÍ? Ï°∞Í±¥ (?†ÌÉù)</h4>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="opt-daycare" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm text-gray-600">?¥Î¶∞?¥Ïßë ?¥Ïö© ?àÏ†ï</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="opt-parental-leave" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm text-gray-600">?°ÏïÑ?¥ÏßÅ ?¨Ïö© ?àÏ†ï</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="opt-low-income" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm text-gray-600">Ï∞®ÏÉÅ???¥Ìïò Í∞ÄÍµ?/span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                    <button id="btn-simulate" class="btn-primary flex-1 flex items-center justify-center gap-2">
+                        <i class="fas fa-play"></i>
+                        <span>Î°úÎìúÎß??ùÏÑ±?òÍ∏∞</span>
+                    </button>
+                    <button id="btn-reset" class="btn-secondary flex items-center justify-center gap-2">
+                        <i class="fas fa-redo"></i>
+                        <span>Ï¥àÍ∏∞??/span>
+                    </button>
+                </div>
+
+                <!-- Info Notice -->
+                <div class="mt-4 flex items-start gap-3 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                    <i class="fas fa-info-circle text-indigo-500 mt-0.5"></i>
+                    <p class="text-sm text-indigo-700">
+                        2026??2??Í∏∞Ï? ÏµúÏã† ?ïÏ±Ö??Î∞òÏòÅ?òÏñ¥ ?àÏäµ?àÎã§. Î∂ÄÎ™®Í∏â????100ÎßåÏõê, Ï≤´Îßå?®Ïù¥?©Í∂å 200ÎßåÏõê,
+                        ?°ÏïÑÍ∏?Í∑ºÎ°ú?úÍ∞Ñ ?®Ï∂ï??10??Ï∂úÍ∑º) ?±Ïù¥ ?¨Ìï®?©Îãà??
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading State -->
+    <div id="loading-section" class="hidden py-20">
+        <div class="text-center">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-500">ÎßûÏ∂§??Î°úÎìúÎßµÏùÑ ?ùÏÑ±?òÍ≥† ?àÏäµ?àÎã§...</p>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <section id="result-section" class="py-12 hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- KPI Dashboard -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <!-- Total Benefits -->
+                <div class="kpi-card emerald scroll-reveal">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">?àÏÉÅ ÏßÄ??Ï¥ùÏï°</p>
+                            <p class="text-sm text-gray-500 mt-1">Estimated Benefits</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                            <i class="fas fa-coins text-emerald-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-900" id="val-total-money">0??/p>
+                    <p class="text-xs text-gray-400 mt-2">?•ÌõÑ 7?ÑÍ∞Ñ ?òÎ†π Í∞Ä??Í∏àÏï°</p>
+                </div>
+
+                <!-- Next Milestone -->
+                <div class="kpi-card blue scroll-reveal" style="animation-delay: 0.1s">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">?§Ïùå Ï§ëÏöî ?ºÏ†ï</p>
+                            <p class="text-sm text-gray-500 mt-1">Next Milestone</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-flag text-blue-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-lg font-bold text-gray-900" id="val-next-event">-</p>
+                    <p class="text-sm font-semibold text-blue-600 mt-1" id="val-next-date">D-day</p>
+                </div>
+
+                <!-- Monthly Support -->
+                <div class="kpi-card purple scroll-reveal" style="animation-delay: 0.2s">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">???âÍ∑† ÏßÄ?êÍ∏à</p>
+                            <p class="text-sm text-gray-500 mt-1">Monthly Average</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-wallet text-purple-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-900" id="val-monthly-avg">0??/p>
+                    <p class="text-xs text-gray-400 mt-2">Ï≤?1??Í∏∞Ï?</p>
+                </div>
+
+                <!-- Time Saved -->
+                <div class="kpi-card pink scroll-reveal" style="animation-delay: 0.3s">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">?°ÏïÑÍ∏??®Ï∂ïÍ∑ºÎ¨¥</p>
+                            <p class="text-sm text-gray-500 mt-1">10AM Work Start</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
+                            <i class="fas fa-clock text-pink-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-900">300<span
+                            class="text-lg font-normal text-gray-500">?úÍ∞Ñ/??/span></p>
+                    <p class="text-xs text-gray-400 mt-2">?∞Í∞Ñ ?ïÎ≥¥ Í∞Ä???ÑÏπ® ?úÍ∞Ñ</p>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Timeline (Left 2 columns) -->
+                <div class="lg:col-span-2">
+                    <div class="content-card p-6 md:p-8 scroll-reveal">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                                    <i class="fas fa-stream text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900">ÎßûÏ∂§???°ÏïÑ Î°úÎìúÎß?/h3>
+                                    <p class="text-sm text-gray-500">Strategic Lifecycle Timeline</p>
+                                </div>
+                            </div>
+                            <button onclick="printRoadmap()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                title="?∏ÏáÑ">
+                                <i class="fas fa-print text-gray-400"></i>
+                            </button>
+                        </div>
+
+                        <!-- Filter Tabs -->
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <button
+                                class="timeline-filter active px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700"
+                                data-filter="all">
+                                ?ÑÏ≤¥
+                            </button>
+                            <button
+                                class="timeline-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                data-filter="benefit">
+                                <i class="fas fa-gift mr-1"></i>?úÌÉù
+                            </button>
+                            <button
+                                class="timeline-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                data-filter="cash">
+                                <i class="fas fa-won-sign mr-1"></i>?ÑÍ∏à
+                            </button>
+                            <button
+                                class="timeline-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                data-filter="policy">
+                                <i class="fas fa-briefcase mr-1"></i>?ïÏ±Ö
+                            </button>
+                            <button
+                                class="timeline-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                data-filter="edu">
+                                <i class="fas fa-school mr-1"></i>ÍµêÏú°
+                            </button>
+                        </div>
+
+                        <!-- Timeline Container -->
+                        <div class="timeline-container" id="roadmap-container">
+                            <!-- Timeline items injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar (Right column) -->
+                <div class="space-y-6">
+                    <!-- Foreigner Support Card -->
+                    <div id="card-foreigner" class="hidden scroll-reveal">
+                        <div class="content-card p-6 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                                    <i class="fas fa-passport text-amber-600"></i>
+                                </div>
+                                <h4 class="font-bold text-amber-900">?∏Íµ≠??Î∂ÄÎ™?Í∞Ä?¥Îìú</h4>
+                            </div>
+                            <p class="text-sm text-amber-800 mb-4 leading-relaxed">
+                                <span class="font-bold" id="region-display"></span> ÏßÄ??Í±∞Ï£º ?∏Íµ≠???§Î¨∏??Í∞Ä?ïÏúºÎ°?Î∂ÑÎ•ò?©Îãà??
+                                Ï§ëÏïô?ïÎ? ÏßÄ?êÏ? ?úÌïú?ÅÏùº ???àÏúº?? ÏßÄ?êÏ≤¥ ?πÌôî ÏßÄ?êÏùÑ ?ïÏù∏?òÏÑ∏??
+                            </p>
+                            <ul class="space-y-2">
+                                <li class="flex items-start gap-2 text-sm text-amber-800">
+                                    <i class="fas fa-check-circle text-amber-600 mt-0.5"></i>
+                                    <span>?∏Íµ≠??Î≥¥Ïú°Î£?ÏßÄ??(Ï£ºÎ??ºÌÑ∞)</span>
+                                </li>
+                                <li class="flex items-start gap-2 text-sm text-amber-800">
+                                    <i class="fas fa-check-circle text-amber-600 mt-0.5"></i>
+                                    <span>?§Íµ≠???µÎ≤à???úÎπÑ??(1577-1366)</span>
+                                </li>
+                                <li class="flex items-start gap-2 text-sm text-amber-800">
+                                    <i class="fas fa-check-circle text-amber-600 mt-0.5"></i>
+                                    <span>?§Î¨∏?îÍ?Ï°±Ï??êÏÑº???ÑÎ°úÍ∑∏Îû®</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Document Checklist -->
+                    <div class="content-card p-6 scroll-reveal">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                                <i class="fas fa-file-contract text-gray-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Ï§ÄÎπ??úÎ•ò Ï≤¥ÌÅ¨Î¶¨Ïä§??/h4>
+                                <p class="text-xs text-gray-500">?ÑÏàò ?úÎ•òÎ•?ÎØ∏Î¶¨ Ï§ÄÎπÑÌïò?∏Ïöî</p>
+                            </div>
+                        </div>
+                        <div id="doc-checklist">
+                            <!-- JS Injected -->
+                        </div>
+                        <p class="text-xs text-gray-400 mt-4">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            ?¥Î¶≠?òÏó¨ Ï§ÄÎπ??ÑÎ£å ?úÏãú
+                        </p>
+                    </div>
+
+                    <!-- Yearly Chart -->
+                    <div class="content-card p-6 scroll-reveal">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-indigo-600"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-900">?∞ÎèÑÎ≥?ÏßÄ?êÍ∏à Ï∂îÏù¥</h4>
+                        </div>
+                        <canvas id="benefitChart" height="200"></canvas>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="content-card p-6 scroll-reveal">
+                        <h4 class="font-bold text-gray-900 mb-4">Í¥Ä???¨Ïù¥??Î∞îÎ°úÍ∞ÄÍ∏?/h4>
+                        <div class="space-y-2">
+                            <a href="https://www.gov.kr" target="_blank" rel="noopener"
+                                class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                <span class="text-sm font-medium text-gray-700">?ïÎ?24</span>
+                                <i class="fas fa-external-link-alt text-gray-400 text-xs"></i>
+                            </a>
+                            <a href="https://www.bokjiro.go.kr" target="_blank" rel="noopener"
+                                class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                <span class="text-sm font-medium text-gray-700">Î≥µÏ?Î°?/span>
+                                <i class="fas fa-external-link-alt text-gray-400 text-xs"></i>
+                            </a>
+                            <a href="https://www.childcare.go.kr" target="_blank" rel="noopener"
+                                class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                <span class="text-sm font-medium text-gray-700">?ÑÏù¥?¨Îûë</span>
+                                <i class="fas fa-external-link-alt text-gray-400 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ad Slot -->
+            <div class="mt-12">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2916041253392911"
+                    data-ad-slot="ROADMAP_BOTTOM_AD" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="particle w-40 h-40 bg-white/5 top-10 left-10 animate-float rounded-full"></div>
+            <div class="particle w-32 h-32 bg-white/5 bottom-10 right-20 animate-float-reverse rounded-full"></div>
+        </div>
+
+        <div class="relative z-10 max-w-4xl mx-auto px-4 text-center scroll-reveal">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                ???ïÌôï??Î∂ÑÏÑù???ÑÏöî?òÏã†Í∞Ä??
+            </h2>
+            <p class="text-xl text-white/80 mb-8">
+                ?ÑÎ¶¨ÎØ∏ÏóÑ Î©§Î≤Ñ??úºÎ°?AI Í∏∞Î∞ò ÎßûÏ∂§ ?ÅÎã¥Í≥?br>
+                ?§ÏãúÍ∞??ïÏ±Ö ?åÎ¶º ?úÎπÑ?§Î? Î∞õÏïÑÎ≥¥ÏÑ∏??            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="pricing.html"
+                    class="px-8 py-4 bg-white text-indigo-600 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg">
+                    <i class="fas fa-crown mr-2"></i>?ÑÎ¶¨ÎØ∏ÏóÑ ?åÏïÑÎ≥¥Í∏∞
+                </a>
+                <a href="tools.html"
+                    class="px-8 py-4 bg-white/10 backdrop-blur text-white rounded-xl font-bold text-lg hover:bg-white/20 transition-all border border-white/30">
+                    <i class="fas fa-tools mr-2"></i>?°ÏïÑ ?ÑÍµ¨ ?¨Ïö©?òÍ∏∞
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <!-- Brand -->
+                <div class="md:col-span-1">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white text-xl">
+                            ?ë∂
+                        </div>
+                        <span class="text-xl font-bold text-white">IMOMGUIDE</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">
+                        100???°ÏïÑ ÏßÄ?úÏ? ÏµúÏã† ?òÌïô ?ïÎ≥¥Î•?Í≤∞Ìï©???ÑÎ¶¨ÎØ∏ÏóÑ ?°ÏïÑ Í∞Ä?¥Îìú
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-blog"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Guide -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">?°ÏïÑ Í∞Ä?¥Îìú</h4>
+                    <ul class="space-y-2">
+                        <li><a href="pregnancy.html"
+                                class="text-gray-400 hover:text-white transition-colors text-sm">?ÑÏã†Î∞±Í≥º</a></li>
+                        <li><a href="postpartum.html"
+                                class="text-gray-400 hover:text-white transition-colors text-sm">?∞ÌõÑ?åÎ≥µ</a></li>
+                        <li><a href="infant.html" class="text-gray-400 hover:text-white transition-colors text-sm">?ÅÏïÑ
+                                Î∞îÏù¥Î∏?/a></li>
+                        <li><a href="toddler.html"
+                                class="text-gray-400 hover:text-white transition-colors text-sm">?†ÏïÑÍ∏?/a></li>
+                        <li><a href="preschool.html"
+                                class="text-gray-400 hover:text-white transition-colors text-sm">?ôÎ†π?ÑÍ∏∞</a></li>
+                    </ul>
+                </div>
+
+                <!-- Tools -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">?§Îßà???ÑÍµ¨</h4>
+                    <ul class="space-y-2">
+                        <li><a href="tools.html" class="text-gray-400 hover:text-white transition-colors text-sm">?±Ïû•
+                                Í∏∞Î°ù</a></li>
+                        <li><a href="tools.html" class="text-gray-400 hover:text-white transition-colors text-sm">?òÏú†
+                                ?∏ÎûòÏª?/a></li>
+                        <li><a href="roadmap.html"
+                                class="text-gray-400 hover:text-white transition-colors text-sm font-medium">?°ÏïÑ Î°úÎìúÎß?/a>
+                        </li>
+                        <li><a href="pricing.html" class="text-gray-400 hover:text-white transition-colors text-sm">?ÑÎ¶¨ÎØ∏ÏóÑ
+                                Î©§Î≤Ñ??/a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">ÏßÄ??/h4>
+                    <ul class="space-y-2">
+                        <li><a href="privacy.html"
+                                class="text-gray-400 hover:text-white transition-colors text-sm">Í∞úÏù∏?ïÎ≥¥Ï≤òÎ¶¨Î∞©Ïπ®</a></li>
+                        <li><a href="sitemap.xml"
+                                class="text-gray-400 hover:text-white transition-colors text-sm">?¨Ïù¥?∏Îßµ</a></li>
+                        <li><a href="mailto:info@imomguide.pages.dev"
+                                class="text-gray-400 hover:text-white transition-colors text-sm">Î¨∏Ïùò?òÍ∏∞</a></li>
+                    </ul>
+                    <div class="mt-4 p-4 rounded-xl bg-gray-800">
+                        <p class="text-gray-400 text-xs">
+                            <i class="fas fa-shield-alt text-green-400 mr-1"></i>
+                            2026??ÏµúÏã† ?ïÏ±Ö Î∞òÏòÅ<br>
+                            Î≥¥Í±¥Î≥µÏ?Î∂Ä, Í≥†Ïö©?∏ÎèôÎ∂Ä ?êÎ£å Í∏∞Ï?
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom -->
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p class="text-gray-500 text-sm">
+                        ¬© 2026 ?ÑÏù¥Îß?Í∞Ä?¥Îìú. All rights reserved.
+                    </p>
+                    <p class="text-gray-500 text-sm">
+                        Î≥??úÎ??àÏù¥?òÏ? Ï∞∏Í≥†?©Ïù¥Î©? ?§Ï†ú ÏßÄ???¨Î???Í¥Ä??Í∏∞Í???Î¨∏Ïùò?òÏÑ∏??
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="back-to-top" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        // ============================================
+        // IMOM GUIDE - Roadmap Simulator v2.0
+        // ============================================
+
+        // Global State
+        let roadmapData = null;
+        let myChart = null;
+        let checkedDocs = new Set();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load saved data
+            const savedBirth = localStorage.getItem('imom_roadmap_birthdate');
+            const savedNationality = localStorage.getItem('imom_roadmap_nationality');
+            const savedRegion = localStorage.getItem('imom_roadmap_region');
+            const savedChildOrder = localStorage.getItem('imom_roadmap_child_order');
+
+            if (savedBirth) document.getElementById('input-birthdate').value = savedBirth;
+            if (savedNationality) document.getElementById('input-nationality').value = savedNationality;
+            if (savedRegion) document.getElementById('input-region').value = savedRegion;
+            if (savedChildOrder) document.getElementById('input-child-order').value = savedChildOrder;
+
+            // Event Listeners
+            document.getElementById('btn-simulate').addEventListener('click', runSimulation);
+            document.getElementById('btn-reset').addEventListener('click', resetForm);
+
+            // Timeline filters
+            document.querySelectorAll('.timeline-filter').forEach(btn => {
+                btn.addEventListener('click', () => filterTimeline(btn.dataset.filter));
+            });
+
+            // Mobile menu
+            initMobileMenu();
+
+            // Scroll reveal
+            initScrollReveal();
+
+            // Back to top
+            initBackToTop();
+        });
+
+        // Mobile Menu
+        function initMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+            function openMobileMenu() {
+                mobileMenu.classList.add('active');
+                mobileMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
+                mobileMenuOverlay.classList.add('opacity-100');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileMenu() {
+                mobileMenu.classList.remove('active');
+                mobileMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
+                mobileMenuOverlay.classList.remove('opacity-100');
+                document.body.style.overflow = '';
+            }
+
+            mobileMenuBtn.addEventListener('click', openMobileMenu);
+            mobileMenuClose.addEventListener('click', closeMobileMenu);
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        // Scroll Reveal
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+        }
+
+        // Back to Top
+        function initBackToTop() {
+            window.addEventListener('scroll', () => {
+                const btn = document.getElementById('back-to-top');
+                if (window.scrollY > 500) {
+                    btn.classList.add('visible');
+                } else {
+                    btn.classList.remove('visible');
+                }
+            });
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 3000);
+        }
+
+        // Reset Form
+        function resetForm() {
+            document.getElementById('input-birthdate').value = '';
+            document.getElementById('input-nationality').value = 'korean';
+            document.getElementById('input-region').value = 'general';
+            document.getElementById('input-child-order').value = '1';
+            document.getElementById('opt-daycare').checked = false;
+            document.getElementById('opt-parental-leave').checked = false;
+            document.getElementById('opt-low-income').checked = false;
+
+            localStorage.removeItem('imom_roadmap_birthdate');
+            localStorage.removeItem('imom_roadmap_nationality');
+            localStorage.removeItem('imom_roadmap_region');
+            localStorage.removeItem('imom_roadmap_child_order');
+
+            document.getElementById('result-section').classList.add('hidden');
+            showToast('?§Ï†ï??Ï¥àÍ∏∞?îÎêò?àÏäµ?àÎã§');
+        }
+
+        // Run Simulation
+        function runSimulation() {
+            const birthdateStr = document.getElementById('input-birthdate').value;
+            const nationality = document.getElementById('input-nationality').value;
+            const region = document.getElementById('input-region').value;
+            const childOrder = document.getElementById('input-child-order').value;
+            const useDaycare = document.getElementById('opt-daycare').checked;
+            const useParentalLeave = document.getElementById('opt-parental-leave').checked;
+            const isLowIncome = document.getElementById('opt-low-income').checked;
+
+            if (!birthdateStr) {
+                showToast('?êÎ????ùÎÖÑ?îÏùº???ÖÎ†•??Ï£ºÏÑ∏??);
+                return;
+            }
+
+            // Save to localStorage
+            localStorage.setItem('imom_roadmap_birthdate', birthdateStr);
+            localStorage.setItem('imom_roadmap_nationality', nationality);
+            localStorage.setItem('imom_roadmap_region', region);
+            localStorage.setItem('imom_roadmap_child_order', childOrder);
+
+            // Show loading
+            document.getElementById('loading-section').classList.remove('hidden');
+            document.getElementById('result-section').classList.add('hidden');
+
+            // Simulate processing delay
+            setTimeout(() => {
+                // Generate roadmap data
+                roadmapData = generateRoadmap(birthdateStr, nationality, region, childOrder, useDaycare, useParentalLeave, isLowIncome);
+
+                // Render results
+                renderDashboard(roadmapData);
+                renderTimeline(roadmapData.events);
+                renderSidePanels(nationality, region);
+                renderChart(roadmapData.financials);
+
+                // Hide loading, show results
+                document.getElementById('loading-section').classList.add('hidden');
+                document.getElementById('result-section').classList.remove('hidden');
+
+                // Scroll to results
+                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+
+                // Animate timeline items
+                setTimeout(() => {
+                    document.querySelectorAll('.timeline-item').forEach((item, i) => {
+                        setTimeout(() => item.classList.add('visible'), i * 100);
+                    });
+                }, 300);
+
+                showToast('Î°úÎìúÎßµÏù¥ ?ùÏÑ±?òÏóà?µÎãà??');
+            }, 1500);
+        }
+
+        // Generate Roadmap Data
+        function generateRoadmap(birthStr, nationality, region, childOrder, useDaycare, useParentalLeave, isLowIncome) {
+            const birth = new Date(birthStr);
+            const events = [];
+            let totalCash = 0;
+            const financialYearly = {};
+
+            const addEvent = (title, dateObj, type, amount = 0, desc = '', priority = 'normal') => {
+                events.push({ title, date: new Date(dateObj), type, amount, desc, priority });
+                if (amount > 0) {
+                    totalCash += amount;
+                    const year = dateObj.getFullYear();
+                    financialYearly[year] = (financialYearly[year] || 0) + amount;
+                }
+            };
+
+            const isKorean = nationality === 'korean' || nationality === 'multicultural';
+            const isSeoulGyeonggi = region === 'seoul' || region === 'gyeonggi';
+
+            // === ?ïÏ±Ö Î°úÏßÅ ===
+
+            // 1. Ï∂úÏÉù ?†Í≥† Î∞?Ï≤´Îßå?®Ïù¥?©Í∂å
+            const firstMeetAmount = isKorean ? 2000000 : 0;
+            addEvent('Ï∂úÏÉù?†Í≥† Î∞?Ï≤´Îßå?®Ïù¥?©Í∂å ?†Ï≤≠', birth, 'benefit', firstMeetAmount,
+                isKorean ? 'Íµ???âÎ≥µÏπ¥Îìú Î∞îÏö∞Ï≤?200ÎßåÏõê (Ï°∞Î¶¨?? ?°ÏïÑ?©Ìíà ???¨Ïö©)' : '?∏Íµ≠?∏Ï? ?ºÎ? ÏßÄ???úÌïú',
+                'high');
+
+            // 2. Î∂ÄÎ™®Í∏â??(0-11Í∞úÏõî) - 2025??Í∏∞Ï? ??100ÎßåÏõê
+            if (isKorean && !useDaycare) {
+                for (let i = 0; i < 12; i++) {
+                    let d = new Date(birth);
+                    d.setMonth(birth.getMonth() + i);
+                    addEvent(`${i + 1}Í∞úÏõî Î∂ÄÎ™®Í∏â??, d, 'cash', 1000000,
+                        '?ÑÍ∏à 100ÎßåÏõê (?¥Î¶∞?¥Ïßë ÎØ∏Ïù¥????');
+                }
+            } else if (isKorean && useDaycare) {
+                // ?¥Î¶∞?¥Ïßë ?¥Ïö© ??Î≥¥Ïú°Î£?ÏßÄ??                for (let i = 0; i < 12; i++) {
+                    let d = new Date(birth);
+                    d.setMonth(birth.getMonth() + i);
+                    addEvent(`${i + 1}Í∞úÏõî Î≥¥Ïú°Î£?ÏßÄ??, d, 'benefit', 514000,
+                        '?¥Î¶∞?¥Ïßë Î≥¥Ïú°Î£??ÑÏï° ÏßÄ??);
+                }
+            }
+
+            // 3. ?ÑÎèô?òÎãπ (0-95Í∞úÏõî, ??10ÎßåÏõê)
+            if (isKorean) {
+                for (let year = 0; year < 8; year++) {
+                    let d = new Date(birth);
+                    d.setFullYear(birth.getFullYear() + year);
+                    d.setMonth(0);
+                    if (d >= birth) {
+                        addEvent(`${year + 1}?ÑÏ∞® ?ÑÎèô?òÎãπ`, d, 'cash', 1200000,
+                            '??10ÎßåÏõê √ó 12Í∞úÏõî (Îß?8??ÎØ∏Îßå)');
+                    }
+                }
+            }
+
+            // 4. ?òÏß∏ ?¥ÏÉÅ Ï∂îÍ? ?úÌÉù
+            if (childOrder >= 2 && isKorean) {
+                addEvent('?§Ïûê?Ä Ï∂îÍ? ?úÌÉù ?†Ï≤≠', birth, 'benefit', 500000,
+                    '?òÏß∏ ?¥ÏÉÅ Ï∂úÏÇ∞ Ï∂ïÌïòÍ∏?(ÏßÄ?êÏ≤¥Î≥??ÅÏù¥)', 'high');
+            }
+
+            // 5. ?ãÏß∏ ?¥ÏÉÅ ?πÎ≥Ñ ?úÌÉù
+            if (childOrder >= 3 && isKorean) {
+                addEvent('?ãÏß∏ ?¥ÏÉÅ ?πÎ≥Ñ ÏßÄ?êÍ∏à', birth, 'benefit', 2000000,
+                    '?ãÏß∏ ?¥ÏÉÅ Ï∂úÏÇ∞ ?•Î†§Í∏?(ÏßÄ?êÏ≤¥Î≥??ÅÏù¥)', 'high');
+            }
+
+            // 6. ?Ä?åÎìù Í∞ÄÍµ?Ï∂îÍ? ÏßÄ??            if (isLowIncome && isKorean) {
+                addEvent('Ï∞®ÏÉÅ??Í∏∞Ï?Í∑Ä¬∑Ï°∞Ï†úÎ∂ÑÏú† ÏßÄ??, birth, 'benefit', 0,
+                    'Í∏∞Ï?Í∑Ä ??8ÎßåÏõê, Ï°∞Ï†úÎ∂ÑÏú† ??10ÎßåÏõê Î∞îÏö∞Ï≤?);
+            }
+
+            // 7. ?°ÏïÑ?¥ÏßÅ (?¨Ïö© ?àÏ†ï??Í≤ΩÏö∞)
+            if (useParentalLeave) {
+                addEvent('?°ÏïÑ?¥ÏßÅ Í∏âÏó¨ ?òÎ†π ?úÏûë', birth, 'policy', 0,
+                    '?µÏÉÅ?ÑÍ∏à 80% (?ÅÌïú 150ÎßåÏõê/?? √ó ÏµúÎ? 1??, 'high');
+
+                let leaveEnd = new Date(birth);
+                leaveEnd.setFullYear(birth.getFullYear() + 1);
+                addEvent('?°ÏïÑ?¥ÏßÅ Ï¢ÖÎ£å', leaveEnd, 'policy', 0,
+                    'Î≥µÏßÅ ?êÎäî ?°ÏïÑÍ∏?Í∑ºÎ°ú?úÍ∞Ñ ?®Ï∂ï ?ÑÌôò Í≤Ä??);
+            }
+
+            // 8. ?°ÏïÑÍ∏?Í∑ºÎ°ú?úÍ∞Ñ ?®Ï∂ï (2026???ïÏ±Ö)
+            const policy2026 = new Date('2026-01-01');
+            if (birth < policy2026) {
+                addEvent('?°ÏïÑÍ∏?10??Ï∂úÍ∑º???úÏö©', policy2026, 'policy', 0,
+                    'Îß?12???¥Ìïò ?êÎ? Î∂ÄÎ™? 1??1?úÍ∞Ñ ?®Ï∂ï (?ÑÍ∏à Î≥¥Ï†Ñ)', 'high');
+            }
+
+            // 9. ?ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß?            const checkups = [
+                { month: 1, name: '1Ï∞??ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß? },
+                { month: 4, name: '2Ï∞??ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß? },
+                { month: 9, name: '3Ï∞??ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß? },
+                { month: 18, name: '4Ï∞??ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß? },
+                { month: 30, name: '5Ï∞??ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß? },
+                { month: 42, name: '6Ï∞??ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß? },
+                { month: 54, name: '7Ï∞??ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß? },
+                { month: 66, name: '8Ï∞??ÅÏú†??Í±¥Í∞ïÍ≤ÄÏß? }
+            ];
+
+            checkups.forEach(c => {
+                let d = new Date(birth);
+                d.setMonth(birth.getMonth() + c.month);
+                addEvent(c.name, d, 'health', 0, 'Î¨¥Î£å Í≤ÄÏß?(Íµ??Í±¥Í∞ïÎ≥¥ÌóòÍ≥µÎã®)');
+            });
+
+            // 10. ?àÎ∞©?ëÏ¢Ö Ï£ºÏöî ?ºÏ†ï
+            const vaccines = [
+                { month: 0, name: 'BCG, B?ïÍ∞Ñ??1Ï∞? },
+                { month: 2, name: 'DTaP, ?¥Î¶¨?? Hib, ?êÎ†¥Íµ¨Í∑†, Î°úÌ?Î∞îÏù¥?¨Ïä§' },
+                { month: 4, name: 'DTaP, ?¥Î¶¨?? Hib, ?êÎ†¥Íµ¨Í∑†, Î°úÌ?Î∞îÏù¥?¨Ïä§ 2Ï∞? },
+                { month: 6, name: 'DTaP, ?¥Î¶¨?? Hib, ?êÎ†¥Íµ¨Í∑†, Î°úÌ?Î∞îÏù¥?¨Ïä§ 3Ï∞? },
+                { month: 12, name: 'MMR, ?òÎëê, ?ºÎ≥∏?åÏóº, A?ïÍ∞Ñ?? }
+            ];
+
+            vaccines.forEach(v => {
+                let d = new Date(birth);
+                d.setMonth(birth.getMonth() + v.month);
+                addEvent(`?àÎ∞©?ëÏ¢Ö: ${v.name}`, d, 'health', 0, 'Íµ???ÑÏàò?àÎ∞©?ëÏ¢Ö Î¨¥Î£å');
+            });
+
+            // 11. ?†Ïπò???¥Î¶∞?¥Ïßë ?ÖÌïô
+            let preschool = new Date(birth);
+            preschool.setFullYear(birth.getFullYear() + 3);
+            preschool.setMonth(2);
+            addEvent('?†Ïπò???¥Î¶∞?¥Ïßë ?ÖÌïô', preschool, 'edu', 0,
+                '?ÑÎ¶¨Í≥ºÏ†ï Î¨¥ÏÉÅÍµêÏú° (Îß?3-5??');
+
+            // 12. Ï¥àÎì±?ôÍµê ?ÖÌïô
+            let school = new Date(birth);
+            school.setFullYear(birth.getFullYear() + 7);
+            school.setMonth(2);
+            addEvent('Ï¥àÎì±?ôÍµê ?ÖÌïô', school, 'edu', 0,
+                '?ÖÌïô Ï∂ïÌïòÍ∏??†Ï≤≠ (ÏßÄ?êÏ≤¥Î≥??ÅÏù¥)', 'high');
+
+            // 13. ÏßÄ??≥Ñ Ï∂îÍ? ?úÌÉù
+            if (region === 'seoul' && isKorean) {
+                addEvent('?úÏö∏??Ï∂úÏÇ∞Ï∂ïÌïòÍ∏?, birth, 'benefit', 1000000,
+                    'Ï≤´Ïß∏ 100ÎßåÏõê (?úÏö∏??Í±∞Ï£º??');
+            }
+            if (region === 'gyeonggi' && isKorean) {
+                addEvent('Í≤ΩÍ∏∞???∞ÌõÑÏ°∞Î¶¨Îπ?, birth, 'benefit', 500000,
+                    '?∞ÌõÑÏ°∞Î¶¨Îπ?ÏßÄ??(Í≤ΩÍ∏∞??Í±∞Ï£º??');
+            }
+            if (region === 'sejong' && isKorean) {
+                addEvent('?∏Ï¢Ö??Ï∂úÏÇ∞?•Î†§Í∏?, birth, 'benefit', 1500000,
+                    'Ï≤´Ïß∏ 150ÎßåÏõê (?∏Ï¢Ö??Í±∞Ï£º??');
+            }
+
+            // ?∏Íµ≠???ÑÏö© ?àÎÇ¥
+            if (nationality === 'foreigner' && isSeoulGyeonggi) {
+                addEvent('?∏Íµ≠??Î≥¥Ïú°Î£?ÏßÄ???†Ï≤≠', birth, 'info', 0,
+                    '?¥Î¶∞?¥Ïßë ?¥Ïö© ??Î≥¥Ïú°Î£??ºÎ? ÏßÄ??(ÏßÄ?êÏ≤¥ ?ïÏ±Ö)');
+            }
+
+            // Sort by date
+            events.sort((a, b) => a.date - b.date);
+
+            // Calculate monthly average (first year)
+            const firstYearTotal = events
+                .filter(e => e.date <= new Date(birth.getFullYear() + 1, birth.getMonth(), birth.getDate()))
+                .reduce((sum, e) => sum + e.amount, 0);
+            const monthlyAvg = Math.round(firstYearTotal / 12);
+
+            return { events, financials: financialYearly, totalCash, monthlyAvg };
+        }
+
+        // Render Dashboard KPIs
+        function renderDashboard(data) {
+            document.getElementById('val-total-money').textContent = data.totalCash.toLocaleString() + '??;
+            document.getElementById('val-monthly-avg').textContent = data.monthlyAvg.toLocaleString() + '??;
+
+            const today = new Date();
+            const nextEvent = data.events.find(e => e.date >= today);
+
+            if (nextEvent) {
+                document.getElementById('val-next-event').textContent = nextEvent.title;
+                const diffDays = Math.ceil((nextEvent.date - today) / (1000 * 60 * 60 * 24));
+                document.getElementById('val-next-date').textContent = diffDays === 0 ? '?§Îäò!' : `D-${diffDays}`;
+            } else {
+                document.getElementById('val-next-event').textContent = 'Î™®Îì† ?ºÏ†ï ?ÑÎ£å';
+                document.getElementById('val-next-date').textContent = '-';
+            }
+        }
+
+        // Render Timeline
+        function renderTimeline(events, filterType = 'all') {
+            const container = document.getElementById('roadmap-container');
+            container.innerHTML = '';
+
+            const today = new Date();
+
+            const filteredEvents = filterType === 'all'
+                ? events
+                : events.filter(e => e.type === filterType);
+
+            filteredEvents.forEach((e, index) => {
+                const isPast = e.date < today;
+
+                // Icon and color based on type
+                const typeConfig = {
+                    benefit: { icon: 'fa-gift', color: 'bg-pink-500', textColor: 'text-pink-600' },
+                    cash: { icon: 'fa-won-sign', color: 'bg-emerald-500', textColor: 'text-emerald-600' },
+                    policy: { icon: 'fa-briefcase', color: 'bg-purple-500', textColor: 'text-purple-600' },
+                    edu: { icon: 'fa-school', color: 'bg-blue-500', textColor: 'text-blue-600' },
+                    health: { icon: 'fa-heartbeat', color: 'bg-red-400', textColor: 'text-red-500' },
+                    info: { icon: 'fa-info-circle', color: 'bg-gray-400', textColor: 'text-gray-500' }
+                };
+
+                const config = typeConfig[e.type] || typeConfig.info;
+                const dateStr = e.date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                const pastClass = isPast ? 'past' : '';
+                const priorityBadge = e.priority === 'high'
+                    ? '<span class="ml-2 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs font-bold">Ï§ëÏöî</span>'
+                    : '';
+
+                const html = `
+                    <div class="timeline-item ${pastClass}" data-type="${e.type}">
+                        <div class="timeline-icon ${config.color} text-white">
+                            <i class="fas ${config.icon} text-sm"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                <span class="text-xs font-bold ${config.textColor} uppercase tracking-wide">${dateStr}</span>
+                                ${e.amount > 0 ? `<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+${e.amount.toLocaleString()}??/span>` : ''}
+                            </div>
+                            <h4 class="font-bold text-gray-900 mb-1">${e.title}${priorityBadge}</h4>
+                            <p class="text-sm text-gray-500">${e.desc}</p>
+                        </div>
+                    </div>
+                `;
+
+                container.insertAdjacentHTML('beforeend', html);
+            });
+
+            // Animate items
+            setTimeout(() => {
+                document.querySelectorAll('.timeline-item').forEach((item, i) => {
+                    setTimeout(() => item.classList.add('visible'), i * 80);
+                });
+            }, 100);
+        }
+
+        // Filter Timeline
+        function filterTimeline(type) {
+            // Update filter button styles
+            document.querySelectorAll('.timeline-filter').forEach(btn => {
+                if (btn.dataset.filter === type) {
+                    btn.classList.remove('bg-gray-100', 'text-gray-600');
+                    btn.classList.add('bg-indigo-100', 'text-indigo-700', 'active');
+                } else {
+                    btn.classList.remove('bg-indigo-100', 'text-indigo-700', 'active');
+                    btn.classList.add('bg-gray-100', 'text-gray-600');
+                }
+            });
+
+            // Re-render timeline
+            if (roadmapData) {
+                renderTimeline(roadmapData.events, type);
+            }
+        }
+
+        // Render Side Panels
+        function renderSidePanels(nationality, region) {
+            // Foreigner card
+            const fCard = document.getElementById('card-foreigner');
+            const regionNames = {
+                seoul: '?úÏö∏',
+                gyeonggi: 'Í≤ΩÍ∏∞',
+                incheon: '?∏Ï≤ú',
+                busan: 'Î∂Ä??,
+                general: '?ºÎ∞ò'
+            };
+            document.getElementById('region-display').textContent = regionNames[region] || '?ºÎ∞ò';
+
+            if (nationality === 'foreigner' || nationality === 'multicultural') {
+                fCard.classList.remove('hidden');
+            } else {
+                fCard.classList.add('hidden');
+            }
+
+            // Document checklist
+            const checklist = document.getElementById('doc-checklist');
+            const docs = [
+                { id: 'doc1', name: 'Ï∂úÏÉùÏ¶ùÎ™Ö??(Î≥ëÏõê Î∞úÍ∏â)', required: true },
+                { id: 'doc2', name: 'Î∂ÄÎ™??†Î∂ÑÏ¶?, required: true },
+                { id: 'doc3', name: '?µÏû• ?¨Î≥∏ (Î∂ÄÎ™??êÎäî ?ÑÎèô Î™ÖÏùò)', required: true },
+                { id: 'doc4', name: 'Ï£ºÎ??±Î°ù?±Î≥∏', required: true }
+            ];
+
+            if (nationality !== 'korean') {
+                docs.push({ id: 'doc5', name: '?∏Íµ≠?∏Îì±Î°ùÏ¶ù (Î∂ÄÎ™?', required: true });
+                docs.push({ id: 'doc6', name: '?∏Íµ≠?∏Îì±Î°ùÏÇ¨?§Ï¶ùÎ™?, required: true });
+            }
+
+            checklist.innerHTML = docs.map(d => `
+                <div class="checklist-item ${checkedDocs.has(d.id) ? 'checked' : ''}" onclick="toggleDoc('${d.id}')">
+                    <span class="text-sm text-gray-700">${d.name}</span>
+                    <i class="fas fa-check-circle check-icon ${checkedDocs.has(d.id) ? 'text-emerald-500' : 'text-gray-300'}"></i>
+                </div>
+            `).join('');
+        }
+
+        // Toggle document check
+        function toggleDoc(docId) {
+            if (checkedDocs.has(docId)) {
+                checkedDocs.delete(docId);
+            } else {
+                checkedDocs.add(docId);
+            }
+
+            const item = event.currentTarget;
+            item.classList.toggle('checked');
+            item.querySelector('.check-icon').classList.toggle('text-emerald-500');
+            item.querySelector('.check-icon').classList.toggle('text-gray-300');
+        }
+
+        // Render Chart
+        function renderChart(financialData) {
+            const ctx = document.getElementById('benefitChart').getContext('2d');
+            const years = Object.keys(financialData).sort();
+            const amounts = years.map(y => financialData[y] / 10000); // Convert to ÎßåÏõê
+
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years.map(y => y + '??),
+                    datasets: [{
+                        label: 'ÏßÄ?êÍ∏à (ÎßåÏõê)',
+                        data: amounts,
+                        backgroundColor: 'rgba(99, 102, 241, 0.5)',
+                        borderColor: 'rgb(99, 102, 241)',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ctx.raw.toLocaleString() + 'ÎßåÏõê'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                callback: (val) => val.toLocaleString() + 'ÎßåÏõê'
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Print roadmap
+        function printRoadmap() {
+            window.print();
+        }
+    </script>
+</body>
+
+</html>
