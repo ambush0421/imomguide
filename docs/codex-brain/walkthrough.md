@@ -691,6 +691,40 @@ npm run test
 
 ---
 
+## 2026-03-19 기준 탭 내부 스크롤 제거
+
+### 문제 확인
+
+- 사용자가 `판정 기준` 영역의 `지식산업센터` 탭에서 일부 카드가 내부 스크롤 때문에 끝까지 보이지 않는다고 제보했다.
+- 실제 구현을 확인한 결과, [rulebook-tabs.tsx](C:/projects/magok/src/features/eligibility/components/rulebook-tabs.tsx) 에서 각 탭 콘텐츠를 `ScrollArea`와 `max-h-[28rem]`으로 감싸 내부 스크롤 박스를 만들고 있었다.
+- 따라서 사용자가 본 문제는 데이터 누락이 아니라 `내부 스크롤 컨테이너에 규칙 카드가 갇혀 보이는 구조`였다.
+
+### 반영 내용
+
+- `rulebook-tabs`에서 내부 `ScrollArea`를 제거하고, 탭 콘텐츠가 페이지 자연 스크롤 흐름으로 이어지도록 변경했다.
+- 산업시설구역, 지식산업센터, 심의·제한 탭 모두 동일하게 `전체 내용이 한 번에 보이는 카드 리스트` 형태로 정리했다.
+- 탭 버튼은 [tabs.tsx](C:/projects/magok/src/components/ui/tabs.tsx) 에서 줄바꿈 가능한 구조로 바꿔 좁은 화면에서도 잘리지 않게 조정했다.
+
+### 구현 파일
+
+- [rulebook-tabs.tsx](C:/projects/magok/src/features/eligibility/components/rulebook-tabs.tsx)
+- [tabs.tsx](C:/projects/magok/src/components/ui/tabs.tsx)
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+
+### 결과
+
+- `판정 기준` 탭 내부에서 따로 스크롤하지 않아도 전체 규칙 카드를 페이지 스크롤로 끝까지 볼 수 있게 됐다.
+- 탭 버튼도 작은 화면에서 줄바꿈되므로 일부 탭명이 잘리거나 가려질 가능성이 줄어들었다.
+
+---
+
 ## 2026-03-19 UI/UX 단순화 및 섹션 구조 업그레이드
 
 ### 작업 배경

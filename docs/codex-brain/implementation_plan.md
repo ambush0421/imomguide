@@ -511,6 +511,25 @@ src/
 - `npm run build`
 - 원격 저장소 반영 후 `git push`
 
+---
+
+## 2026-03-19 기준 탭 내부 스크롤 제거 계획
+
+### 변경 목표
+
+`판정 기준` 영역의 탭 콘텐츠는 현재 `ScrollArea`와 `max-h-[28rem]` 조합으로 내부 스크롤 박스가 만들어져 있다. 이 구조는 규칙 카드가 길어질수록 내용이 카드 내부에 갇힌 것처럼 느껴져, 사용자가 모든 규칙을 한 번에 읽기 어렵다. 이번 변경에서는 내부 스크롤을 없애고 페이지 전체 스크롤 흐름에 자연스럽게 이어지도록 바꾼다.
+
+### 구현 메모
+
+1. `src/features/eligibility/components/rulebook-tabs.tsx`
+   - `ScrollArea` 제거
+   - 각 탭 콘텐츠를 일반 컨테이너로 바꿔 전체 내용이 모두 보이게 구성
+2. `src/components/ui/tabs.tsx`
+   - `TabsList`와 `TabsTrigger`가 작은 화면에서도 줄바꿈되도록 조정
+3. 검증
+   - `npm run test -- --run`
+   - `npm run build`
+
 ### UX 방향
 
 1. 첫 화면에서 서비스 정체가 바로 보이도록 `마곡 업종코드 찾기` 메시지를 전면에 둔다.
