@@ -674,23 +674,20 @@ npm run test
 ### Git 반영
 
 - 원격 저장소 `ambush0421/imomguide`
-- UI 변경 커밋: `2ad0b39` (`feat: simplify magok finder ui`)
-- 브랜치 반영
-  - `codex/magok-site-replace` -> `2ad0b39`
-  - `main` -> `2ad0b39`
+- UI 단순화 코드 커밋: `feat: simplify magok finder ui`
+- 완료 기록 문서 커밋: `docs: record ui deployment`
+- 최종 상태
+  - `codex/magok-site-replace` 반영 완료
+  - `main` 반영 완료
 
 ### Cloudflare 반영
 
 - Preview 배포
   - 브랜치: `codex/magok-site-replace`
-  - 커밋: `2ad0b39`
-  - 상태: `Active`
-  - URL: `https://e2312105.imomguide.pages.dev`
+  - 상태: `Active` 확인
 - Production 배포
   - 브랜치: `main`
-  - 커밋: `2ad0b39`
-  - 상태: `Active`
-  - URL: `https://28c24081.imomguide.pages.dev`
+  - 상태: `Active` 확인
 
 ---
 
