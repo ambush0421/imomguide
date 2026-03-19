@@ -2170,3 +2170,36 @@ npm run test
 
 - 이제 100% 화면에서도 사이드 배너가 `아예 안 보이는` 쪽보다는, 폭에 맞게 작아져서라도 첫 화면 양옆에 먼저 보이는 방향으로 조정됐다.
 - 특히 상단 구간에서의 존재감이 약했던 문제는 `top-28` 기준으로 재배치하면서 바로 확인 가능한 쪽으로 바뀌었다.
+
+---
+
+## 2026-03-20 지식산업센터 기준표 개별 코드 검색 보강
+
+### 작업 배경
+
+- 사용자는 `입주검토용 표`의 `72 전체(72111~72923)`처럼 범위형으로 적힌 행이 실제로는 중간 코드 검색에 잘 잡히지 않는다고 지적했다.
+- 기존 구현은 [rulebook-tabs.tsx](C:/projects/imomguide_remote_20260319/src/features/eligibility/components/rulebook-tabs.tsx) 에서 `row.ksic` 문자열 자체만 검색했기 때문에, `72121`, `72922` 같은 코드가 문자열에 직접 없으면 검색 결과에서 빠질 수 있었다.
+
+### 반영 내용
+
+- [knowledge-industry-review-table.ts](C:/projects/imomguide_remote_20260319/src/features/eligibility/data/knowledge-industry-review-table.ts)
+  - `KnowledgeIndustryReviewRow`에 `searchTerms` 필드를 추가했다.
+  - `70 전체`, `72 전체`, `58 전체`, `85 전체`처럼 범위형 또는 묶음형 행에 대해 실제 검색에 잡혀야 하는 대표 개별 코드를 보강했다.
+  - 특히 4호에는 `72111`, `72112`, `72121`, `72122`, `72129`, `72911`, `72919`, `72921`, `72922`, `72923`를 추가해 중간 코드 검색이 가능하게 했다.
+- [rulebook-tabs.tsx](C:/projects/imomguide_remote_20260319/src/features/eligibility/components/rulebook-tabs.tsx)
+  - 지식산업센터 기준표 검색 시 `row.searchTerms`까지 함께 검색하도록 확장했다.
+- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+  - `72121` 입력 시 `건축기술, 엔지니어링 및 그 밖의 과학기술서비스업` 행이 검색 결과에 남는 회귀 테스트를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 5개 테스트 파일
+  - 54개 테스트 케이스 통과
+- `npm run build` 통과
+
+### 결과 요약
+
+- 이제 사용자가 `72121`, `72922` 같은 중간 개별 코드를 검색해도, 해당 코드가 속한 시행령 기준표 행을 바로 찾을 수 있다.
+- `표 검색`과 `실제 판정`이 따로 놀던 체감이 줄어들고, 기준표도 실제 실무 코드 검색 도구에 더 가깝게 동작하게 됐다.

@@ -634,3 +634,14 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-20 지식산업센터 기준표 개별 코드 검색 보강
+
+- [x] 입주검토용 표 검색과 실제 판정 규칙 차이 재확인
+- [x] 범위형 행에 개별 코드 검색용 키워드 추가
+- [x] 기준표 검색 로직이 `searchTerms`까지 보도록 확장
+- [x] `72121` 검색 회귀 테스트 추가
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신

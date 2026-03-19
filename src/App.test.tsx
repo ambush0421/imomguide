@@ -63,6 +63,23 @@ describe('App', () => {
     expect(screen.getByText('시행령 제6조제2항 1~27호 대응표')).toBeInTheDocument()
   }, 10000)
 
+  it('지식산업센터 기준표는 중간 개별 코드로도 검색된다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('tab', { name: '지식산업센터' }))
+
+    await user.type(
+      screen.getByPlaceholderText('특례 업종명, 요약, prefix로 찾기'),
+      '72121',
+    )
+
+    expect(
+      screen.getByText('건축기술, 엔지니어링 및 그 밖의 과학기술서비스업'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('광고물 작성업')).not.toBeInTheDocument()
+  }, 10000)
+
   it('추천 업종 선택 후 2단계로 이동하고 결과 보기 후 3단계 결과를 보여준다', async () => {
     render(<App />)
     const user = userEvent.setup()

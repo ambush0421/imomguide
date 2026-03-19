@@ -155,7 +155,14 @@ export function RulebookTabs() {
 
   const knowledgeReviewRows = KNOWLEDGE_INDUSTRY_REVIEW_ROWS.filter((row) =>
     matchesText(
-      [row.clause, row.label, row.ksic, row.verdict, row.note],
+      [
+        row.clause,
+        row.label,
+        row.ksic,
+        row.verdict,
+        row.note,
+        ...(row.searchTerms ?? []),
+      ],
       queries.knowledge,
     ),
   )
