@@ -589,14 +589,14 @@ function App() {
             id="affiliate"
             className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(248,252,255,0.96),rgba(255,255,255,0.94))] p-6 shadow-[0_20px_56px_rgba(28,33,43,0.08)] sm:p-8"
           >
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,448px)] lg:items-start">
-              <div>
+            <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
+              <div className="rounded-[28px] border border-[var(--border)] bg-white/88 p-5 shadow-[0_18px_36px_rgba(28,33,43,0.06)]">
                 <Badge variant="muted">업무용 추천</Badge>
-                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
+                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
                   업무용 추천 상품
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-                  핸드폰, 생수, 업무 기기, 사무 소모품까지 바로 비교할 수 있게 묶어뒀습니다.
+                <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                  업무 시작 전에 자주 챙기는 품목만 골라 오른쪽 보드에 모아뒀습니다.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -607,13 +607,13 @@ function App() {
                   ))}
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 grid gap-3">
                   {affiliateActions.map((item) => (
                     <Button
                       key={item.title}
                       asChild
                       variant={item.variant}
-                      className="rounded-2xl px-5"
+                      className="justify-start rounded-2xl px-5"
                     >
                       <a
                         href={item.href}
@@ -645,13 +645,13 @@ function App() {
               </div>
 
               <div className="rounded-[28px] border border-[var(--border)] bg-white p-5 shadow-[0_18px_34px_rgba(43,109,255,0.08)]">
-                <div className="mb-4 flex items-center justify-between gap-3">
+                <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold text-[var(--foreground)]">
-                      많이 찾는 업무 준비 품목
+                      사이드 추천 보드
                     </div>
                     <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                      용도별로 바로 고를 수 있게 4개 카드로 나눠뒀습니다.
+                      실무에서 자주 보는 품목을 바로 비교할 수 있게 정리했습니다.
                     </p>
                   </div>
                   <Badge variant="muted">4 picks</Badge>
@@ -661,7 +661,7 @@ function App() {
                   {affiliateWidgets.map((widget, index) => (
                     <div
                       key={widget.src}
-                      className={`rounded-[24px] border p-4 shadow-[0_14px_28px_rgba(43,109,255,0.06)] ${
+                      className={`rounded-[24px] border p-4 shadow-[0_14px_28px_rgba(43,109,255,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(43,109,255,0.12)] ${
                         index === 0 || index === 1
                           ? 'border-[rgba(94,126,255,0.18)] bg-[linear-gradient(180deg,rgba(241,246,255,0.96),rgba(255,255,255,0.98))]'
                           : 'border-[var(--border)] bg-[rgba(248,251,255,0.9)]'
@@ -672,18 +672,18 @@ function App() {
                           <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
                             {widget.badge}
                           </div>
-                          <div className="mt-2 text-lg font-semibold text-[var(--foreground)]">
+                          <div className="mt-2 text-xl font-semibold text-[var(--foreground)]">
                             {widget.headline}
                           </div>
                         </div>
                         {index < 2 ? <Badge variant="muted">추천</Badge> : null}
                       </div>
 
-                      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                      <p className="mt-2 min-h-12 text-sm leading-6 text-[var(--foreground-muted)]">
                         {widget.description}
                       </p>
 
-                      <div className="mt-4 flex justify-center rounded-[18px] bg-white px-3 py-4 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.45)]">
+                      <div className="mt-4 flex justify-center rounded-[20px] bg-white px-3 py-4 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.45)]">
                         <iframe
                           src={widget.src}
                           title={widget.title}
@@ -697,7 +697,7 @@ function App() {
                         />
                       </div>
 
-                      <div className="mt-3 text-center text-xs font-medium text-[var(--foreground-subtle)]">
+                      <div className="mt-3 text-center text-xs font-medium tracking-[0.04em] text-[var(--foreground-subtle)]">
                         상품 자세히 보기
                       </div>
                     </div>

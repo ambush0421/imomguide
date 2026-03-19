@@ -53,7 +53,7 @@ describe('App', () => {
     expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 생수')).toBeInTheDocument()
     expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 업무기기')).toBeInTheDocument()
     expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 소모품')).toBeInTheDocument()
-    expect(screen.getByText('많이 찾는 업무 준비 품목')).toBeInTheDocument()
+    expect(screen.getByText('사이드 추천 보드')).toBeInTheDocument()
     expect(screen.getAllByText('상품 자세히 보기')).toHaveLength(4)
     expect(
       screen.getAllByText(/쿠팡 파트너스 사이드 배너/i),

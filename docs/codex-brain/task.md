@@ -559,6 +559,17 @@
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
 
+## 2026-03-19 제휴 섹션 사이드 보드 재구성
+
+- [x] 왼쪽 설명 영역 과대 비중 문제 재확인
+- [x] 왼쪽 안내를 컴팩트 카드로 축소
+- [x] 오른쪽 추천 영역을 2열 사이드 보드 형태로 재정렬
+- [x] 테스트 기대값 갱신
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
+
 ## 2026-03-19 loopincode 전용 소스 정리
 
 - [x] 현재 엔트리 기준으로 미사용 정적 소스와 유지 대상 분류
