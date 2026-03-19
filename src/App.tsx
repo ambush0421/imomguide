@@ -77,10 +77,20 @@ const affiliateActions = [
   },
 ]
 
-const affiliateWidget = {
-  src: 'https://coupa.ng/clX3qg',
-  title: '쿠팡 파트너스 상품 위젯',
-}
+const affiliateWidgets = [
+  {
+    src: 'https://coupa.ng/clX5tE',
+    title: '쿠팡 파트너스 추천 위젯 1',
+  },
+  {
+    src: 'https://coupa.ng/clX5vK',
+    title: '쿠팡 파트너스 추천 위젯 2',
+  },
+  {
+    src: 'https://coupa.ng/clX5EI',
+    title: '쿠팡 파트너스 추천 위젯 3',
+  },
+]
 
 const sideAffiliateBanner = {
   id: 973794,
@@ -421,7 +431,7 @@ function App() {
             id="affiliate"
             className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(248,252,255,0.96),rgba(255,255,255,0.94))] p-6 shadow-[0_20px_56px_rgba(28,33,43,0.08)] sm:p-8"
           >
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_184px] lg:items-center">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,448px)] lg:items-start">
               <div>
                 <Badge variant="muted">추천 상품</Badge>
                 <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
@@ -474,22 +484,43 @@ function App() {
                 </div>
               </div>
 
-              <div className="mx-auto w-full max-w-[168px] rounded-[28px] border border-[var(--border)] bg-white p-4 shadow-[0_18px_34px_rgba(43,109,255,0.08)]">
-                <div className="text-xs font-semibold tracking-[0.14em] text-[var(--foreground-subtle)]">
-                  상품 위젯
+              <div className="rounded-[28px] border border-[var(--border)] bg-white p-5 shadow-[0_18px_34px_rgba(43,109,255,0.08)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-semibold tracking-[0.14em] text-[var(--foreground-subtle)]">
+                      추천 위젯 3종
+                    </div>
+                    <div className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                      책상 주변이나 사무환경 준비에 참고할 수 있는 추천 위젯입니다.
+                    </div>
+                  </div>
+                  <Badge variant="muted">120 x 240</Badge>
                 </div>
-                <div className="mt-3 flex justify-center">
-                  <iframe
-                    src={affiliateWidget.src}
-                    title={affiliateWidget.title}
-                    width="120"
-                    height="240"
-                    frameBorder="0"
-                    scrolling="no"
-                    referrerPolicy="unsafe-url"
-                    loading="lazy"
-                    className="overflow-hidden rounded-[18px] bg-white"
-                  />
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {affiliateWidgets.map((widget, index) => (
+                    <div
+                      key={widget.src}
+                      className="rounded-[22px] border border-[var(--border)] bg-[rgba(243,248,255,0.78)] p-3"
+                    >
+                      <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
+                        추천 위젯 {index + 1}
+                      </div>
+                      <div className="mt-3 flex justify-center rounded-[18px] bg-white px-2 py-3 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.45)]">
+                        <iframe
+                          src={widget.src}
+                          title={widget.title}
+                          width="120"
+                          height="240"
+                          frameBorder="0"
+                          scrolling="no"
+                          referrerPolicy="unsafe-url"
+                          loading="lazy"
+                          className="overflow-hidden rounded-[18px] bg-white"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

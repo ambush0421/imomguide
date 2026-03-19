@@ -419,3 +419,13 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 쿠팡 추천 위젯 3종 배치
+
+- [x] 사용자 제공 iframe 위젯 3개 확인
+- [x] 본문 추천 상품 영역을 3개 위젯 카드 그리드로 재배치
+- [x] 테스트를 새 위젯 3개 기준으로 갱신
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신

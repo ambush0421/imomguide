@@ -29,7 +29,10 @@ describe('App', () => {
     expect(
       screen.getByRole('link', { name: /추가 추천 보기/i }),
     ).toHaveAttribute('href', 'https://link.coupang.com/a/d7n7ta')
-    expect(screen.getByTitle('쿠팡 파트너스 상품 위젯')).toBeInTheDocument()
+    expect(screen.getByText('추천 위젯 3종')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 1')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 2')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 3')).toBeInTheDocument()
     expect(
       screen.getAllByText(/쿠팡 파트너스 사이드 배너/i),
     ).toHaveLength(2)

@@ -1434,3 +1434,35 @@ npm run test
 ### 결과 요약
 
 - 좌우 고정 배너는 유지하면서, 배너 콘텐츠 자체는 사용자 제공 태그 기반의 쿠팡 다이나믹 배너로 전환되도록 정리했다.
+
+---
+
+## 2026-03-19 쿠팡 추천 위젯 3종 배치
+
+### 작업 배경
+
+- 사용자는 본문 제휴영역에 새 쿠팡 iframe 위젯 3개를 넣고, 보기 좋게 배치한 뒤 커밋과 배포까지 해 달라고 요청했다.
+- 이번 단계의 목적은 단일 위젯 대신 3개 위젯을 `추천 위젯 3종` 카드 그리드로 정리해, 정보 밀도는 높이고 시각적 답답함은 줄이는 것이다.
+
+### 반영 내용
+
+- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+  - 기존 단일 `affiliateWidget`을 3개 iframe 위젯 배열로 교체했다.
+  - 추천 상품 우측 영역을 `추천 위젯 3종` 카드로 바꾸고, `sm` 이상에서는 2열, `xl`에서는 3열 카드 그리드로 배치했다.
+- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+  - `추천 위젯 3종` 제목과 `쿠팡 파트너스 추천 위젯 1~3` iframe title이 렌더링되는지 검증하도록 갱신했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-DXmBQR9h.css`
+  - `dist/assets/index-DRsMfrUv.js`
+
+### 결과 요약
+
+- 본문 제휴영역은 단일 위젯보다 훨씬 읽기 쉬운 3종 추천 위젯 카드형 레이아웃으로 정리됐다.
