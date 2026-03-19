@@ -1300,7 +1300,25 @@ npm run test
 
 ### 검증
 
-- 검증은 아직 진행 중이다.
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-C8wMFAgN.css`
+  - `dist/assets/index-CUSbAYT4.js`
+- Git 커밋 `ac6ea69` (`refactor: simplify live affiliate presentation`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+- Cloudflare Pages Production Active: `https://7f8135c5.imomguide.pages.dev` (`ac6ea69`)
+- 운영 도메인 `https://loopincode.com`의 최신 번들 `index-BzUj6zdl.js` 안에서 아래 문자열을 확인했다.
+  - `업무용 추천 상품`
+  - `제휴 안내`
+  - `추천 상품 보기`
+  - `추가 추천 보기`
+  - `문의: contact.loopinlab@gmail.com`
+- 같은 번들 안에서 아래 문자열이 제거된 것도 확인했다.
+  - `최종승인 준비`
+  - `승인용 제휴영역`
 
 ### 결과 요약
 

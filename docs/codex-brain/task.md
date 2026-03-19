@@ -383,7 +383,7 @@
 - [x] `최종승인 준비`, `권장 문구`, `캡처 리허설` 설명 제거 방향 결정
 - [x] 제휴영역을 `추천 상품` 중심의 작은 사용자용 섹션으로 축소
 - [x] 푸터를 운영/문의/활동 페이지 중심의 간결한 정보로 정리
-- [ ] lint/test/build 재검증
-- [ ] 원격 저장소 반영
-- [ ] Cloudflare Pages 재배포
-- [ ] walkthrough.md 갱신
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
