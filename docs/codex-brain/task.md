@@ -537,6 +537,17 @@
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
 
+## 2026-03-19 제휴 섹션 UI/UX 보강
+
+- [x] 제휴 섹션의 아쉬운 밀도와 위계 문제 재확인
+- [x] 생수 위젯 `clX3qg` 복구
+- [x] 추천 맥락이 드러나는 카드형 레이아웃으로 재구성
+- [x] 테스트 기대값 갱신
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
+
 ## 2026-03-19 loopincode 전용 소스 정리
 
 - [x] 현재 엔트리 기준으로 미사용 정적 소스와 유지 대상 분류

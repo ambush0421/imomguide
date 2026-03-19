@@ -37,6 +37,9 @@ describe('App', () => {
 
     expect(screen.getByText('업무용 추천 상품')).toBeInTheDocument()
     expect(screen.getByText('광고·제휴 안내')).toBeInTheDocument()
+    expect(screen.getByText('생수/비품')).toBeInTheDocument()
+    expect(screen.getByText('탕비실 추천')).toBeInTheDocument()
+    expect(screen.getByText('생수와 비품')).toBeInTheDocument()
     expect(screen.getByText('문의: contact.loopinlab@gmail.com')).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: /추천 상품 보기/i }),
@@ -44,10 +47,10 @@ describe('App', () => {
     expect(
       screen.getByRole('link', { name: /추가 상품 보기/i }),
     ).toHaveAttribute('href', 'https://link.coupang.com/a/d7n7ta')
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 1')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 2')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 3')).toBeInTheDocument()
-    expect(screen.getAllByText('상품 자세히 보기')).toHaveLength(3)
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 생수')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 업무기기')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 소모품')).toBeInTheDocument()
+    expect(screen.getAllByText('상품 자세히 보기')).toHaveLength(2)
     expect(
       screen.getAllByText(/쿠팡 파트너스 사이드 배너/i),
     ).toHaveLength(2)
