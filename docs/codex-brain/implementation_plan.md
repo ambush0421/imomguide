@@ -605,6 +605,37 @@ src/
 - `npm run test -- --run`
 - `npm run build`
 - `Invoke-WebRequest https://loopincode.com`
+
+---
+
+## 2026-03-19 AdSense 스크립트 및 좌우 고정 배너 반영 계획
+
+### 변경 목표
+
+- 현재 빠져 있는 AdSense `pagead2.googlesyndication.com` 스크립트를 `head`에 추가한다.
+- 초대형 화면에서는 쿠팡 160x600 배너를 좌우에 고정 배치해 스크롤을 내려도 따라오게 만든다.
+- 메인 콘텐츠 침범을 줄이기 위해 작은 화면에서는 배너를 숨긴다.
+
+### 구현 메모
+
+1. `index.html`
+   - `google-adsense-account` meta 아래에 AdSense async script를 1회 추가한다.
+2. `src/App.tsx`
+   - 좌우 고정 배너용 상수를 추가한다.
+   - `2xl` 이상에서만 보이는 fixed anchor 2개를 렌더링한다.
+   - 기존 하단 `추천 상품` 섹션은 유지한다.
+3. `src/App.test.tsx`
+   - 사이드 배너 링크가 2개 렌더링되는지 확인한다.
+4. 배포
+   - `main`까지 푸시하고 `loopincode.com` HTML에서 script/meta/ads.txt를 다시 확인한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+- `Invoke-WebRequest https://loopincode.com`
+- `Invoke-WebRequest https://loopincode.com/ads.txt`
 - `Invoke-WebRequest https://imomguide.pages.dev`
 
 ### UX 방향

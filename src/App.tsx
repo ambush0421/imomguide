@@ -81,6 +81,13 @@ const affiliateWidget = {
   title: '쿠팡 파트너스 상품 위젯',
 }
 
+const sideAffiliateBanner = {
+  href: 'https://link.coupang.com/a/d7pcAe',
+  imageSrc:
+    'https://ads-partners.coupang.com/banners/973791?subId=&traceId=V0-301-879dd1202e5c73b2-I973791&w=160&h=600',
+  imageAlt: '쿠팡 파트너스 사이드 배너',
+}
+
 const footerFacts = [
   '운영: Loopin Lab',
   '문의: contact.loopinlab@gmail.com',
@@ -113,6 +120,29 @@ function App() {
 
   return (
     <div className="min-h-screen">
+      {(['left', 'right'] as const).map((side) => (
+        <a
+          key={side}
+          href={sideAffiliateBanner.href}
+          target="_blank"
+          rel="nofollow sponsored noopener"
+          referrerPolicy="unsafe-url"
+          aria-label={`쿠팡 파트너스 사이드 배너 ${side}`}
+          className={`fixed top-1/2 z-30 hidden -translate-y-1/2 2xl:block ${
+            side === 'left' ? 'left-4' : 'right-4'
+          }`}
+        >
+          <img
+            src={sideAffiliateBanner.imageSrc}
+            alt={sideAffiliateBanner.imageAlt}
+            width="160"
+            height="600"
+            loading="lazy"
+            className="h-auto w-[160px] rounded-[24px] border border-[var(--border)] bg-white shadow-[0_18px_40px_rgba(28,33,43,0.18)]"
+          />
+        </a>
+      ))}
+
       <div className="mx-auto max-w-[1180px] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
         <header className="sticky top-4 z-20 rounded-[24px] border border-[var(--border)] bg-white/88 px-4 py-3 shadow-[0_18px_40px_rgba(28,33,43,0.08)] backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">

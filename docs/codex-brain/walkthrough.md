@@ -1323,3 +1323,31 @@ npm run test
 ### 결과 요약
 
 - 메인 페이지가 다시 `입주가능 판별 서비스` 중심으로 보이게 됐고, 쿠팡 관련 요소는 실제 사용자 경험을 해치지 않는 범위로 줄었다.
+
+---
+
+## 2026-03-19 AdSense 스크립트 및 좌우 고정 배너 반영
+
+### 작업 배경
+
+- 사용자는 AdSense `script`, `ads.txt`, `google-adsense-account meta`가 모두 들어갔는지 다시 확인해 달라고 요청했고, 확인 결과 `script`만 빠져 있었다.
+- 추가로 쿠팡 160x600 배너를 좌우에 고정해 스크롤을 내려도 따라오게 넣을 수 있는지 요청했다.
+
+### 반영 내용
+
+- [index.html](C:/projects/imomguide_remote_20260319/index.html)
+  - `google-adsense-account` meta 아래에 AdSense async script를 1회 추가했다.
+- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+  - 쿠팡 160x600 사이드 배너 상수를 추가했다.
+  - `2xl` 이상 화면에서만 좌우에 고정되는 배너 2개를 렌더링하도록 반영했다.
+  - 메인 `추천 상품` 섹션은 유지해 작은 화면에서는 기존 UX가 그대로 유지되게 했다.
+- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+  - `쿠팡 파트너스 사이드 배너` 링크가 2개 렌더링되는지 검증을 추가했다.
+
+### 검증
+
+- 검증은 아직 진행 중이다.
+
+### 결과 요약
+
+- AdSense 식별 요소는 `meta + ads.txt + script` 3종 구성이 맞춰지게 됐고, 초대형 화면에서는 좌우 고정 배너가 추가로 노출되도록 준비됐다.
