@@ -533,3 +533,43 @@ npm run test
 - Cloudflare Bulk Redirect 또는 Redirect Rules로 `imomguide.pages.dev -> loopincode.com` 영구 리다이렉트 설정
 - Search Console Change of Address 실행
 - AdSense 새 사이트 검토 상태 확인
+
+---
+
+## 2026-03-19 GitHub 원격 저장소 교체 및 Git 배포 안정화
+
+### 반영 내용
+
+- 원격 저장소 `https://github.com/ambush0421/imomguide`의 기본 브랜치 `main`이 아직 `아이맘가이드` 정적 사이트 구조라는 점을 확인했다.
+- 별도 작업 디렉터리에 원격 저장소를 클론한 뒤, 현재 `마곡 코드찾기` 프로젝트 구조로 교체했다.
+- 원격 작업본 기준으로 `npm ci`, `npm run lint`, `npm run test`, `npm run build`를 다시 확인했다.
+- 먼저 `codex/magok-site-replace` 브랜치에 푸시해 Cloudflare Preview 배포를 확인했다.
+- 첫 Preview 배포는 `Failure`였고, 원인은 기존 Pages 프로젝트가 무빌드(static) 설정에 가까워 Git 배포 시 prebuilt `dist/`가 필요하기 때문으로 판단했다.
+- `dist/`를 함께 추적하도록 보정한 뒤 같은 브랜치에 다시 푸시했고, Preview 배포가 `Active`로 전환됐다.
+- 이후 같은 커밋 `45696c8`을 원격 `main`에 반영했고, Cloudflare Production 배포도 `Active` 상태가 됐다.
+
+### 검증
+
+- 원격 브랜치 확인
+  - `refs/heads/main` -> `45696c8`
+  - `refs/heads/codex/magok-site-replace` -> `45696c8`
+- Cloudflare Preview 배포
+  - 실패 커밋: `a80b7ae`
+  - 성공 커밋: `45696c8`
+  - Active Preview URL: `https://7328591b.imomguide.pages.dev`
+- Cloudflare Production 배포
+  - Active Production deployment commit: `45696c8`
+  - Active Production URL: `https://6273ac32.imomguide.pages.dev`
+- 운영 도메인 확인
+  - `https://loopincode.com` -> `200 OK`
+
+### 현재 판단
+
+- `GitHub 원격 저장소 교체`: 완료
+- `Cloudflare Git Production 배포`: 완료
+- `구도메인 -> 신도메인 리다이렉트`: 미완료
+
+### 운영 메모
+
+- 현재 Git 배포 호환성을 위해 prebuilt `dist/`를 함께 추적하는 상태다.
+- 장기적으로는 Cloudflare Pages 대시보드에서 `Build command = npm run build`, `Build output directory = dist`로 명시 전환하면 더 깔끔하다.

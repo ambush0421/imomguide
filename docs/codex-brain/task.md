@@ -205,3 +205,17 @@
 - [x] `imomguide.pages.dev` 리다이렉트 상태 확인
 - [x] 남은 수동 작업 정리
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 GitHub 원격 저장소 교체 및 Git 배포 안정화
+
+- [x] 원격 저장소 `ambush0421/imomguide` 기본 브랜치 상태 확인
+- [x] 원격 저장소 작업본 별도 클론
+- [x] 기존 `아이맘가이드` 정적 구조를 현재 `마곡 코드찾기` 프로젝트로 교체
+- [x] 원격 저장소 작업본 기준 `lint/test/build` 검증
+- [x] `codex/magok-site-replace` 브랜치 생성 및 푸시
+- [x] Cloudflare Preview 배포 실패 원인 확인
+- [x] prebuilt `dist` 추적으로 Git 배포 호환성 보정
+- [x] Preview 배포 `Active` 확인
+- [x] 동일 커밋을 `main`에 반영
+- [x] Cloudflare Production 배포 `Active` 확인
+- [x] walkthrough.md 갱신

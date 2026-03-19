@@ -615,3 +615,33 @@ src/
 - `npx wrangler pages deploy dist --project-name imomguide`
 - `curl -I https://loopincode.com`
 - `curl -I https://imomguide.pages.dev`
+
+---
+
+## 2026-03-19 GitHub 원격 저장소 교체 및 Git 배포 안정화 계획
+
+### 변경 목표
+
+- `https://github.com/ambush0421/imomguide`의 `main`을 현재 `마곡 코드찾기` 프로젝트 기준으로 교체한다.
+- Cloudflare Pages의 기존 Git 연동이 유지되더라도 새 저장소 구조로 Production 배포가 가능하도록 맞춘다.
+
+### 구현 메모
+
+1. 원격 저장소를 별도 작업 디렉터리에 클론한다.
+2. 현재 로컬 프로젝트에서 배포에 필요한 소스와 설정만 선별해 원격 작업본에 복사한다.
+3. 원격 작업본에서 `npm ci`, `npm run lint`, `npm run test`, `npm run build`를 다시 검증한다.
+4. `codex/magok-site-replace` 브랜치로 먼저 푸시해 Preview 배포 상태를 본다.
+5. Preview 실패 시 현재 Pages 프로젝트가 무빌드 구조라는 점을 감안해 prebuilt `dist/`를 함께 추적한다.
+6. Preview가 `Active`가 되면 같은 커밋을 `main`에 반영한다.
+
+### 검증 메모
+
+- `git ls-remote --heads https://github.com/ambush0421/imomguide.git`
+- `git clone --depth 1 https://github.com/ambush0421/imomguide.git`
+- 원격 작업본에서 `npm ci`
+- 원격 작업본에서 `npm run lint`
+- 원격 작업본에서 `npm run test`
+- 원격 작업본에서 `npm run build`
+- `git push origin codex/magok-site-replace`
+- `npx wrangler pages deployment list --project-name imomguide`
+- `git push origin codex/magok-site-replace:main`
