@@ -138,7 +138,11 @@ function App() {
           key={side}
           label={`쿠팡 파트너스 사이드 배너 ${side}`}
           config={sideAffiliateBanner}
-          className={side === 'left' ? 'left-4' : 'right-4'}
+          className={
+            side === 'left'
+              ? 'left-[max(20px,calc((100vw-1180px)/2-176px))]'
+              : 'right-[max(20px,calc((100vw-1180px)/2-176px))]'
+          }
         />
       ))}
 

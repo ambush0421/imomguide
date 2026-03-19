@@ -109,12 +109,12 @@ export function CoupangDynamicBanner({
   return (
     <aside
       aria-label={label}
-      className={`fixed top-1/2 z-30 hidden -translate-y-1/2 overflow-hidden rounded-[24px] border border-[var(--border)] bg-white shadow-[0_18px_40px_rgba(28,33,43,0.18)] 2xl:block ${className}`}
+      className={`fixed top-1/2 z-30 hidden -translate-y-1/2 min-[1560px]:block ${className}`}
     >
       <span className="sr-only">{label}</span>
       <div
         ref={containerRef}
-        className="flex h-[600px] w-[160px] items-center justify-center bg-white"
+        className="flex h-[600px] w-[160px] items-center justify-center"
       />
     </aside>
   )

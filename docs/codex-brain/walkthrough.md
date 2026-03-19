@@ -1466,3 +1466,35 @@ npm run test
 ### 결과 요약
 
 - 본문 제휴영역은 단일 위젯보다 훨씬 읽기 쉬운 3종 추천 위젯 카드형 레이아웃으로 정리됐다.
+
+---
+
+## 2026-03-19 쿠팡 사이드 배너 여백 재배치
+
+### 작업 배경
+
+- 사용자는 다이나믹 사이드 배너가 `왼쪽 오른쪽 비어 있는 쪽`이 아니라 어색한 흰 박스처럼 보여 이상하다고 판단했다.
+- 이번 단계의 목적은 사이드 배너를 콘텐츠 바깥 여백에 직접 놓고, 본문과 시각적으로 섞이지 않게 정리하는 것이다.
+
+### 반영 내용
+
+- [coupang-dynamic-banner.tsx](C:/projects/imomguide_remote_20260319/src/components/coupang-dynamic-banner.tsx)
+  - 배너 래퍼의 흰 배경, 보더, 그림자, overflow를 제거해 광고 자체가 잘리지 않게 했다.
+  - 표시 조건을 `2xl`에서 `min-[1560px]` 이상으로 조정해 충분한 가로폭이 있을 때만 보이게 했다.
+- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+  - 배너 위치를 `left/right-4`에서 `max-width 1180px` 본문 바깥 여백 기준 `calc((100vw-1180px)/2-176px)` 좌표로 옮겼다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-C0h_rT6e.css`
+  - `dist/assets/index-BV9LX5-L.js`
+
+### 결과 요약
+
+- 사이드 배너는 이제 화면 모서리가 아니라 본문 양옆의 빈 여백을 기준으로 고정되도록 정리됐다.

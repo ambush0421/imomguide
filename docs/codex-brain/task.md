@@ -429,3 +429,14 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 쿠팡 사이드 배너 여백 재배치
+
+- [x] 현재 사이드 배너 겹침/클리핑 원인 확인
+- [x] 사이드 배너 래퍼의 흰 박스 스타일 제거
+- [x] 콘텐츠 좌우 빈 여백 기준의 `calc()` 위치로 이동
+- [x] 충분한 폭에서만 보이도록 노출 breakpoint 상향
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
