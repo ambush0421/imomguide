@@ -1494,6 +1494,9 @@ npm run test
   - `dist/index.html`
   - `dist/assets/index-C0h_rT6e.css`
   - `dist/assets/index-BV9LX5-L.js`
+- Git 커밋 `ea2f25b` (`fix: reposition side coupang banners in outer gutters`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+- Cloudflare Pages Production Active: `https://e000dbf1.imomguide.pages.dev` (`ea2f25b`)
+- `https://loopincode.com`은 확인 시점에 아직 직전 번들 `index-DRsMfrUv.js`, `index-DXmBQR9h.css`를 응답하고 있어 커스텀 도메인 캐시 반영이 더 필요했다.
 
 ### 결과 요약
 
