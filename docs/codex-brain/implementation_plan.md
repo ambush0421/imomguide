@@ -805,3 +805,35 @@ src/
 - `npm run build`
 - `npm run test`
 - `Invoke-WebRequest https://loopincode.com`로 메타/script 포함 여부 확인
+
+---
+
+## 2026-03-19 쿠팡 실제 제휴 링크 반영 계획
+
+### 변경 목표
+
+- 승인용 제휴영역의 플레이스홀더를 실제 쿠팡 파트너스 링크, 배너, iframe 위젯으로 교체한다.
+- 같은 화면 안에 `대가성 문구`, `문의 이메일`, `실제 제휴 요소`가 함께 보여 최종승인 캡처용으로 바로 사용할 수 있게 만든다.
+- GitHub 원격과 Cloudflare Pages 운영 도메인까지 같은 결과를 보도록 마감한다.
+
+### 구현 메모
+
+1. `src/App.tsx`
+   - 비활성 플레이스홀더 카드 대신 실제 링크 2개, 배너 1개, iframe 위젯 1개를 렌더링한다.
+   - 각 링크는 새 탭으로 열고 `nofollow sponsored noopener`를 붙여 제휴 링크 성격을 분명히 한다.
+   - 대가성 문구와 문의 이메일이 같은 섹션 안에서 계속 보이도록 유지한다.
+2. `src/App.test.tsx`
+   - 실제 링크 href, 배너 alt, iframe title이 렌더링되는지 검증한다.
+3. 문서
+   - `coupang_final_approval_submission_checklist.md`에 현재 실제 반영 요소를 명시한다.
+   - `task.md`, `walkthrough.md`에 반영 범위와 검증 결과를 남긴다.
+4. 배포
+   - 원격 저장소에 커밋/푸시 후 `wrangler pages deploy dist --project-name imomguide`로 운영 도메인에 즉시 반영한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+- `Invoke-WebRequest https://loopincode.com`
+- 운영 JS 번들 안에 실제 쿠팡 링크 문자열 포함 여부 확인

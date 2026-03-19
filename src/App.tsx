@@ -89,41 +89,55 @@ const coupangApprovalChecklist = [
 const coupangDisclosureText =
   '이 게시물은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.'
 
+const affiliateLinkCards = [
+  {
+    label: '실제 링크 1',
+    title: '쿠팡 파트너스 추천 링크',
+    description:
+      '심사 화면에서 바로 확인할 수 있도록 텍스트형 제휴 링크를 첫 카드로 배치했습니다.',
+    href: 'https://link.coupang.com/a/d7nWco',
+    cta: '추천 링크 1 열기',
+  },
+  {
+    label: '실제 링크 2',
+    title: '추가 추천 링크',
+    description:
+      '동일한 제휴영역 안에서 실제 링크가 여러 개 노출되는 구조를 보여주기 위한 두 번째 링크입니다.',
+    href: 'https://link.coupang.com/a/d7n7ta',
+    cta: '추천 링크 2 열기',
+  },
+]
+
+const affiliateBanner = {
+  href: 'https://link.coupang.com/a/d7nYOA',
+  imageSrc:
+    'https://ads-partners.coupang.com/banners/973764?subId=&traceId=V0-301-5f9bd61900e673c0-I973764&w=728&h=90',
+  imageAlt: '쿠팡 파트너스 배너',
+}
+
+const affiliateWidget = {
+  src: 'https://coupa.ng/clX3qg',
+  title: '쿠팡 파트너스 상품 위젯',
+}
+
 const affiliateShowcaseSteps = [
   {
     icon: ShoppingBag,
-    title: '실제 제휴 링크를 넣습니다',
+    title: '실제 링크 2개와 배너를 노출합니다',
     description:
-      '승인 제출 전에는 이 구역의 버튼이나 배너를 실제 쿠팡 파트너스 링크로 교체해야 합니다.',
+      '현재 이 구역에는 실제 쿠팡 파트너스 링크 2개와 728 배너가 함께 노출되도록 구성했습니다.',
   },
   {
     icon: BadgeCheck,
-    title: '대가성 문구를 같은 화면에 둡니다',
+    title: '위젯과 대가성 문구를 같은 섹션에 둡니다',
     description:
-      '링크 또는 배너만 보이는 화면보다, 대가성 문구가 같은 구역 안에서 함께 보이는 화면이 승인용으로 더 안전합니다.',
+      'iframe 위젯과 대가성 문구를 같은 영역 안에 두어 심사자가 활동 구조를 한 번에 이해할 수 있게 했습니다.',
   },
   {
     icon: ImageIcon,
     title: 'PC와 모바일에서 같은 구조를 캡처합니다',
     description:
       '제휴 요소, 대가성 문구, 문의 정보가 한 화면에 보이도록 맞춘 뒤 각 1장씩 캡처하면 됩니다.',
-  },
-]
-
-const affiliateMockCards = [
-  {
-    label: '링크 카드 자리',
-    title: '실제 쿠팡 파트너스 상품 링크를 여기에 연결',
-    description:
-      '상품명, 짧은 한 줄 설명, CTA 버튼을 두면 심사자가 실제 활동 구조를 이해하기 쉽습니다.',
-    cta: '실제 링크 연결 예정',
-  },
-  {
-    label: '배너 자리',
-    title: '배너 또는 위젯 노출 영역',
-    description:
-      '이미지 배너를 쓰는 경우에도 같은 화면 아래에 대가성 문구와 문의 정보를 함께 배치하는 편이 좋습니다.',
-    cta: '배너 영역 준비 완료',
   },
 ]
 
@@ -559,13 +573,13 @@ function App() {
                   실제 제휴영역 자리입니다
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-                  지금은 승인용 구조를 먼저 넣어두었습니다. 제출 직전에는 아래 링크 카드
-                  또는 배너 자리를 실제 쿠팡 파트너스 링크로 교체한 뒤 캡처하면 됩니다.
+                  실제 쿠팡 파트너스 링크 2개, iframe 위젯 1개, 728 배너 1개를 같은
+                  구역에 배치했습니다. 승인 제출용 캡처는 이 섹션을 기준으로 잡으면 됩니다.
                 </p>
               </div>
               <div className="rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm leading-6 text-sky-900 lg:max-w-sm">
                 문의 이메일 `contact.loopinlab@gmail.com`과 대가성 문구가 같은 화면에
-                보이도록 맞추면 승인용 스크린샷으로 쓰기 좋습니다.
+                함께 보여 승인용 스크린샷으로 쓰기 좋게 정리했습니다.
               </div>
             </div>
 
@@ -578,21 +592,21 @@ function App() {
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-[var(--foreground)]">
-                        실제 제휴 요소는 이 구역에 넣어 주세요
+                        실제 제휴 요소가 현재 이 구역에 노출 중입니다
                       </div>
                       <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                        승인용으로는 구조만 예쁘게 보이는 것보다, 실제 파트너스 링크 또는
-                        배너가 현재 페이지 안에 존재하는지가 더 중요합니다.
+                        승인용으로는 구조 설명보다 실제 파트너스 링크, 배너, 위젯이 현재
+                        페이지 안에 함께 존재하는지가 더 중요합니다.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  {affiliateMockCards.map((card) => (
+                  {affiliateLinkCards.map((card) => (
                     <article
                       key={card.title}
-                      className="rounded-[28px] border border-dashed border-sky-300 bg-[rgba(255,255,255,0.92)] p-5"
+                      className="rounded-[28px] border border-sky-200 bg-[rgba(255,255,255,0.96)] p-5 shadow-[0_18px_34px_rgba(43,109,255,0.06)]"
                     >
                       <Badge variant="muted">{card.label}</Badge>
                       <h3 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)]">
@@ -602,14 +616,85 @@ function App() {
                         {card.description}
                       </p>
                       <div className="mt-5 rounded-[22px] border border-[var(--border)] bg-[rgba(239,245,255,0.84)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
-                        승인 제출 전 실제 쿠팡 파트너스 URL 또는 배너 이미지로 바꿔 주세요.
+                        {card.href}
                       </div>
-                      <Button disabled className="mt-4 w-full">
-                        {card.cta}
+                      <Button asChild className="mt-4 w-full">
+                        <a
+                          href={card.href}
+                          target="_blank"
+                          rel="nofollow sponsored noopener"
+                          referrerPolicy="unsafe-url"
+                        >
+                          {card.cta}
+                        </a>
                       </Button>
                     </article>
                   ))}
                 </div>
+
+                <article className="rounded-[28px] border border-sky-200 bg-white p-5 shadow-[0_18px_34px_rgba(43,109,255,0.06)]">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Badge variant="default">실제 배너</Badge>
+                    <div className="text-sm text-[var(--foreground-muted)]">
+                      728 x 90 배너를 직접 노출합니다.
+                    </div>
+                  </div>
+                  <h3 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)]">
+                    쿠팡 파트너스 배너
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                    심사자가 이미지형 제휴 노출을 바로 확인할 수 있도록 실제 배너를 같은
+                    섹션 안에 배치했습니다.
+                  </p>
+                  <a
+                    href={affiliateBanner.href}
+                    target="_blank"
+                    rel="nofollow sponsored noopener"
+                    referrerPolicy="unsafe-url"
+                    className="mt-5 block"
+                  >
+                    <img
+                      src={affiliateBanner.imageSrc}
+                      alt={affiliateBanner.imageAlt}
+                      className="h-auto w-full rounded-[22px] border border-[var(--border)] bg-white object-cover"
+                      loading="lazy"
+                    />
+                  </a>
+                </article>
+
+                <article className="rounded-[28px] border border-sky-200 bg-white p-5 shadow-[0_18px_34px_rgba(43,109,255,0.06)]">
+                  <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_170px] md:items-center">
+                    <div>
+                      <Badge variant="default">실제 위젯</Badge>
+                      <h3 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)]">
+                        쿠팡 파트너스 상품 위젯
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                        iframe 위젯까지 같은 화면에 넣어, 텍스트 링크와 배너 외의 제휴
+                        노출 방식도 실제로 운영 중임을 보여줍니다.
+                      </p>
+                      <p className="mt-3 text-sm leading-6 text-[var(--foreground-subtle)]">
+                        모바일 캡처에서는 이 위젯과 대가성 문구가 함께 보이도록 맞추면
+                        제출용 화면으로 쓰기 좋습니다.
+                      </p>
+                    </div>
+                    <div className="flex justify-center">
+                      <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.84)] p-3 shadow-inner">
+                        <iframe
+                          src={affiliateWidget.src}
+                          title={affiliateWidget.title}
+                          width="120"
+                          height="240"
+                          frameBorder="0"
+                          scrolling="no"
+                          referrerPolicy="unsafe-url"
+                          loading="lazy"
+                          className="mx-auto overflow-hidden rounded-[18px] bg-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </article>
 
                 <div className="rounded-[28px] border border-sky-200 bg-sky-50 p-5">
                   <div className="text-xs font-semibold tracking-[0.14em] text-sky-700">
@@ -619,8 +704,8 @@ function App() {
                     {coupangDisclosureText}
                   </p>
                   <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                    실제 제휴 링크나 배너가 들어간 카드와 같은 화면 안에 이 문구가 함께
-                    보이게 두는 것을 권장합니다.
+                    실제 제휴 링크, 배너, 위젯이 들어간 카드와 같은 화면 안에 이 문구가
+                    함께 보이게 두는 것을 권장합니다.
                   </p>
                 </div>
               </div>

@@ -1234,3 +1234,32 @@ npm run test
 
 - 사이트 안에 실제 승인 캡처용으로 쓸 기준 구역이 생겨, 사용자가 어느 위치를 제휴영역으로 잡아야 할지 더 명확해졌다.
 - 실제 쿠팡 파트너스 링크만 나중에 꽂으면, 현재 레이아웃 그대로 승인용 캡처 흐름으로 이어갈 수 있게 됐다.
+
+---
+
+## 2026-03-19 쿠팡 실제 링크·배너·위젯 반영
+
+### 작업 배경
+
+- 사용자는 승인용 제휴영역의 플레이스홀더가 아니라 실제 쿠팡 파트너스 링크, 배너, 위젯을 바로 반영해 달라고 요청했다.
+- 이번 단계의 목적은 `실제 제휴 요소 + 대가성 문구 + 문의 이메일`이 같은 화면에 함께 보이는 승인 제출용 라이브 구성을 만드는 것이다.
+
+### 반영 내용
+
+- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+  - `승인용 제휴영역`의 비활성 플레이스홀더를 제거하고 실제 링크 2개를 버튼형 카드로 교체했다.
+  - 실제 728x90 배너와 iframe 위젯을 같은 섹션 안에 추가했다.
+  - 각 제휴 링크는 새 탭으로 열리고 `nofollow sponsored noopener` 속성을 붙였다.
+  - 대가성 문구와 문의 이메일 `contact.loopinlab@gmail.com`은 같은 섹션 안에서 계속 보이도록 유지했다.
+- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+  - 실제 링크 href, 배너 alt, iframe title 렌더링을 검증하도록 보강했다.
+- [coupang_final_approval_submission_checklist.md](C:/projects/imomguide_remote_20260319/docs/codex-brain/coupang_final_approval_submission_checklist.md)
+  - 현재 사이트에 반영된 실제 링크, 배너, 위젯 정보를 문서에 추가했다.
+
+### 검증
+
+- 검증은 아직 진행 중이다.
+
+### 결과 요약
+
+- 승인용 제휴영역이 더 이상 모형이 아니라 실제 활동 페이지 구조로 바뀌었고, 쿠팡 최종승인용 캡처에 바로 쓸 수 있는 준비 상태가 됐다.
