@@ -441,3 +441,13 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 쿠팡 사이드 배너 미노출 보정
+
+- [x] 사용자 화면 기준 미노출 원인 재확인
+- [x] 사이드 배너 노출 breakpoint를 더 현실적인 데스크톱 폭으로 완화
+- [x] 콘텐츠 여백 좌표를 더 안쪽으로 보정
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신

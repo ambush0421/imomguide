@@ -133,10 +133,10 @@ function App() {
 
   const sideBannerStyles = {
     left: {
-      left: 'calc(50vw - 590px - 184px)',
+      left: 'max(8px, calc(50vw - 590px - 172px))',
     },
     right: {
-      right: 'calc(50vw - 590px - 184px)',
+      right: 'max(8px, calc(50vw - 590px - 172px))',
     },
   } as const
 
