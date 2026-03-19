@@ -19,6 +19,8 @@ describe('App', () => {
     expect(
       screen.getByText('업종을 고르면 결과가 여기에 바로 나옵니다.'),
     ).toBeInTheDocument()
+    expect(screen.getByText('승인용 제휴영역')).toBeInTheDocument()
+    expect(screen.getByText('실제 제휴 요소는 이 구역에 넣어 주세요')).toBeInTheDocument()
     expect(screen.getByText('운영자 정보')).toBeInTheDocument()
     expect(screen.getByText('쿠팡 파트너스 안내')).toBeInTheDocument()
     expect(screen.getByText('문의 이메일: contact.loopinlab@gmail.com')).toBeInTheDocument()

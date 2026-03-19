@@ -947,3 +947,290 @@ npm run test
 
 - 화면과 제출용 문서의 문의 채널이 동일해져 승인 제출 시 정보 불일치 가능성이 줄었다.
 - 이제 푸터 스크린샷만 캡처해도 실제 문의 이메일이 함께 보이는 상태가 됐다.
+
+---
+
+## 2026-03-19 지식산업센터 입주검토용 표 및 CSV/사이트 반영
+
+### 작업 배경
+
+- 사용자는 시행령 제6조제2항 1호부터 27호까지를 누락 없이 다시 확인하고, 그 결과를 `입주검토용 표` 형태로 문서와 사이트에 동시에 반영하길 원했다.
+- 특히 KSIC 11차에서는 법령 문구와 표준산업분류 명칭·코드가 그대로 1:1 대응되지 않는 항목이 있어, `고등교육법상 연구소`, `기초연구법상 기관·단체`, `이러닝업`, `관리기관 인정 산업` 같은 항목을 별도로 보강할 필요가 있었다.
+
+### 반영 내용
+
+- [magok_knowledge_industry_center_allowed_codes.md](C:/projects/magok/docs/codex-brain/magok_knowledge_industry_center_allowed_codes.md)에 `시행령 제6조제2항 입주검토용 표`를 새로 추가했다.
+  - `호`
+  - `시행령 업종`
+  - `현재 KSIC 대응`
+  - `마곡 지식산업센터 적용`
+  - `실무 확인사항`
+- [magok_knowledge_industry_center_exact_5digit_codes.csv](C:/projects/magok/docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.csv)의 헤더를 실무형으로 바꾸고, 아래 `코드만으로 확정 불가` 행을 보강했다.
+  - `연구소(2호)`
+  - `기관·단체(3호)`
+  - `이러닝업(26호)`
+  - `73901·73905·73909 등`
+- [magok_knowledge_industry_center_exact_5digit_codes.md](C:/projects/magok/docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.md)에도 같은 비정형 판정 항목을 추가해 문서와 CSV가 어긋나지 않도록 맞췄다.
+- [knowledge-industry-review-table.ts](C:/projects/magok/src/features/eligibility/data/knowledge-industry-review-table.ts)를 새로 만들어 시행령 1~27호의 화면용 검토 데이터를 분리했다.
+- [rulebook-tabs.tsx](C:/projects/magok/src/features/eligibility/components/rulebook-tabs.tsx) 지식산업센터 탭에 `시행령 제6조제2항 1~27호 대응표`를 추가했다.
+  - 검색창과 연동되도록 구성
+  - `가능 / 조건부 / 추가 확인 / 불가` 배지로 즉시 구분 가능
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)는 지식산업센터 탭을 실제로 눌렀을 때 새 표가 보이는지 검증하도록 보완했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-ilDEELP8.css`
+  - `dist/assets/index-BfgjL2uf.js`
+
+### 배포 확인
+
+- `npx wrangler pages deploy dist --project-name imomguide`로 새 빌드를 배포했다.
+- 배포 URL: `https://058d53cd.imomguide.pages.dev`
+- `pages.dev`와 `loopincode.com`의 HTML 모두 새 번들 `index-BfgjL2uf.js`를 가리키는 것을 확인했다.
+- `pages.dev`와 `loopincode.com`의 번들 파일 안에서 `시행령 제6조제2항 1~27호 대응표` 문자열이 실제 포함된 것도 확인했다.
+
+### 결과 요약
+
+- 사용자가 한눈에 볼 수 있는 `27개 조문 기준 입주검토용 표`가 문서와 사이트에 동시에 생겼다.
+- exact 5자리 CSV는 기존 판정 로직을 유지하면서도, 빠지기 쉬운 비정형 항목까지 실무 메모와 함께 보강됐다.
+- 공개 사이트 번들까지 새 표가 포함된 상태로 배포를 마쳤다.
+
+---
+
+## 2026-03-19 레퍼런스 PDF 최종 반영 및 업종코드 분석기 완료
+
+### 작업 배경
+
+- 사용자는 추가로 제공한 로컬 PDF 3종을 기준으로 업종코드 분석기를 끝까지 보강해 달라고 요청했다.
+- 기존 반영본은 `입주검토용 표`와 CSV는 들어가 있었지만, 실제 판정 엔진에서는 `연구소(2호)`, `기관·단체(3호)`, `이러닝업(26호)`, `관리기관 인정 업종(27호)` 흐름이 완전히 연결돼 있지 않았다.
+- 또한 `73905`, `73909`처럼 제27호 취지로 보수적으로 봐야 하는 세세분류가 direct code 입력에서 누락될 여지가 있어 이를 막을 필요가 있었다.
+
+### 반영 내용
+
+- [magok_knowledge_industry_center_exact_5digit_codes.csv](C:/projects/magok/docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.csv)에 아래 `추가 확인` 코드를 명시했다.
+  - `73905 고고유산 조사연구 서비스업`
+  - `73909 그 외 기타 분류 안된 전문, 과학 및 기술 서비스업`
+- [magok_knowledge_industry_center_exact_5digit_codes.md](C:/projects/magok/docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.md)도 같은 내용으로 맞춰 문서와 CSV를 동기화했다.
+- [knowledge-center-exact-codes.ts](C:/projects/magok/src/features/eligibility/data/knowledge-center-exact-codes.ts)
+  - CSV의 `코드만으로 확정 불가` 행을 직접 파싱하도록 바꿨다.
+  - `85*` 같은 prefix 기반 불확실 항목은 코드만으로 자동 확정하지 않도록 유지했다.
+  - exact 코드로 명시된 `73905`, `73909`는 `추가 확인` 결과로 직접 연결되도록 보강했다.
+- [types.ts](C:/projects/magok/src/features/eligibility/types.ts)와 [eligibility-form.tsx](C:/projects/magok/src/features/eligibility/components/eligibility-form.tsx)
+  - 수동 법령 분류에 아래 선택지를 추가했다.
+  - `고등교육법 제25조 연구소(2호)`
+  - `기초연구법 제14조 기관·단체(3호)`
+  - `이러닝법상 업(26호)`
+  - `관리기관 인정 업종(27호)`
+- [evaluator.ts](C:/projects/magok/src/features/eligibility/evaluator.ts)
+  - `2호`, `3호` 선택 시 `기관 설치 근거 + 실제 연구개발 수행 계획` 확인이 필요한 조건부 결과를 반환하도록 보강했다.
+  - `26호` 선택 시 `제7호·제10호 또는 제6조제3항 산업을 경영하는 입주기업체가 운영하는지`를 묻는 조건부 결과를 반환하도록 추가했다.
+  - `27호` 선택 시 관리기관 인정과 홈페이지 게시 여부를 먼저 확인하도록 `추가 확인` 결과를 반환하게 했다.
+- [evaluator.test.ts](C:/projects/magok/src/features/eligibility/evaluator.test.ts)
+  - `73905`
+  - `이러닝업(26호)`
+  - `관리기관 인정 업종(27호)`
+  시나리오를 테스트로 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 3개 테스트 파일
+  - 18개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-ilDEELP8.css`
+  - `dist/assets/index-C7_sujel.js`
+
+### 배포 확인
+
+- `npx wrangler pages deploy dist --project-name imomguide`로 다시 배포했다.
+- 새 배포 URL: `https://73c21219.imomguide.pages.dev`
+- `https://73c21219.imomguide.pages.dev`와 `https://loopincode.com`의 HTML이 모두 새 번들 `index-C7_sujel.js`를 가리키는 것을 확인했다.
+
+### 결과 요약
+
+- 문서에만 있던 `2호`, `3호`, `26호`, `27호` 흐름이 실제 업종코드 분석기 엔진과 입력 폼에도 연결됐다.
+- `73905`, `73909` 같은 관리기관 인정 검토 대상 코드를 직접 넣어도 이제 보수적으로 `추가 확인` 결과가 나온다.
+- 새 번들이 실제 운영 도메인까지 반영돼, 사이트 업종코드 분석기 기준이 레퍼런스 PDF와 더 가깝게 맞춰졌다.
+
+---
+
+## 2026-03-19 업종코드 상세 해설 화면 반영
+
+### 작업 배경
+
+- 사용자는 결과를 파일로 받기보다, 사이트 화면 안에서 바로 확인할 수 있게 해 달라고 요청했다.
+- 기존 결과 패널은 `가능/조건부/심의/불가` 요약은 잘 보여줬지만, 현재 선택한 코드가 정확히 어떤 조문과 코드표에 연결되는지는 한 번 더 추론해야 했다.
+
+### 반영 내용
+
+- [screen-insights.ts](C:/projects/magok/src/features/eligibility/data/screen-insights.ts)를 새로 만들어 화면 전용 인사이트 헬퍼를 추가했다.
+  - `exact 5자리`
+  - `코드만으로 확정 불가`
+  - `수동 법령 분류`
+  - `산업시설구역 기본업종`
+  - `지식산업센터 특례`
+  를 한 객체로 합쳐 결과 화면에서 바로 쓸 수 있게 정리했다.
+- [result-panel.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.tsx)에 `업종코드 상세 해설` 카드를 추가했다.
+  - `입력 코드`
+  - `입력 업종`
+  - `판정 기준`
+  - `연결 조문`
+  - `현재 KSIC 대응`
+  - `실무 메모`
+  를 결과 요약 아래에서 바로 보여준다.
+- `73905` 같은 코드 입력 시 이제 화면 안에서 바로 아래 흐름을 확인할 수 있다.
+  - `27호 · 관리기관 인정 기타 전문·과학·기술 서비스업`
+  - `7390 중 미열거 영역`
+  - `관리기관 인정 산업으로 별도 인정받는지 확인 필요`
+- [result-panel.test.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.test.tsx)를 추가해 `업종코드 상세 해설` 카드가 실제 렌더링되는지 UI 테스트로 고정했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 4개 테스트 파일
+  - 19개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-tWpwNL8l.css`
+  - `dist/assets/index-DX33N43b.js`
+
+### 배포 확인
+
+- `npx wrangler pages deploy dist --project-name imomguide`로 재배포했다.
+- 새 배포 URL: `https://b3223d0c.imomguide.pages.dev`
+- `https://b3223d0c.imomguide.pages.dev`와 `https://loopincode.com` HTML이 모두 새 번들 `index-DX33N43b.js`를 가리키는 것을 확인했다.
+- `loopincode.com`의 새 번들 안에 `업종코드 상세 해설`, `관리기관 인정 산업으로 별도 인정받는지 확인 필요` 문자열이 포함된 것도 확인했다.
+
+### 결과 요약
+
+- 이제 사용자는 파일을 열지 않아도, 선택한 업종코드가 어떤 조문과 기준에 걸리는지 사이트 화면에서 바로 볼 수 있다.
+- 특히 `지식산업센터 추가 확인 코드`, `이러닝`, `관리기관 인정 업종` 같은 애매한 케이스도 화면 카드로 더 명확하게 읽을 수 있게 됐다.
+
+---
+
+## 2026-03-19 블루 테마 UI/UX 개편
+
+### 작업 배경
+
+- 사용자는 현재 화면을 푸른 계열 UI/UX로 바꿀 수 있는지 요청했다.
+- 기존 화면은 주황 기반 포인트 컬러와 웜톤 배경이 강해서, 법령·검토 도구 특유의 차분하고 신뢰감 있는 인상을 더 주려면 블루 계열로 재정리하는 편이 자연스러웠다.
+
+### 반영 내용
+
+- [index.css](C:/projects/magok/src/index.css)
+  - 전역 색 토큰을 블루 계열로 교체했다.
+  - `--background`, `--accent`, `--accent-strong`, `--ring` 등을 새 팔레트로 바꾸고 body 그라데이션도 차가운 톤으로 정리했다.
+- [badge.tsx](C:/projects/magok/src/components/ui/badge.tsx)
+  - 기본 브랜드 배지를 블루 포인트로 바꿨다.
+  - `muted` 배지 배경도 약한 블루 틴트로 조정했다.
+- [button.tsx](C:/projects/magok/src/components/ui/button.tsx), [select.tsx](C:/projects/magok/src/components/ui/select.tsx), [switch.tsx](C:/projects/magok/src/components/ui/switch.tsx), [async-state.tsx](C:/projects/magok/src/components/async-state.tsx)
+  - 버튼 그림자, hover, focus ring, 셀렉트 highlight, 스위치, 빈 상태 카드까지 블루 계열로 맞췄다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 랜딩 상단 아이콘 글로우, 이용 방법 스텝, 핵심 기능 섹션, 푸터 카드, 안내 박스 색을 블루 계열로 바꿨다.
+  - 쿠팡 안내 박스처럼 기존 amber 계열이던 정보 카드도 `sky` 계열로 조정했다.
+- [eligibility-form.tsx](C:/projects/magok/src/features/eligibility/components/eligibility-form.tsx), [industry-discovery-panel.tsx](C:/projects/magok/src/features/eligibility/components/industry-discovery-panel.tsx), [result-panel.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.tsx), [rulebook-tabs.tsx](C:/projects/magok/src/features/eligibility/components/rulebook-tabs.tsx)
+  - 입력 패널, 결과 요약, 상세 해설, 기준 탭 카드의 웜톤 배경을 블루 계열로 정리했다.
+  - 상태 의미가 강한 `warning/danger` 계열은 유지해 의미 전달력은 살렸다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 4개 테스트 파일
+  - 19개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-Da3MiyC8.css`
+  - `dist/assets/index-CdfXDUcJ.js`
+
+### 배포 확인
+
+- `npx wrangler pages deploy dist --project-name imomguide`로 재배포했다.
+- 새 배포 URL: `https://d69698c3.imomguide.pages.dev`
+- `https://d69698c3.imomguide.pages.dev`와 `https://loopincode.com` HTML이 모두 새 번들 `index-CdfXDUcJ.js`, `index-Da3MiyC8.css`를 가리키는 것을 확인했다.
+- 운영 CSS 번들 안에 `#2b6dff`, `#eef4ff`가 포함된 것도 확인했다.
+
+### 결과 요약
+
+- 전체 화면 톤이 주황 중심에서 푸른 계열로 바뀌어, 더 차분하고 신뢰감 있는 느낌으로 정리됐다.
+- 배경, 버튼, 카드, 빈 상태, 입력 폼이 같이 바뀌어서 단순 색 교체가 아니라 전체 UI가 한 세트처럼 보이게 됐다.
+
+---
+
+## 2026-03-19 쿠팡 제출용 캡처 구도 및 문안 최종본 정리
+
+### 작업 배경
+
+- 사용자는 쿠팡 파트너스 최종승인 제출을 위해 `PC/모바일 캡처 구도`와 `제출 문안 최종본`을 바로 쓸 수 있는 형태로 원했다.
+- 기존 문서는 체크리스트 중심이어서, 실제 심사 화면에 어떤 요소를 같이 보여야 하는지와 제출란에 그대로 붙여 넣을 문안이 조금 더 구체적으로 필요했다.
+
+### 반영 내용
+
+- [coupang_final_approval_submission_checklist.md](C:/projects/magok/docs/codex-brain/coupang_final_approval_submission_checklist.md)에 아래 내용을 추가했다.
+  - 승인 제출 전제 조건
+  - PC 캡처 구도
+  - 모바일 캡처 구도
+  - 활동 페이지 등록 문안 최종본
+  - 스크린샷 첨부 설명 문안
+  - 최종승인 요청 메모 문안
+  - 짧은 버전 문안
+  - 제출 직전 30초 점검표
+- 특히 `실제 쿠팡 파트너스 링크/배너/위젯`이 같은 화면에 보여야 한다는 점과, `대가성 문구`가 같은 화면에 함께 있어야 한다는 점을 가장 먼저 보이게 정리했다.
+- 문의 이메일은 현재 운영값인 `contact.loopinlab@gmail.com` 기준으로 모든 문안에 맞췄다.
+
+### 검증
+
+- 이번 단계는 문서 정리 작업으로, 별도 코드 수정이나 빌드 작업은 수행하지 않았다.
+- 문서 내용은 현재 운영 주소 `https://loopincode.com/`와 반영된 문의 이메일 기준으로 작성했다.
+
+### 결과 요약
+
+- 이제 사용자는 쿠팡 제출 화면에서 그대로 복붙할 수 있는 문안과, 어떤 화면을 캡처해야 하는지에 대한 구체적인 가이드를 한 문서에서 바로 확인할 수 있다.
+- 특히 `링크/배너 + 대가성 문구 + 문의 정보`를 어떤 우선순위로 한 화면에 넣어야 하는지 판단이 쉬워졌다.
+
+---
+
+## 2026-03-19 승인용 제휴영역 섹션 추가
+
+### 작업 배경
+
+- 사용자는 문서만이 아니라, 실제 사이트 안에도 쿠팡 제출용으로 바로 캡처할 수 있는 `제휴영역`이 있길 원했다.
+- 다만 실제 쿠팡 파트너스 URL은 아직 제공되지 않았기 때문에, 거짓 링크를 넣는 대신 `실제 링크나 배너를 바로 교체할 수 있는 승인용 레이아웃`으로 구성할 필요가 있었다.
+
+### 반영 내용
+
+- [App.tsx](C:/projects/magok/src/App.tsx)에 `승인용 제휴영역` 섹션을 새로 추가했다.
+- 섹션 안에는 아래 요소를 함께 배치했다.
+  - `링크 카드 자리`
+  - `배너 자리`
+  - 같은 화면 안의 `대가성 문구`
+  - `캡처 리허설` 안내 카드
+  - 문의 이메일 안내
+- 링크 카드와 배너 자리는 현재 `실제 쿠팡 파트너스 URL로 교체해야 하는 자리`라는 점이 보이도록 점선 카드와 비활성 버튼 형태로 구성했다.
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 `승인용 제휴영역`과 `실제 제휴 요소는 이 구역에 넣어 주세요` 문구가 렌더링되는지 검증을 추가했다.
+- [coupang_final_approval_submission_checklist.md](C:/projects/magok/docs/codex-brain/coupang_final_approval_submission_checklist.md)도 새 섹션 기준으로 캡처 설명을 보강했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-DMxnKqiy.css`
+  - `dist/assets/index-wXWR_llK.js`
+
+### 결과 요약
+
+- 사이트 안에 실제 승인 캡처용으로 쓸 기준 구역이 생겨, 사용자가 어느 위치를 제휴영역으로 잡아야 할지 더 명확해졌다.
+- 실제 쿠팡 파트너스 링크만 나중에 꽂으면, 현재 레이아웃 그대로 승인용 캡처 흐름으로 이어갈 수 있게 됐다.

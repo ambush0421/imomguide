@@ -1,14 +1,18 @@
 import {
   ArrowRight,
+  BadgeCheck,
   CircleUserRound,
   Building2,
   CheckCircle2,
   ClipboardCheck,
+  ExternalLink,
   FileSearch,
+  ImageIcon,
   Landmark,
   Link2,
   MailQuestion,
   MonitorSmartphone,
+  ShoppingBag,
   ShieldCheck,
 } from 'lucide-react'
 
@@ -85,6 +89,44 @@ const coupangApprovalChecklist = [
 const coupangDisclosureText =
   '이 게시물은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.'
 
+const affiliateShowcaseSteps = [
+  {
+    icon: ShoppingBag,
+    title: '실제 제휴 링크를 넣습니다',
+    description:
+      '승인 제출 전에는 이 구역의 버튼이나 배너를 실제 쿠팡 파트너스 링크로 교체해야 합니다.',
+  },
+  {
+    icon: BadgeCheck,
+    title: '대가성 문구를 같은 화면에 둡니다',
+    description:
+      '링크 또는 배너만 보이는 화면보다, 대가성 문구가 같은 구역 안에서 함께 보이는 화면이 승인용으로 더 안전합니다.',
+  },
+  {
+    icon: ImageIcon,
+    title: 'PC와 모바일에서 같은 구조를 캡처합니다',
+    description:
+      '제휴 요소, 대가성 문구, 문의 정보가 한 화면에 보이도록 맞춘 뒤 각 1장씩 캡처하면 됩니다.',
+  },
+]
+
+const affiliateMockCards = [
+  {
+    label: '링크 카드 자리',
+    title: '실제 쿠팡 파트너스 상품 링크를 여기에 연결',
+    description:
+      '상품명, 짧은 한 줄 설명, CTA 버튼을 두면 심사자가 실제 활동 구조를 이해하기 쉽습니다.',
+    cta: '실제 링크 연결 예정',
+  },
+  {
+    label: '배너 자리',
+    title: '배너 또는 위젯 노출 영역',
+    description:
+      '이미지 배너를 쓰는 경우에도 같은 화면 아래에 대가성 문구와 문의 정보를 함께 배치하는 편이 좋습니다.',
+    cta: '배너 영역 준비 완료',
+  },
+]
+
 const approvalFooterCards = [
   {
     icon: CircleUserRound,
@@ -147,7 +189,7 @@ function App() {
         <header className="sticky top-4 z-20 rounded-[24px] border border-[var(--border)] bg-white/88 px-4 py-3 shadow-[0_18px_40px_rgba(28,33,43,0.08)] backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <a href="#top" className="flex items-center gap-3">
-              <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[0_14px_30px_rgba(239,109,30,0.2)]">
+              <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[0_14px_30px_rgba(43,109,255,0.24)]">
                 <Building2 className="size-5" />
               </div>
               <div>
@@ -163,19 +205,19 @@ function App() {
             <nav className="hidden items-center gap-1 md:flex">
               <a
                 href="#how"
-                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(239,109,30,0.08)] hover:text-[var(--foreground)]"
+                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(43,109,255,0.08)] hover:text-[var(--foreground)]"
               >
                 이용 방법
               </a>
               <a
                 href="#finder"
-                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(239,109,30,0.08)] hover:text-[var(--foreground)]"
+                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(43,109,255,0.08)] hover:text-[var(--foreground)]"
               >
                 코드 찾기
               </a>
               <a
                 href="#criteria"
-                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(239,109,30,0.08)] hover:text-[var(--foreground)]"
+                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(43,109,255,0.08)] hover:text-[var(--foreground)]"
               >
                 판정 기준
               </a>
@@ -235,9 +277,9 @@ function App() {
               </div>
             </div>
 
-            <Card className="h-full bg-[linear-gradient(180deg,rgba(255,248,242,0.98),rgba(255,255,255,0.94))]">
+            <Card className="h-full bg-[linear-gradient(180deg,rgba(243,248,255,0.98),rgba(255,255,255,0.94))]">
               <CardContent className="space-y-5 p-6">
-                <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+                <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
                   <FileSearch className="size-6" />
                 </div>
                 <div>
@@ -256,7 +298,7 @@ function App() {
                       className="rounded-[24px] border border-[var(--border)] bg-white px-4 py-4"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="inline-flex size-8 items-center justify-center rounded-full bg-[rgba(239,109,30,0.12)] text-sm font-semibold text-[var(--accent)]">
+                        <div className="inline-flex size-8 items-center justify-center rounded-full bg-[rgba(43,109,255,0.12)] text-sm font-semibold text-[var(--accent)]">
                           {item.step}
                         </div>
                         <div className="text-sm font-semibold text-[var(--foreground)]">
@@ -286,7 +328,7 @@ function App() {
             {steps.map((item) => (
               <Card key={item.step}>
                 <CardContent className="p-6">
-                  <div className="inline-flex size-10 items-center justify-center rounded-full bg-[rgba(239,109,30,0.12)] text-base font-semibold text-[var(--accent)]">
+                  <div className="inline-flex size-10 items-center justify-center rounded-full bg-[rgba(43,109,255,0.12)] text-base font-semibold text-[var(--accent)]">
                     {item.step}
                   </div>
                   <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)]">
@@ -352,7 +394,7 @@ function App() {
 
           <section
             id="finder"
-            className="rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(255,250,244,0.92))] p-6 shadow-[0_24px_70px_rgba(28,33,43,0.08)] sm:p-8"
+            className="rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(242,247,255,0.94))] p-6 shadow-[0_24px_70px_rgba(28,33,43,0.08)] sm:p-8"
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
@@ -452,7 +494,7 @@ function App() {
                         className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+                          <div className="inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
                             <Icon className="size-4" />
                           </div>
                           <div className="text-sm font-semibold text-[var(--foreground)]">
@@ -482,8 +524,8 @@ function App() {
                   인식할 수 있는 대가성 문구를 함께 표시하라고 안내합니다. 아래 문구를
                   그대로 참고해도 됩니다.
                 </p>
-                <div className="rounded-[28px] border border-amber-200 bg-amber-50 p-5">
-                  <div className="text-xs font-semibold tracking-[0.14em] text-amber-700">
+                <div className="rounded-[28px] border border-sky-200 bg-sky-50 p-5">
+                  <div className="text-xs font-semibold tracking-[0.14em] text-sky-700">
                     권장 예시
                   </div>
                   <p className="mt-3 text-base font-semibold leading-8 text-[var(--foreground)]">
@@ -502,6 +544,133 @@ function App() {
                 </div>
               </CardContent>
             </Card>
+          </section>
+
+          <section
+            id="affiliate"
+            className="rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(248,252,255,0.98),rgba(255,255,255,0.94))] p-6 shadow-[0_24px_70px_rgba(28,33,43,0.08)] sm:p-8"
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <Badge variant="muted">승인용 제휴영역</Badge>
+                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
+                  심사자가 캡처에서 보게 될
+                  <br />
+                  실제 제휴영역 자리입니다
+                </h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
+                  지금은 승인용 구조를 먼저 넣어두었습니다. 제출 직전에는 아래 링크 카드
+                  또는 배너 자리를 실제 쿠팡 파트너스 링크로 교체한 뒤 캡처하면 됩니다.
+                </p>
+              </div>
+              <div className="rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm leading-6 text-sky-900 lg:max-w-sm">
+                문의 이메일 `contact.loopinlab@gmail.com`과 대가성 문구가 같은 화면에
+                보이도록 맞추면 승인용 스크린샷으로 쓰기 좋습니다.
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_360px]">
+              <div className="space-y-4">
+                <div className="rounded-[28px] border border-sky-200 bg-white p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                      <ExternalLink className="size-4" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-[var(--foreground)]">
+                        실제 제휴 요소는 이 구역에 넣어 주세요
+                      </div>
+                      <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
+                        승인용으로는 구조만 예쁘게 보이는 것보다, 실제 파트너스 링크 또는
+                        배너가 현재 페이지 안에 존재하는지가 더 중요합니다.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  {affiliateMockCards.map((card) => (
+                    <article
+                      key={card.title}
+                      className="rounded-[28px] border border-dashed border-sky-300 bg-[rgba(255,255,255,0.92)] p-5"
+                    >
+                      <Badge variant="muted">{card.label}</Badge>
+                      <h3 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)]">
+                        {card.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                        {card.description}
+                      </p>
+                      <div className="mt-5 rounded-[22px] border border-[var(--border)] bg-[rgba(239,245,255,0.84)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
+                        승인 제출 전 실제 쿠팡 파트너스 URL 또는 배너 이미지로 바꿔 주세요.
+                      </div>
+                      <Button disabled className="mt-4 w-full">
+                        {card.cta}
+                      </Button>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="rounded-[28px] border border-sky-200 bg-sky-50 p-5">
+                  <div className="text-xs font-semibold tracking-[0.14em] text-sky-700">
+                    대가성 문구
+                  </div>
+                  <p className="mt-3 text-base font-semibold leading-8 text-[var(--foreground)]">
+                    {coupangDisclosureText}
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                    실제 제휴 링크나 배너가 들어간 카드와 같은 화면 안에 이 문구가 함께
+                    보이게 두는 것을 권장합니다.
+                  </p>
+                </div>
+              </div>
+
+              <Card>
+                <CardContent className="space-y-4 p-6">
+                  <Badge variant="muted">캡처 리허설</Badge>
+                  <h3 className="font-display text-3xl font-semibold text-[var(--foreground)]">
+                    이 순서대로 맞추면
+                    <br />
+                    심사 캡처가 쉬워집니다.
+                  </h3>
+                  <div className="space-y-3">
+                    {affiliateShowcaseSteps.map((step) => {
+                      const Icon = step.icon
+
+                      return (
+                        <div
+                          key={step.title}
+                          className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.78)] px-4 py-4"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                              <Icon className="size-4" />
+                            </div>
+                            <div className="text-sm font-semibold text-[var(--foreground)]">
+                              {step.title}
+                            </div>
+                          </div>
+                          <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                            {step.description}
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(239,245,255,0.84)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
+                    캡처에 꼭 함께 보이면 좋은 요소:
+                    <br />
+                    `loopincode.com` 주소
+                    <br />
+                    실제 제휴 요소
+                    <br />
+                    대가성 문구
+                    <br />
+                    문의 이메일 `contact.loopinlab@gmail.com`
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </section>
 
           <section id="criteria" className="space-y-4">
@@ -550,7 +719,7 @@ function App() {
                     className="rounded-[26px] border border-[var(--border)] bg-[rgba(255,255,255,0.76)] p-5"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(239,109,30,0.12)] text-[var(--accent)]">
+                      <div className="inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
                         <Icon className="size-4" />
                       </div>
                       <div className="text-base font-semibold text-[var(--foreground)]">
@@ -564,7 +733,7 @@ function App() {
                       {card.points.map((point) => (
                         <li
                           key={point}
-                          className="rounded-[18px] bg-[rgba(246,242,235,0.9)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
+                          className="rounded-[18px] bg-[rgba(239,245,255,0.94)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
                         >
                           {point}
                         </li>
@@ -575,7 +744,7 @@ function App() {
               })}
             </div>
 
-            <div className="rounded-[26px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-900">
+            <div className="rounded-[26px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm leading-6 text-sky-900">
               대가성 문구 예시: {coupangDisclosureText}
             </div>
           </footer>
