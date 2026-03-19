@@ -125,9 +125,8 @@ const affiliateWidgets = [
 ]
 
 const sideAffiliateBanner = {
-  href: 'https://link.coupang.com/a/d7pcAe',
-  imageSrc:
-    'https://ads-partners.coupang.com/banners/973791?subId=&traceId=V0-301-879dd1202e5c73b2-I973791&w=160&h=600',
+  iframeSrc:
+    'https://ads-partners.coupang.com/widgets.html?id=973794&template=carousel&trackingCode=AF7474453&subId=&width=160&height=600&tsource=',
 }
 
 const footerFacts = [
@@ -186,8 +185,7 @@ function App() {
         <CoupangSideBanner
           key={side}
           label={`쿠팡 파트너스 사이드 배너 ${side}`}
-          href={sideAffiliateBanner.href}
-          imageSrc={sideAffiliateBanner.imageSrc}
+          iframeSrc={sideAffiliateBanner.iframeSrc}
           style={sideBannerStyles[side]}
         />
       ))}

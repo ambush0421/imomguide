@@ -516,6 +516,16 @@
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
 
+## 2026-03-19 쿠팡 사이드 배너 iframe 재전환
+
+- [x] 사용자 제공 `widgets.html` iframe 태그 확인
+- [x] 좌우 사이드 배너를 쿠팡 iframe 위젯 방식으로 교체
+- [x] 콘텐츠 좌우 여백 고정 구조 유지
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
+
 ## 2026-03-19 loopincode 전용 소스 정리
 
 - [x] 현재 엔트리 기준으로 미사용 정적 소스와 유지 대상 분류

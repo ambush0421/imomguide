@@ -1815,6 +1815,34 @@ npm run test
 
 ---
 
+## 2026-03-19 쿠팡 사이드 배너 iframe 재전환
+
+### 작업 배경
+
+- 사용자는 정적 이미지 배너 대신 쿠팡이 제공한 `widgets.html` iframe 태그로 좌우 사이드 광고를 다시 교체해 보길 원했다.
+- iframe 방식은 다이나믹 스크립트보다 부모 레이아웃을 더 잘 따를 가능성이 높아, 콘텐츠 좌우 여백 고정 구조와의 궁합을 다시 검증할 가치가 있었다.
+
+### 반영 내용
+
+- [coupang-side-banner.tsx](C:/projects/imomguide_remote_20260319/src/components/coupang-side-banner.tsx)
+  - 정적 이미지 링크 기반 구현을 제거하고, `160x600` 쿠팡 iframe 위젯을 직접 렌더링하도록 변경했다.
+  - 좌우 래퍼의 보더, 라운드, 그림자는 유지해 레일 광고처럼 보이도록 정리했다.
+- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+  - 사이드 배너 데이터 소스를 `href + imageSrc`에서 `iframeSrc`로 교체했다.
+  - 좌우 모두 동일한 `widgets.html?id=973794&template=carousel&trackingCode=AF7474453...` iframe을 사용한다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+- `npm run build` 통과
+
+### 결과 요약
+
+- 좌우 사이드 광고는 다시 쿠팡 공식 iframe 위젯 기반으로 교체됐고, 위치 제어는 기존 콘텐츠 여백 고정 레일 구조를 그대로 사용한다.
+
+---
+
 ## 2026-03-19 loopincode 전용 소스 정리
 
 ### 작업 배경
