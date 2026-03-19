@@ -15,21 +15,8 @@
 - 웹: `index.html -> src/main.tsx -> src/App.tsx`
 - 데스크톱: `electron/main.mjs`
 
-루트에 있는 아래 파일들은 과거 `아이맘가이드` 정적 소스이며, 현재 웹/데스크톱 진입에 사용되지 않습니다.
-
-- `pregnancy.html`
-- `postpartum.html`
-- `infant.html`
-- `toddler.html`
-- `preschool.html`
-- `pricing.html`
-- `privacy.html`
-- `roadmap.html`
-- `tools.html`
-- `style.css`
-- `main.js`
-
-즉, 사이트를 수정할 때는 정적 HTML이 아니라 `src/` 아래 React 앱을 기준으로 작업하면 됩니다.
+예전 `아이맘가이드` 정적 HTML/JS/CSS 소스는 정리했고, 이제 저장소에는 loopincode 운영에 필요한 React/Electron 기반 소스만 남겨 둡니다.
+즉, 사이트를 수정할 때는 루트 정적 HTML이 아니라 `src/` 아래 React 앱을 기준으로 작업하면 됩니다.
 
 ## 기술 스택
 
@@ -99,7 +86,7 @@ npm run desktop:build
 - 연결 도메인: `imomguide.pages.dev`, `loopincode.com`
 - 저장소를 Git 연동으로 계속 사용할 경우, Cloudflare Pages의 `Build command`는 `npm run build`, `Build output directory`는 `dist`로 맞춰 두는 것이 안전하다.
 - `wrangler.toml`에는 `pages_build_output_dir = "./dist"`를 반영해 두었다.
-- 현재 Pages 프로젝트는 기존 정적 사이트 설정의 영향으로 Git 배포 시 `dist`가 필요할 수 있어, 배포 안정화 전까지는 `npm run build` 후 생성된 `dist/`를 함께 반영하는 방식이 가장 안전하다.
+- 현재 Pages 프로젝트명은 기존 운영 이력 때문에 `imomguide`를 유지하고 있지만, 실제 서비스 소스는 loopincode 기준으로 관리한다.
 
 ## 검증 명령
 

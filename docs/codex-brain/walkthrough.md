@@ -1784,3 +1784,54 @@ npm run test
 ### 결과 요약
 
 - 이전보다 더 넓은 데스크톱 폭에서 좌우 사이드 배너가 실제로 노출되도록 조건을 완화했고, 콘텐츠 여백 기준 위치도 함께 보정했다.
+
+---
+
+## 2026-03-19 loopincode 전용 소스 정리
+
+### 작업 배경
+
+- 사용자는 더 이상 필요하지 않은 예전 `imomguide` 사이트 제작 흔적을 제거하고, 현재 운영 중인 loopincode 관련 소스만 남겨 달라고 요청했다.
+- 현재 웹 엔트리는 `index.html -> src/main.tsx -> src/App.tsx`, 데스크톱 엔트리는 `electron/main.mjs`인데, 루트에는 과거 정적 HTML/JS/CSS와 중복 정적 파일, 추적 중인 `dist` 산출물이 함께 남아 있었다.
+
+### 반영 내용
+
+- [README.md](C:/projects/magok/README.md)
+  - 예전 정적 소스가 제거됐고 이제 React/Electron 기반 loopincode 소스만 관리한다는 현재 구조로 설명을 정리했다.
+  - Cloudflare Pages 프로젝트명 `imomguide`는 기존 운영 인프라 식별자라서 이번 정리에서는 유지한다는 점을 명시했다.
+- [.gitignore](C:/projects/magok/.gitignore)
+  - `dist`와 `tmp_*`를 추가해 빌드 산출물과 임시 파일이 다시 추적되지 않게 정리했다.
+- 삭제한 과거 정적/중복/임시 파일
+  - 루트 정적 페이지와 템플릿:
+    - `infant.html`, `postpartum.html`, `pregnancy.html`, `preschool.html`, `pricing.html`, `privacy.html`, `roadmap.html`, `toddler.html`, `tools.html`
+    - `nav_template.html`, `mobile_nav_template.html`
+    - `main.js`, `style.css`
+  - 루트 중복 정적 파일:
+    - `ads.txt`, `robots.txt`, `sitemap.xml`
+  - 임시/미사용 파일:
+    - `tmp_coupang_guide.pdf`, `tmp_coupang_partners_main.js`
+    - `src/assets/hero.png`, `src/assets/react.svg`, `src/assets/vite.svg`
+  - 추적 중이던 빌드 산출물:
+    - `dist/` 내부 파일 전체
+- 유지한 항목
+  - 현재 앱 소스 `src/`
+  - 정적 자산 원본 `public/`
+  - 데스크톱 진입점 `electron/`
+  - 법령/작업 문서 `docs/codex-brain/`
+  - 배포 설정 `wrangler.toml`
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-DCsMlPyE.css`
+  - `dist/assets/index-SrEU6g-x.js`
+
+### 결과 요약
+
+- 저장소 루트에서 예전 `imomguide` 정적 사이트 흔적은 제거되고, 현재 loopincode 운영에 필요한 소스 중심 구조만 남게 됐다.
+- `dist`는 더 이상 저장소에 추적되지 않고, 필요할 때 `npm run build`로만 다시 생성되는 구조로 정리됐다.

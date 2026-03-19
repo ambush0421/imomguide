@@ -608,6 +608,42 @@ src/
 
 ---
 
+## 2026-03-19 loopincode 전용 소스 정리 계획
+
+### 변경 목표
+
+- 예전 `imomguide` 정적 사이트 제작 흔적을 저장소에서 제거하고, 현재 운영 중인 loopincode용 React/Electron 소스만 남긴다.
+- 현재 엔트리(`index.html -> src/main.tsx -> src/App.tsx`, `electron/main.mjs`)에서 사용하지 않는 루트 정적 HTML, 템플릿, 임시 파일, 추적 중인 빌드 산출물을 정리한다.
+- 기존 Cloudflare Pages 프로젝트명 `imomguide` 같은 인프라 식별자는 운영 영향이 있으므로 이번 정리에서는 유지한다.
+
+### 구현 메모
+
+1. 삭제 대상
+   - 루트의 과거 정적 페이지와 템플릿:
+     - `infant.html`, `postpartum.html`, `pregnancy.html`, `preschool.html`, `pricing.html`, `privacy.html`, `roadmap.html`, `toddler.html`, `tools.html`
+     - `nav_template.html`, `mobile_nav_template.html`
+     - `main.js`, `style.css`
+   - 현재 참조되지 않는 임시/보조 파일:
+     - `tmp_coupang_guide.pdf`, `tmp_coupang_partners_main.js`
+     - `src/assets/hero.png`, `src/assets/react.svg`, `src/assets/vite.svg`
+   - 루트 중복 정적 파일:
+     - `ads.txt`, `robots.txt`, `sitemap.xml`
+   - 추적 중인 빌드 산출물:
+     - `dist/` 전체
+2. 유지 대상
+   - 현재 앱 소스 `src/`, 정적 자산 원본 `public/`, 데스크톱 진입점 `electron/`, 배포 설정 `wrangler.toml`, 법령 참고 파일과 `docs/codex-brain/` 문서
+3. 보조 정리
+   - `.gitignore`에 `dist`와 임시 파일 패턴을 추가해 다시 추적되지 않게 한다.
+   - `README.md`를 현재 구조 기준으로 업데이트해, 예전 정적 사이트 소스가 제거됐음을 반영한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+---
+
 ## 2026-03-19 지식산업센터 기본값 조정 계획
 
 ### 변경 목표
