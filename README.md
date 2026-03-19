@@ -99,6 +99,7 @@ npm run desktop:build
 - 연결 도메인: `imomguide.pages.dev`, `loopincode.com`
 - 저장소를 Git 연동으로 계속 사용할 경우, Cloudflare Pages의 `Build command`는 `npm run build`, `Build output directory`는 `dist`로 맞춰 두는 것이 안전하다.
 - `wrangler.toml`에는 `pages_build_output_dir = "./dist"`를 반영해 두었다.
+- 현재 Pages 프로젝트는 기존 정적 사이트 설정의 영향으로 Git 배포 시 `dist`가 필요할 수 있어, 배포 안정화 전까지는 `npm run build` 후 생성된 `dist/`를 함께 반영하는 방식이 가장 안전하다.
 
 ## 검증 명령
 

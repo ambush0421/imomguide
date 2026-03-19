@@ -1,0 +1,19 @@
+# LoopinCode - robots.txt
+# https://loopincode.com
+
+User-agent: *
+Allow: /
+
+Sitemap: https://loopincode.com/sitemap.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+
+# Naver specific (한국 SEO)
+User-agent: Yeti
+Allow: /
