@@ -573,3 +573,40 @@ npm run test
 
 - 현재 Git 배포 호환성을 위해 prebuilt `dist/`를 함께 추적하는 상태다.
 - 장기적으로는 Cloudflare Pages 대시보드에서 `Build command = npm run build`, `Build output directory = dist`로 명시 전환하면 더 깔끔하다.
+
+---
+
+## 2026-03-19 AdSense 사이트 검토 코드 반영
+
+### 판단
+
+- `loopincode.com`은 이미 같은 AdSense 계정의 publisher ID를 담은 `ads.txt`를 가지고 있었고, 이 값은 그대로 유지하는 것이 맞다.
+- 사이트 검토용 publisher ID는 새로 만들 필요가 없고, 기존 `ca-pub-2916041253392911` / `pub-2916041253392911`를 그대로 재사용하면 된다.
+- 다만 기존 상태에서는 `head`에 AdSense script와 `google-adsense-account` meta가 없어, 검토 신호를 더 분명히 하기 위해 둘 다 추가했다.
+
+### 반영 내용
+
+- `index.html`에 아래 두 항목을 추가했다.
+  - `<meta name="google-adsense-account" content="ca-pub-2916041253392911">`
+  - `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911`
+- `public/ads.txt`는 기존 값 그대로 유지했다.
+- 변경 내용을 GitHub 원격 `main`과 Cloudflare Production 배포까지 반영했다.
+
+### 검증
+
+- `npm run build` 통과
+- `npm run test` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- Cloudflare Production 배포
+  - `fb87daa` 기준 `Production Active`
+- 운영 도메인 확인
+  - `https://loopincode.com` HTML에서 `google-adsense-account`
+  - `adsbygoogle.js?client=ca-pub-2916041253392911`
+  - 기존 `ads.txt` 값 노출 확인
+
+### 결론
+
+- `ads.txt`: 기존 값 그대로 사용
+- `AdSense script`: 추가하는 것이 맞음
+- `google-adsense-account` meta: 추가하는 것이 맞음

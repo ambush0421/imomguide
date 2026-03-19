@@ -645,3 +645,28 @@ src/
 - `git push origin codex/magok-site-replace`
 - `npx wrangler pages deployment list --project-name imomguide`
 - `git push origin codex/magok-site-replace:main`
+
+---
+
+## 2026-03-19 AdSense 사이트 검토 코드 반영 계획
+
+### 변경 목표
+
+- `loopincode.com`이 AdSense 사이트 검토 시 더 명확하게 식별되도록 `head`에 AdSense 계정 신호를 추가한다.
+- 기존 AdSense 계정의 publisher ID를 유지한 채, 현재 사이트에서 필요한 태그만 보강한다.
+
+### 구현 메모
+
+1. `index.html`
+   - `<meta name="google-adsense-account" content="ca-pub-2916041253392911">` 추가
+   - AdSense script snippet 추가
+2. `public/ads.txt`
+   - 기존 `google.com, pub-2916041253392911, DIRECT, f08c47fec0942fa0` 유지
+3. GitHub 원격
+   - 동일 변경을 원격 저장소 작업본과 `main`에 반영
+
+### 검증 메모
+
+- `npm run build`
+- `npm run test`
+- `Invoke-WebRequest https://loopincode.com`로 메타/script 포함 여부 확인

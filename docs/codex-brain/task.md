@@ -219,3 +219,16 @@
 - [x] 동일 커밋을 `main`에 반영
 - [x] Cloudflare Production 배포 `Active` 확인
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 AdSense 사이트 검토 코드 반영
+
+- [x] 현재 `loopincode.com`의 AdSense 관련 태그 상태 확인
+- [x] AdSense 공식 가이드 기준 검토 필요 코드 확인
+- [x] 동일 publisher ID 재사용 가능 여부 판단
+- [x] `index.html`에 `google-adsense-account` meta 추가
+- [x] `index.html`에 AdSense script 추가
+- [x] `ads.txt` 유지 여부 확인
+- [x] build/test 재검증
+- [x] GitHub 원격 `main`에 반영
+- [x] Cloudflare Production 반영 확인
+- [x] walkthrough.md 갱신
