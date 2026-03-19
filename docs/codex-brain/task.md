@@ -589,3 +589,14 @@
 - [x] `.gitignore`, `README.md`를 현재 구조 기준으로 정리
 - [x] lint/test/build 재검증
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 제휴 섹션 공간 밀도 재조정
+
+- [x] 현재 제휴 섹션이 비어 보이는 원인 재확인
+- [x] 상품 보드를 메인 영역으로 확장
+- [x] 안내/CTA를 오른쪽 사이드 레일로 재배치
+- [x] 카드 내부 여백과 정보 밀도 재조정
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신

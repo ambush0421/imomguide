@@ -602,73 +602,29 @@ function App() {
             id="affiliate"
             className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(248,252,255,0.96),rgba(255,255,255,0.94))] p-6 shadow-[0_20px_56px_rgba(28,33,43,0.08)] sm:p-8"
           >
-            <div className="grid gap-6 xl:grid-cols-[290px_minmax(0,1fr)] xl:items-start">
-              <div className="rounded-[30px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,248,255,0.92))] p-5 shadow-[0_18px_36px_rgba(28,33,43,0.06)] xl:sticky xl:top-24">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+              <div className="max-w-3xl">
                 <Badge variant="muted">업무용 추천</Badge>
-                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
                   업무용 추천 상품
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-                  업무 시작 전에 자주 챙기는 품목만 오른쪽 보드에 모아뒀습니다.
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--foreground-muted)]">
+                  핸드폰, 생수, 업무 기기, 소모품까지 실무에서 자주 먼저 보는 품목을 한
+                  화면 안에서 바로 비교할 수 있게 정리했습니다.
                 </p>
-
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {affiliateHighlights.map((item) => (
-                    <Badge key={item} variant="muted">
-                      {item}
-                    </Badge>
-                  ))}
-                </div>
-
-                <div className="mt-6 space-y-3">
-                  {affiliateSidebarNotes.map((note) => (
-                    <div
-                      key={note}
-                      className="flex items-start gap-3 rounded-[18px] border border-[rgba(190,208,234,0.55)] bg-white/86 px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
-                    >
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" />
-                      <span>{note}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 grid gap-3">
-                  {affiliateActions.map((item) => (
-                    <Button
-                      key={item.title}
-                      asChild
-                      variant={item.variant}
-                      className="justify-start rounded-2xl px-5"
-                    >
-                      <a
-                        href={item.href}
-                        target="_blank"
-                        rel="nofollow sponsored noopener"
-                        referrerPolicy="unsafe-url"
-                      >
-                        {item.title}
-                      </a>
-                    </Button>
-                  ))}
-                </div>
-
-                <div className="mt-6 rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4">
-                  <div className="flex items-start gap-3">
-                    <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
-                      <ExternalLink className="size-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-[var(--foreground)]">
-                        광고·제휴 안내
-                      </div>
-                      <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                        {coupangDisclosureText}
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
 
+              <div className="flex flex-wrap gap-2">
+                {affiliateHighlights.map((item) => (
+                  <Badge key={item} variant="muted">
+                    {item}
+                  </Badge>
+                ))}
+                <Badge variant="muted">4 picks</Badge>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_300px] xl:items-start">
               <div className="rounded-[30px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,250,255,0.96))] p-5 shadow-[0_20px_40px_rgba(43,109,255,0.08)]">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
@@ -676,42 +632,52 @@ function App() {
                       사이드 추천 보드
                     </div>
                     <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                      실무에서 자주 보는 품목을 바로 비교할 수 있게 정리했습니다.
+                      상품 설명과 위젯을 같은 줄에 묶어, 비어 보이지 않게 바로 비교하도록
+                      다시 정리했습니다.
                     </p>
                   </div>
-                  <Badge variant="muted">4 picks</Badge>
+                  <Badge variant="muted">업무 시작 전 체크</Badge>
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                   {affiliateWidgets.map((widget, index) => (
                     <div
                       key={widget.src}
-                      className="group relative overflow-hidden rounded-[26px] border border-[rgba(190,208,234,0.7)] bg-white/92 p-4 shadow-[0_14px_28px_rgba(43,109,255,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_44px_rgba(43,109,255,0.12)]"
+                      className="group relative overflow-hidden rounded-[28px] border border-[rgba(190,208,234,0.7)] bg-white/95 p-4 shadow-[0_14px_28px_rgba(43,109,255,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_44px_rgba(43,109,255,0.12)]"
                     >
                       <div
-                        className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${affiliateCardAccentClasses[index]}`}
+                        className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${affiliateCardAccentClasses[index]}`}
                       />
-                      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_136px] sm:items-center">
-                        <div>
+                      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_132px] sm:items-center">
+                        <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
                               {widget.badge}
                             </div>
                             {index < 2 ? <Badge variant="muted">추천</Badge> : null}
                           </div>
-                          <div className="mt-3 text-xl font-semibold leading-8 text-[var(--foreground)]">
+                          <div className="mt-3 text-[1.65rem] font-semibold leading-9 text-[var(--foreground)]">
                             {widget.headline}
                           </div>
-                          <p className="mt-3 min-h-12 text-sm leading-6 text-[var(--foreground-muted)]">
+                          <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
                             {widget.description}
                           </p>
 
-                          <div className="mt-4 text-xs font-medium tracking-[0.04em] text-[var(--foreground-subtle)]">
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <span className="rounded-full border border-[rgba(190,208,234,0.65)] bg-[rgba(244,247,255,0.92)] px-3 py-1 text-xs font-medium text-[var(--foreground-subtle)]">
+                              빠른 비교
+                            </span>
+                            <span className="rounded-full border border-[rgba(190,208,234,0.65)] bg-[rgba(244,247,255,0.92)] px-3 py-1 text-xs font-medium text-[var(--foreground-subtle)]">
+                              외부 링크
+                            </span>
+                          </div>
+
+                          <div className="mt-5 text-xs font-medium tracking-[0.04em] text-[var(--foreground-subtle)]">
                             상품 자세히 보기
                           </div>
                         </div>
 
-                        <div className="flex justify-center rounded-[22px] border border-[rgba(190,208,234,0.7)] bg-[linear-gradient(180deg,#ffffff,rgba(245,248,255,0.96))] px-2 py-3 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.35)]">
+                        <div className="flex justify-center rounded-[24px] border border-[rgba(190,208,234,0.7)] bg-[linear-gradient(180deg,#ffffff,rgba(245,248,255,0.96))] px-2 py-3 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.35)]">
                           <iframe
                             src={widget.src}
                             title={widget.title}
@@ -727,6 +693,75 @@ function App() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              <div className="space-y-4 xl:sticky xl:top-24">
+                <div className="rounded-[28px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(243,248,255,0.94))] p-5 shadow-[0_18px_36px_rgba(28,33,43,0.06)]">
+                  <div className="text-sm font-semibold text-[var(--foreground)]">바로 보는 안내</div>
+                  <p className="mt-2 text-sm leading-7 text-[var(--foreground-muted)]">
+                    오른쪽 보드에서 자주 찾는 품목을 먼저 보고, 필요하면 바로 외부 링크로
+                    이어서 확인하면 됩니다.
+                  </p>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    {affiliateHighlights.map((item) => (
+                      <div
+                        key={item}
+                        className="rounded-[18px] border border-[rgba(190,208,234,0.6)] bg-white/92 px-3 py-3 text-sm font-medium text-[var(--foreground)]"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-5 grid gap-3">
+                    {affiliateActions.map((item) => (
+                      <Button
+                        key={item.title}
+                        asChild
+                        variant={item.variant}
+                        className="justify-start rounded-2xl px-5"
+                      >
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="nofollow sponsored noopener"
+                          referrerPolicy="unsafe-url"
+                        >
+                          {item.title}
+                        </a>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-3">
+                  {affiliateSidebarNotes.map((note) => (
+                    <div
+                      key={note}
+                      className="flex items-start gap-3 rounded-[22px] border border-[rgba(190,208,234,0.55)] bg-white/90 px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] shadow-[0_10px_24px_rgba(28,33,43,0.04)]"
+                    >
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" />
+                      <span>{note}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                      <ExternalLink className="size-4" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-[var(--foreground)]">
+                        광고·제휴 안내
+                      </div>
+                      <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
+                        {coupangDisclosureText}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
