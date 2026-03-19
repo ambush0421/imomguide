@@ -622,3 +622,15 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-20 사이드 배너 첫 화면 가시성 강화
+
+- [x] 100% 화면 첫 구간에서 배너가 안 보이는 증상 재확인
+- [x] 노출 시작 breakpoint를 `lg`로 완화
+- [x] 폭 구간별 축소 비율을 더 세분화
+- [x] `top-28` 기준으로 첫 화면 가시성 보정
+- [x] 좌우 오프셋을 축소 폭 기준으로 재조정
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
