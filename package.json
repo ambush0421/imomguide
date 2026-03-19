@@ -1,0 +1,87 @@
+{
+  "name": "magok",
+  "private": true,
+  "version": "0.0.0",
+  "description": "마곡 일반산업단지 업종코드 추천 및 입주 예비판정 데스크톱/웹 앱",
+  "author": "Loopin Lab",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "type": "module",
+  "main": "electron/main.mjs",
+  "scripts": {
+    "dev": "npm run web:dev",
+    "web:dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "test": "vitest run --pool=threads --maxWorkers=1",
+    "preview": "npm run web:preview",
+    "web:preview": "vite preview --host 0.0.0.0",
+    "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 5180\" \"wait-on tcp:127.0.0.1:5180 && cross-env ELECTRON_RENDERER_URL=http://127.0.0.1:5180 electron electron/main.mjs\"",
+    "desktop:build": "node scripts/desktop-build.mjs"
+  },
+  "dependencies": {
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-scroll-area": "^1.2.10",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.577.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.5.0",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@tailwindcss/postcss": "^4.2.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.12.0",
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.0.0",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^41.0.2",
+    "electron-builder": "^26.8.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "jsdom": "^29.0.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.56.1",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0",
+    "wait-on": "^9.0.4"
+  },
+  "build": {
+    "appId": "com.loopinlab.magokcodefinder",
+    "productName": "Magok Code Finder",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        "portable"
+      ],
+      "artifactName": "magok-code-finder-${version}.${ext}"
+    }
+  }
+}

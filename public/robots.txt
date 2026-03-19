@@ -10,7 +10,7 @@ Sitemap: https://loopincode.com/sitemap.xml
 User-agent: Googlebot
 Allow: /
 
-# Bing specific  
+# Bing specific
 User-agent: Bingbot
 Allow: /
 
