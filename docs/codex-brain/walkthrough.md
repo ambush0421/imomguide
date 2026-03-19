@@ -1393,6 +1393,9 @@ npm run test
   - `dist/index.html`
   - `dist/assets/index-zpFHZgKx.css`
   - `dist/assets/index-0bqty4mx.js`
+- Git 커밋 `df96b26` (`feat: default zone to knowledge industry center`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+- Cloudflare Pages Production Active: `https://d2e8c2d7.imomguide.pages.dev` (`df96b26`)
+- `https://loopincode.com`은 확인 시점에 아직 이전 번들 `index-BmeHSo0H.js`, `index-BnevUQsF.css`를 응답하고 있어 커스텀 도메인 캐시 반영이 더 필요했다.
 
 ### 결과 요약
 
