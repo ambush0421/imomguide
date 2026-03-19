@@ -1258,7 +1258,23 @@ npm run test
 
 ### 검증
 
-- 검증은 아직 진행 중이다.
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-CX7ApAM0.css`
+  - `dist/assets/index-xvF1-hNF.js`
+- Git 커밋 `dd1f458` (`feat: add live coupang affiliate elements`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
+- Cloudflare Pages Preview 새 배포 URL: `https://b641a1af.imomguide.pages.dev`
+- Cloudflare Pages Production Active: `https://19879faf.imomguide.pages.dev` (`dd1f458`)
+- 운영 도메인 `https://loopincode.com`의 최신 번들 `index-Oex0_FWl.js` 안에 아래 문자열이 모두 포함되는 것을 확인했다.
+  - `https://link.coupang.com/a/d7nWco`
+  - `https://link.coupang.com/a/d7n7ta`
+  - `https://link.coupang.com/a/d7nYOA`
+  - `https://coupa.ng/clX3qg`
+  - `contact.loopinlab@gmail.com`
 
 ### 결과 요약
 

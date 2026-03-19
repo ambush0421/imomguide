@@ -372,7 +372,7 @@
 - [x] 대가성 문구와 문의 이메일이 같은 섹션 안에 보이도록 유지
 - [x] App 테스트를 실제 링크/배너/위젯 기준으로 보강
 - [x] 쿠팡 제출 체크리스트 문서에 현재 실반영 요소 명시
-- [ ] lint/test/build 재검증
-- [ ] 원격 저장소 반영
-- [ ] Cloudflare Pages 재배포
-- [ ] walkthrough.md 갱신
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
