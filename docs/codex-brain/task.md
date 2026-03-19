@@ -611,3 +611,14 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 사이드 배너 100퍼센트 화면 대응
+
+- [x] 100% 확대에서 사이드 배너가 사라지는 원인 재확인
+- [x] `2xl` 고정 노출 조건 제거
+- [x] 중간 해상도용 축소 레일 배너 도입
+- [x] 콘텐츠 여백 기준 좌우 오프셋 재조정
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신

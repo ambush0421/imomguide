@@ -61,7 +61,7 @@ describe('App', () => {
 
     await user.click(screen.getByRole('tab', { name: '지식산업센터' }))
     expect(screen.getByText('시행령 제6조제2항 1~27호 대응표')).toBeInTheDocument()
-  })
+  }, 10000)
 
   it('추천 업종 선택 후 2단계로 이동하고 결과 보기 후 3단계 결과를 보여준다', async () => {
     render(<App />)

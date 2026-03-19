@@ -2102,3 +2102,37 @@ npm run test
 
 - 제휴 섹션이 `왼쪽 안내 박스 + 오른쪽 카드 묶음`처럼 분리돼 보이던 상태에서, 이제는 하나의 보드처럼 꽉 찬 벤토 레이아웃으로 정리됐다.
 - 사용자가 지적한 오른쪽 하단 잔여 공간은 2x2 카드 구성이 직접 채우도록 바뀌어, 전체 면적이 더 안정적으로 보이게 됐다.
+
+---
+
+## 2026-03-19 사이드 배너 100퍼센트 화면 대응
+
+### 작업 배경
+
+- 사용자는 브라우저 배율을 `100%`로 두면 좌우 쿠팡 사이드 배너가 아예 사라진다고 피드백했다.
+- 기존 구현은 [coupang-side-banner.tsx](C:/projects/imomguide_remote_20260319/src/components/coupang-side-banner.tsx) 에서 `2xl:block`으로만 노출되도록 되어 있어, 폭이 조금만 줄어도 사이드 배너가 숨겨지는 구조였다.
+
+### 반영 내용
+
+- [coupang-side-banner.tsx](C:/projects/imomguide_remote_20260319/src/components/coupang-side-banner.tsx)
+  - 노출 기준을 `2xl`에서 `min-[1440px]`로 낮췄다.
+  - `1440~1679px` 구간에서는 `160x600` iframe을 `0.8배`로 축소해 보여주고, `1680px` 이상에서는 원본 크기로 보이게 조정했다.
+  - 이렇게 해서 100% 화면에서도 배너가 완전히 사라지지 않고, 여백 안에서 축소된 상태로 유지되도록 했다.
+- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+  - 콘텐츠 여백 기준 좌우 오프셋을 `172px`에서 `140px`로 줄여, 축소 배너 폭에 맞게 위치를 다시 맞췄다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 5개 테스트 파일
+  - 53개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-euiSRlBF.css`
+  - `dist/assets/index-B_1fMMLJ.js`
+
+### 결과 요약
+
+- 100% 화면에서 사라지던 사이드 배너는 이제 중간 해상도에서 축소판으로도 유지되도록 바뀌었다.
+- 넓은 화면에서는 기존 크기를 유지하고, 중간 폭에서는 가볍게 축소해 콘텐츠 여백 안에서 계속 노출되는 방향으로 최적화했다.
