@@ -7,7 +7,7 @@ import {
   Landmark,
 } from 'lucide-react'
 
-import { CoupangDynamicBanner } from '@/components/coupang-dynamic-banner'
+import { CoupangSideBanner } from '@/components/coupang-side-banner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -125,12 +125,9 @@ const affiliateWidgets = [
 ]
 
 const sideAffiliateBanner = {
-  id: 973794,
-  template: 'carousel' as const,
-  trackingCode: 'AF7474453',
-  width: '160',
-  height: '600',
-  tsource: '',
+  href: 'https://link.coupang.com/a/d7pcAe',
+  imageSrc:
+    'https://ads-partners.coupang.com/banners/973791?subId=&traceId=V0-301-879dd1202e5c73b2-I973791&w=160&h=600',
 }
 
 const footerFacts = [
@@ -186,10 +183,11 @@ function App() {
   return (
     <div className="min-h-screen">
       {(['left', 'right'] as const).map((side) => (
-        <CoupangDynamicBanner
+        <CoupangSideBanner
           key={side}
           label={`쿠팡 파트너스 사이드 배너 ${side}`}
-          config={sideAffiliateBanner}
+          href={sideAffiliateBanner.href}
+          imageSrc={sideAffiliateBanner.imageSrc}
           style={sideBannerStyles[side]}
         />
       ))}
