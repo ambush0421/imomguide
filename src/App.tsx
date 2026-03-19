@@ -7,6 +7,7 @@ import {
   Landmark,
 } from 'lucide-react'
 
+import { CoupangDynamicBanner } from '@/components/coupang-dynamic-banner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -82,10 +83,12 @@ const affiliateWidget = {
 }
 
 const sideAffiliateBanner = {
-  href: 'https://link.coupang.com/a/d7pcAe',
-  imageSrc:
-    'https://ads-partners.coupang.com/banners/973791?subId=&traceId=V0-301-879dd1202e5c73b2-I973791&w=160&h=600',
-  imageAlt: '쿠팡 파트너스 사이드 배너',
+  id: 973794,
+  template: 'carousel' as const,
+  trackingCode: 'AF7474453',
+  width: '160',
+  height: '600',
+  tsource: '',
 }
 
 const footerFacts = [
@@ -121,26 +124,12 @@ function App() {
   return (
     <div className="min-h-screen">
       {(['left', 'right'] as const).map((side) => (
-        <a
+        <CoupangDynamicBanner
           key={side}
-          href={sideAffiliateBanner.href}
-          target="_blank"
-          rel="nofollow sponsored noopener"
-          referrerPolicy="unsafe-url"
-          aria-label={`쿠팡 파트너스 사이드 배너 ${side}`}
-          className={`fixed top-1/2 z-30 hidden -translate-y-1/2 2xl:block ${
-            side === 'left' ? 'left-4' : 'right-4'
-          }`}
-        >
-          <img
-            src={sideAffiliateBanner.imageSrc}
-            alt={sideAffiliateBanner.imageAlt}
-            width="160"
-            height="600"
-            loading="lazy"
-            className="h-auto w-[160px] rounded-[24px] border border-[var(--border)] bg-white shadow-[0_18px_40px_rgba(28,33,43,0.18)]"
-          />
-        </a>
+          label={`쿠팡 파트너스 사이드 배너 ${side}`}
+          config={sideAffiliateBanner}
+          className={side === 'left' ? 'left-4' : 'right-4'}
+        />
       ))}
 
       <div className="mx-auto max-w-[1180px] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">

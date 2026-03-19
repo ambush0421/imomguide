@@ -1400,3 +1400,37 @@ npm run test
 ### 결과 요약
 
 - 사용자가 처음 진입하거나 `입력 초기화`를 눌렀을 때 기본 구역이 `지식산업센터`로 일관되게 유지되도록 조정했다.
+
+---
+
+## 2026-03-19 쿠팡 사이드 배너 다이나믹 배너 전환
+
+### 작업 배경
+
+- 사용자는 정적 160x600 이미지 배너 대신 쿠팡 포털에서 생성한 `PartnersCoupang.G` 다이나믹 배너 태그로 사이드 배너를 바꿔 달라고 요청했다.
+- 이번 단계의 목적은 기존 좌우 고정 노출 위치는 유지하면서, 실제 태그 사용 가이드 형식에 더 가깝게 다이나믹 배너를 실행하는 것이다.
+
+### 반영 내용
+
+- [coupang-dynamic-banner.tsx](C:/projects/imomguide_remote_20260319/src/components/coupang-dynamic-banner.tsx)
+  - 쿠팡 `https://ads-partners.coupang.com/g.js`를 한 번만 로드하는 헬퍼를 추가했다.
+  - 각 고정 배너 영역 안에서 `new PartnersCoupang.G(...)`를 실행해 다이나믹 배너를 렌더링하도록 구성했다.
+- [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
+  - 기존 정적 이미지 사이드 배너를 제거하고, `id=973794`, `template=carousel`, `trackingCode=AF7474453`, `160x600` 설정의 다이나믹 배너 2개로 교체했다.
+- [App.test.tsx](C:/projects/imomguide_remote_20260319/src/App.test.tsx)
+  - 외부 스크립트 실행과 무관하게 `쿠팡 파트너스 사이드 배너` 래퍼 2개가 렌더링되는지 검증을 갱신했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 3개 테스트 파일
+  - 15개 테스트 케이스 통과
+- `npm run build` 통과
+  - `dist/index.html`
+  - `dist/assets/index-SwaFqRfB.css`
+  - `dist/assets/index-Ba9B1Ak6.js`
+
+### 결과 요약
+
+- 좌우 고정 배너는 유지하면서, 배너 콘텐츠 자체는 사용자 제공 태그 기반의 쿠팡 다이나믹 배너로 전환되도록 정리했다.
