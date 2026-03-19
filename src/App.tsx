@@ -95,15 +95,11 @@ const coupangDisclosureText =
 const affiliateActions = [
   {
     title: '추천 상품 보기',
-    description:
-      '업무 공간 준비에 참고할 수 있는 외부 추천 상품 링크입니다.',
     href: 'https://link.coupang.com/a/d7nWco',
     variant: 'default' as const,
   },
   {
-    title: '추가 추천 보기',
-    description:
-      '다른 추천 항목도 보고 싶다면 보조 링크에서 이어서 확인할 수 있습니다.',
+    title: '추가 상품 보기',
     href: 'https://link.coupang.com/a/d7n7ta',
     variant: 'secondary' as const,
   },
@@ -578,13 +574,12 @@ function App() {
           >
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,448px)] lg:items-start">
               <div>
-                <Badge variant="muted">추천 상품</Badge>
+                <Badge variant="muted">업무용 추천</Badge>
                 <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
                   업무용 추천 상품
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-                  업무 공간이나 사무환경을 준비할 때 참고할 수 있는 외부 추천 상품입니다.
-                  필요한 경우에만 가볍게 확인해 보세요.
+                  사무환경 준비에 도움이 되는 제품을 함께 볼 수 있습니다.
                 </p>
 
                 <div className="mt-6 flex flex-wrap gap-3">
@@ -593,7 +588,7 @@ function App() {
                       key={item.title}
                       asChild
                       variant={item.variant}
-                      className="h-auto rounded-2xl px-5 py-4"
+                      className="rounded-2xl px-5"
                     >
                       <a
                         href={item.href}
@@ -601,12 +596,7 @@ function App() {
                         rel="nofollow sponsored noopener"
                         referrerPolicy="unsafe-url"
                       >
-                        <span className="flex flex-col items-start gap-1 text-left">
-                          <span className="font-semibold">{item.title}</span>
-                          <span className="text-xs font-medium opacity-80">
-                            {item.description}
-                          </span>
-                        </span>
+                        {item.title}
                       </a>
                     </Button>
                   ))}
@@ -619,7 +609,7 @@ function App() {
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-[var(--foreground)]">
-                        제휴 안내
+                        광고·제휴 안내
                       </div>
                       <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
                         {coupangDisclosureText}
@@ -630,28 +620,13 @@ function App() {
               </div>
 
               <div className="rounded-[28px] border border-[var(--border)] bg-white p-5 shadow-[0_18px_34px_rgba(43,109,255,0.08)]">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-xs font-semibold tracking-[0.14em] text-[var(--foreground-subtle)]">
-                      추천 위젯 3종
-                    </div>
-                    <div className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                      책상 주변이나 사무환경 준비에 참고할 수 있는 추천 위젯입니다.
-                    </div>
-                  </div>
-                  <Badge variant="muted">120 x 240</Badge>
-                </div>
-
-                <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {affiliateWidgets.map((widget, index) => (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {affiliateWidgets.map((widget) => (
                     <div
                       key={widget.src}
                       className="rounded-[22px] border border-[var(--border)] bg-[rgba(243,248,255,0.78)] p-3"
                     >
-                      <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
-                        추천 위젯 {index + 1}
-                      </div>
-                      <div className="mt-3 flex justify-center rounded-[18px] bg-white px-2 py-3 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.45)]">
+                      <div className="flex justify-center rounded-[18px] bg-white px-2 py-3 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.45)]">
                         <iframe
                           src={widget.src}
                           title={widget.title}
@@ -663,6 +638,9 @@ function App() {
                           loading="lazy"
                           className="overflow-hidden rounded-[18px] bg-white"
                         />
+                      </div>
+                      <div className="mt-3 text-center text-xs font-medium text-[var(--foreground-subtle)]">
+                        상품 자세히 보기
                       </div>
                     </div>
                   ))}
