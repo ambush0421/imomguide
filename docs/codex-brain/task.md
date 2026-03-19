@@ -600,3 +600,14 @@
 - [x] 원격 저장소 반영
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
+
+## 2026-03-19 제휴 보드 벤토 재배치
+
+- [x] 오른쪽 하단 잔여 공백 문제 재확인
+- [x] 왼쪽 소개 카드를 전체 높이를 먹는 벤토 타일로 재구성
+- [x] 오른쪽 보드를 헤더 + 2x2 카드 구조로 재배치
+- [x] 중복 제목 제거로 카피 흐름 정리
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
