@@ -920,3 +920,30 @@ npm run test
 - 사이트 하단만 봐도 쿠팡 승인 준비에 필요한 핵심 정보 구조가 보이도록 정리됐다.
 - 운영자가 바로 사용할 수 있는 제출용 문안과 체크리스트가 별도 문서로 생겨, 승인 신청 준비가 쉬워졌다.
 - 라이브 도메인의 현재 응답과 번들 안에서도 쿠팡 관련 섹션이 실제 포함된 것을 확인했다.
+
+---
+
+## 2026-03-19 문의 이메일 실반영
+
+### 작업 배경
+
+- 사용자가 실제 문의 이메일 `contact.loopinlab@gmail.com`을 제공했다.
+- 이전까지는 승인용 푸터에 문의 채널이 미확정 상태라는 안내만 있었기 때문에, 실제 제출 화면과 문서에 동일한 연락처를 반영할 필요가 있었다.
+
+### 반영 내용
+
+- [App.tsx](C:/projects/magok/src/App.tsx)의 `문의 안내` 카드 문구를 실제 이메일 기준으로 수정했다.
+- 문의 카드 포인트 첫 줄에 `문의 이메일: contact.loopinlab@gmail.com`을 직접 노출했다.
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 해당 이메일이 렌더링되는지 검증을 추가했다.
+- [coupang_final_approval_submission_checklist.md](C:/projects/magok/docs/codex-brain/coupang_final_approval_submission_checklist.md)에도 같은 이메일을 반영해, 스크린샷 체크리스트와 최종 점검 문구가 실제 운영 정보와 맞도록 정리했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+- `npm run build` 통과
+
+### 결과
+
+- 화면과 제출용 문서의 문의 채널이 동일해져 승인 제출 시 정보 불일치 가능성이 줄었다.
+- 이제 푸터 스크린샷만 캡처해도 실제 문의 이메일이 함께 보이는 상태가 됐다.
