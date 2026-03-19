@@ -138,6 +138,19 @@ const affiliateWidgets = [
 
 const affiliateHighlights = ['모바일 기기', '생수/비품', '업무 기기', '사무 소모품']
 
+const affiliateSidebarNotes = [
+  '실무에서 자주 먼저 보는 품목만 추렸습니다.',
+  '외부 링크로 바로 이어져 빠르게 비교할 수 있습니다.',
+  '광고·제휴 고지는 아래에 분명하게 표시합니다.',
+]
+
+const affiliateCardAccentClasses = [
+  'from-sky-500 to-indigo-500',
+  'from-cyan-500 to-blue-500',
+  'from-violet-500 to-indigo-500',
+  'from-amber-500 to-orange-500',
+] as const
+
 const sideAffiliateBanner = {
   iframeSrc:
     'https://ads-partners.coupang.com/widgets.html?id=973794&template=carousel&trackingCode=AF7474453&subId=&width=160&height=600&tsource=',
@@ -589,14 +602,14 @@ function App() {
             id="affiliate"
             className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(248,252,255,0.96),rgba(255,255,255,0.94))] p-6 shadow-[0_20px_56px_rgba(28,33,43,0.08)] sm:p-8"
           >
-            <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
-              <div className="rounded-[28px] border border-[var(--border)] bg-white/88 p-5 shadow-[0_18px_36px_rgba(28,33,43,0.06)]">
+            <div className="grid gap-6 xl:grid-cols-[290px_minmax(0,1fr)] xl:items-start">
+              <div className="rounded-[30px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,248,255,0.92))] p-5 shadow-[0_18px_36px_rgba(28,33,43,0.06)] xl:sticky xl:top-24">
                 <Badge variant="muted">업무용 추천</Badge>
                 <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
                   업무용 추천 상품
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-                  업무 시작 전에 자주 챙기는 품목만 골라 오른쪽 보드에 모아뒀습니다.
+                  업무 시작 전에 자주 챙기는 품목만 오른쪽 보드에 모아뒀습니다.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -604,6 +617,18 @@ function App() {
                     <Badge key={item} variant="muted">
                       {item}
                     </Badge>
+                  ))}
+                </div>
+
+                <div className="mt-6 space-y-3">
+                  {affiliateSidebarNotes.map((note) => (
+                    <div
+                      key={note}
+                      className="flex items-start gap-3 rounded-[18px] border border-[rgba(190,208,234,0.55)] bg-white/86 px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
+                    >
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" />
+                      <span>{note}</span>
+                    </div>
                   ))}
                 </div>
 
@@ -644,7 +669,7 @@ function App() {
                 </div>
               </div>
 
-              <div className="rounded-[28px] border border-[var(--border)] bg-white p-5 shadow-[0_18px_34px_rgba(43,109,255,0.08)]">
+              <div className="rounded-[30px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,250,255,0.96))] p-5 shadow-[0_20px_40px_rgba(43,109,255,0.08)]">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold text-[var(--foreground)]">
@@ -657,48 +682,48 @@ function App() {
                   <Badge variant="muted">4 picks</Badge>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 xl:grid-cols-2">
                   {affiliateWidgets.map((widget, index) => (
                     <div
                       key={widget.src}
-                      className={`rounded-[24px] border p-4 shadow-[0_14px_28px_rgba(43,109,255,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(43,109,255,0.12)] ${
-                        index === 0 || index === 1
-                          ? 'border-[rgba(94,126,255,0.18)] bg-[linear-gradient(180deg,rgba(241,246,255,0.96),rgba(255,255,255,0.98))]'
-                          : 'border-[var(--border)] bg-[rgba(248,251,255,0.9)]'
-                      }`}
+                      className="group relative overflow-hidden rounded-[26px] border border-[rgba(190,208,234,0.7)] bg-white/92 p-4 shadow-[0_14px_28px_rgba(43,109,255,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_44px_rgba(43,109,255,0.12)]"
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div
+                        className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${affiliateCardAccentClasses[index]}`}
+                      />
+                      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_136px] sm:items-center">
                         <div>
-                          <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
-                            {widget.badge}
+                          <div className="flex flex-wrap items-center gap-2">
+                            <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
+                              {widget.badge}
+                            </div>
+                            {index < 2 ? <Badge variant="muted">추천</Badge> : null}
                           </div>
-                          <div className="mt-2 text-xl font-semibold text-[var(--foreground)]">
+                          <div className="mt-3 text-xl font-semibold leading-8 text-[var(--foreground)]">
                             {widget.headline}
                           </div>
+                          <p className="mt-3 min-h-12 text-sm leading-6 text-[var(--foreground-muted)]">
+                            {widget.description}
+                          </p>
+
+                          <div className="mt-4 text-xs font-medium tracking-[0.04em] text-[var(--foreground-subtle)]">
+                            상품 자세히 보기
+                          </div>
                         </div>
-                        {index < 2 ? <Badge variant="muted">추천</Badge> : null}
-                      </div>
 
-                      <p className="mt-2 min-h-12 text-sm leading-6 text-[var(--foreground-muted)]">
-                        {widget.description}
-                      </p>
-
-                      <div className="mt-4 flex justify-center rounded-[20px] bg-white px-3 py-4 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.45)]">
-                        <iframe
-                          src={widget.src}
-                          title={widget.title}
-                          width="120"
-                          height="240"
-                          frameBorder="0"
-                          scrolling="no"
-                          referrerPolicy="unsafe-url"
-                          loading="lazy"
-                          className="overflow-hidden rounded-[18px] bg-white"
-                        />
-                      </div>
-
-                      <div className="mt-3 text-center text-xs font-medium tracking-[0.04em] text-[var(--foreground-subtle)]">
-                        상품 자세히 보기
+                        <div className="flex justify-center rounded-[22px] border border-[rgba(190,208,234,0.7)] bg-[linear-gradient(180deg,#ffffff,rgba(245,248,255,0.96))] px-2 py-3 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.35)]">
+                          <iframe
+                            src={widget.src}
+                            title={widget.title}
+                            width="120"
+                            height="240"
+                            frameBorder="0"
+                            scrolling="no"
+                            referrerPolicy="unsafe-url"
+                            loading="lazy"
+                            className="overflow-hidden rounded-[18px] bg-white"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}

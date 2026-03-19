@@ -570,6 +570,17 @@
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
 
+## 2026-03-19 제휴 보드 고도화
+
+- [x] 현재 사이드 보드의 응집력 부족 재확인
+- [x] 왼쪽 안내 카드에 체크리스트형 메모 추가
+- [x] 오른쪽 카드를 가로 정보 + 세로 위젯 조합으로 재설계
+- [x] 테스트 유지 확인
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
+
 ## 2026-03-19 loopincode 전용 소스 정리
 
 - [x] 현재 엔트리 기준으로 미사용 정적 소스와 유지 대상 분류
