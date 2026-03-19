@@ -19,18 +19,15 @@ describe('App', () => {
     expect(
       screen.getByText('업종을 고르면 결과가 여기에 바로 나옵니다.'),
     ).toBeInTheDocument()
-    expect(screen.getByText('승인용 제휴영역')).toBeInTheDocument()
-    expect(screen.getByText('실제 제휴 요소가 현재 이 구역에 노출 중입니다')).toBeInTheDocument()
-    expect(screen.getByText('운영자 정보')).toBeInTheDocument()
-    expect(screen.getByText('쿠팡 파트너스 안내')).toBeInTheDocument()
-    expect(screen.getByText('문의 이메일: contact.loopinlab@gmail.com')).toBeInTheDocument()
+    expect(screen.getByText('업무용 추천 상품')).toBeInTheDocument()
+    expect(screen.getByText('제휴 안내')).toBeInTheDocument()
+    expect(screen.getByText('문의: contact.loopinlab@gmail.com')).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: '추천 링크 1 열기' }),
+      screen.getByRole('link', { name: /추천 상품 보기/i }),
     ).toHaveAttribute('href', 'https://link.coupang.com/a/d7nWco')
     expect(
-      screen.getByRole('link', { name: '추천 링크 2 열기' }),
+      screen.getByRole('link', { name: /추가 추천 보기/i }),
     ).toHaveAttribute('href', 'https://link.coupang.com/a/d7n7ta')
-    expect(screen.getByAltText('쿠팡 파트너스 배너')).toBeInTheDocument()
     expect(screen.getByTitle('쿠팡 파트너스 상품 위젯')).toBeInTheDocument()
   })
 })
