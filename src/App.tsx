@@ -131,6 +131,15 @@ function App() {
     void discoverIndustry()
   }
 
+  const sideBannerStyles = {
+    left: {
+      left: 'calc(50vw - 590px - 184px)',
+    },
+    right: {
+      right: 'calc(50vw - 590px - 184px)',
+    },
+  } as const
+
   return (
     <div className="min-h-screen">
       {(['left', 'right'] as const).map((side) => (
@@ -138,11 +147,7 @@ function App() {
           key={side}
           label={`쿠팡 파트너스 사이드 배너 ${side}`}
           config={sideAffiliateBanner}
-          className={
-            side === 'left'
-              ? 'left-[max(20px,calc((100vw-1180px)/2-176px))]'
-              : 'right-[max(20px,calc((100vw-1180px)/2-176px))]'
-          }
+          style={sideBannerStyles[side]}
         />
       ))}
 

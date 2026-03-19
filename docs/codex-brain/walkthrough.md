@@ -1482,7 +1482,8 @@ npm run test
   - 배너 래퍼의 흰 배경, 보더, 그림자, overflow를 제거해 광고 자체가 잘리지 않게 했다.
   - 표시 조건을 `2xl`에서 `min-[1560px]` 이상으로 조정해 충분한 가로폭이 있을 때만 보이게 했다.
 - [App.tsx](C:/projects/imomguide_remote_20260319/src/App.tsx)
-  - 배너 위치를 `left/right-4`에서 `max-width 1180px` 본문 바깥 여백 기준 `calc((100vw-1180px)/2-176px)` 좌표로 옮겼다.
+  - 배너 위치를 `left/right-4`에서 `max-width 1180px` 본문 바깥 여백 기준 `calc(50vw - 590px - 184px)` 좌표로 옮겼다.
+  - Tailwind 임의 좌표 클래스 대신 inline style로 고정 위치를 지정해 실제 콘텐츠 여백 좌표가 정확히 적용되게 했다.
 
 ### 검증
 
@@ -1494,6 +1495,7 @@ npm run test
   - `dist/index.html`
   - `dist/assets/index-C0h_rT6e.css`
   - `dist/assets/index-BV9LX5-L.js`
+- Git 커밋 `ea2f25b` (`fix: reposition side coupang banners in outer gutters`) 이후 inline style 좌표 보정까지 포함한 결과를 원격 저장소에 이어서 반영했다.
 - Git 커밋 `ea2f25b` (`fix: reposition side coupang banners in outer gutters`)를 `codex/magok-site-replace`와 `main`에 모두 푸시했다.
 - Cloudflare Pages Production Active: `https://e000dbf1.imomguide.pages.dev` (`ea2f25b`)
 - `https://loopincode.com`은 확인 시점에 아직 직전 번들 `index-DRsMfrUv.js`, `index-DXmBQR9h.css`를 응답하고 있어 커스텀 도메인 캐시 반영이 더 필요했다.

@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useEffect, useRef } from 'react'
 
 interface CoupangDynamicBannerConfig {
@@ -13,6 +14,7 @@ interface CoupangDynamicBannerProps {
   label: string
   className?: string
   config: CoupangDynamicBannerConfig
+  style?: CSSProperties
 }
 
 type CoupangWindow = Window & {
@@ -70,6 +72,7 @@ export function CoupangDynamicBanner({
   label,
   className = '',
   config,
+  style,
 }: CoupangDynamicBannerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -110,6 +113,7 @@ export function CoupangDynamicBanner({
     <aside
       aria-label={label}
       className={`fixed top-1/2 z-30 hidden -translate-y-1/2 min-[1560px]:block ${className}`}
+      style={style}
     >
       <span className="sr-only">{label}</span>
       <div
