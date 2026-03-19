@@ -548,6 +548,17 @@
 - [x] Cloudflare Pages 재배포
 - [x] walkthrough.md 갱신
 
+## 2026-03-19 제휴 섹션 4카드 재배치
+
+- [x] 핸드폰 위젯이 빠진 원인 재확인
+- [x] `clX5tE` 모바일기기 위젯 복구
+- [x] 제휴 섹션을 4카드 그리드 중심으로 재구성
+- [x] 테스트 기대값 갱신
+- [x] lint/test/build 재검증
+- [x] 원격 저장소 반영
+- [x] Cloudflare Pages 재배포
+- [x] walkthrough.md 갱신
+
 ## 2026-03-19 loopincode 전용 소스 정리
 
 - [x] 현재 엔트리 기준으로 미사용 정적 소스와 유지 대상 분류
