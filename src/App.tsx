@@ -61,6 +61,7 @@ import {
 import { formatKoreanDate, formatNumber } from '@/utils/format'
 
 type AppView = 'home' | 'directory' | 'library' | 'updates' | 'guide'
+type DiscoverScreen = 'compose' | 'results'
 
 const introSteps = [
   {
@@ -264,19 +265,46 @@ function HomeSections({
   onOpenGuide: (code: string) => void
 }) {
   const canShowResult = Boolean(status === 'ready' && result)
+  const canStayOnResultStep =
+    status === 'loading' || status === 'error' || canShowResult
   const safeCurrentStep =
-    currentStep === 'result' && !canShowResult ? 'adjust' : currentStep
+    currentStep === 'result' && !canStayOnResultStep ? 'adjust' : currentStep
   const [isAffiliateExpanded, setIsAffiliateExpanded] = useState(false)
+  const [discoverScreen, setDiscoverScreen] = useState<DiscoverScreen>('compose')
+  const activeDiscoverScreen =
+    discoveryStatus === 'idle' &&
+    industrySuggestions.length === 0 &&
+    !industryQuery.trim()
+      ? 'compose'
+      : discoverScreen
   const currentWizardStep =
     wizardSteps.find((step) => step.id === safeCurrentStep) ?? wizardSteps[0]
   const currentWizardIndex = wizardSteps.findIndex(
     (step) => step.id === safeCurrentStep,
   )
+  const currentWizardBadge =
+    safeCurrentStep === 'discover' && activeDiscoverScreen === 'results'
+      ? '1단계 · 추천 결과'
+      : currentWizardStep.badge
+  const currentWizardTitle =
+    safeCurrentStep === 'discover' && activeDiscoverScreen === 'results'
+      ? '추천 결과 확인하기'
+      : currentWizardStep.title
+  const currentWizardDescription =
+    safeCurrentStep === 'discover' && activeDiscoverScreen === 'results'
+      ? '추천된 코드 중 하나를 고르면 다음 화면으로 넘어갑니다.'
+      : currentWizardStep.description
+  const panelTransitionKey =
+    safeCurrentStep === 'discover'
+      ? `discover-${activeDiscoverScreen}`
+      : safeCurrentStep
 
   const knowledgeCounts = getZoneVerdictCounts('knowledgeIndustryCenter')
   const industrialCounts = getZoneVerdictCounts('industrialFacility')
   const recentUpdates = getRecentUpdateLogEntries(3)
   const featuredGuides = getFeaturedGuideEntries(3)
+  const canOpenAdjustStep = Boolean(input.ksicCode.trim() || input.ksicName.trim())
+  const canOpenResultStep = canStayOnResultStep
 
   const introFacts = [
     {
@@ -320,15 +348,57 @@ function HomeSections({
     },
   ] as const
 
+  function handleDiscoverSearch() {
+    setDiscoverScreen('results')
+    void discoverIndustry()
+  }
+
+  function handleBackToDiscoverSearch() {
+    setDiscoverScreen('compose')
+  }
+
+  function handleWizardStepSelect(step: EligibilityStep) {
+    if (step === 'discover') {
+      setCurrentStep('discover')
+      return
+    }
+
+    if (step === 'adjust') {
+      if (!canOpenAdjustStep) {
+        return
+      }
+
+      setCurrentStep('adjust')
+      return
+    }
+
+    if (!canOpenResultStep) {
+      return
+    }
+
+    setCurrentStep('result')
+  }
+
   function runQuickSearch(value: string) {
     setIndustryQuery(value)
+    setDiscoverScreen('results')
     void discoverIndustry()
+  }
+
+  function handleSuggestionSelect(
+    suggestion: ReturnType<typeof useEligibilityStore.getState>['industrySuggestions'][number],
+  ) {
+    void applyIndustrySuggestion(suggestion)
+  }
+
+  function handleEvaluateStep() {
+    void evaluate()
   }
 
   return (
     <>
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.14fr)_320px] lg:items-stretch">
-        <div className="flex h-full flex-col rounded-[38px] border border-[rgba(43,109,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.96))] px-6 py-8 shadow-[0_28px_72px_rgba(28,33,43,0.1)] sm:px-8 lg:px-10 lg:py-10">
+        <div className="flex h-full flex-col rounded-[38px] border border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,#ffffff_0%,rgba(230,238,255,0.98)_100%)] px-6 py-8 shadow-[var(--shadow-xl)] sm:px-8 lg:px-10 lg:py-10">
           <Badge variant="muted">마곡 일반산업단지 전용</Badge>
           <h1 className="mt-5 max-w-4xl font-display text-4xl font-semibold tracking-[-0.06em] text-[var(--foreground)] sm:text-5xl lg:text-6xl">
             입주 가능한 업종코드를
@@ -359,8 +429,8 @@ function HomeSections({
                 key={fact.label}
                 className={`rounded-[24px] border px-4 py-4 ${
                   fact.tone === 'hero'
-                    ? 'border-[rgba(43,109,255,0.16)] bg-[rgba(240,246,255,0.94)] shadow-[0_16px_34px_rgba(43,109,255,0.08)]'
-                    : 'border-[var(--border)] bg-[rgba(255,255,255,0.78)]'
+                    ? 'border-[var(--border-accent-strong)] bg-[rgba(223,234,255,0.98)] shadow-[0_18px_36px_rgba(20,92,255,0.16)]'
+                    : 'border-[var(--border)] bg-[rgba(255,255,255,0.92)] shadow-[var(--shadow-sm)]'
                 }`}
               >
                 <div className="text-xs font-medium text-[var(--foreground-subtle)]">
@@ -381,9 +451,9 @@ function HomeSections({
           </div>
         </div>
 
-        <Card className="h-full border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+        <Card className="h-full border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(238,244,255,0.96))] shadow-[var(--shadow-lg)]">
           <CardContent className="flex h-full flex-col space-y-5 p-6">
-            <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+            <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <FileSearch className="size-6" />
             </div>
             <div>
@@ -400,10 +470,10 @@ function HomeSections({
               {introSteps.map((item) => (
                 <div
                   key={item.step}
-                  className="rounded-[22px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.78)] px-4 py-4"
+                  className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-4 py-4 shadow-[var(--shadow-sm)]"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="inline-flex size-8 items-center justify-center rounded-full bg-[rgba(43,109,255,0.12)] text-sm font-semibold text-[var(--accent)]">
+                    <div className="inline-flex size-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent-strong)]">
                       {item.step}
                     </div>
                     <div className="text-sm font-semibold text-[var(--foreground)]">
@@ -433,7 +503,7 @@ function HomeSections({
         {promisePoints.map((item) => (
           <div
             key={item}
-            className="rounded-[24px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.76)] px-5 py-5"
+            className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-5 py-5 shadow-[var(--shadow-sm)]"
           >
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[var(--accent)]" />
@@ -446,7 +516,7 @@ function HomeSections({
       <section
         id="finder"
         aria-label="업종코드 분석 위저드"
-        className="rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(242,247,255,0.94))] p-6 shadow-[0_24px_70px_rgba(28,33,43,0.08)] sm:p-8"
+        className="rounded-[36px] border border-[var(--border-accent)] bg-[linear-gradient(180deg,#ffffff_0%,rgba(236,243,255,0.98)_100%)] p-6 shadow-[var(--shadow-xl)] sm:p-8"
       >
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -462,7 +532,7 @@ function HomeSections({
               수 있습니다.
             </p>
           </div>
-          <div className="rounded-[22px] border border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.9)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] lg:max-w-sm">
+          <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] lg:max-w-sm">
             `내가 하는 일이 어떤 코드에 가까운지`, `그 코드가 마곡에서 가능한지`,
             `왜 그런지`, `더 확인해야 할 게 있는지` 순서로 보여줍니다.
           </div>
@@ -473,24 +543,33 @@ function HomeSections({
             {wizardSteps.map((step, index) => {
               const isActive = step.id === safeCurrentStep
               const isComplete = currentWizardIndex > index
+              const isLocked =
+                (step.id === 'adjust' && !canOpenAdjustStep) ||
+                (step.id === 'result' && !canOpenResultStep)
 
               return (
-                <div
+                <button
+                  type="button"
                   key={step.id}
+                  onClick={() => handleWizardStepSelect(step.id)}
+                  disabled={isLocked}
+                  aria-pressed={isActive}
                   className={`rounded-[24px] border px-4 py-4 transition ${
                     isActive
-                      ? 'border-[rgba(43,109,255,0.2)] bg-[rgba(239,245,255,0.96)] shadow-[0_18px_32px_rgba(43,109,255,0.08)]'
+                      ? 'border-[var(--border-accent-strong)] bg-[rgba(221,233,255,0.98)] shadow-[0_20px_36px_rgba(20,92,255,0.18)]'
                       : isComplete
-                        ? 'border-[rgba(43,109,255,0.12)] bg-white'
-                        : 'border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.66)]'
+                        ? 'border-[var(--border-accent)] bg-[rgba(255,255,255,0.98)] shadow-[var(--shadow-sm)]'
+                        : 'border-[var(--border)] bg-[rgba(255,255,255,0.84)]'
+                  } ${
+                    isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-[var(--border-accent-strong)] hover:bg-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold ${
                         isActive || isComplete
-                          ? 'bg-[rgba(43,109,255,0.12)] text-[var(--accent)]'
-                          : 'bg-[rgba(130,147,173,0.18)] text-[var(--foreground-subtle)]'
+                          ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+                          : 'bg-[rgba(95,112,141,0.18)] text-[var(--foreground-subtle)]'
                       }`}
                     >
                       {isComplete ? <CheckCircle2 className="size-4" /> : index + 1}
@@ -504,21 +583,21 @@ function HomeSections({
                       </div>
                     </div>
                   </div>
-                </div>
+                </button>
               )
             })}
           </div>
 
-          <Card className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+          <Card className="border-[var(--border-accent)] bg-[rgba(255,255,255,0.98)] shadow-[var(--shadow-lg)]">
             <CardContent className="space-y-6 p-6">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <Badge variant="muted">{currentWizardStep.badge}</Badge>
+                  <Badge variant="muted">{currentWizardBadge}</Badge>
                   <h3 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
-                    {currentWizardStep.title}
+                    {currentWizardTitle}
                   </h3>
                   <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-                    {currentWizardStep.description}
+                    {currentWizardDescription}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -534,97 +613,66 @@ function HomeSections({
                 </div>
               </div>
 
-              {safeCurrentStep === 'discover' ? (
-                <IndustryDiscoveryPanel
-                  input={input}
-                  query={industryQuery}
-                  suggestions={industrySuggestions}
-                  status={discoveryStatus}
-                  error={discoveryError}
-                  onQueryChange={setIndustryQuery}
-                  onDiscover={discoverIndustry}
-                  onSuggestionSelect={applyIndustrySuggestion}
-                  onExampleSelect={runQuickSearch}
-                  onContinueManual={() => setCurrentStep('adjust')}
-                />
-              ) : null}
+              <div
+                key={panelTransitionKey}
+                className="animate-fade-in space-y-6"
+              >
+                {safeCurrentStep === 'discover' ? (
+                  <IndustryDiscoveryPanel
+                    input={input}
+                    query={industryQuery}
+                    suggestions={industrySuggestions}
+                    status={discoveryStatus}
+                    error={discoveryError}
+                    screen={activeDiscoverScreen}
+                    embedded
+                    onQueryChange={setIndustryQuery}
+                    onSubmitSearch={handleDiscoverSearch}
+                    onSuggestionSelect={handleSuggestionSelect}
+                    onExampleSelect={runQuickSearch}
+                    onBackToSearch={handleBackToDiscoverSearch}
+                    onContinueManual={() => setCurrentStep('adjust')}
+                  />
+                ) : null}
 
-              {safeCurrentStep === 'adjust' ? (
-                <div className="space-y-5">
-                  <Card className="bg-[rgba(239,245,255,0.86)]">
-                    <CardContent className="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-4">
-                      <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-                        <div className="text-xs text-[var(--foreground-subtle)]">
-                          선택한 업종코드
-                        </div>
-                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                          {input.ksicCode.trim() || '직접 입력 예정'}
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-                        <div className="text-xs text-[var(--foreground-subtle)]">
-                          선택한 업종명
-                        </div>
-                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                          {input.ksicName.trim() || '아직 선택 전'}
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-                        <div className="text-xs text-[var(--foreground-subtle)]">
-                          현재 구역
-                        </div>
-                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                          {input.zoneType === 'industrialFacility'
-                            ? '산업시설구역'
-                            : input.zoneType === 'knowledgeIndustryCenter'
-                              ? '지식산업센터'
-                              : '지원시설구역'}
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-                        <div className="text-xs text-[var(--foreground-subtle)]">안내</div>
-                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                          필요한 조건만 보정하고 결과 보기로 넘어가면 됩니다
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
+                {safeCurrentStep === 'adjust' ? (
                   <EligibilityForm
                     input={input}
                     status={status}
                     onFieldChange={setField}
                     onFlagChange={setFlag}
-                    onEvaluate={evaluate}
+                    onEvaluate={handleEvaluateStep}
                     onReset={reset}
                     onPrevious={() => setCurrentStep('discover')}
                     primaryActionLabel="결과 보기"
                     secondaryActionLabel="이전 단계"
                     defaultExpanded
+                    embedded
                   />
-                </div>
-              ) : null}
+                ) : null}
 
-              {safeCurrentStep === 'result' ? (
-                <ResultPanel
-                  input={input}
-                  result={result}
-                  status={status}
-                  error={error}
-                  onEvaluate={evaluate}
-                  onAdjust={() => setCurrentStep('adjust')}
-                  onOpenGuide={onOpenGuide}
-                  sticky={false}
-                  stepLabel="3단계"
-                />
-              ) : null}
+                {safeCurrentStep === 'result' ? (
+                  <ResultPanel
+                    input={input}
+                    result={result}
+                    status={status}
+                    error={error}
+                    onEvaluate={evaluate}
+                    onAdjust={() => setCurrentStep('adjust')}
+                    onOpenGuide={onOpenGuide}
+                    sticky={false}
+                    stepLabel="3단계"
+                    embedded
+                  />
+                ) : null}
+              </div>
             </CardContent>
           </Card>
         </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <Card className="border-[rgba(43,109,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.96))] shadow-[0_20px_44px_rgba(24,32,43,0.06)]">
+        <Card className="border-[var(--border-accent)] bg-[linear-gradient(180deg,#ffffff_0%,rgba(236,243,255,0.98)_100%)] shadow-[var(--shadow-lg)]">
           <CardContent className="p-6">
             <Badge variant="muted">전수 코드 사전</Badge>
             <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
@@ -643,8 +691,8 @@ function HomeSections({
                   key={item.title}
                   className={`rounded-[24px] border px-4 py-4 ${
                     item.tone === 'strong'
-                      ? 'border-[rgba(43,109,255,0.14)] bg-[rgba(239,245,255,0.94)]'
-                      : 'border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.74)]'
+                      ? 'border-[var(--border-accent-strong)] bg-[rgba(223,234,255,0.98)] shadow-[var(--shadow-sm)]'
+                      : 'border-[var(--border)] bg-[rgba(255,255,255,0.92)] shadow-[var(--shadow-sm)]'
                   }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -672,9 +720,9 @@ function HomeSections({
           </CardContent>
         </Card>
 
-        <Card className="border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+        <Card className="border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,246,255,0.96))] shadow-[var(--shadow-lg)]">
           <CardContent className="space-y-4 p-6">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <BookOpenText className="size-5" />
             </div>
             <div>
@@ -691,7 +739,7 @@ function HomeSections({
               {introSteps.map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-[22px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.78)] px-4 py-4"
+                  className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-4 py-4 shadow-[var(--shadow-sm)]"
                 >
                   <div className="text-sm font-semibold text-[var(--foreground)]">
                     {item.title}
@@ -721,9 +769,9 @@ function HomeSections({
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]">
-        <Card className="border-[rgba(43,109,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.96))] shadow-[0_20px_44px_rgba(24,32,43,0.06)]">
+        <Card className="border-[var(--border-accent)] bg-[linear-gradient(180deg,#ffffff_0%,rgba(236,243,255,0.98)_100%)] shadow-[var(--shadow-lg)]">
           <CardContent className="space-y-5 p-6">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <BookOpenText className="size-5" />
             </div>
             <div>
@@ -740,7 +788,7 @@ function HomeSections({
               </p>
             </div>
             <div className="grid gap-3">
-              <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(239,245,255,0.92)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
+              <div className="rounded-[22px] border border-[var(--border-accent)] bg-[rgba(232,241,255,0.94)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
                 `산업집적법 시행령`과 `마곡 관리기본계획`을 문서 단위로 나눠, 어떤
                 판정이 어디에서 왔는지 더 쉽게 추적할 수 있습니다.
               </div>
@@ -759,9 +807,9 @@ function HomeSections({
           </CardContent>
         </Card>
 
-        <Card className="border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+        <Card className="border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,246,255,0.96))] shadow-[var(--shadow-lg)]">
           <CardContent className="space-y-5 p-6">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <FileSearch className="size-5" />
             </div>
             <div>
@@ -781,7 +829,7 @@ function HomeSections({
               {recentUpdates.map((entry) => (
                 <div
                   key={entry.id}
-                  className="rounded-[22px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.78)] px-4 py-4"
+                  className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-4 py-4 shadow-[var(--shadow-sm)]"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="muted">{formatKoreanDate(entry.date)}</Badge>
@@ -822,7 +870,7 @@ function HomeSections({
           {featuredGuides.map((guide) => (
             <Card
               key={guide.code}
-              className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]"
+              className="border-[var(--border-accent)] bg-[rgba(255,255,255,0.98)] shadow-[var(--shadow-lg)]"
             >
               <CardContent className="space-y-4 p-5">
                 <div className="flex flex-wrap items-center gap-2">
@@ -853,7 +901,7 @@ function HomeSections({
 
       <section
         id="affiliate"
-        className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(250,252,255,0.94),rgba(255,255,255,0.96))] p-5 shadow-[0_18px_40px_rgba(28,33,43,0.05)] sm:p-6"
+        className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,246,255,0.98))] p-5 shadow-[var(--shadow-lg)] sm:p-6"
       >
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
@@ -868,14 +916,14 @@ function HomeSections({
             </p>
           </div>
 
-          <div className="rounded-[20px] border border-[rgba(190,208,234,0.7)] bg-[rgba(247,250,255,0.92)] px-4 py-3 text-xs leading-5 text-[var(--foreground-muted)]">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] px-4 py-3 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
             광고보다 본문이 먼저 보이도록
             <br />
             제휴 영역은 기본 접힘 상태로 제공합니다.
           </div>
         </div>
 
-        <div className="mt-5 rounded-[28px] border border-[rgba(21,37,58,0.08)] bg-white/90">
+        <div className="mt-5 rounded-[28px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] shadow-[var(--shadow-sm)]">
           <button
             type="button"
             onClick={() => setIsAffiliateExpanded((current) => !current)}
@@ -906,10 +954,10 @@ function HomeSections({
           {isAffiliateExpanded ? (
             <div
               id="affiliate-links-panel"
-              className="border-t border-[rgba(21,37,58,0.08)] px-4 py-4 sm:px-5 sm:py-5"
+              className="border-t border-[var(--border)] px-4 py-4 sm:px-5 sm:py-5"
             >
               <div className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
-                <Card className="h-full border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.78)] shadow-none">
+                <Card className="h-full border-[var(--border)] bg-[rgba(245,248,255,0.96)] shadow-[var(--shadow-sm)]">
                   <CardContent className="space-y-4 p-5">
                     <div>
                       <div className="text-sm font-semibold text-[var(--foreground)]">
@@ -924,7 +972,7 @@ function HomeSections({
 
                     <div className="rounded-[22px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4">
                       <div className="flex items-start gap-3">
-                        <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                        <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                           <ExternalLink className="size-4" />
                         </div>
                         <div>
@@ -959,7 +1007,7 @@ function HomeSections({
                   {affiliateWidgets.map((widget) => (
                     <Card
                       key={widget.src}
-                      className="h-full border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.9)] shadow-none"
+                      className="h-full border-[var(--border)] bg-[rgba(255,255,255,0.96)] shadow-[var(--shadow-sm)]"
                     >
                       <CardContent className="flex h-full flex-col p-4">
                         <div className="flex min-h-11 items-start justify-between gap-2">
@@ -976,7 +1024,7 @@ function HomeSections({
                         <div className="mt-3 min-h-14 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--foreground)] sm:min-h-16 sm:text-base">
                           {widget.headline}
                         </div>
-                        <div className="mt-4 flex flex-1 items-start justify-center rounded-[22px] border border-[rgba(190,208,234,0.7)] bg-[linear-gradient(180deg,#ffffff,rgba(245,248,255,0.96))] px-2 py-3">
+                        <div className="mt-4 flex flex-1 items-start justify-center rounded-[22px] border border-[var(--border)] bg-[linear-gradient(180deg,#ffffff,rgba(236,243,255,0.96))] px-2 py-3">
                           <iframe
                             src={widget.src}
                             title={widget.title}
@@ -1112,7 +1160,7 @@ function App() {
         본문으로 바로가기
       </a>
       <div className="mx-auto max-w-[1180px] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-        <header className="sticky top-4 z-20 rounded-[24px] border border-[var(--border)] bg-white/88 px-4 py-3 shadow-[0_18px_40px_rgba(28,33,43,0.08)] backdrop-blur">
+        <header className="sticky top-4 z-20 rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] px-4 py-3 shadow-[var(--shadow-lg)] backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
@@ -1120,7 +1168,7 @@ function App() {
               className="flex items-center gap-3 text-left"
               aria-label="마곡 코드찾기 홈으로"
             >
-              <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[0_14px_30px_rgba(43,109,255,0.24)]">
+              <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[var(--shadow-accent)]">
                 <Building2 className="size-5" />
               </div>
               <div>
@@ -1180,7 +1228,7 @@ function App() {
               </Button>
               <button
                 type="button"
-                className="inline-flex size-11 items-center justify-center rounded-2xl text-[var(--foreground-muted)] transition-colors hover:bg-[rgba(43,109,255,0.06)] hover:text-[var(--foreground)] md:hidden"
+                className="inline-flex size-11 items-center justify-center rounded-2xl text-[var(--foreground-muted)] transition-colors hover:bg-[rgba(20,92,255,0.08)] hover:text-[var(--accent-strong)] md:hidden"
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                 aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
                 aria-expanded={isMobileMenuOpen}
@@ -1264,7 +1312,7 @@ function App() {
                 onOpenGuide={openGuideView}
               />
             ) : (
-              <Card className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+              <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
                 <CardContent className="space-y-4 p-6">
                   <Badge variant="muted">가이드 없음</Badge>
                   <h2 className="font-display text-3xl font-semibold text-[var(--foreground)]">
@@ -1322,7 +1370,7 @@ function App() {
           )}
           </Suspense>
 
-          <footer className="space-y-6 rounded-[32px] border border-[var(--border)] bg-white/88 px-6 py-6 shadow-[0_20px_50px_rgba(28,33,43,0.06)]">
+          <footer className="space-y-6 rounded-[32px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] px-6 py-6 shadow-[var(--shadow-lg)]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="text-xs font-semibold tracking-[0.16em] text-[var(--foreground-subtle)]">

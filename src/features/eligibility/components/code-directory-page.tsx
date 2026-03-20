@@ -69,18 +69,18 @@ function getVerdictBadgeVariant(verdict: Verdict) {
 
 function getVerdictAccentClass(verdict: Verdict) {
   if (verdict === 'eligible') {
-    return 'bg-emerald-500'
+    return 'bg-[var(--dot-success)]'
   }
 
   if (verdict === 'conditional' || verdict === 'reviewRequired') {
-    return 'bg-amber-400'
+    return 'bg-[var(--dot-warning)]'
   }
 
   if (verdict === 'ineligible') {
-    return 'bg-rose-400'
+    return 'bg-[var(--dot-danger)]'
   }
 
-  return 'bg-slate-300'
+  return 'bg-[var(--dot-neutral)]'
 }
 
 interface CodeDirectoryPageProps {
@@ -156,7 +156,7 @@ export function CodeDirectoryPage({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_320px]">
-        <Card className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+        <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
           <CardContent className="space-y-5 p-5">
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_200px_220px]">
               <div className="relative">
@@ -244,7 +244,7 @@ export function CodeDirectoryPage({
           </CardContent>
         </Card>
 
-        <Card className="border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+        <Card className="border-[var(--border-soft)] bg-[rgba(248,251,255,0.84)] shadow-none">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
               <Filter className="size-4 text-[var(--accent)]" />
@@ -326,7 +326,7 @@ export function CodeDirectoryPage({
               return (
                 <details
                   key={`${zoneType}-${entry.code}`}
-                  className="group overflow-hidden rounded-[26px] border border-[rgba(21,37,58,0.08)] bg-white"
+                  className="group overflow-hidden rounded-[26px] border border-[var(--border-soft)] bg-white"
                 >
                   <div className={`h-1.5 w-full ${getVerdictAccentClass(zoneVerdict.verdict)}`} />
                   <summary className="cursor-pointer list-none px-5 py-5">
@@ -352,25 +352,25 @@ export function CodeDirectoryPage({
 
                   <div className="border-t border-[var(--border)] px-5 py-5">
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.92)] px-4 py-3">
+                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[rgba(248,251,255,0.92)] px-4 py-3">
                         <div className="text-xs text-[var(--foreground-subtle)]">대분류</div>
                         <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
                           {entry.sectionCode} · {entry.sectionName}
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.92)] px-4 py-3">
+                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[rgba(248,251,255,0.92)] px-4 py-3">
                         <div className="text-xs text-[var(--foreground-subtle)]">중분류</div>
                         <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
                           {entry.divisionCode} · {entry.divisionName}
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.92)] px-4 py-3">
+                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[rgba(248,251,255,0.92)] px-4 py-3">
                         <div className="text-xs text-[var(--foreground-subtle)]">소분류</div>
                         <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
                           {entry.groupCode} · {entry.groupName}
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.92)] px-4 py-3">
+                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[rgba(248,251,255,0.92)] px-4 py-3">
                         <div className="text-xs text-[var(--foreground-subtle)]">세분류</div>
                         <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
                           {entry.categoryCode} · {entry.categoryName}
@@ -383,7 +383,7 @@ export function CodeDirectoryPage({
                         {zoneVerdict.notes.map((note) => (
                           <div
                             key={`${entry.code}-${note}`}
-                            className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.84)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
+                            className="rounded-2xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.84)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
                           >
                             {note}
                           </div>
@@ -396,7 +396,7 @@ export function CodeDirectoryPage({
                         {legalBases.map((basis) => (
                           <div
                             key={`${entry.code}-${basis.id}`}
-                            className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-[rgba(244,248,255,0.92)] px-4 py-3"
+                            className="rounded-2xl border border-[var(--border-soft)] bg-[rgba(244,248,255,0.92)] px-4 py-3"
                           >
                             <div className="text-xs uppercase tracking-[0.12em] text-[var(--foreground-subtle)]">
                               {basis.source === 'magokPlan' ? '고시문' : '시행령'} ·{' '}
@@ -455,19 +455,19 @@ export function CodeDirectoryPage({
         </div>
       )}
 
-      <div className="rounded-[28px] border border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] p-5">
+      <div className="rounded-[28px] border border-[var(--border-soft)] bg-[rgba(248,251,255,0.84)] p-5">
         <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
           <BookOpenText className="size-4 text-[var(--accent)]" />
           보는 법
         </div>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-white/88 px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+          <div className="rounded-2xl border border-[var(--border-soft)] bg-white/88 px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
             `가능`은 현재 구역 기준으로 코드만 보면 기본 검토 대상에 들어간다는 뜻입니다.
           </div>
-          <div className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-white/88 px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+          <div className="rounded-2xl border border-[var(--border-soft)] bg-white/88 px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
             `조건부 가능`과 `심의 필요`는 추가 서류, 단독 등록 제한, 위원회 판단이 붙는 경우입니다.
           </div>
-          <div className="rounded-2xl border border-[rgba(21,37,58,0.08)] bg-white/88 px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+          <div className="rounded-2xl border border-[var(--border-soft)] bg-white/88 px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
             `추가 확인`은 코드만으로는 부족한 경우라서 실제 사업 내용과 관리기관 확인이 더 필요합니다.
           </div>
         </div>

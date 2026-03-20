@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { LoaderCircle } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -10,13 +11,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[var(--accent)] px-5 py-3 text-[var(--accent-foreground)] shadow-[0_16px_34px_rgba(43,109,255,0.2)] hover:-translate-y-0.5 hover:bg-[var(--accent-strong)]',
+          'bg-[var(--accent)] px-5 py-3 text-[var(--accent-foreground)] shadow-[var(--shadow-accent)] hover:-translate-y-0.5 hover:bg-[var(--accent-strong)] hover:shadow-[0_26px_48px_rgba(20,92,255,0.34)]',
         secondary:
-          'bg-white px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-[rgba(43,109,255,0.05)]',
+          'bg-[var(--surface-strong)] px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] shadow-[var(--shadow-sm)] hover:bg-[var(--surface-muted)]',
         ghost:
-          'px-4 py-3 text-[var(--foreground-muted)] hover:bg-[rgba(43,109,255,0.06)] hover:text-[var(--foreground)]',
+          'px-4 py-3 text-[var(--foreground)] hover:bg-[rgba(20,92,255,0.08)] hover:text-[var(--accent-strong)]',
         outline:
-          'bg-transparent px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-white/60',
+          'bg-transparent px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-[rgba(20,92,255,0.08)]',
       },
       size: {
         default: 'h-11',
@@ -35,18 +36,40 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  loading?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button'
+  ({ className, variant, size, asChild = false, loading = false, disabled, children, ...props }, ref) => {
+    const isLoading = loading && !asChild
+
+    if (asChild) {
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </Slot>
+      )
+    }
 
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+      <button
+        type="button"
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          isLoading ? 'cursor-progress' : undefined,
+        )}
         ref={ref}
         {...props}
-      />
+        disabled={disabled || isLoading}
+        aria-busy={isLoading || undefined}
+      >
+        {isLoading ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : null}
+        {children}
+      </button>
     )
   },
 )

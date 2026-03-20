@@ -67,6 +67,7 @@ interface EligibilityFormProps {
   primaryActionLabel?: string
   secondaryActionLabel?: string
   defaultExpanded?: boolean
+  embedded?: boolean
 }
 
 const switchRows: Array<{
@@ -122,25 +123,32 @@ export function EligibilityForm({
   primaryActionLabel = '현재 설정으로 다시 판정',
   secondaryActionLabel,
   defaultExpanded = false,
+  embedded = false,
 }: EligibilityFormProps) {
   const isLoading = status === 'loading'
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const enabledFlagCount = switchRows.filter((row) => input.flags[row.key]).length
 
   return (
-    <Card className="overflow-hidden bg-white/96">
-      <CardHeader className="relative">
+    <Card
+      className={
+        embedded
+          ? 'overflow-visible rounded-none border-0 bg-transparent shadow-none'
+          : 'overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-md)]'
+      }
+    >
+      <CardHeader className={embedded ? 'hidden' : 'relative'}>
         <CardTitle>세부 조건 직접 수정</CardTitle>
         <CardDescription>
           대부분은 위에서 업종을 고른 뒤 결과만 보면 됩니다. 구역이나 예외 조건을
           직접 바꾸고 싶을 때만 이 섹션을 열어 주세요.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.86)] p-5">
+      <CardContent className={embedded ? 'space-y-6 p-0' : 'space-y-6'}>
+        <section className="rounded-[24px] border border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,var(--surface-strong)_0%,var(--surface-muted)_100%)] p-5 shadow-[var(--shadow-sm)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+              <div className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                 <SearchCheck className="size-4" />
               </div>
               <div>
@@ -171,25 +179,25 @@ export function EligibilityForm({
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 shadow-[var(--shadow-sm)]">
               <div className="text-xs text-[var(--foreground-subtle)]">구역</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {zoneTypeLabels[input.zoneType]}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 shadow-[var(--shadow-sm)]">
               <div className="text-xs text-[var(--foreground-subtle)]">신청 주체</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {applicantTypeLabels[input.applicantType]}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-              <div className="text-xs text-[var(--foreground-subtle)]">선택된 업종코드</div>
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 shadow-[var(--shadow-sm)]">
+              <div className="text-xs text-[var(--foreground-subtle)]">선택한 업종코드</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
-                {input.ksicCode.trim() || '아직 선택 전'}
+                {input.ksicCode.trim() || '직접 입력 예정'}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 shadow-[var(--shadow-sm)]">
               <div className="text-xs text-[var(--foreground-subtle)]">예외조건</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {enabledFlagCount > 0 ? `${enabledFlagCount}개 적용 중` : '없음'}
@@ -200,10 +208,10 @@ export function EligibilityForm({
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <Button
               className="sm:flex-1"
-              disabled={isLoading}
+              loading={isLoading}
               onClick={onEvaluate}
             >
-              <SearchCheck className="size-4" />
+              {!isLoading ? <SearchCheck className="size-4" /> : null}
               {isLoading ? '판정 계산 중...' : primaryActionLabel}
             </Button>
             {onPrevious ? (
@@ -232,9 +240,9 @@ export function EligibilityForm({
 
         {isExpanded ? (
           <>
-            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                   <Building2 className="size-4" />
                 </div>
                 <div>
@@ -384,9 +392,9 @@ export function EligibilityForm({
               </div>
             </section>
 
-            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                   <Factory className="size-4" />
                 </div>
                 <div>
@@ -455,9 +463,9 @@ export function EligibilityForm({
               </p>
             </section>
 
-            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                   <Factory className="size-4" />
                 </div>
                 <div>
@@ -474,7 +482,7 @@ export function EligibilityForm({
                 {switchRows.map((row) => (
                   <label
                     key={row.key}
-                    className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] px-4 py-3"
+                    className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3 shadow-[var(--shadow-sm)]"
                   >
                     <div className="space-y-1 pr-4">
                       <span className="block text-sm font-medium text-[var(--foreground)]">
@@ -494,9 +502,9 @@ export function EligibilityForm({
               </div>
             </section>
 
-            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
               <div className="mb-4 flex items-start gap-3">
-                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                   <FlaskConical className="size-4" />
                 </div>
                 <div>

@@ -66,8 +66,18 @@ describe('App', () => {
     )
 
     expect(
+      await within(finderSection).findByRole('heading', {
+        name: '추천 결과 확인하기',
+      }),
+    ).toBeInTheDocument()
+    expect(within(finderSection).queryByText('어떤 일을 하시나요?')).not.toBeInTheDocument()
+    expect(
+      within(finderSection).getByText('추천된 코드 중 하나를 고르면 다음 화면으로 넘어갑니다.'),
+    ).toBeInTheDocument()
+    expect(
       await within(finderSection).findByText('바로 확인할 수 있는 추천 코드'),
     ).toBeInTheDocument()
+
     await user.click(
       within(finderSection).getAllByRole('button', { name: '이 코드로 확인하기' })[0],
     )
@@ -109,7 +119,7 @@ describe('App', () => {
     await user.click(screen.getAllByRole('button', { name: '코드 사전 열기' })[0])
 
     expect(
-      screen.getByRole('heading', {
+      await screen.findByRole('heading', {
         name: /입주 가능한 업종코드를\s*전체로 찾아보는 화면입니다/,
       }),
     ).toBeInTheDocument()

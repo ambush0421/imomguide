@@ -1,5 +1,75 @@
 # 입주가능판별기 작업 체크리스트
 
+## 2026-03-20 쉬운 검색 홈 단일 패널 전환 정리
+
+- [x] 현재 `finder`의 중첩 카드 구조 확인
+- [x] 1단계/2단계/3단계가 바깥 메인 패널 하나 안에서 보이도록 구조 정리
+- [x] 단계 컴포넌트의 중복 헤더/카드 래퍼 제거 또는 임베드 모드 추가
+- [x] `App.test.tsx`를 단일 패널 흐름 기준으로 갱신
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 쉬운 검색 홈 뎁스형 화면 전환 개선
+
+- [x] 현재 `finder` 단계 구조와 전환 지점 분석
+- [x] 1단계를 `입력 화면 / 추천 결과 화면`으로 분리
+- [x] 클릭 시 다음 화면으로 넘어가는 뎁스형 전환 흐름 구현
+- [x] 2단계/3단계 자동 전환과 이전 이동 UX 정리
+- [x] `App.test.tsx` 사용자 흐름 갱신
+- [x] lint/test/build 재검증
+- [x] walkthrough.md 갱신
+
+## 2026-03-20 고대비형 SaaS 색 체계 보정
+
+- [x] 전역 색 토큰 재정의
+- [x] 공통 `Button`/`Badge`/`Card` 대비 강화
+- [x] `AsyncState` 대비 강화
+- [x] 홈 핵심 섹션 배경/테두리/강조색 보정
+- [x] 헤더/푸터 대비 보정
+- [x] 위저드 핵심 패널(`discover / adjust / result`) 대비 강화
+- [x] 직접 입력 흐름 문구와 테스트 기대값 정합성 보정
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 PDCA UI/UX 잔여 핵심 보정
+
+- [x] 공통 `Button` loading API 추가
+- [x] 추천/판정 CTA에 loading 상태 연결
+- [x] `SelectItem` 클릭 affordance 보정
+- [x] lazy 전환 이후 깨진 테스트 복구
+- [x] `Button` loading 테스트 추가
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 최종 체크리스트 상태 반영
+
+## 2026-03-20 Cloudflare Pages Git 빌드 누락 원인 점검
+
+- [x] Cloudflare Pages 실패 로그 확인
+- [x] `wrangler.toml`의 Pages 출력 경로 설정 확인
+- [x] `package.json`의 실제 빌드 스크립트 확인
+- [x] 로컬 `npm run build` 및 `dist` 생성 여부 재검증
+- [x] Git 연동 배포 실패의 직접 원인 정리
+- [x] OAuth 토큰 기반 Pages API 호출 복구
+- [x] `dist` direct upload로 Production 배포 성공
+- [x] Pages 프로젝트 `build_config`를 `npm run build` / `dist`로 수정
+- [x] `loopincode.com` 최신 자산 응답 확인
+- [x] 대시보드/배포 방식 기준 대응안 문서화
+
+## 2026-03-20 안티그래비티 walkthrough 공식 반영
+
+- [x] 루트 `walkthrough.md` 문서 내용 확인
+- [x] 문서에 적힌 파일별 변경 사항과 현재 소스 대조
+- [x] `npm run build`로 빌드/청크 분리 상태 재확인
+- [x] 정식 아티팩트 위치인 `docs/codex-brain/walkthrough.md` 반영 여부 확인
+- [x] 루트 walkthrough 핵심 내용을 정식 워크스루 형식으로 통합
+- [x] 통합 결과를 `docs/codex-brain` 아티팩트에 기록
+
 ## 2026-03-20 홈 섹션 대비 강화 및 쉬운 검색 슬라이드 위저드 설계
 
 - [x] 현재 홈 화면 섹션 위계와 쉬운 검색 위저드 구조 분석

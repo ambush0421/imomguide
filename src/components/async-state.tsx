@@ -29,11 +29,11 @@ export function AsyncState({
   return (
     <div
       className={cn(
-        'flex min-h-72 flex-col justify-center rounded-[24px] border border-dashed border-[var(--border)] bg-[rgba(239,245,255,0.88)] p-6',
+        'flex min-h-72 flex-col justify-center rounded-[24px] border border-dashed border-[var(--border-accent)] bg-[var(--surface-muted)] p-6 shadow-[var(--shadow-sm)]',
         className,
       )}
     >
-      <div className="mb-4 inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.1)] text-[var(--accent)]">
+      <div className="mb-4 inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)]">
         {iconMap[variant]}
       </div>
       <h3 className="font-display text-xl font-semibold text-[var(--foreground)]">

@@ -1,5 +1,186 @@
 # 입주가능판별기 구현 계획
 
+## 2026-03-20 쉬운 검색 홈 단일 패널 전환 정리
+
+### 목표
+
+- `finder`가 단계마다 새 창이 겹쳐 뜨는 것처럼 보이지 않게 하고, 하나의 메인 패널 안에서 본문만 바뀌는 위저드로 정리한다.
+- 이미 만든 `입력 -> 추천 결과 -> 조건 확인 -> 결과 확인` 흐름은 유지하되, 카드 중첩과 반복 헤더만 줄여 시각적 깊이를 단순화한다.
+
+### 구현 방향
+
+1. `HomeSections`의 바깥 카드만 메인 패널로 유지하고, 단계 컴포넌트는 그 안에 삽입되는 본문 역할로 바꾼다.
+2. `IndustryDiscoveryPanel`, `EligibilityForm`, `ResultPanel`에 임베드 모드를 추가해 내부 `Card` 래퍼와 중복 헤더를 선택적으로 제거한다.
+3. 단계별로 필요한 핵심 요약 카드와 액션 버튼은 유지하되, 이중 테두리와 이중 제목 구조는 줄인다.
+4. 테스트는 더 이상 내부 개별 카드 제목에 의존하지 않고, 한 개 위저드 영역 안에서 단계 전환이 이뤄지는 흐름을 기준으로 확인한다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 쉬운 검색 홈 뎁스형 화면 전환 개선
+
+### 목표
+
+- 사용자가 `finder` 섹션에서 같은 카드 안의 정보 덩어리를 읽는 것이 아니라, 클릭할 때마다 다음 화면으로 넘어간다는 느낌을 분명하게 받게 한다.
+- 현재 `discover -> adjust -> result` 구조는 유지하되, 1단계 안의 `검색 입력`과 `추천 결과`도 분리해 더 뎁스형 흐름으로 바꾼다.
+
+### 구현 방향
+
+1. `HomeSections`의 위저드 본문을 단계별 스크린처럼 보이도록 슬라이드형/패널형 전환 구조로 재구성한다.
+2. `IndustryDiscoveryPanel`은 `입력 화면`과 `추천 결과 화면`을 분리하고, 검색 버튼을 누르면 결과 화면으로 넘어가게 만든다.
+3. 추천 결과 화면에서는 `다시 검색`, `직접 입력으로 계속`, `이 코드로 확인하기`를 명확한 다음 행동으로 배치한다.
+4. 추천 코드 선택 시 2단계 `adjust`로, `결과 보기` 시 3단계 `result`로 자동 전환되게 유지한다.
+5. 2단계와 3단계는 이전/다음 관계가 명확하게 보이도록 헤더와 내비게이션을 보강한다.
+6. 테스트는 `App.test.tsx`에서 `검색 -> 추천 결과 화면 -> 코드 선택 -> 조건 보정 -> 결과 화면` 흐름을 기준으로 갱신한다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/store/eligibility-store.ts`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 고대비형 SaaS 색 체계 보정
+
+### 목표
+
+- 현재 블루 단일 톤 위주의 안전한 팔레트를, CTA와 핵심 정보가 더 또렷하게 들어오는 고대비형 SaaS 스타일로 보정한다.
+- 제품 구조와 컴포넌트 체계는 유지하되, 배경-카드-강조색 위계를 더 분명하게 만들어 첫인상과 스캔 속도를 개선한다.
+- 전역 토큰, 공통 UI 컴포넌트, 홈 핵심 섹션까지만 우선 손대고 기능 흐름이나 문구는 바꾸지 않는다.
+
+### 구현 방향
+
+1. `src/index.css`의 전역 색 토큰을 더 중립적인 배경과 더 진한 전경, 더 선명한 블루 CTA 기준으로 재정의한다.
+2. `src/components/ui/button.tsx`, `badge.tsx`, `card.tsx`, `async-state.tsx`의 기본 색/테두리/그림자 체계를 새 토큰 기준으로 높여 공통 대비를 끌어올린다.
+3. `src/App.tsx`의 헤더, 히어로, 위저드, 코드 사전/법령/업데이트/가이드 진입 섹션처럼 시선이 가장 많이 머무는 영역의 배경과 테두리 대비를 함께 강화한다.
+4. 상태 색은 기존 의미를 유지하되, muted/default 배지와 보조 카드가 배경에 묻히지 않도록 더 진한 텍스트와 선명한 경계를 준다.
+5. 마지막에 `lint/test/build`를 다시 실행해 기능 회귀 없이 스타일만 바뀌었는지 확인한다.
+
+### 예상 영향 범위
+
+- `src/index.css`
+- `src/components/ui/button.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/ui/card.tsx`
+- `src/components/async-state.tsx`
+- `src/App.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+## 2026-03-20 PDCA UI/UX 잔여 핵심 보정
+
+### 목표
+
+- 이미 반영된 UI/UX 개선은 유지하고, 실제로 남아 있는 핵심 갭만 보정한다.
+- 공통 `Button`에 `loading` 상태를 추가해 추천/판정 CTA의 비동기 피드백을 일관되게 맞춘다.
+- `SelectItem` 상호작용 affordance와 lazy 전환 이후 깨진 테스트 1건을 함께 정리해 문서-코드-검증 상태를 다시 일치시킨다.
+
+### 구현 방향
+
+1. `src/components/ui/button.tsx`에 `loading?: boolean`을 추가하고, 네이티브 버튼일 때만 스피너, `disabled`, `aria-busy`를 자동 적용한다.
+2. `src/features/eligibility/components/industry-discovery-panel.tsx`와 `src/features/eligibility/components/eligibility-form.tsx`의 주요 CTA에 `loading`을 연결해 중복 클릭 방지와 시각 피드백을 동시에 제공한다.
+3. `src/components/ui/select.tsx`의 `SelectItem` 커서를 `cursor-pointer`로 바꿔 클릭 가능한 요소라는 신호를 명확히 한다.
+4. `src/App.test.tsx`의 전수 코드 사전 진입 테스트를 `findByRole` 기반으로 바꿔 lazy 렌더링 이후 DOM 준비를 기다리게 한다.
+5. `Button` loading 동작을 별도 컴포넌트 테스트로 추가하고, 마지막에 `lint/test/build`를 모두 다시 돌린다.
+
+### 예상 영향 범위
+
+- `src/components/ui/button.tsx`
+- `src/components/ui/select.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/App.test.tsx`
+- `src/components/ui/button.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+## 2026-03-20 Cloudflare Pages Git 빌드 누락 원인 점검
+
+### 목표
+
+- Cloudflare Pages 로그의 `No build command specified. Skipping build step.`와 `Output directory "dist" not found.`가 왜 발생했는지 현재 저장소 기준으로 확정한다.
+- 저장소 수정만으로 해결 가능한 범위와, Cloudflare 대시보드에서 반드시 맞춰야 하는 설정을 분리해서 정리한다.
+
+### 구현 방향
+
+1. `wrangler.toml`에서 Pages 출력 디렉터리 설정이 어떻게 선언돼 있는지 확인한다.
+2. `package.json`에서 실제 프로덕션 빌드 명령이 무엇인지 확인한다.
+3. 로컬에서 `npm run build`를 다시 실행해 `dist`가 정상 생성되는지 검증한다.
+4. Cloudflare 공식 문서 기준으로 Git 연동 Pages 프로젝트에는 빌드 명령과 출력 디렉터리를 지정해야 함을 확인한다.
+5. 현재 실패는 앱 코드 문제가 아니라 Pages가 빌드 명령 없이 `dist`만 찾도록 설정된 상태라는 결론으로 정리한다.
+6. 로컬 wrangler 설정의 OAuth 토큰을 현재 프로세스 환경변수에 주입해 Pages API와 direct upload를 다시 사용할 수 있게 한다.
+7. `wrangler pages deploy dist --project-name imomguide --commit-dirty=true`로 production을 즉시 복구한다.
+8. Cloudflare Pages 프로젝트 API에서 `build_config`를 `npm run build`, `dist`, `/` 기준으로 저장한다.
+9. `loopincode.com`과 최신 direct upload URL이 같은 자산 해시를 응답하는지 확인한다.
+
+### 검증 메모
+
+- `Get-Content -Raw wrangler.toml`
+- `Get-Content -Raw package.json`
+- `Get-Content -Raw .gitignore`
+- `npm run build`
+- `npx wrangler whoami`
+- `npx wrangler pages deploy dist --project-name imomguide --commit-dirty=true`
+- `Invoke-RestMethod https://api.cloudflare.com/client/v4/accounts/.../pages/projects/imomguide`
+- `Invoke-WebRequest https://0b19544e.imomguide.pages.dev`
+- `Invoke-WebRequest https://loopincode.com`
+- Cloudflare Pages 공식 문서
+  - Git integration
+  - Build configuration
+  - Wrangler configuration
+
+## 2026-03-20 안티그래비티 walkthrough 공식 반영
+
+### 목표
+
+- 루트 `walkthrough.md`에 적힌 UI/UX 개선 항목이 현재 소스에 실제로 반영되어 있는지 빠르게 확인한다.
+- 프로젝트 규칙상 정식 산출물 위치인 `docs/codex-brain/walkthrough.md`에 같은 내용을 공식 형식으로 재정리해 남긴다.
+
+### 검토 범위
+
+1. 루트 `walkthrough.md`에 명시된 대상 파일 `src/index.css`, `src/components/ui/button.tsx`, `src/App.tsx`, `index.html`, `src/components/ui/skeleton.tsx`를 직접 확인한다.
+2. 접근성(`skip nav`, `aria-*`), 터치 타겟(`44px`), 애니메이션, reduced motion, lazy import, `Suspense`, 폰트 프리로드/프리커넥트 여부를 소스 기준으로 검증한다.
+3. `npm run build`를 다시 실행해 실제 빌드 성공과 분리 청크 생성 여부를 확인한다.
+4. 루트 `walkthrough.md`의 핵심 내용을 `작업 배경 / 반영 내용 / 구현 파일 / 검증 결과 / 결과 요약` 형식으로 재구성한다.
+5. 점검 메모 성격의 임시 기록을 공식 반영 상태에 맞게 갱신한다.
+
+### 검증 메모
+
+- `Get-Content -Raw walkthrough.md`
+- `Get-Content -Raw src/index.css`
+- `Get-Content -Raw src/components/ui/button.tsx`
+- `Get-Content -Raw src/App.tsx`
+- `Get-Content -Raw index.html`
+- `Get-Content -Raw src/components/ui/skeleton.tsx`
+- `git status --short`
+- `git diff --no-index -- walkthrough.md docs/codex-brain/walkthrough.md`
+- `npm run build`
+
 ## 2026-03-20 홈 섹션 대비 강화 및 쉬운 검색 슬라이드 위저드 설계
 
 ### 목표

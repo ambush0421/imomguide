@@ -55,7 +55,7 @@ export function LegalLibraryPage({
         {entries.map((entry) => (
           <Card
             key={entry.id}
-            className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]"
+            className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]"
           >
             <CardContent className="space-y-5 p-5">
               <div className="flex flex-wrap items-center gap-2">

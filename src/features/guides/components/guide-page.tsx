@@ -66,7 +66,7 @@ export function GuidePage({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_320px]">
-        <Card className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+        <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
           <CardContent className="space-y-5 p-5">
             <div className="flex flex-wrap items-center gap-2">
               <Badge>{guide.code}</Badge>
@@ -112,7 +112,7 @@ export function GuidePage({
           </CardContent>
         </Card>
 
-        <Card className="border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+        <Card className="border-[var(--border-soft)] bg-[rgba(248,251,255,0.84)] shadow-none">
           <CardContent className="space-y-4 p-5">
             <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
               <LibraryBig className="size-5" />
@@ -133,7 +133,7 @@ export function GuidePage({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <Card className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+        <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
               <FileQuestion className="size-4 text-[var(--accent)]" />
@@ -157,7 +157,7 @@ export function GuidePage({
           </CardContent>
         </Card>
 
-        <Card className="border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+        <Card className="border-[var(--border-soft)] bg-[rgba(248,251,255,0.84)] shadow-none">
           <CardContent className="space-y-4 p-5">
             <div className="text-sm font-medium text-[var(--foreground)]">
               관련 법령
@@ -185,7 +185,7 @@ export function GuidePage({
         </Card>
       </div>
 
-      <Card className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+      <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
         <CardContent className="space-y-4 p-5">
           <div className="text-sm font-medium text-[var(--foreground)]">연관 코드</div>
           <div className="flex flex-wrap gap-2">

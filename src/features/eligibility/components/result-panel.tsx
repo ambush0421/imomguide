@@ -40,6 +40,7 @@ interface ResultPanelProps {
   onOpenGuide?: (code: string) => void
   sticky?: boolean
   stepLabel?: string
+  embedded?: boolean
 }
 
 function getBadgeVariant(verdict: EligibilityResult['verdict']) {
@@ -68,6 +69,7 @@ export function ResultPanel({
   onOpenGuide,
   sticky = true,
   stepLabel = '2단계',
+  embedded = false,
 }: ResultPanelProps) {
   const hasManualInput = Boolean(input.ksicCode.trim() || input.ksicName.trim())
   const screenInsight = getEligibilityScreenInsight(input, result)
@@ -78,10 +80,20 @@ export function ResultPanel({
     : null
 
   return (
-    <Card className={sticky ? 'sticky top-6 overflow-hidden bg-white/96' : 'overflow-hidden bg-white/96'}>
-      <CardHeader>
+    <Card
+      className={
+        embedded
+          ? sticky
+            ? 'sticky top-6 overflow-visible rounded-none border-0 bg-transparent shadow-none'
+            : 'overflow-visible rounded-none border-0 bg-transparent shadow-none'
+          : sticky
+            ? 'sticky top-6 overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-md)]'
+            : 'overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-md)]'
+      }
+    >
+      <CardHeader className={embedded ? 'px-0 pt-0 pb-0' : undefined}>
         <div className="flex items-center justify-between gap-3">
-          <div>
+          <div className={embedded ? 'hidden' : undefined}>
             <Badge variant="muted" className="mb-3 w-fit">
               {stepLabel}
             </Badge>
@@ -105,7 +117,7 @@ export function ResultPanel({
           </div>
         ) : null}
       </CardHeader>
-      <CardContent>
+      <CardContent className={embedded ? 'p-0 pt-5' : undefined}>
         {status === 'idle' ? (
           <AsyncState
             variant="empty"
@@ -142,7 +154,7 @@ export function ResultPanel({
 
         {status === 'ready' && result ? (
           <div className="space-y-4">
-            <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.84)] p-5">
+            <section className="rounded-[24px] border border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,var(--surface-strong)_0%,var(--surface-muted)_100%)] p-5 shadow-[var(--shadow-md)]">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={getBadgeVariant(result.verdict)}>
                   {formatVerdictLabel(result.verdict)}
@@ -168,7 +180,7 @@ export function ResultPanel({
             </section>
 
             {screenInsight ? (
-              <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+              <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={screenInsight.tone}>업종코드 상세 해설</Badge>
                   <Badge variant="muted">화면 기준 재정리</Badge>
@@ -180,7 +192,7 @@ export function ResultPanel({
                   {screenInsight.fields.map((field) => (
                     <div
                       key={`${field.label}-${field.value}`}
-                      className="rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] px-4 py-3"
+                      className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 shadow-[var(--shadow-sm)]"
                     >
                       <div className="text-xs text-[var(--foreground-subtle)]">
                         {field.label}
@@ -196,7 +208,7 @@ export function ResultPanel({
                     {screenInsight.bullets.map((bullet) => (
                       <div
                         key={bullet}
-                        className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.8)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
+                        className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]"
                       >
                         {bullet}
                       </div>
@@ -207,7 +219,7 @@ export function ResultPanel({
             ) : null}
 
             {expertInsights.length > 0 ? (
-              <section className="space-y-4 rounded-[24px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-5">
+              <section className="space-y-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-soft)] p-5 shadow-[var(--shadow-sm)]">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="muted">전문가 인사이트</Badge>
                   <Badge variant="muted">실무형 해설</Badge>
@@ -225,7 +237,7 @@ export function ResultPanel({
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-2">
-              <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+              <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                   <ArrowRight className="size-4 text-[var(--accent)]" />
                   왜 이렇게 판단했나요?
@@ -234,7 +246,7 @@ export function ResultPanel({
                   {result.reasons.map((reason) => (
                     <li
                       key={reason}
-                      className="rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] px-4 py-3"
+                      className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 shadow-[var(--shadow-sm)]"
                     >
                       {reason}
                     </li>
@@ -242,7 +254,7 @@ export function ResultPanel({
                 </ul>
               </section>
 
-              <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+              <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                   <FileStack className="size-4 text-[var(--accent)]" />
                   다음에 확인할 것
@@ -251,7 +263,7 @@ export function ResultPanel({
                   {result.requiredActions.map((action) => (
                     <li
                       key={action}
-                      className="rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.75)] px-4 py-3"
+                      className="rounded-2xl border border-[var(--warning-border)] bg-[rgba(255,247,221,0.82)] px-4 py-3 shadow-[var(--shadow-sm)]"
                     >
                       {action}
                     </li>
@@ -261,7 +273,7 @@ export function ResultPanel({
             </div>
 
             {guideEntry && onOpenGuide ? (
-              <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-5">
+              <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-soft)] p-5 shadow-[var(--shadow-sm)]">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="muted">연관 가이드</Badge>
                   <Badge variant="muted">{guideEntry.code}</Badge>

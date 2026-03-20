@@ -123,7 +123,14 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
     })),
   setCurrentStep: (step) =>
     set((state) => {
-      if (step === 'result' && !(state.status === 'ready' && state.result)) {
+      if (
+        step === 'result' &&
+        !(
+          state.status === 'loading' ||
+          state.status === 'error' ||
+          (state.status === 'ready' && state.result)
+        )
+      ) {
         return state
       }
 
@@ -190,7 +197,7 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
     })
   },
   evaluate: async () => {
-    set({ status: 'loading', error: null })
+    set({ status: 'loading', error: null, currentStep: 'result' })
 
     try {
       await wait(320)
@@ -208,6 +215,7 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
           error instanceof Error
             ? error.message
             : '판정 엔진 실행 중 알 수 없는 오류가 발생했습니다.',
+        currentStep: 'result',
       })
     }
   },

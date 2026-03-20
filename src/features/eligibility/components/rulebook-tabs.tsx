@@ -352,13 +352,13 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
-                    <AlertTriangle className="size-4 text-rose-500" />
+                    <AlertTriangle className="size-4 text-[var(--danger-icon)]" />
                     불가 또는 제한
                   </div>
                   {blockingRules.map((scenario) => (
                     <article
                       key={scenario.id}
-                      className="rounded-[24px] border border-rose-200 bg-rose-50 p-5"
+                      className="rounded-[24px] border border-[var(--danger-border)] bg-[var(--danger-bg)] p-5"
                     >
                       <h3 className="text-base font-semibold text-[var(--foreground)]">
                         {scenario.label}
