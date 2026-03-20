@@ -1,6 +1,12 @@
+import {
+  MAGOK_CODE_DIRECTORY,
+  getDirectoryVerdictWeight,
+  getMagokCodeDirectoryEntry,
+} from '@/features/eligibility/data/magok-code-directory'
 import { KNOWLEDGE_CENTER_DISCOVERY_ENTRIES } from '@/features/eligibility/data/knowledge-center-exact-codes'
 import { normalizeKsicCode } from '@/features/eligibility/data/rules'
 import type {
+  DirectoryZoneType,
   IndustrySuggestion,
   RegulatoryFit,
 } from '@/features/eligibility/types'
@@ -685,8 +691,11 @@ function buildSuggestion(
   matchKind: IndustrySuggestion['matchKind'],
   source: IndustrySuggestion['source'],
   score: number,
+  zoneType: DirectoryZoneType,
 ): IndustrySuggestion {
   const catalogMetadata = getCatalogMetadata(preset.code)
+  const directoryEntry = getMagokCodeDirectoryEntry(preset.code)
+  const zoneVerdict = directoryEntry?.zoneVerdicts[zoneType]
 
   return {
     id: `${source}-${preset.code}`,
@@ -695,10 +704,12 @@ function buildSuggestion(
     reason,
     matchKind,
     source,
-    score,
+    score: score + (zoneVerdict ? getDirectoryVerdictWeight(zoneVerdict.verdict) * 8 : 0),
     suggestedRegulatoryFit: preset.suggestedRegulatoryFit,
     catalogVerdict: catalogMetadata.catalogVerdict,
     catalogNote: catalogMetadata.catalogNote,
+    selectedZoneVerdict: zoneVerdict?.verdict,
+    recommendationReason: zoneVerdict?.reason,
   }
 }
 
@@ -819,7 +830,48 @@ function matchCatalogName(
   }
 }
 
-export function discoverIndustrySuggestions(query: string) {
+function matchDirectoryEntry(
+  querySegments: string[],
+  queryTokens: string[],
+  entry: (typeof MAGOK_CODE_DIRECTORY)[number],
+) {
+  const normalizedName = normalizeIndustryText(entry.name)
+  const normalizedKeywords = entry.searchKeywords.map(normalizeIndustryText)
+  const directSegmentMatch =
+    querySegments.some((segment) => segment.includes(normalizedName)) ||
+    normalizedKeywords.some((keyword) =>
+      querySegments.some((segment) => keyword.includes(segment) || segment.includes(keyword)),
+    )
+
+  if (directSegmentMatch) {
+    return {
+      reason: `${entry.name}(${entry.code})은 입력한 설명과 가장 가까운 업종명 또는 분류 키워드에 직접 걸렸습니다.`,
+      score: 118 + normalizedName.length,
+      matchKind: 'exact' as const,
+    }
+  }
+
+  const tokenHits = entry.searchKeywords.filter((keyword) =>
+    queryTokens.some((queryToken) =>
+      normalizeIndustryText(keyword).includes(queryToken) || queryToken.includes(normalizeIndustryText(keyword)),
+    ),
+  ).length
+
+  if (!tokenHits) {
+    return null
+  }
+
+  return {
+    reason: `${entry.name}(${entry.code})은 입력한 표현과 가까운 관련 업종으로 검토할 수 있습니다.`,
+    score: 54 + tokenHits * 7,
+    matchKind: tokenHits >= 2 ? ('exact' as const) : ('related' as const),
+  }
+}
+
+export function discoverIndustrySuggestions(
+  query: string,
+  zoneType: DirectoryZoneType = 'knowledgeIndustryCenter',
+) {
   const trimmedQuery = query.trim()
 
   if (!trimmedQuery) {
@@ -852,9 +904,17 @@ export function discoverIndustrySuggestions(query: string) {
         reason: `입력 텍스트에 KSIC 코드 \`${code}\`가 직접 포함되어 있습니다.`,
         matchKind: 'exact',
         source: 'directCode',
-        score: 240,
+        score:
+          240 +
+          (getMagokCodeDirectoryEntry(code)
+            ? getDirectoryVerdictWeight(
+                getMagokCodeDirectoryEntry(code)!.zoneVerdicts[zoneType].verdict,
+              ) * 8
+            : 0),
         catalogVerdict: catalogMetadata.catalogVerdict,
         catalogNote: catalogMetadata.catalogNote,
+        selectedZoneVerdict: getMagokCodeDirectoryEntry(code)?.zoneVerdicts[zoneType].verdict,
+        recommendationReason: getMagokCodeDirectoryEntry(code)?.zoneVerdicts[zoneType].reason,
       },
     )
   }
@@ -879,6 +939,7 @@ export function discoverIndustrySuggestions(query: string) {
         presetMatch.matchKind,
         'preset',
         presetMatch.score,
+        zoneType,
       ),
     )
   }
@@ -904,9 +965,42 @@ export function discoverIndustrySuggestions(query: string) {
         reason: catalogMatch.reason,
         matchKind: catalogMatch.matchKind,
         source: 'catalog',
-        score: catalogMatch.score,
+        score:
+          catalogMatch.score +
+          (getMagokCodeDirectoryEntry(entry.code)
+            ? getDirectoryVerdictWeight(
+                getMagokCodeDirectoryEntry(entry.code)!.zoneVerdicts[zoneType].verdict,
+              ) * 8
+            : 0),
         catalogVerdict: entry.verdict,
         catalogNote: entry.note,
+        selectedZoneVerdict: getMagokCodeDirectoryEntry(entry.code)?.zoneVerdicts[zoneType].verdict,
+        recommendationReason: getMagokCodeDirectoryEntry(entry.code)?.zoneVerdicts[zoneType].reason,
+      },
+    )
+  }
+
+  for (const entry of MAGOK_CODE_DIRECTORY) {
+    const directoryMatch = matchDirectoryEntry(querySegments, queryTokens, entry)
+
+    if (!directoryMatch) {
+      continue
+    }
+
+    addSuggestion(
+      suggestions,
+      {
+        id: `directory-${entry.code}`,
+        code: entry.code,
+        name: entry.name,
+        reason: directoryMatch.reason,
+        matchKind: directoryMatch.matchKind,
+        source: 'directory',
+        score:
+          directoryMatch.score +
+          getDirectoryVerdictWeight(entry.zoneVerdicts[zoneType].verdict) * 8,
+        selectedZoneVerdict: entry.zoneVerdicts[zoneType].verdict,
+        recommendationReason: entry.zoneVerdicts[zoneType].reason,
       },
     )
   }
@@ -914,6 +1008,17 @@ export function discoverIndustrySuggestions(query: string) {
   const orderedSuggestions = [...suggestions.values()].sort((left, right) => {
     if (right.score !== left.score) {
       return right.score - left.score
+    }
+
+     if (
+      left.selectedZoneVerdict &&
+      right.selectedZoneVerdict &&
+      left.selectedZoneVerdict !== right.selectedZoneVerdict
+    ) {
+      return (
+        getDirectoryVerdictWeight(right.selectedZoneVerdict) -
+        getDirectoryVerdictWeight(left.selectedZoneVerdict)
+      )
     }
 
     if (left.matchKind !== right.matchKind) {
@@ -926,9 +1031,17 @@ export function discoverIndustrySuggestions(query: string) {
   const exactMatches = orderedSuggestions
     .filter((suggestion) => suggestion.matchKind === 'exact')
     .slice(0, 3)
-  const relatedMatches = orderedSuggestions
+  const relatedSuggestionPool = orderedSuggestions
     .filter((suggestion) => suggestion.matchKind === 'related')
-    .slice(0, 4)
+  const relatedMatches = (
+    relatedSuggestionPool.filter(
+      (suggestion) => suggestion.selectedZoneVerdict !== 'ineligible',
+    ).length > 0
+      ? relatedSuggestionPool.filter(
+          (suggestion) => suggestion.selectedZoneVerdict !== 'ineligible',
+        )
+      : relatedSuggestionPool
+  ).slice(0, 4)
 
   return [...exactMatches, ...relatedMatches]
 }

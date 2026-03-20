@@ -17,7 +17,7 @@ const badgeVariants = cva(
         danger:
           'border-rose-200 bg-rose-50 text-rose-700',
         muted:
-          'border-[var(--border)] bg-[rgba(242,247,255,0.92)] text-[var(--foreground-muted)]',
+          'border-[rgba(21,37,58,0.1)] bg-[rgba(249,251,255,0.96)] text-[var(--foreground-subtle)]',
       },
     },
     defaultVariants: {

@@ -10,6 +10,7 @@ export interface KnowledgeIndustryReviewRow {
   ksic: string
   verdict: KnowledgeIndustryReviewVerdict
   note: string
+  searchTerms?: string[]
 }
 
 export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
@@ -19,6 +20,17 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     ksic: '70 전체(70111~70209)',
     verdict: '가능',
     note: '일반 기업은 KSIC 70 계열 코드로 예비판정 가능하며, 대학·연구소 성격이면 2호·3호 요건도 함께 봐야 합니다.',
+    searchTerms: [
+      '70111',
+      '70112',
+      '70113',
+      '70119',
+      '70121',
+      '70129',
+      '70130',
+      '70201',
+      '70209',
+    ],
   },
   {
     clause: '2호',
@@ -40,6 +52,18 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     ksic: '72 전체(72111~72923)',
     verdict: '가능',
     note: '현재 KSIC 11차에서는 721 계열과 729 계열로 펼쳐서 검토하면 됩니다.',
+    searchTerms: [
+      '72111',
+      '72112',
+      '72121',
+      '72122',
+      '72129',
+      '72911',
+      '72919',
+      '72921',
+      '72922',
+      '72923',
+    ],
   },
   {
     clause: '5호',
@@ -54,6 +78,7 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     ksic: '5911(59111~59114)',
     verdict: '가능',
     note: '제작업만 해당하며 후반작업은 15호, 배급·상영은 이 조문만으로는 직접 해당하지 않습니다.',
+    searchTerms: ['59111', '59112', '59113', '59114'],
   },
   {
     clause: '7호',
@@ -61,6 +86,20 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     ksic: '58 전체(581xx, 582xx)',
     verdict: '가능',
     note: '서적·정기간행물 출판뿐 아니라 소프트웨어 개발 및 공급업(582xx)까지 포함됩니다.',
+    searchTerms: [
+      '58111',
+      '58112',
+      '58113',
+      '58121',
+      '58122',
+      '58123',
+      '58190',
+      '58211',
+      '58212',
+      '58219',
+      '58221',
+      '58222',
+    ],
   },
   {
     clause: '8호',
@@ -68,6 +107,7 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     ksic: '7320(73201, 73202, 73203, 73209)',
     verdict: '가능',
     note: '인테리어·제품·시각·패션/섬유류 디자인을 7320 범위에서 확인하면 됩니다.',
+    searchTerms: ['73201', '73202', '73203', '73209'],
   },
   {
     clause: '9호',
@@ -82,6 +122,7 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     ksic: '85 전체',
     verdict: '조건부',
     note: '직업능력개발훈련시설, 요건 충족 대학, 산업단지 안에서 운영하는 대학인지까지 확인해야 합니다.',
+    searchTerms: ['85503', '85631', '85640', '85650', '85669', '85691', '85699'],
   },
   {
     clause: '11호',
@@ -110,6 +151,7 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     ksic: '3900(39001, 39009)',
     verdict: '가능',
     note: '토양·지하수 정화와 기타 환경 정화·복원업을 함께 포함합니다.',
+    searchTerms: ['39001', '39009'],
   },
   {
     clause: '15호',
@@ -201,5 +243,6 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     ksic: '7390 중 미열거 영역',
     verdict: '추가 확인',
     note: '주로 73901, 73905, 73909 등을 검토하며 관리기관 인정과 홈페이지 게시 여부를 반드시 확인해야 합니다.',
+    searchTerms: ['73901', '73905', '73909'],
   },
 ]

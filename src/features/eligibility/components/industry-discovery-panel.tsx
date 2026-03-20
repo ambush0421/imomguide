@@ -61,6 +61,18 @@ function buildPreviewResult(input: EligibilityInput, suggestion: IndustrySuggest
   })
 }
 
+function getZoneLabel(input: EligibilityInput) {
+  if (input.zoneType === 'industrialFacility') {
+    return '산업시설구역'
+  }
+
+  if (input.zoneType === 'knowledgeIndustryCenter') {
+    return '지식산업센터'
+  }
+
+  return '지원시설구역'
+}
+
 function SuggestionCard({
   input,
   suggestion,
@@ -71,16 +83,25 @@ function SuggestionCard({
   onSelect: (suggestion: IndustrySuggestion) => void
 }) {
   const previewResult = buildPreviewResult(input, suggestion)
+  const zoneVerdict = suggestion.selectedZoneVerdict ?? previewResult.verdict
+  const headlineReason = suggestion.recommendationReason ?? suggestion.reason
+  const isExact = suggestion.matchKind === 'exact'
 
   return (
-    <article className="rounded-[24px] border border-[var(--border)] bg-white p-5 shadow-[0_12px_24px_rgba(24,32,43,0.04)]">
+    <article
+      className={`rounded-[26px] border p-5 ${
+        isExact
+          ? 'border-[rgba(43,109,255,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,247,255,0.96))] shadow-[0_18px_36px_rgba(43,109,255,0.08)]'
+          : 'border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.84)] shadow-none'
+      }`}
+    >
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={suggestion.matchKind === 'exact' ? 'success' : 'muted'}>
-          {suggestion.matchKind === 'exact' ? '바로 선택 가능' : '비슷한 업종'}
+        <Badge variant={isExact ? 'success' : 'muted'}>
+          {isExact ? '먼저 볼 코드' : '비슷한 코드'}
         </Badge>
         <Badge variant="muted">{suggestion.code}</Badge>
-        <Badge variant={getVerdictBadgeVariant(previewResult.verdict)}>
-          예상 결과 {formatVerdictLabel(previewResult.verdict)}
+        <Badge variant={getVerdictBadgeVariant(zoneVerdict)}>
+          {getZoneLabel(input)} 기준 {formatVerdictLabel(zoneVerdict)}
         </Badge>
       </div>
 
@@ -88,11 +109,17 @@ function SuggestionCard({
         {suggestion.name}
       </h3>
       <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-        {suggestion.reason}
+        {headlineReason}
       </p>
 
+      {suggestion.reason !== headlineReason ? (
+        <p className="mt-3 rounded-2xl bg-[rgba(248,251,255,0.92)] px-3 py-2 text-xs leading-5 text-[var(--foreground-subtle)]">
+          추천 근거: {suggestion.reason}
+        </p>
+      ) : null}
+
       {suggestion.catalogNote ? (
-        <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
+        <p className="mt-2 text-xs leading-5 text-[var(--foreground-subtle)]">
           참고: {suggestion.catalogNote}
         </p>
       ) : null}
@@ -103,7 +130,7 @@ function SuggestionCard({
           onClick={() => onSelect(suggestion)}
         >
           <ArrowRight className="size-4" />
-          이 업종으로 계속
+          이 코드로 확인하기
         </Button>
       </div>
     </article>
@@ -136,73 +163,89 @@ export function IndustryDiscoveryPanel({
         <Badge variant="muted" className="w-fit">
           1단계
         </Badge>
-        <CardTitle className="pt-1">업종코드 찾기</CardTitle>
+        <CardTitle className="pt-1">업종코드 추천받기</CardTitle>
         <CardDescription className="max-w-3xl">
-          사업 설명이나 사업자등록증의 `업태 / 종목`을 넣어 주세요. 먼저 가장 가까운
-          업종코드를 보여드리고, 선택 즉시 결과 확인으로 이어집니다.
+          업종코드를 몰라도 됩니다. 사업 설명이나 사업자등록증의 `업태 / 종목`을 넣으면,
+          먼저 가장 가까운 코드를 추천해 드리고 바로 결과 확인으로 이어집니다.
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(239,245,255,0.86)] p-5">
-          <div className="flex items-start gap-3">
-            <div className="mt-1 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
-              <SearchCheck className="size-4" />
-            </div>
+        <section className="rounded-[28px] border border-[rgba(43,109,255,0.14)] bg-[linear-gradient(180deg,rgba(241,247,255,0.96),rgba(255,255,255,0.96))] p-5 sm:p-6">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
             <div>
-              <h3 className="font-display text-lg font-semibold text-[var(--foreground)]">
-                어떤 사업을 하시나요?
-              </h3>
-              <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                자유롭게 적어도 되고, 사업자등록증의 업태·종목을 그대로 붙여 넣어도
-                됩니다.
-              </p>
+              <div className="flex items-start gap-3">
+                <div className="mt-1 inline-flex size-10 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                  <SearchCheck className="size-4" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-semibold text-[var(--foreground)]">
+                    어떤 일을 하시나요?
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
+                    업종코드를 몰라도 됩니다. 어떤 일을 하는지 쉬운 말로 적어 주세요. 바로 확인할 만한 코드를 먼저
+                    추천하고, 애매하면 비슷한 코드까지 이어서 보여드립니다.
+                  </p>
+                </div>
+              </div>
+
+              <Textarea
+                className="mt-4 min-h-36 bg-white"
+                value={query}
+                placeholder={
+                  '예: 광고대행업을 해요\n예: 업태: 서비스 / 종목: 광고대행업\n예: 모바일 앱 개발과 SaaS 운영을 합니다'
+                }
+                onChange={(event) => onQueryChange(event.target.value)}
+              />
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {DISCOVERY_EXAMPLE_PROMPTS.map((prompt) => (
+                  <Button
+                    key={prompt}
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onExampleSelect(prompt)}
+                  >
+                    {prompt}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Button disabled={isLoading || !query.trim()} onClick={onDiscover}>
+                  <SearchCheck className="size-4" />
+                  {isLoading ? '추천 코드 찾는 중...' : '추천 코드 찾기'}
+                </Button>
+                <Button variant="secondary" onClick={onContinueManual}>
+                  직접 입력으로 계속
+                </Button>
+              </div>
             </div>
-          </div>
 
-          <Textarea
-            className="mt-4 min-h-36"
-            value={query}
-            placeholder={
-              '예: 업태: 서비스 / 종목: 광고대행업\n예: 모바일 앱 개발과 SaaS 운영을 합니다'
-            }
-            onChange={(event) => onQueryChange(event.target.value)}
-          />
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {DISCOVERY_EXAMPLE_PROMPTS.map((prompt) => (
-              <Button
-                key={prompt}
-                variant="secondary"
-                size="sm"
-                onClick={() => onExampleSelect(prompt)}
-              >
-                {prompt}
-              </Button>
-            ))}
-          </div>
-
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button disabled={isLoading || !query.trim()} onClick={onDiscover}>
-                <SearchCheck className="size-4" />
-                {isLoading ? '업종코드 찾는 중...' : '업종코드 찾기'}
-              </Button>
-              <Button variant="secondary" onClick={onContinueManual}>
-                직접 입력으로 계속
-              </Button>
+            <div className="rounded-[24px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.82)] p-4">
+              <div className="text-xs font-semibold tracking-[0.08em] text-[var(--foreground-subtle)]">
+                이렇게 보면 쉽습니다
+              </div>
+              <div className="mt-3 space-y-3">
+                <div className="rounded-2xl bg-[rgba(248,251,255,0.96)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                  1. 먼저 `바로 확인할 수 있는 추천 코드`를 봅니다.
+                </div>
+                <div className="rounded-2xl bg-[rgba(248,251,255,0.96)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                  2. 없으면 `비슷한 코드 추천`에서 가까운 업종을 고릅니다.
+                </div>
+                <div className="rounded-2xl bg-[rgba(248,251,255,0.96)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                  3. 선택한 코드로 바로 입주 가능성까지 확인합니다.
+                </div>
+              </div>
             </div>
-            <p className="text-sm leading-6 text-[var(--foreground-subtle)]">
-              정확한 코드가 없으면 가장 가까운 관련 업종을 추천하고, 원하면 바로 2단계로 넘어갈 수 있습니다.
-            </p>
           </div>
         </section>
 
         {status === 'idle' ? (
           <AsyncState
             variant="empty"
-            title="사업 내용을 입력하면 코드 후보를 바로 보여드립니다."
-            description="위 입력창에 한 줄만 적어도 됩니다. 가장 가까운 업종을 찾은 뒤, 선택 즉시 결과가 나옵니다."
+            title="사업 내용을 입력하면 추천 코드를 바로 보여드립니다."
+            description="한 줄만 적어도 됩니다. 가장 가까운 코드를 찾은 뒤, 선택 즉시 입주 가능 여부를 볼 수 있습니다."
             className="min-h-44"
           />
         ) : null}
@@ -210,7 +253,7 @@ export function IndustryDiscoveryPanel({
         {status === 'loading' ? (
           <AsyncState
             variant="loading"
-            title="업종코드 후보를 찾고 있습니다."
+            title="추천 코드를 찾고 있습니다."
             description="입력한 설명과 사업자등록증 표현을 함께 비교해 가장 가까운 KSIC 코드를 정리하는 중입니다."
             className="min-h-44"
           />
@@ -228,7 +271,7 @@ export function IndustryDiscoveryPanel({
         {status === 'ready' && suggestions.length === 0 ? (
           <AsyncState
             variant="empty"
-            title="정확히 맞는 코드를 아직 찾지 못했습니다."
+            title="아직 맞는 추천 코드를 찾지 못했습니다."
             description="사업 설명을 조금 더 구체적으로 적어 주세요. 예: 온라인 광고 기획 및 집행, 웹호스팅 운영, 모바일 앱 개발 및 공급"
             className="min-h-44"
           />
@@ -238,10 +281,13 @@ export function IndustryDiscoveryPanel({
           <div className="space-y-6">
             {exactSuggestions.length > 0 ? (
               <section className="space-y-3">
-                <div className="text-sm font-semibold text-[var(--foreground)]">
-                  정확히 찾은 후보
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-semibold text-[var(--foreground)]">
+                    바로 확인할 수 있는 추천 코드
+                  </div>
+                  <Badge variant="success">{exactSuggestions.length}개</Badge>
                 </div>
-                <div className="space-y-3">
+                <div className="grid gap-3 xl:grid-cols-2">
                   {exactSuggestions.map((suggestion) => (
                     <SuggestionCard
                       key={suggestion.id}
@@ -256,10 +302,13 @@ export function IndustryDiscoveryPanel({
 
             {relatedSuggestions.length > 0 ? (
               <section className="space-y-3">
-                <div className="text-sm font-semibold text-[var(--foreground)]">
-                  관련 업종 추천
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-semibold text-[var(--foreground)]">
+                    비슷한 코드 추천
+                  </div>
+                  <Badge variant="muted">{relatedSuggestions.length}개</Badge>
                 </div>
-                <div className="space-y-3">
+                <div className="grid gap-3 xl:grid-cols-2">
                   {relatedSuggestions.map((suggestion) => (
                     <SuggestionCard
                       key={suggestion.id}

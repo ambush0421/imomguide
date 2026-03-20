@@ -1,5 +1,809 @@
 # 입주가능판별기 구현 계획
 
+## 2026-03-20 홈 섹션 대비 강화 및 쉬운 검색 슬라이드 위저드 설계
+
+### 목표
+
+- 홈 화면에서 배경과 핵심 섹션의 경계가 더 선명하게 읽히도록 시각적 대비를 높인다.
+- `쉬운 검색 홈`을 한 화면 안에서 자연스럽게 넘겨보는 슬라이드형 위저드로 바꿔, 클릭과 터치 모두로 다음 단계/이전 단계 이동이 가능하게 만든다.
+- 기존 `discover -> adjust -> result` 상태 구조는 유지하되, 사용자가 현재 어디에 있는지와 다음 행동이 무엇인지 더 직관적으로 느끼게 한다.
+
+### 구현 방향
+
+1. `HomeSections`의 주요 섹션을 같은 톤의 카드 나열이 아니라 `히어로 / 위저드 / 참고 섹션`이 분리된 밴드형 레이아웃으로 재정리한다.
+2. 홈 배경에는 은은한 그라디언트와 섹션별 surface 차이를 더하고, 핵심 섹션은 테두리/그림자/배경색 강도를 한 단계 높여 `무엇을 먼저 봐야 하는지`가 드러나게 한다.
+3. `쉬운 검색 홈`은 현재의 조건부 렌더링 구조를 감싸는 `슬라이드 트랙`을 만들고, 단계별 패널을 좌우 이동시키는 방식으로 바꾼다.
+4. 단계 하단에는 `이전`, `다음`, `결과 보기`, `처음으로` 같은 네비게이션 버튼을 문맥에 맞게 노출한다.
+5. 포인터 이벤트를 사용해 모바일/터치 환경에서 좌우 스와이프 시 단계가 전환되게 하고, 과도한 스와이프 오동작을 막기 위해 임계값을 둔다.
+6. 키보드/스크린리더 기준으로도 현재 단계가 유지되도록 `aria-live`, 현재 단계 텍스트, 버튼 라벨을 함께 점검한다.
+7. 검증은 `App.test.tsx`에 단계 이동과 홈 진입 UX를 보강하고, `lint/test/build`로 마무리한다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/App.test.tsx`
+- 필요 시 `src/features/eligibility/components/industry-discovery-panel.tsx`
+- 필요 시 `src/features/eligibility/components/eligibility-form.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 제안서/PDF 렌더러 경로 최종 확인 및 현 범위 종결
+
+### 목표
+
+- `result-panel-source-metadata-reuse` 다음 단계로 예정했던 `제안서/PDF 렌더러 연결`의 실현 가능성을 현재 워크스페이스 기준으로 최종 판정한다.
+- 연결 대상이 실제로 없을 경우, 억지 구현 대신 `현 범위 종결`로 정리해 추후 다른 브랜치/워크스페이스에서 이어붙일 수 있는 기준점을 남긴다.
+
+### 구현 방향
+
+1. 소스 트리(`src`, `scripts`, `electron`, `public`, `docs`)에서 제안서/PDF 관련 문자열과 렌더러 경로를 재검색한다.
+2. `electron/main.mjs`가 실제로 어떤 엔트리를 여는지 확인해, 별도 제안서 전용 창이나 렌더러가 존재하는지 검증한다.
+3. `release/win-unpacked/resources/app.asar` 패키지 내부를 확인해, 배포 산출물 기준으로도 별도 제안서/PDF 렌더러가 포함되어 있는지 확인한다.
+4. 별도 렌더러가 없으면 이번 워크스페이스에서는 출처 메타 헬퍼 연결 작업을 더 진행하지 않고, 결과 패널까지 구현 완료된 상태를 현 범위 종결로 기록한다.
+
+### 예상 영향 범위
+
+- `electron/main.mjs`
+- `release/win-unpacked/resources/app.asar`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `Get-Content electron/main.mjs`
+- `Get-ChildItem src,scripts,electron,public,docs -Recurse -File | Select-String ...`
+- `npx asar list release/win-unpacked/resources/app.asar`
+
+## 2026-03-20 결과 패널 출처 메타 재사용 1차 구현
+
+### 목표
+
+- `LegalFootnotes`가 법령 라이브러리에서 정의한 공식 원문 메타를 다시 사용하도록 연결한다.
+- 결과 패널에서도 `원문 보기`, `출처 기관`, `문서번호`, `공개일`을 한 번에 확인할 수 있게 만들어 상담/공유 흐름을 강화한다.
+- PDF/제안서 전용 경로가 아직 없는 현재 코드베이스 상황을 반영해, 재사용 가능한 출처 메타 계층을 먼저 완성한다.
+
+### 구현 방향
+
+1. `legal-library.ts`에 `sourceKind -> 문서 메타`를 되찾는 헬퍼를 추가한다.
+2. `legal-footnotes.tsx`에서 legal basis의 `source` 값을 기준으로 원문 출처 묶음과 메타 배지를 노출한다.
+3. `result-panel.test.tsx`에 결과 화면의 원문 출처 노출을 검증하는 테스트를 추가한다.
+4. 이번 턴에서는 PDF/제안서 전용 출력 경로가 코드에 없는 점을 walkthrough에 명시하고, 다음 단계에서 연결 가능한 상태만 만든다.
+
+### 예상 영향 범위
+
+- `src/features/library/data/legal-library.ts`
+- `src/features/eligibility/components/legal-footnotes.tsx`
+- `src/features/eligibility/components/result-panel.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 법령 원문 출처 링크 및 문서 메타 강화
+
+### 목표
+
+- 법령 라이브러리와 업데이트 로그에 `원문 보기`, `출처 기관`, `고시번호/법령번호`, `공개일` 메타를 명시해 신뢰 신호를 강화한다.
+- 내부 앱 화면과 공개 SEO 페이지가 같은 출처 데이터를 재사용하도록 데이터 구조를 통합한다.
+- 공개 페이지 구조화 데이터에도 발행일·출처 URL을 반영해 Search Console과 검색엔진이 문서 맥락을 더 잘 읽게 만든다.
+
+### 구현 방향
+
+1. `legal-library.ts`에 공식 원문 URL, 출처 기관, 고시번호, 공개일 메타를 추가한다.
+2. `update-log.ts`에는 각 업데이트가 근거로 삼는 원문/정책 문서 링크 목록을 추가한다.
+3. `LegalLibraryPage`, `UpdateLogPage`에서 원문 보기 버튼과 출처 메타 카드가 보이도록 확장한다.
+4. `seo-page-builder`의 `library/updates` 공개 페이지에도 같은 메타와 링크를 반영하고, 구조화 데이터에 날짜와 출처 URL을 넣는다.
+
+### 예상 영향 범위
+
+- `src/features/library/data/legal-library.ts`
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/updates/data/update-log.ts`
+- `src/features/updates/components/update-log-page.tsx`
+- `src/features/guides/seo/seo-page-builder.ts`
+- `src/features/guides/seo/seo-page-builder.test.ts`
+- `scripts/export-magok-seo-pages.mts`
+- `public/library/**/*`
+- `public/updates/**/*`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run export:seo-pages`
+- `npm run build`
+
+## 2026-03-20 Search Console 제출 최적화 1차 구현
+
+### 목표
+
+- Search Console 제출 관점에서 `sitemap.xml`을 단일 URL 목록이 아닌 `sitemap index`로 전환해 색인 자산을 섹션별로 관리한다.
+- `guides`, `faq`, `library`, `updates`, `core`를 분리된 sitemap으로 내보내 대량 정적 페이지의 재생성 비용과 점검 범위를 낮춘다.
+- 공개 SEO 페이지 전반에 `robots` 메타를 명시해 검색엔진 크롤링 의도를 일관되게 전달한다.
+
+### 구현 방향
+
+1. `seo-page-builder`에 `robots` 메타와 `sitemap index` 생성 함수를 추가한다.
+2. `export-magok-seo-pages.mts`가 `public/sitemaps/*.xml`을 만들고, 루트 `public/sitemap.xml`은 각 sitemap을 가리키는 인덱스로 출력하게 한다.
+3. `guide/faq`뿐 아니라 `library/updates` 공개 페이지도 같은 SEO 출력 흐름에서 함께 관리한다.
+4. 검증은 `lint`, `test`, `export:seo-pages`, `build`를 순차 실행해 Windows 환경의 재생성 충돌 없이 통과하는지 확인한다.
+
+### 예상 영향 범위
+
+- `src/features/guides/data/guide-catalog.ts`
+- `src/features/guides/seo/seo-page-builder.ts`
+- `src/features/guides/seo/seo-page-builder.test.ts`
+- `src/features/library/data/legal-library.ts`
+- `scripts/export-magok-seo-pages.mts`
+- `package.json`
+- `public/sitemap.xml`
+- `public/sitemaps/*.xml`
+- `public/library/**/*`
+- `public/updates/**/*`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run export:seo-pages`
+- `npm run build`
+
+## 2026-03-20 공개 SEO 법령 라이브러리 및 업데이트 로그 1차 구현
+
+### 목표
+
+- 기존 공개 SEO 파이프라인을 `guide/faq`에서 `library/updates`까지 확장해, 법령과 변경 이력도 검색엔진이 직접 읽을 수 있게 만든다.
+- `public/library`, `public/updates` 정적 HTML과 sitemap 항목을 자동 생성해, 공개 지식 자산과 신뢰 자산이 같은 배포 흐름에서 관리되게 한다.
+- 앱 내부 `LegalLibraryPage`, `UpdateLogPage`에서도 공개 페이지로 바로 이동할 수 있게 연결한다.
+
+### 구현 방향
+
+1. `seo-page-builder`에 `library index/detail`, `updates index/detail` HTML 빌더를 추가한다.
+2. `export-magok-seo-pages.mts`가 `guides/faq`뿐 아니라 `library/updates`도 재생성하고 sitemap에 포함하도록 확장한다.
+3. `LegalLibraryPage`, `UpdateLogPage`에 `공개 페이지 열기` 버튼을 추가한다.
+4. 테스트에서는 canonical, breadcrumb, 페이지 타이틀, sitemap 생성 여부를 고정한다.
+
+### 예상 영향 범위
+
+- `src/features/library/data/legal-library.ts`
+- `src/features/guides/seo/seo-page-builder.ts`
+- `src/features/guides/seo/seo-page-builder.test.ts`
+- `scripts/export-magok-seo-pages.mts`
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/updates/components/update-log-page.tsx`
+- `public/library/**/*`
+- `public/updates/**/*`
+- `public/sitemap.xml`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run export:seo-pages`
+- `npm run build`
+
+## 2026-03-20 공개 SEO 가이드·FAQ 페이지 레이어 1차 구현
+
+### 목표
+
+- 해시 라우트 기반 가이드를 검색엔진이 직접 읽을 수 있는 `정적 공개 HTML`로 확장한다.
+- 가이드/FAQ 데이터에서 공개 페이지와 sitemap을 함께 생성해, 배포 시점마다 검색 자산이 자동으로 갱신되게 만든다.
+- `title`, `description`, `canonical`, `Open Graph`, `Twitter`, `FAQPage`, `BreadcrumbList`까지 포함한 최소 SEO 메타 구조를 각 페이지에 넣는다.
+
+### 구현 방향
+
+1. `seo-page-builder`에서 가이드 페이지, FAQ 페이지, 색인 페이지, sitemap XML을 생성한다.
+2. `export-magok-seo-pages.mts`가 `public/guides`, `public/faq`, `public/sitemap.xml`을 재생성하도록 만든다.
+3. `package.json`의 `prebuild`에서 이 생성기를 자동 실행해, 일반 `build`만으로도 공개 SEO 페이지가 포함되게 한다.
+4. 앱 내부 가이드 화면에는 `공개 페이지 열기` 진입선을 넣어, 문서형 가이드와 검색용 공개 페이지가 분리되어도 연결이 유지되게 한다.
+
+### 예상 영향 범위
+
+- `src/features/guides/seo/seo-page-builder.ts`
+- `src/features/guides/seo/seo-page-builder.test.ts`
+- `scripts/export-magok-seo-pages.mts`
+- `src/features/guides/data/guide-catalog.ts`
+- `src/features/guides/components/guide-page.tsx`
+- `package.json`
+- `public/guides/**/*`
+- `public/faq/**/*`
+- `public/sitemap.xml`
+
+### 검증 계획
+
+- `seo-page-builder` 테스트로 canonical/JSON-LD/BreadcrumbList 포함 여부 확인
+- `npm run export:seo-pages` 실행 시 공개 HTML과 sitemap 생성 확인
+- `npm run build`에서 `prebuild`를 포함한 전체 흐름 통과 확인
+
+## 2026-03-20 업종별 가이드 및 FAQ 파이프라인 1차 구현
+
+### 목표
+
+- `코드 사전 데이터`를 사람이 읽을 수 있는 `문서형 가이드`로 재구성해, 결과 화면을 넘어서는 콘텐츠 자산을 만든다.
+- 앱 내부에서는 `#guides/<code>` 해시 라우트로 가이드를 바로 읽을 수 있게 하고, 같은 데이터로 JSON/Markdown 산출물도 함께 뽑는다.
+- FAQ는 별도 수기 작성이 아니라 가이드 데이터에서 파생 생성해, 이후 정적 페이지와 구조화 데이터 확장에 재사용할 수 있게 한다.
+
+### 구현 방향
+
+1. `src/features/guides/data/guide-catalog.ts`에서 `MAGOK_CODE_DIRECTORY`를 가이드 엔트리와 FAQ 엔트리로 변환한다.
+2. `GuidePage`를 추가하고 `App.tsx`에서 `#guides/<code>` 해시 라우팅을 지원한다.
+3. 홈에 `대표 업종 가이드` 섹션을 추가하고, 결과 패널에도 `이 코드 가이드 보기` 진입선을 붙인다.
+4. `scripts/export-magok-guides.mts`를 통해 가이드/FAQ 인덱스 JSON과 미리보기 Markdown을 `docs/codex-brain/`에 생성한다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/App.test.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/features/guides/components/guide-page.tsx`
+- `src/features/guides/data/guide-catalog.ts`
+- `scripts/export-magok-guides.mts`
+- `package.json`
+- `docs/codex-brain/magok_guides_index.json`
+- `docs/codex-brain/magok_faq_index.json`
+- `docs/codex-brain/magok_guides_preview.md`
+
+### 검증 계획
+
+- 홈 대표 가이드 카드에서 가이드 화면으로 이동하는지 확인
+- 결과 패널에서 `이 코드 가이드 보기` 버튼이 가이드로 이어지는지 확인
+- `npm run lint`, `npm run test`, `npm run build`, `npm run export:guides` 검증
+
+## 2026-03-20 법령 라이브러리 및 업데이트 로그 1차 구현
+
+### 목표
+
+- `결과 패널 각주`에 흩어져 있는 신뢰 정보를 독립 화면으로 분리해, 사용자가 문서 단위 근거와 최근 변경 이력을 따로 읽을 수 있게 한다.
+- 홈에서도 `법령 라이브러리`, `업데이트 로그`로 바로 이동할 수 있게 연결해, 서비스가 단순 판독기가 아니라 관리 근거와 업데이트 이력을 갖춘 정보 제품처럼 읽히게 만든다.
+- 기존 hash 기반 단일 앱 구조를 유지하면서 `#library`, `#updates` 뷰를 추가해 구현 부담을 낮춘다.
+
+### 구현 방향
+
+1. `src/features/library/data/legal-library.ts`와 `legal-bases.ts` 메타데이터를 사용해 `LegalLibraryPage`를 정식 뷰로 연결한다.
+2. `src/features/updates/data/update-log.ts`에 최근 반영 이력을 정리하고, `UpdateLogPage`에서 날짜·반영 범위·근거 라벨을 함께 보여준다.
+3. `src/App.tsx`의 `AppView`를 `home | directory | library | updates`로 확장하고, 헤더 내비게이션과 홈 신뢰 섹션에서 새 화면 진입선을 제공한다.
+4. 홈에서는 최근 업데이트 3건을 미리 보여주고, 법령 문서를 별도 카드로 안내해 결과 화면 밖에서도 신뢰 자산이 보이게 한다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/App.test.tsx`
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/library/data/legal-library.ts`
+- `src/features/updates/components/update-log-page.tsx`
+- `src/features/updates/data/update-log.ts`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- 헤더에서 `법령 라이브러리`, `업데이트 로그` 버튼으로 정상 이동하는지 확인
+- 각 페이지에서 홈 또는 상대 페이지로 되돌아갈 수 있는지 확인
+- `npm run lint`, `npm run test`, `npm run build` 회귀 검증
+
+## 2026-03-20 High-Quality SaaS 아키텍처 재설계
+
+### 핵심 목표
+
+- 서비스를 `단순 판독기`가 아니라 `마곡 입주 의사결정 미디어 + SaaS`로 재정의한다.
+- 광고 또는 제휴 요소보다 `판정 근거`, `실무 해설`, `가이드 콘텐츠`, `업데이트 신뢰성`이 먼저 보이도록 구조를 바꾼다.
+- Google 검색 품질 가이드와 게시자 정책 기준에서 `정보성`, `독창성`, `탐색 편의성`, `신뢰성`이 드러나는 사이트 아키텍처를 만든다.
+
+### 현재 구조의 한계
+
+- 현재 홈은 `쉬운 검색`, `코드 사전`, `법령 참고`, `제휴 링크`를 한 화면에 모아두고 있어 기능은 많지만 `왜 이 사이트가 권위 있는가`를 충분히 설명하지 못한다.
+- 현재 결과 패널은 `가능/조건부/심의 필요/불가`와 근거를 잘 보여주지만, 구글이 고품질 정보 페이지로 인식할 만한 `독자적 해설`과 `실무 조언`이 약하다.
+- 현재 법령 참고는 탭형 요약에 머물러 있어, 개별 문서가 검색 유입과 신뢰 신호를 만드는 `인덱서블 페이지`로 확장되지 못한다.
+- 현재 제휴 요소는 최근에 축소했지만, 여전히 `정보 흐름 안에 어떤 맥락으로 녹아드는가`까지 제품 차원에서 설계되지는 않았다.
+
+### 제품 철학
+
+1. 정보가 먼저다.
+2. 판정만으로 끝내지 않고, 사용자가 다음 행동을 결정할 수 있는 해설까지 제공한다.
+3. 광고는 클릭 유도 장치가 아니라, 본문 맥락 안의 보조 리소스여야 한다.
+4. 모든 중요한 주장과 판정은 출처, 업데이트 일자, 적용 범위가 따라와야 한다.
+5. 검색 유입 페이지는 키워드용 문서가 아니라, 실제 질문에 답하는 가이드여야 한다.
+
+### 목표 정보 구조
+
+- 홈 `/`
+  - 쉬운 업종 검색
+  - 서비스 신뢰 신호
+    - 최근 업데이트 로그 요약
+    - 법령 반영 기준일
+    - 데이터 커버리지
+  - 대표 가이드 링크
+    - 업종별 입주 가이드
+    - 법령 라이브러리
+    - 자주 묻는 심의 포인트
+- 결과 화면
+  - 판정 결과
+  - 법적 근거
+  - 추가 확인 사항
+  - `[전문가 인사이트]`
+  - `[다음 단계 체크리스트]`
+  - `[연관 가이드]`
+  - `[연관 서비스/준비 자료]` 카드
+- 코드 사전 `/directory`
+  - 전체 코드 탐색
+  - verdict 필터
+  - 검색어 기반 진입
+  - 관련 가이드 문서 연결
+- 업종별 가이드 `/guides/:code`
+  - 예: `71531 경영컨설팅업 마곡 입주 가이드`
+  - 코드 설명
+  - 마곡 기준 판정
+  - 자주 걸리는 조건
+  - 준비 서류/심의 포인트
+  - 관련 법령 요약
+  - 관련 코드 비교
+- 법령 라이브러리 `/library`
+  - 문서별 핵심 요약
+  - 조문별 해설
+  - 반영 일자
+  - 원문 PDF 링크
+- 업데이트 로그 `/updates`
+  - 데이터 갱신 내역
+  - 반영 법령 버전
+  - 코드 분류 변경 이력
+
+### 코드에 박히는 구조
+
+#### 1. 결과 패널의 `전문가 인사이트`
+
+- 현재 `ResultPanel`은 verdict와 근거 중심이다.
+- 여기에 아래 블록을 추가한다.
+  - `ExpertInsightCard`
+    - verdict + zoneType + KSIC 코드 조합별 실무 조언
+    - 예: 심의 가능성이 높은 이유
+    - 예: 사업계획서/인력구성/제출자료 팁
+    - 예: 자주 오해하는 예외 규정
+  - `NextActionChecklistCard`
+    - 지금 바로 할 일
+    - 확인할 문서
+    - 심의 필요 시 준비 항목
+- 데이터는 하드코딩 문구가 아니라 `insight dataset`으로 분리한다.
+
+예상 파일:
+
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/features/eligibility/components/expert-insight-card.tsx`
+- `src/features/eligibility/data/expert-insights.ts`
+
+#### 1-1. `융복합 심의 경로` 자동화
+
+- 이미 `legal-bases.ts`에는 `magokConvergenceReview`, `rules.ts`에는 `convergence-review` 시나리오가 있어 확장 기반이 있다.
+- 이를 단순 경고가 아니라 `실행 가능한 심의 경로 안내`로 확장한다.
+- 원칙:
+  - 원칙적 불가 또는 경계 업종이어도 `IT / BT / NT / GT / 에너지 / 자원순환`과의 결합 가능성이 있으면 별도 안내를 노출한다.
+  - 사용자의 메모, 업종명, 선택한 유사 코드, 신청 주체를 바탕으로 `융복합 가능성 힌트`를 제공한다.
+  - 최종 verdict를 무리하게 뒤집지 않고 `심의 경로 존재`를 별도 층위로 설명한다.
+- 결과 문구 예시:
+  - `원칙상 직접 허용 코드는 아니지만, 마곡 관리기본계획상 산업 융·복합 필요성이 인정되면 정책심의위원회 검토 경로가 있습니다.`
+  - `사업계획서에는 기술 결합성, 연구개발 인력 비중, 기존 특화 산업과의 연결성을 함께 제시해야 합니다.`
+
+예상 파일:
+
+- `src/features/eligibility/data/convergence-review-playbook.ts`
+- `src/features/eligibility/components/convergence-review-card.tsx`
+
+#### 2. 광고가 아닌 정보로 읽히는 `Native Recommendation`
+
+- 홈 전체 하단에 묶어두는 광고 보드 대신, 결과 문맥 안에서만 연관 리소스를 보여준다.
+- 원칙:
+  - 결과가 없으면 노출하지 않는다.
+  - 로딩/에러/빈 상태에서는 노출하지 않는다.
+  - 판정과 연결되는 맥락 문구가 있어야 한다.
+  - `추천 상품 보기` 같은 문구 대신 `연관 서비스 확인하기`, `사무실 준비 참고 자료`처럼 중립적 문구를 쓴다.
+- 예시:
+  - `입주 확정 후 많이 찾는 네트워크/프린터 준비 체크`
+  - `IT 장비 렌탈 가이드`
+  - `사무실 탕비 준비 체크리스트`
+
+예상 파일:
+
+- `src/features/eligibility/components/contextual-resource-card.tsx`
+- `src/features/eligibility/data/contextual-resources.ts`
+
+#### 3. 검색 유입용 `업종코드별 마곡 입주 가이드`
+
+- 단순 directory 검색 결과만으로는 `개별 검색 의도`를 받기 어렵다.
+- `코드별 정적 페이지`를 생성해 long-tail 유입을 받는다.
+- 대상 수:
+  - 최소 `검토 가치가 있는 코드` 우선 생성
+  - 최종적으로는 `KSIC 11차 5자리 전체 1204개`까지 확장 가능
+- 각 페이지의 기본 구조:
+  - H1: `71531 경영컨설팅업 마곡 입주 가이드`
+  - 한 줄 요약 verdict
+  - 왜 이런 결과인지
+  - 심의/조건 체크 포인트
+  - 비슷한 코드와 차이
+  - 관련 법령 요약
+  - 마지막 업데이트 일자
+- 이 페이지들은 keyword landing page가 아니라 `가이드 문서`여야 한다.
+
+예상 파일/파이프라인:
+
+- `src/features/guides/`
+- `scripts/export-magok-guides.mts`
+- 라우팅 페이지 또는 정적 렌더링 진입점
+
+#### 3-1. `SEO FAQ / 질문형 랜딩` 대량 생성
+
+- 가이드 페이지 외에 질문형 검색 의도를 받는 FAQ 자산을 만든다.
+- 예시:
+  - `7131 광고대행업 마곡 입주 가능한가요?`
+  - `62 컴퓨터 프로그래밍 업종 세제 혜택 있나요?`
+  - `63112 호스팅업은 왜 심의가 필요한가요?`
+- 답변은 얇은 Q&A가 아니라 다음을 모두 포함하는 짧은 가이드여야 한다.
+  - verdict 요약
+  - 왜 그런지
+  - 심의/예외 포인트
+  - 연관 법령
+  - 관련 코드 링크
+  - 상담 전 체크리스트
+- 구조화 데이터(`FAQPage`, `BreadcrumbList`)를 함께 고려한다.
+
+예상 파일:
+
+- `src/features/guides/faq/`
+- `scripts/export-magok-faq-pages.mts`
+
+#### 4. E-E-A-T 강화용 `법령 라이브러리`와 `업데이트 로그`
+
+- 현재 `RulebookTabs`는 좋은 요약이지만 indexable asset이 아니다.
+- 아래 두 축으로 확장한다.
+  - `LegalLibraryPage`
+    - 문서별 요약
+    - 핵심 조문
+    - 적용 범위
+    - 원문 출처
+  - `UpdateLogPage`
+    - 언제 무엇이 바뀌었는지
+    - 왜 판정이 달라졌는지
+    - 어떤 데이터셋이 갱신됐는지
+- 푸터와 홈 상단 신뢰 영역에서 최신 업데이트 1~3개를 노출한다.
+
+예상 파일:
+
+- `src/features/library/`
+- `src/features/updates/`
+- `src/data/legal-library.ts`
+- `src/data/update-log.ts`
+
+#### 4-1. `법적 근거 각주` 자동 생성
+
+- 현재 `LegalBasis`는 `id`, `source`, `citation`, `summary`까지만 가진다.
+- 이를 아래 필드까지 확장한다.
+  - `articlePath`
+  - `pageHint`
+  - `quote`
+  - `sourceDocumentTitle`
+- 결과 패널 하단에는 사람이 바로 복사해 실무 자료로 붙일 수 있는 `법적 근거 각주` 블록을 생성한다.
+- 출력 형식:
+  - `근거 1. 마곡일반산업단지 관리기본계획 고시(제2025-593호) 7쪽 융·복합 업종 심의`
+  - `근거 2. 산업집적법 시행령 제6조 제7항`
+- 향후 PDF 원문 뷰어 또는 문서 라이브러리 상세 페이지로 연결 가능한 링크 구조를 준비한다.
+
+예상 파일:
+
+- `src/features/eligibility/components/legal-footnotes.tsx`
+- `src/features/eligibility/data/legal-bases.ts`
+
+#### 5. 데이터 시각화
+
+- 결과를 텍스트만으로 두지 않고 시각적으로도 이해시키는 계층을 추가한다.
+- 우선순위:
+  - `판정 흐름도`
+  - `가능/조건부/심의 필요` 판단 트리
+  - 구역별 검토 가능 코드 수 요약
+  - 법령 반영 타임라인
+- 목적은 장식이 아니라, 복잡한 규칙을 쉽게 읽히게 만드는 것이다.
+
+예상 파일:
+
+- `src/features/eligibility/components/verdict-flow-diagram.tsx`
+- `src/features/eligibility/components/zone-summary-chart.tsx`
+
+#### 5-1. `Interactive Eligibility Map`
+
+- 마곡의 특화 산업군(BiT, GeT, BmT, IT 등)을 지도형 또는 클러스터형 시각 요소로 표현한다.
+- 목적:
+  - 사용자가 `내 업종이 어느 산업 클러스터와 가까운지`를 직관적으로 이해
+  - 융복합 심의 가능성을 시각적으로 연결
+  - 검색 유입 페이지에서도 시각 콘텐츠 자산으로 활용
+- 초기 버전은 실제 지도가 아니라 `클러스터 인터랙션 맵`으로 시작해도 된다.
+
+예상 파일:
+
+- `src/features/eligibility/components/interactive-eligibility-map.tsx`
+- `src/features/eligibility/data/cluster-zones.ts`
+
+#### 5-2. `마곡 입주 레이아웃 시뮬레이션`
+
+- 고시문상의 연구시설 비율, 제조시설 비율 조건을 숫자로 계산하는 실전형 도구를 추가한다.
+- 입력:
+  - 총 면적
+  - 기업 구분(대기업/중소기업)
+  - 제조시설 계획 여부
+  - 예상 연구개발 인력
+- 출력:
+  - 최소 연구시설 필요 면적
+  - 제조시설 허용 가능 최대 면적
+  - 사후 신고 시 점검 포인트
+  - 위험 경고
+- 핵심 메시지:
+  - `1,000평 기준 연구시설 최소 400평`
+  - `제조시설은 연구시설 유지 조건 아래 20% 이내`
+
+예상 파일:
+
+- `src/features/eligibility/components/layout-simulator.tsx`
+- `src/features/eligibility/data/layout-rules.ts`
+- `src/features/eligibility/utils/layout-calculator.ts`
+
+#### 5-3. `Pre-Check Audit Report` PDF
+
+- 결과 화면을 단순 뷰가 아니라 `영업용 사전진단 보고서`로 내려받을 수 있게 한다.
+- 포함 내용:
+  - 기본 판정 요약
+  - 법적 근거 각주
+  - 전문가 인사이트
+  - 면적 시뮬레이션 결과
+  - 사업개시 신고/공장설립 완료신고 심사기준 요약
+  - 제출 전 체크리스트
+- 목적:
+  - 중개 실무자, 컨설턴트, 법인 담당자가 바로 공유 가능한 문서 자산 생성
+
+예상 파일:
+
+- `src/features/reports/`
+- `src/features/reports/build-precheck-report.ts`
+- PDF 렌더링 또는 print stylesheet 기반 출력 모듈
+
+### 데이터 모델 확장
+
+- `ExpertInsightEntry`
+  - `code`
+  - `zoneType`
+  - `verdict`
+  - `headline`
+  - `analysis`
+  - `actionItems`
+  - `riskNotes`
+- `GuidePageEntry`
+  - `code`
+  - `slug`
+  - `title`
+  - `summary`
+  - `verdictByZone`
+  - `faq`
+  - `relatedCodes`
+  - `updatedAt`
+- `LegalLibraryEntry`
+  - `documentId`
+  - `title`
+  - `effectiveDate`
+  - `summary`
+  - `keyArticles`
+  - `sourceUrl`
+- `UpdateLogEntry`
+  - `date`
+  - `title`
+  - `description`
+  - `affectedCodes`
+  - `sourceDocumentIds`
+- `ConvergenceReviewEntry`
+  - `code`
+  - `candidateCluster`
+  - `reviewRationale`
+  - `planHints`
+  - `requiredNarratives`
+- `LayoutSimulationInput`
+  - `grossAreaPy`
+  - `companyScale`
+  - `hasManufacturingFacility`
+  - `rndHeadcount`
+- `LayoutSimulationResult`
+  - `minimumResearchAreaPy`
+  - `maximumManufacturingAreaPy`
+  - `warnings`
+  - `postCheckItems`
+
+### 광고/정책 원칙
+
+- 사이드 고정 배너는 사용하지 않는다.
+- empty / loading / error / 결과 없음 상태에서는 광고성 리소스를 노출하지 않는다.
+- 광고 또는 제휴 요소는 명확히 표시하되, 본문보다 더 강하게 디자인하지 않는다.
+- 클릭 유도 문구, 오해를 부르는 버튼 카피, 결과와 무관한 상품 위젯은 피한다.
+- 광고는 `결과 이후의 연관 리소스`로만 배치한다.
+
+### 단계별 구현 순서
+
+1. 결과 패널에 `전문가 인사이트`와 `다음 단계 체크리스트`를 추가한다.
+2. `융복합 심의 경로`와 `법적 근거 각주`를 결과 패널에 연결한다.
+3. `마곡 입주 레이아웃 시뮬레이션`을 결과 흐름에 추가한다.
+4. 홈 제휴 섹션을 결과 문맥형 `Native Recommendation` 구조로 재배치한다.
+5. `업종코드별 가이드`와 `SEO FAQ` 생성 파이프라인을 만든다.
+6. `법령 라이브러리`와 `업데이트 로그` 페이지를 추가한다.
+7. `Interactive Eligibility Map`과 `Pre-Check Audit Report`를 붙인다.
+8. 구조화 데이터와 SEO 메타를 정리한다.
+
+### 완료 기준
+
+- 홈 첫 화면에서 광고보다 정보 구조가 먼저 보인다.
+- 결과 페이지가 `기계 판정`이 아니라 `실무 해설 문서`처럼 읽힌다.
+- 검색엔진이 인덱싱할 수 있는 가이드/법령/업데이트 페이지가 추가된다.
+- 제휴 요소는 본문을 방해하지 않고, 맥락이 있을 때만 노출된다.
+- 사용자는 `판정 결과 -> 왜 그런지 -> 다음에 무엇을 해야 하는지`를 한 흐름으로 이해할 수 있다.
+
+## 2026-03-20 제휴 섹션 노출 강도 축소 및 본문 우선 재배치
+
+### 목표
+
+- 홈 첫 화면에서 제휴 요소가 본문보다 먼저 눈에 들어오는 인상을 줄인다.
+- 제휴 링크는 유지하되 `필요할 때만 펼쳐 보는 참고 자료` 수준으로 노출 강도를 낮춘다.
+- 분석 결과, 코드 사전, 법령 참고 같은 핵심 본문 흐름이 먼저 소비되도록 구조를 재정렬한다.
+
+### 확인한 원인
+
+- 홈 화면의 사이드 배너와 항상 펼쳐진 4개 제휴 카드가 첫 인상에서 본문 비중을 잠식할 수 있다.
+- 기존 CTA 문구가 `추천 상품 보기` 중심이라 분석 도구보다 쇼핑 행동을 먼저 유도하는 톤으로 읽힐 수 있다.
+- 제휴 섹션이 접힘 없이 항상 노출되어 `광고보다 본문이 먼저`라는 정책 취지와 거리가 있다.
+
+### 구현 방향
+
+1. 홈 진입 시 보이던 `CoupangSideBanner`는 제거한다.
+2. 제휴 섹션은 기본 접힘형 패널로 바꾸고, 사용자가 직접 펼칠 때만 위젯을 노출한다.
+3. 섹션 제목과 설명은 `입주 판단용 본문이 아니라 참고 링크`라는 점이 명확히 드러나도록 수정한다.
+4. 제휴 CTA는 더 낮은 강도의 버튼 스타일과 중립적 문구로 바꾼다.
+5. 펼친 뒤에도 제휴 카드의 배경, 그림자, 타이포 세기를 낮춰 본문보다 덜 강하게 보이게 한다.
+
+### 영향 범위
+
+- 주 수정 대상: `src/App.tsx`
+- 회귀 확인 대상: `src/App.test.tsx`
+- 문서 산출물: `docs/codex-brain/task.md`, `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- 홈 초기 진입 시 제휴 위젯과 사이드 배너가 기본 노출되지 않는지 확인
+- 제휴 패널을 펼쳤을 때 기존 외부 링크와 위젯이 정상적으로 보이는지 확인
+- `npm run lint`, `npm run test`, `npm run build` 기준 회귀 여부 확인
+
+## 2026-03-20 추천 상품 카드 라인 정렬 보정
+
+### 목표
+
+- 추천 상품 4개 카드의 상단 헤더선, 제목 시작선, 상품 위젯 영역, 하단 CTA 기준선을 최대한 동일하게 맞춘다.
+- 제목 길이가 다른 경우에도 카드 전체 높이가 들쭉날쭉해 보이지 않도록 안정적인 레이아웃을 만든다.
+- 기존 시각 톤은 유지하되, 필요한 경우 제목 글자 크기와 줄높이를 소폭 줄여 정돈감을 높인다.
+
+### 확인한 원인
+
+- `affiliate` 섹션의 카드 본문이 `space-y-4` 기반 세로 흐름이라 제목 높이가 커지면 아래 블록이 함께 밀린다.
+- 카드 제목 길이가 달라 `핸드폰과 태블릿`, `디지털 업무 기기`, `복사용지와 소모품` 카드의 제목 높이가 서로 다르게 잡힌다.
+- iframe 높이는 고정이지만 카드 내부 구획 높이가 균일하지 않아 위젯 시작선과 CTA 위치가 어긋나 보인다.
+
+### 구현 방향
+
+1. 카드 본문을 고정 구획형 `flex` 또는 `grid` 레이아웃으로 바꿔 헤더, 제목, 위젯 영역을 분리한다.
+2. 제목 영역에 `min-height`, `line-clamp`, 반응형 글자 크기/줄높이 조정을 적용해 카드 간 높이 차를 줄인다.
+3. iframe 래퍼와 카드 전체에 동일한 세로 분배 규칙을 적용해 상품 위젯과 하단 버튼 기준선을 맞춘다.
+4. 카드 상단 배지와 `외부 상품` 라벨은 `nowrap`과 축소된 패딩을 적용해 헤더 첫 줄이 카드마다 동일하게 유지되도록 한다.
+5. 모바일과 데스크톱에서 모두 줄바꿈이 과도하게 깨지지 않는지 함께 확인한다.
+
+### 영향 범위
+
+- 주 수정 대상: `src/App.tsx`
+- 회귀 확인 대상: `src/App.test.tsx`
+- 문서 산출물: `docs/codex-brain/task.md`, `docs/codex-brain/walkthrough.md`
+
+### 승인 후 검증 계획
+
+- 홈 화면에서 4개 추천 카드의 제목/위젯/버튼 기준선 정렬 확인
+- 긴 제목 카드가 다른 카드보다 과도하게 세로 길이를 점유하지 않는지 확인
+- `npm test`, `npm run build` 기준 회귀 여부 확인
+
+## 2026-03-20 UI 정보 위계 재조정
+
+### 목표
+
+- `강조해야 할 정보`와 `보조 정보`의 시각적 세기를 명확히 나눈다.
+- 홈, 추천 검색, 코드 사전에서 사용자가 먼저 봐야 할 행동과 결과가 즉시 눈에 들어오게 한다.
+
+### 반영 원칙
+
+1. 기본 카드와 보조 배지는 힘을 낮추고, 핵심 카드만 강한 대비와 그림자를 사용한다.
+2. 설명 문장은 배경과 톤을 눌러서 읽고 싶을 때만 읽히게 만든다.
+3. 입력창, 현재 단계, 결과 개수, verdict 같은 핵심 정보는 강조 색과 더 큰 타이포로 먼저 보이게 한다.
+4. 코드 사전 결과 카드는 verdict와 코드가 먼저 보이고, 분류/법령 메모는 펼친 뒤 보이는 보조 정보로 둔다.
+
+## 2026-03-20 KSIC 11차 전수 코드 사전 + 쉬운 추천형 검색 개편
+
+### 목표
+
+- 앱을 `마곡에서 입주 가능한 업종코드를 누구나 쉽게 찾는 사이트`로 재정의한다.
+- 범위는 `산업시설구역 + 지식산업센터`의 KSIC 11차 5자리 전체 코드 전수 분류다.
+- `지원시설구역`은 이번 버전에서 수동 검토 안내로 유지한다.
+
+### 구현 방향
+
+1. `ksic11.txt`를 파싱해 KSIC 11차 5자리 전체 마스터를 만든다.
+2. 기존 `지식산업센터 exact CSV`, `마곡 허용표`, `시행령 대응표`를 전수 verdict 레이어로 합친다.
+3. 홈 화면은 쉬운 검색 하나에 집중하고, 전체 코드는 별도 `코드 사전` 화면에서 탐색하게 한다.
+4. 추천 엔진은 현재 구역 기준 `검토 가능한 코드`를 우선 정렬한다.
+5. 기존 `판정 기준` 탭은 법적 기준 참고용으로만 남기고, exact 전체 탐색 UI는 코드 사전 페이지로 이동한다.
+
+### 새 데이터 레이어
+
+- `MagokCodeDirectoryEntry`
+  - `code`
+  - `name`
+  - `sectionCode`, `sectionName`
+  - `divisionCode`, `divisionName`
+  - `groupCode`, `groupName`
+  - `categoryCode`, `categoryName`
+  - `browseCategory`
+  - `zoneVerdicts.industrialFacility`
+  - `zoneVerdicts.knowledgeIndustryCenter`
+  - `searchKeywords`
+- `zoneVerdict`
+  - `verdict`
+  - `reason`
+  - `legalBasisIds`
+  - `notes`
+
+### UI 계획
+
+- 홈
+  - 큰 검색창
+  - 쉬운 예시 문구
+  - 추천 코드 카드
+  - 전체 코드 사전으로 가는 CTA
+- 코드 사전
+  - 큰 검색창
+  - 구역 필터
+  - 결과 필터
+  - 대분류/업무군 필터
+  - 코드순 목록
+  - 상세 펼치기
+- 판정 기준
+  - 산업시설구역 규칙
+  - 지식산업센터 조문 대응표
+  - 심의/제한 규칙
+  - 코드 사전 바로가기
+
+### 검증 메모
+
+- 전수 코드 수, 중복 여부, zone verdict 누락 여부 확인
+- 대표 코드 회귀
+  - `63111`
+  - `63112`
+  - `75994`
+  - `72121`
+  - `72922`
+  - `71310`
+  - `74100`
+  - `75320`
+- 쉬운 검색 회귀
+  - `광고대행업`
+  - `앱 개발`
+  - `호스팅`
+  - `엔지니어링`
+  - `콜센터`
+  - `생명공학`
+
 ## 1. 목표
 
 마곡일반산업단지의 입주 가능 여부를 빠르게 예비 판정할 수 있는 웹 기반 판별기를 구축한다. 사용자는 주소, 구역/건물유형, 업종 코드(KSIC), 기업 유형, 예외 조건을 입력하고, 시스템은 입주 가능 여부와 그 근거 조항을 함께 보여준다.
@@ -1330,3 +2134,34 @@ src/
 - `npm run test -- --run`
 - `npm run build`
 - `Invoke-WebRequest https://loopincode.com`
+
+---
+
+## 2026-03-20 지식산업센터 코드표 드롭다운 정리 계획
+
+### 변경 목표
+
+- `사용자 정리 코드표 반영` 카드에서 요약 숫자만 보이던 exact 코드표를 실제 검토용 드롭다운 UI로 확장한다.
+- 사용자는 `호별로 보기`와 `입주검토 구분별 전체 보기`를 같은 카드 안에서 펼치고 접을 수 있어야 한다.
+- 검색어를 넣으면 관련 드롭다운이 자동으로 열려 개별 코드까지 바로 확인할 수 있어야 한다.
+
+### 구현 메모
+
+1. `src/features/eligibility/data/knowledge-center-exact-codes.ts`
+   - CSV 전체를 화면에서 바로 활용할 수 있도록 공개용 카탈로그 엔트리 배열을 추가한다.
+   - 각 행에 판정구분, 입주검토 구분, 코드/범위, 메모, exact 여부를 함께 담아 UI 쪽 계산량을 줄인다.
+2. `src/features/eligibility/data/knowledge-industry-review-table.ts`
+   - `1~27호` 대응표에 `searchTerms`를 추가해 범위형 조문도 개별 5자리 코드 기준으로 다시 찾을 수 있게 만든다.
+   - 이 검색 키는 표 검색과 호별 드롭다운 매핑에 공용으로 사용한다.
+3. `src/features/eligibility/components/rulebook-tabs.tsx`
+   - `사용자 정리 코드표 반영` 카드 안에 `호별 펼쳐보기`와 `전체 코드표 펼쳐보기` 두 블록을 추가한다.
+   - `details/summary` 기반 접이식 UI로 구현해 별도 의존성 없이 펼치기/접기를 지원한다.
+   - 검색어가 있으면 관련 조문/분류 아코디언을 자동으로 열고, 코드/업종명/메모를 한 번에 보여준다.
+4. 테스트
+   - `src/App.test.tsx`에 `72121` 같은 중간 코드를 검색했을 때 드롭다운 안에서 실제 코드가 보이는지 검증 케이스를 추가한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+    <title>제휴 섹션 노출 강도 축소 | 마곡 코드찾기</title>
+    <meta name="description" content="제휴 영역을 기본 접힘형 참고 패널로 바꾸고, 첫 화면에서는 정보가 먼저 보이도록 노출 강도를 낮췄습니다." />
+    <link rel="canonical" href="https://loopincode.com/updates/affiliate-reduction/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="마곡 코드찾기" />
+    <meta property="og:title" content="제휴 섹션 노출 강도 축소 | 마곡 코드찾기" />
+    <meta property="og:description" content="제휴 영역을 기본 접힘형 참고 패널로 바꾸고, 첫 화면에서는 정보가 먼저 보이도록 노출 강도를 낮췄습니다." />
+    <meta property="og:url" content="https://loopincode.com/updates/affiliate-reduction/" />
+    <meta property="og:image" content="https://loopincode.com/favicon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="제휴 섹션 노출 강도 축소 | 마곡 코드찾기" />
+    <meta name="twitter:description" content="제휴 영역을 기본 접힘형 참고 패널로 바꾸고, 첫 화면에서는 정보가 먼저 보이도록 노출 강도를 낮췄습니다." />
+    <meta name="twitter:image" content="https://loopincode.com/favicon.svg" />
+    <script type="application/ld+json">[{"@context":"https://schema.org","@type":"WebPage","name":"제휴 섹션 노출 강도 축소","description":"제휴 영역을 기본 접힘형 참고 패널로 바꾸고, 첫 화면에서는 정보가 먼저 보이도록 노출 강도를 낮췄습니다.","url":"https://loopincode.com/updates/affiliate-reduction/","datePublished":"2026-03-20","dateModified":"2026-03-20","publisher":{"@type":"Organization","name":"마곡 코드찾기","url":"https://loopincode.com"},"isBasedOn":["https://support.google.com/publisherpolicies/answer/11112688","https://support.google.com/adsense/answer/48182?utm_source=crs&utm_medium=email&utm_campaign=notification"]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"마곡 코드찾기","item":"https://loopincode.com"},{"@type":"ListItem","position":2,"name":"업데이트 로그","item":"https://loopincode.com/updates/"},{"@type":"ListItem","position":3,"name":"제휴 섹션 노출 강도 축소","item":"https://loopincode.com/updates/affiliate-reduction/"}]}]</script>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f8ff;
+        --panel: rgba(255,255,255,0.96);
+        --line: rgba(43,109,255,0.14);
+        --text: #1f2a3d;
+        --muted: #5a6a82;
+        --accent: #2b6dff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Pretendard", "Noto Sans KR", sans-serif;
+        background: linear-gradient(180deg, #f7faff 0%, #eef4ff 100%);
+        color: var(--text);
+      }
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0 64px;
+      }
+      .hero, .section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 24px;
+        box-shadow: 0 20px 50px rgba(28,33,43,0.08);
+      }
+      .section { margin-top: 16px; }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(43,109,255,0.08);
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 700;
+      }
+      h1 {
+        margin: 18px 0 0;
+        font-size: clamp(32px, 5vw, 48px);
+        line-height: 1.12;
+        letter-spacing: -0.04em;
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        line-height: 1.25;
+      }
+      p, li { color: var(--muted); line-height: 1.8; }
+      ul { margin: 0; padding-left: 20px; }
+      .meta-row, .chip-row, .link-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .chip, .link-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(239,245,255,0.9);
+        color: var(--text);
+        font-size: 13px;
+        text-decoration: none;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      .grid.two {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(248,251,255,0.88);
+        padding: 20px;
+      }
+      .faq-item + .faq-item { margin-top: 12px; }
+      a.cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 16px;
+        color: white;
+        background: var(--accent);
+        border-radius: 999px;
+        padding: 12px 18px;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      a.text-link {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      @media (max-width: 720px) {
+        main { width: min(100% - 20px, 1120px); padding-top: 24px; }
+        .hero, .section { padding: 18px; border-radius: 22px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      
+    <section class="hero">
+      <div class="eyebrow">업데이트 로그</div>
+      <h1>제휴 섹션 노출 강도 축소</h1>
+      <p>제휴 영역을 기본 접힘형 참고 패널로 바꾸고, 첫 화면에서는 정보가 먼저 보이도록 노출 강도를 낮췄습니다.</p>
+      <div class="meta-row">
+        <span class="chip">2026-03-20</span>
+        <span class="chip">Google 게시자 정책: 콘텐츠가 없는 화면의 광고</span><span class="chip">AdSense 프로그램 정책</span>
+      </div>
+      <a class="cta" href="https://loopincode.com/#updates">앱에서 인터랙티브로 보기</a>
+    </section>
+
+    <section class="section">
+      <h2>이번에 달라진 점</h2>
+      <ul>
+        <li>사이드 배너를 제거했습니다.</li><li>초기 상태에서는 제휴 위젯이 보이지 않도록 바꿨습니다.</li><li>중립적 문구와 낮은 강도의 CTA로 조정했습니다.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>영향 범위</h2>
+      <div class="chip-row">
+        <span class="chip">홈 제휴 섹션</span><span class="chip">CTA 카피</span><span class="chip">초기 화면 정보 위계</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>원문·정책 출처</h2>
+      
+      <article class="card faq-item">
+        <h2><a class="text-link" href="https://support.google.com/publisherpolicies/answer/11112688">Google 게시자 정책: 콘텐츠가 없는 화면의 광고</a></h2>
+        <div class="chip-row">
+          <span class="chip">Google Publisher Policies</span>
+          
+          
+        </div>
+        <p>콘텐츠가 거의 없거나 완료/전환/에러 상태인 화면에서 광고를 어떻게 다뤄야 하는지 설명하는 정책 문서입니다.</p>
+      </article>
+      <article class="card faq-item">
+        <h2><a class="text-link" href="https://support.google.com/adsense/answer/48182?utm_source=crs&amp;utm_medium=email&amp;utm_campaign=notification">AdSense 프로그램 정책</a></h2>
+        <div class="chip-row">
+          <span class="chip">Google AdSense Help</span>
+          
+          
+        </div>
+        <p>광고 배치, 클릭 유도 금지, 저품질 페이지 제한 등 전체 운영 기준을 정리한 정책 문서입니다.</p>
+      </article>
+    </section>
+
+    <section class="section">
+      <h2>공개 주소</h2>
+      <p><a class="text-link" href="https://loopincode.com/updates/affiliate-reduction/">https://loopincode.com/updates/affiliate-reduction/</a></p>
+    </section>
+  
+    </main>
+  </body>
+</html>

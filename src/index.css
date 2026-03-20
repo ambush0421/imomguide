@@ -6,15 +6,36 @@
   --background: #eef4ff;
   --surface: rgba(255, 255, 255, 0.88);
   --surface-strong: #ffffff;
+  --surface-muted: rgba(248, 251, 255, 0.9);
+  --surface-soft: rgba(255, 255, 255, 0.72);
   --foreground: #15253a;
   --foreground-muted: #586b86;
-  --foreground-subtle: #8293ad;
+  --foreground-subtle: #6b7fa0;
   --border: rgba(21, 37, 58, 0.12);
   --ring: rgba(43, 109, 255, 0.28);
   --accent: #2b6dff;
   --accent-strong: #1658db;
   --accent-soft: #9cc0ff;
   --accent-foreground: #f7fbff;
+  --info-border: #bae6fd;
+  --info-bg: #f0f9ff;
+  --info-foreground: #0c4a6e;
+
+  /* Rounding scale */
+  --radius-sm: 16px;
+  --radius-md: 22px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+  --radius-2xl: 32px;
+  --radius-3xl: 38px;
+  --radius-full: 9999px;
+
+  /* Shadow scale */
+  --shadow-sm: 0 4px 12px rgba(24, 32, 43, 0.04);
+  --shadow-md: 0 12px 28px rgba(24, 32, 43, 0.05);
+  --shadow-lg: 0 18px 40px rgba(24, 32, 43, 0.08);
+  --shadow-xl: 0 24px 70px rgba(28, 33, 43, 0.1);
+  --shadow-accent: 0 16px 34px rgba(43, 109, 255, 0.2);
 }
 
 @layer base {
@@ -79,4 +100,46 @@
 
 @theme inline {
   --font-display: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  --animate-shimmer: shimmer 2s infinite;
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-slide-down: slide-down 0.2s ease-out;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

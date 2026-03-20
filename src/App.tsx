@@ -1,50 +1,85 @@
+import { lazy, Suspense, useEffect, useState } from 'react'
 import {
   ArrowRight,
+  BookOpenText,
   Building2,
   CheckCircle2,
+  ChevronDown,
   ExternalLink,
   FileSearch,
-  Landmark,
+  LibraryBig,
+  Menu,
+  X,
 } from 'lucide-react'
 
-import { CoupangSideBanner } from '@/components/coupang-side-banner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { SkeletonCard } from '@/components/ui/skeleton'
+
+const CodeDirectoryPage = lazy(() =>
+  import('@/features/eligibility/components/code-directory-page').then((m) => ({
+    default: m.CodeDirectoryPage,
+  })),
+)
+const GuidePage = lazy(() =>
+  import('@/features/guides/components/guide-page').then((m) => ({
+    default: m.GuidePage,
+  })),
+)
+const LegalLibraryPage = lazy(() =>
+  import('@/features/library/components/legal-library-page').then((m) => ({
+    default: m.LegalLibraryPage,
+  })),
+)
+const UpdateLogPage = lazy(() =>
+  import('@/features/updates/components/update-log-page').then((m) => ({
+    default: m.UpdateLogPage,
+  })),
+)
 import { EligibilityForm } from '@/features/eligibility/components/eligibility-form'
 import { IndustryDiscoveryPanel } from '@/features/eligibility/components/industry-discovery-panel'
 import { ResultPanel } from '@/features/eligibility/components/result-panel'
 import { RulebookTabs } from '@/features/eligibility/components/rulebook-tabs'
 import {
+  getFeaturedGuideEntries,
+  getGuideEntryByCode,
+} from '@/features/guides/data/guide-catalog'
+import { getRecentUpdateLogEntries } from '@/features/updates/data/update-log'
+import {
+  MAGOK_CODE_DIRECTORY_TOTAL_COUNT,
+  getZoneVerdictCounts,
+} from '@/features/eligibility/data/magok-code-directory'
+import type {
+  DirectoryZoneType,
+  MagokCodeDirectoryEntry,
+} from '@/features/eligibility/types'
+import {
   type EligibilityStep,
   useEligibilityStore,
 } from '@/store/eligibility-store'
-import { formatKoreanDate } from '@/utils/format'
+import { formatKoreanDate, formatNumber } from '@/utils/format'
 
-const introFacts = [
-  { label: '대상', value: '마곡 일반산업단지' },
-  { label: '기준', value: '시행령 + 관리기본계획' },
-  { label: '결과', value: '업종코드 추천 + 입주 예비판정' },
-]
+type AppView = 'home' | 'directory' | 'library' | 'updates' | 'guide'
 
-const steps = [
+const introSteps = [
   {
     step: '1',
-    title: '사업 내용을 적습니다',
+    title: '하고 싶은 일을 적습니다',
     description:
-      '광고대행업처럼 한 줄로 적거나, 사업자등록증의 업태·종목을 그대로 붙여 넣으면 됩니다.',
+      '업종코드를 몰라도 됩니다. 광고대행업처럼 한 줄로 적거나 사업자등록증의 업태·종목을 붙여 넣으면 됩니다.',
   },
   {
     step: '2',
-    title: '추천 업종을 고릅니다',
+    title: '가장 가까운 코드를 추천받습니다',
     description:
-      '정확히 맞는 코드가 있으면 바로 보여주고, 없으면 가장 가까운 관련 업종을 추천합니다.',
+      '정확한 코드가 있으면 바로 보여주고, 없으면 현재 구역에서 검토 가능한 비슷한 코드를 먼저 추천합니다.',
   },
   {
     step: '3',
-    title: '입주 가능성을 바로 봅니다',
+    title: '마곡에서 가능한지 확인합니다',
     description:
-      '선택한 업종 기준으로 가능, 조건부 가능, 심의 필요, 불가를 한 화면에서 확인합니다.',
+      '선택한 코드 기준으로 가능, 조건부 가능, 심의 필요, 추가 확인, 불가를 이유와 함께 보여줍니다.',
   },
 ]
 
@@ -57,36 +92,30 @@ const wizardSteps: Array<{
   {
     id: 'discover',
     badge: '1단계',
-    title: '업종 찾기',
+    title: '업종코드 추천받기',
     description:
-      '사업 설명이나 사업자등록증 업태·종목을 넣고 가장 가까운 업종코드를 먼저 찾습니다.',
+      '하고 싶은 일을 적으면 마곡에서 먼저 검토할 만한 코드를 추천합니다.',
   },
   {
     id: 'adjust',
     badge: '2단계',
-    title: '조건 보정',
+    title: '선택한 코드 확인하기',
     description:
-      '선택한 업종을 기준으로 구역, 신청 주체, 예외 조건을 확인하고 필요하면 보정합니다.',
+      '구역과 예외 조건만 필요한 만큼 손보고 결과 보기로 넘어가면 됩니다.',
   },
   {
     id: 'result',
     badge: '3단계',
-    title: '결과 확인',
+    title: '입주 가능성 보기',
     description:
-      '가능 여부, 연결 조문, 업종코드 상세 해설과 추가 확인 포인트를 한 화면에서 봅니다.',
+      '선택한 코드가 왜 가능 또는 불가인지, 어떤 조문을 봐야 하는지 쉽게 설명합니다.',
   },
 ]
 
-const useCases = [
-  '중개 실무자가 임차 문의를 받았을 때',
-  '법인 담당자가 입주 가능 업종을 먼저 확인할 때',
-  '사업자등록증 업태·종목만 받아 빠르게 1차 검토할 때',
-]
-
-const trustPoints = [
-  '마곡 관리기본계획과 시행령을 함께 반영합니다.',
-  '애매한 업종은 무리하게 가능으로 찍지 않습니다.',
-  '세부 조건 수정과 재판정을 같은 화면에서 이어서 할 수 있습니다.',
+const promisePoints = [
+  '전체 KSIC 11차 5자리 코드를 전수로 찾을 수 있습니다.',
+  '업종코드를 몰라도 쉬운 말로 검색할 수 있습니다.',
+  '애매한 업종은 무리하게 가능으로 찍지 않고 더 확인할 점을 함께 보여줍니다.',
 ]
 
 const coupangDisclosureText =
@@ -94,46 +123,884 @@ const coupangDisclosureText =
 
 const affiliateActions = [
   {
-    title: '추천 상품 보기',
-    description:
-      '업무 공간 준비에 참고할 수 있는 외부 추천 상품 링크입니다.',
+    title: '참고 상품 모음 보기',
     href: 'https://link.coupang.com/a/d7nWco',
-    variant: 'default' as const,
+    variant: 'secondary' as const,
   },
   {
-    title: '추가 추천 보기',
-    description:
-      '다른 추천 항목도 보고 싶다면 보조 링크에서 이어서 확인할 수 있습니다.',
+    title: '추가 참고 링크 보기',
     href: 'https://link.coupang.com/a/d7n7ta',
-    variant: 'secondary' as const,
+    variant: 'outline' as const,
   },
 ]
 
 const affiliateWidgets = [
   {
     src: 'https://coupa.ng/clX5tE',
-    title: '쿠팡 파트너스 추천 위젯 1',
+    title: '쿠팡 파트너스 추천 위젯 모바일기기',
+    badge: '모바일 기기',
+    headline: '핸드폰과 태블릿',
+  },
+  {
+    src: 'https://coupa.ng/clX3qg',
+    title: '쿠팡 파트너스 추천 위젯 생수',
+    badge: '탕비실 추천',
+    headline: '생수와 비품',
   },
   {
     src: 'https://coupa.ng/clX5vK',
-    title: '쿠팡 파트너스 추천 위젯 2',
+    title: '쿠팡 파트너스 추천 위젯 업무기기',
+    badge: '업무 기기',
+    headline: '디지털 업무 기기',
   },
   {
     src: 'https://coupa.ng/clX5EI',
-    title: '쿠팡 파트너스 추천 위젯 3',
+    title: '쿠팡 파트너스 추천 위젯 소모품',
+    badge: '사무 소모품',
+    headline: '복사용지와 소모품',
   },
 ]
-
-const sideAffiliateBanner = {
-  iframeSrc:
-    'https://ads-partners.coupang.com/widgets.html?id=973794&template=carousel&trackingCode=AF7474453&subId=&width=160&height=600&tsource=',
-}
 
 const footerFacts = [
   '운영: Loopin Lab',
   '문의: contact.loopinlab@gmail.com',
   '활동 페이지: https://loopincode.com',
 ]
+
+function getHashState(hash: string): { view: AppView; guideCode: string | null } {
+  if (hash.startsWith('#guides/')) {
+    const guideCode = decodeURIComponent(hash.slice('#guides/'.length)).trim()
+
+    return {
+      view: 'guide',
+      guideCode: guideCode || null,
+    }
+  }
+
+  if (hash.startsWith('#directory')) {
+    return { view: 'directory', guideCode: null }
+  }
+
+  if (hash.startsWith('#library')) {
+    return { view: 'library', guideCode: null }
+  }
+
+  if (hash.startsWith('#updates')) {
+    return { view: 'updates', guideCode: null }
+  }
+
+  return { view: 'home', guideCode: null }
+}
+
+function scrollToSection(id: string) {
+  window.requestAnimationFrame(() => {
+    const element = document.getElementById(id)
+
+    if (element && typeof element.scrollIntoView === 'function') {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  })
+}
+
+function getReviewableCount(counts: ReturnType<typeof getZoneVerdictCounts>) {
+  return (
+    counts.eligible +
+    counts.conditional +
+    counts.reviewRequired +
+    counts.insufficient
+  )
+}
+
+function getZoneLabel(zoneType: DirectoryZoneType) {
+  return zoneType === 'industrialFacility' ? '산업시설구역' : '지식산업센터'
+}
+
+function HomeSections({
+  input,
+  status,
+  result,
+  error,
+  industryQuery,
+  industrySuggestions,
+  discoveryStatus,
+  discoveryError,
+  currentStep,
+  setField,
+  setFlag,
+  setCurrentStep,
+  setIndustryQuery,
+  discoverIndustry,
+  applyIndustrySuggestion,
+  evaluate,
+  reset,
+  onOpenDirectory,
+  onOpenLibrary,
+  onOpenUpdates,
+  onOpenGuide,
+}: {
+  input: ReturnType<typeof useEligibilityStore.getState>['input']
+  status: ReturnType<typeof useEligibilityStore.getState>['status']
+  result: ReturnType<typeof useEligibilityStore.getState>['result']
+  error: ReturnType<typeof useEligibilityStore.getState>['error']
+  industryQuery: ReturnType<typeof useEligibilityStore.getState>['industryQuery']
+  industrySuggestions: ReturnType<typeof useEligibilityStore.getState>['industrySuggestions']
+  discoveryStatus: ReturnType<typeof useEligibilityStore.getState>['discoveryStatus']
+  discoveryError: ReturnType<typeof useEligibilityStore.getState>['discoveryError']
+  currentStep: ReturnType<typeof useEligibilityStore.getState>['currentStep']
+  setField: ReturnType<typeof useEligibilityStore.getState>['setField']
+  setFlag: ReturnType<typeof useEligibilityStore.getState>['setFlag']
+  setCurrentStep: ReturnType<typeof useEligibilityStore.getState>['setCurrentStep']
+  setIndustryQuery: ReturnType<typeof useEligibilityStore.getState>['setIndustryQuery']
+  discoverIndustry: ReturnType<typeof useEligibilityStore.getState>['discoverIndustry']
+  applyIndustrySuggestion: ReturnType<typeof useEligibilityStore.getState>['applyIndustrySuggestion']
+  evaluate: ReturnType<typeof useEligibilityStore.getState>['evaluate']
+  reset: ReturnType<typeof useEligibilityStore.getState>['reset']
+  onOpenDirectory: () => void
+  onOpenLibrary: () => void
+  onOpenUpdates: () => void
+  onOpenGuide: (code: string) => void
+}) {
+  const canShowResult = Boolean(status === 'ready' && result)
+  const safeCurrentStep =
+    currentStep === 'result' && !canShowResult ? 'adjust' : currentStep
+  const [isAffiliateExpanded, setIsAffiliateExpanded] = useState(false)
+  const currentWizardStep =
+    wizardSteps.find((step) => step.id === safeCurrentStep) ?? wizardSteps[0]
+  const currentWizardIndex = wizardSteps.findIndex(
+    (step) => step.id === safeCurrentStep,
+  )
+
+  const knowledgeCounts = getZoneVerdictCounts('knowledgeIndustryCenter')
+  const industrialCounts = getZoneVerdictCounts('industrialFacility')
+  const recentUpdates = getRecentUpdateLogEntries(3)
+  const featuredGuides = getFeaturedGuideEntries(3)
+
+  const introFacts = [
+    {
+      label: '전체 전수 코드',
+      value: `${formatNumber(MAGOK_CODE_DIRECTORY_TOTAL_COUNT)}개`,
+      note: 'KSIC 11차 5자리 기준',
+      tone: 'hero',
+    },
+    {
+      label: '지식산업센터 검토 가능',
+      value: `${formatNumber(getReviewableCount(knowledgeCounts))}개`,
+      note: '가능·조건부·심의·추가 확인 포함',
+      tone: 'support',
+    },
+    {
+      label: '산업시설구역 검토 가능',
+      value: `${formatNumber(getReviewableCount(industrialCounts))}개`,
+      note: '관리기본계획 허용 기준 반영',
+      tone: 'support',
+    },
+  ] as const
+
+  const dictionaryPreviewCards = [
+    {
+      title: '지식산업센터',
+      count: `${formatNumber(getReviewableCount(knowledgeCounts))}개`,
+      note: 'exact 코드표, 시행령 대응표, 예외 규칙을 함께 반영했습니다.',
+      tone: 'strong',
+    },
+    {
+      title: '산업시설구역',
+      count: `${formatNumber(getReviewableCount(industrialCounts))}개`,
+      note: '마곡 관리기본계획 허용군과 prefix를 전체 KSIC 코드에 투영했습니다.',
+      tone: 'soft',
+    },
+    {
+      title: '쉽게 검색',
+      count: '자유 문장 가능',
+      note: '광고대행업, 앱 개발, 호스팅처럼 쉬운 표현으로도 추천을 시작할 수 있습니다.',
+      tone: 'soft',
+    },
+  ] as const
+
+  function runQuickSearch(value: string) {
+    setIndustryQuery(value)
+    void discoverIndustry()
+  }
+
+  return (
+    <>
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.14fr)_320px] lg:items-stretch">
+        <div className="flex h-full flex-col rounded-[38px] border border-[rgba(43,109,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.96))] px-6 py-8 shadow-[0_28px_72px_rgba(28,33,43,0.1)] sm:px-8 lg:px-10 lg:py-10">
+          <Badge variant="muted">마곡 일반산업단지 전용</Badge>
+          <h1 className="mt-5 max-w-4xl font-display text-4xl font-semibold tracking-[-0.06em] text-[var(--foreground)] sm:text-5xl lg:text-6xl">
+            입주 가능한 업종코드를
+            <br />
+            쉽게 찾고
+            <br />
+            바로 확인합니다
+          </h1>
+          <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--foreground-muted)] sm:text-lg">
+            업종코드를 몰라도 괜찮습니다. 하고 싶은 일을 적거나 사업자등록증의
+            업태·종목을 넣으면, 마곡에서 먼저 검토할 만한 코드를 추천하고 입주 가능성까지
+            이어서 보여드립니다.
+          </p>
+
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Button size="lg" onClick={() => scrollToSection('finder')}>
+              코드 추천받기
+              <ArrowRight className="size-4" />
+            </Button>
+            <Button variant="secondary" size="lg" onClick={onOpenDirectory}>
+              가능 코드 전체 보기
+            </Button>
+          </div>
+
+          <div className="mt-7 grid gap-3 sm:grid-cols-3">
+            {introFacts.map((fact) => (
+              <div
+                key={fact.label}
+                className={`rounded-[24px] border px-4 py-4 ${
+                  fact.tone === 'hero'
+                    ? 'border-[rgba(43,109,255,0.16)] bg-[rgba(240,246,255,0.94)] shadow-[0_16px_34px_rgba(43,109,255,0.08)]'
+                    : 'border-[var(--border)] bg-[rgba(255,255,255,0.78)]'
+                }`}
+              >
+                <div className="text-xs font-medium text-[var(--foreground-subtle)]">
+                  {fact.label}
+                </div>
+                <div
+                  className={`mt-2 font-semibold text-[var(--foreground)] ${
+                    fact.tone === 'hero' ? 'text-2xl' : 'text-xl'
+                  }`}
+                >
+                  {fact.value}
+                </div>
+                <div className="mt-1 text-xs leading-5 text-[var(--foreground-subtle)]">
+                  {fact.note}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Card className="h-full border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+          <CardContent className="flex h-full flex-col space-y-5 p-6">
+            <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+              <FileSearch className="size-6" />
+            </div>
+            <div>
+              <h2 className="font-display text-2xl font-semibold text-[var(--foreground)]">
+                처음 오셨다면 이렇게 보세요
+              </h2>
+              <p className="mt-2 text-sm leading-7 text-[var(--foreground-muted)]">
+                고등학생도 이해할 수 있을 만큼 쉽게 찾고, 필요한 법령 근거는 뒤에서
+                확인할 수 있게 순서를 나눴습니다.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {introSteps.map((item) => (
+                <div
+                  key={item.step}
+                  className="rounded-[22px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.78)] px-4 py-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="inline-flex size-8 items-center justify-center rounded-full bg-[rgba(43,109,255,0.12)] text-sm font-semibold text-[var(--accent)]">
+                      {item.step}
+                    </div>
+                    <div className="text-sm font-semibold text-[var(--foreground)]">
+                      {item.title}
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-auto flex flex-wrap gap-2">
+              <Badge variant="muted">
+                시행령 기준일 {formatKoreanDate('2026-01-02')}
+              </Badge>
+              <Badge variant="muted">
+                관리기본계획 고시일 {formatKoreanDate('2025-10-30')}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        {promisePoints.map((item) => (
+          <div
+            key={item}
+            className="rounded-[24px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.76)] px-5 py-5"
+          >
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[var(--accent)]" />
+              <p className="text-sm leading-7 text-[var(--foreground-muted)]">{item}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <section
+        id="finder"
+        aria-label="업종코드 분석 위저드"
+        className="rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(242,247,255,0.94))] p-6 shadow-[0_24px_70px_rgba(28,33,43,0.08)] sm:p-8"
+      >
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <Badge variant="muted">쉬운 검색 홈</Badge>
+            <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
+              하고 싶은 일을 적으면
+              <br />
+              추천 코드와 결과를 바로 보여드립니다
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
+              자유 문장, 사업자등록증 업태·종목, 실무 메모 모두 괜찮습니다.
+              업종코드를 몰라도 검색할 수 있고, 추천된 코드로 바로 입주 가능 여부를 확인할
+              수 있습니다.
+            </p>
+          </div>
+          <div className="rounded-[22px] border border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.9)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] lg:max-w-sm">
+            `내가 하는 일이 어떤 코드에 가까운지`, `그 코드가 마곡에서 가능한지`,
+            `왜 그런지`, `더 확인해야 할 게 있는지` 순서로 보여줍니다.
+          </div>
+        </div>
+
+        <div className="mt-8 space-y-6">
+          <div className="grid gap-3 lg:grid-cols-3">
+            {wizardSteps.map((step, index) => {
+              const isActive = step.id === safeCurrentStep
+              const isComplete = currentWizardIndex > index
+
+              return (
+                <div
+                  key={step.id}
+                  className={`rounded-[24px] border px-4 py-4 transition ${
+                    isActive
+                      ? 'border-[rgba(43,109,255,0.2)] bg-[rgba(239,245,255,0.96)] shadow-[0_18px_32px_rgba(43,109,255,0.08)]'
+                      : isComplete
+                        ? 'border-[rgba(43,109,255,0.12)] bg-white'
+                        : 'border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.66)]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold ${
+                        isActive || isComplete
+                          ? 'bg-[rgba(43,109,255,0.12)] text-[var(--accent)]'
+                          : 'bg-[rgba(130,147,173,0.18)] text-[var(--foreground-subtle)]'
+                      }`}
+                    >
+                      {isComplete ? <CheckCircle2 className="size-4" /> : index + 1}
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-[var(--foreground-subtle)]">
+                        {step.badge}
+                      </div>
+                      <div className="text-sm font-semibold text-[var(--foreground)]">
+                        {step.title}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <Card className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+            <CardContent className="space-y-6 p-6">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <Badge variant="muted">{currentWizardStep.badge}</Badge>
+                  <h3 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+                    {currentWizardStep.title}
+                  </h3>
+                  <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
+                    {currentWizardStep.description}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {safeCurrentStep !== 'discover' ? (
+                    <Button variant="secondary" onClick={() => setCurrentStep('discover')}>
+                      처음 단계로 돌아가기
+                    </Button>
+                  ) : null}
+                  <Button variant="ghost" onClick={onOpenDirectory}>
+                    전체 코드 사전 열기
+                    <ArrowRight className="size-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {safeCurrentStep === 'discover' ? (
+                <IndustryDiscoveryPanel
+                  input={input}
+                  query={industryQuery}
+                  suggestions={industrySuggestions}
+                  status={discoveryStatus}
+                  error={discoveryError}
+                  onQueryChange={setIndustryQuery}
+                  onDiscover={discoverIndustry}
+                  onSuggestionSelect={applyIndustrySuggestion}
+                  onExampleSelect={runQuickSearch}
+                  onContinueManual={() => setCurrentStep('adjust')}
+                />
+              ) : null}
+
+              {safeCurrentStep === 'adjust' ? (
+                <div className="space-y-5">
+                  <Card className="bg-[rgba(239,245,255,0.86)]">
+                    <CardContent className="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-4">
+                      <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+                        <div className="text-xs text-[var(--foreground-subtle)]">
+                          선택한 업종코드
+                        </div>
+                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                          {input.ksicCode.trim() || '직접 입력 예정'}
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+                        <div className="text-xs text-[var(--foreground-subtle)]">
+                          선택한 업종명
+                        </div>
+                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                          {input.ksicName.trim() || '아직 선택 전'}
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+                        <div className="text-xs text-[var(--foreground-subtle)]">
+                          현재 구역
+                        </div>
+                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                          {input.zoneType === 'industrialFacility'
+                            ? '산업시설구역'
+                            : input.zoneType === 'knowledgeIndustryCenter'
+                              ? '지식산업센터'
+                              : '지원시설구역'}
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+                        <div className="text-xs text-[var(--foreground-subtle)]">안내</div>
+                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                          필요한 조건만 보정하고 결과 보기로 넘어가면 됩니다
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <EligibilityForm
+                    input={input}
+                    status={status}
+                    onFieldChange={setField}
+                    onFlagChange={setFlag}
+                    onEvaluate={evaluate}
+                    onReset={reset}
+                    onPrevious={() => setCurrentStep('discover')}
+                    primaryActionLabel="결과 보기"
+                    secondaryActionLabel="이전 단계"
+                    defaultExpanded
+                  />
+                </div>
+              ) : null}
+
+              {safeCurrentStep === 'result' ? (
+                <ResultPanel
+                  input={input}
+                  result={result}
+                  status={status}
+                  error={error}
+                  onEvaluate={evaluate}
+                  onAdjust={() => setCurrentStep('adjust')}
+                  onOpenGuide={onOpenGuide}
+                  sticky={false}
+                  stepLabel="3단계"
+                />
+              ) : null}
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <Card className="border-[rgba(43,109,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.96))] shadow-[0_20px_44px_rgba(24,32,43,0.06)]">
+          <CardContent className="p-6">
+            <Badge variant="muted">전수 코드 사전</Badge>
+            <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+              모든 코드를 한 번에 보고 싶다면
+              <br />
+              전용 코드 사전에서 찾으면 됩니다
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+              검색과 탐색을 분리했습니다. 코드를 모를 때는 쉬운 검색 홈에서, 전체 코드를
+              훑고 싶을 때는 전용 코드 사전에서 시작하면 더 편합니다.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              {dictionaryPreviewCards.map((item) => (
+                <div
+                  key={item.title}
+                  className={`rounded-[24px] border px-4 py-4 ${
+                    item.tone === 'strong'
+                      ? 'border-[rgba(43,109,255,0.14)] bg-[rgba(239,245,255,0.94)]'
+                      : 'border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.74)]'
+                  }`}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="text-base font-semibold text-[var(--foreground)]">
+                      {item.title}
+                    </div>
+                    <Badge variant="muted">{item.count}</Badge>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                    {item.note}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button onClick={onOpenDirectory}>
+                코드 사전 열기
+                <LibraryBig className="size-4" />
+              </Button>
+              <Button variant="secondary" onClick={() => scrollToSection('criteria')}>
+                법령 참고 보기
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+          <CardContent className="space-y-4 p-6">
+            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+              <BookOpenText className="size-5" />
+            </div>
+            <div>
+              <h2 className="font-display text-3xl font-semibold text-[var(--foreground)]">
+                이렇게 읽으면 더 쉽습니다
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                먼저 내가 하는 일과 가까운 코드를 찾고, 그다음 `가능 / 조건부 가능 /
+                심의 필요 / 추가 확인 / 불가` 순서로 읽으면 됩니다.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {introSteps.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-[22px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.78)] px-4 py-4"
+                >
+                  <div className="text-sm font-semibold text-[var(--foreground)]">
+                    {item.title}
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section id="criteria" className="space-y-4">
+        <div className="max-w-3xl">
+          <Badge variant="muted">법령 참고</Badge>
+          <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+            어떤 기준으로 보는지 아래에서 다시 확인할 수 있습니다
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+            이 영역은 법령과 예외 규칙을 빠르게 훑는 참고 화면입니다. 전체 코드 탐색은
+            전수 코드 사전에서 보는 편이 더 쉽습니다.
+          </p>
+        </div>
+        <RulebookTabs onOpenDirectory={onOpenDirectory} />
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]">
+        <Card className="border-[rgba(43,109,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.96))] shadow-[0_20px_44px_rgba(24,32,43,0.06)]">
+          <CardContent className="space-y-5 p-6">
+            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+              <BookOpenText className="size-5" />
+            </div>
+            <div>
+              <Badge variant="muted">참조 법령 라이브러리</Badge>
+              <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+                판정 근거를
+                <br />
+                문서 단위로 다시 읽을 수 있습니다
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                결과 패널의 각주에서 끝나지 않고, 시행령과 마곡 고시문을 문서별로
+                다시 읽을 수 있는 독립 화면을 준비했습니다. 상담 전 근거 설명이나
+                내부 검토 자료 정리에 바로 쓸 수 있습니다.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(239,245,255,0.92)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
+                `산업집적법 시행령`과 `마곡 관리기본계획`을 문서 단위로 나눠, 어떤
+                판정이 어디에서 왔는지 더 쉽게 추적할 수 있습니다.
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="muted">시행령</Badge>
+                <Badge variant="muted">마곡 고시문</Badge>
+                <Badge variant="muted">조문 / 페이지 힌트</Badge>
+              </div>
+            </div>
+            <div>
+              <Button onClick={onOpenLibrary}>
+                법령 라이브러리 열기
+                <ArrowRight className="size-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.84)] shadow-none">
+          <CardContent className="space-y-5 p-6">
+            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+              <FileSearch className="size-5" />
+            </div>
+            <div>
+              <Badge variant="muted">데이터 업데이트 로그</Badge>
+              <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+                최근에 무엇이 바뀌었는지
+                <br />
+                빠르게 확인할 수 있습니다
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                판정 기준과 화면 구조가 언제 어떻게 바뀌었는지 기록해 둔 이력
+                화면입니다. 상담 전 최신 반영 범위를 설명하거나 기존 화면과의 차이를
+                정리할 때 유용합니다.
+              </p>
+            </div>
+            <div className="space-y-3">
+              {recentUpdates.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="rounded-[22px] border border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.78)] px-4 py-4"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="muted">{formatKoreanDate(entry.date)}</Badge>
+                    <div className="text-sm font-semibold text-[var(--foreground)]">
+                      {entry.title}
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                    {entry.summary}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div>
+              <Button variant="secondary" onClick={onOpenUpdates}>
+                업데이트 로그 열기
+                <ArrowRight className="size-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="space-y-4">
+        <div className="max-w-3xl">
+          <Badge variant="muted">대표 업종 가이드</Badge>
+          <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+            자주 찾는 업종은
+            <br />
+            문서형 가이드로 바로 읽을 수 있습니다
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+            결과 화면에서 끝내지 않고, 코드별 설명과 자주 묻는 질문까지 읽을 수 있는
+            가이드 페이지를 준비했습니다.
+          </p>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {featuredGuides.map((guide) => (
+            <Card
+              key={guide.code}
+              className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]"
+            >
+              <CardContent className="space-y-4 p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge>{guide.code}</Badge>
+                  <Badge variant="muted">{guide.recommendedZoneLabel}</Badge>
+                </div>
+                <div>
+                  <h3 className="font-display text-2xl font-semibold text-[var(--foreground)]">
+                    {guide.name}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                    {guide.summary}
+                  </p>
+                </div>
+                <Button
+                  variant="secondary"
+                  onClick={() => onOpenGuide(guide.code)}
+                  aria-label={`${guide.code} ${guide.name} 가이드 보기`}
+                >
+                  가이드 보기
+                  <ArrowRight className="size-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section
+        id="affiliate"
+        className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(250,252,255,0.94),rgba(255,255,255,0.96))] p-5 shadow-[0_18px_40px_rgba(28,33,43,0.05)] sm:p-6"
+      >
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <Badge variant="muted">참고용 제휴 링크</Badge>
+            <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)] sm:text-[2rem]">
+              업종 분석과 법령 확인이 끝난 뒤 필요할 때만 참고할 수 있습니다
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+              이 영역은 입주 판단용 본문이 아니라 사무실 준비에 참고할 수 있는 외부
+              상품 링크입니다. 먼저 업종 분석 결과와 법령 참고를 확인한 뒤, 필요한 경우에만
+              펼쳐서 보도록 기본 노출 강도를 낮췄습니다.
+            </p>
+          </div>
+
+          <div className="rounded-[20px] border border-[rgba(190,208,234,0.7)] bg-[rgba(247,250,255,0.92)] px-4 py-3 text-xs leading-5 text-[var(--foreground-muted)]">
+            광고보다 본문이 먼저 보이도록
+            <br />
+            제휴 영역은 기본 접힘 상태로 제공합니다.
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-[28px] border border-[rgba(21,37,58,0.08)] bg-white/90">
+          <button
+            type="button"
+            onClick={() => setIsAffiliateExpanded((current) => !current)}
+            className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+            aria-expanded={isAffiliateExpanded}
+            aria-controls="affiliate-links-panel"
+          >
+            <div>
+              <div className="text-sm font-semibold text-[var(--foreground)]">
+                사무환경 참고 상품 {isAffiliateExpanded ? '접기' : '펼치기'}
+              </div>
+              <p className="mt-1 text-xs leading-5 text-[var(--foreground-muted)]">
+                외부 상품은 필요한 경우에만 확인할 수 있도록 접어두었습니다.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant="muted" className="whitespace-nowrap">
+                기본 숨김
+              </Badge>
+              <ChevronDown
+                className={`size-4 text-[var(--foreground-subtle)] transition-transform ${
+                  isAffiliateExpanded ? 'rotate-180' : ''
+                }`}
+              />
+            </div>
+          </button>
+
+          {isAffiliateExpanded ? (
+            <div
+              id="affiliate-links-panel"
+              className="border-t border-[rgba(21,37,58,0.08)] px-4 py-4 sm:px-5 sm:py-5"
+            >
+              <div className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
+                <Card className="h-full border-[rgba(21,37,58,0.08)] bg-[rgba(248,251,255,0.78)] shadow-none">
+                  <CardContent className="space-y-4 p-5">
+                    <div>
+                      <div className="text-sm font-semibold text-[var(--foreground)]">
+                        사무실 준비 참고
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                        사무 가구, 전자기기, 탕비용품처럼 자주 찾는 항목만 참고용으로
+                        정리한 링크입니다. 입주 가능 여부를 대신하지 않으며, 본문보다
+                        앞세우지 않도록 축소된 카드로 배치합니다.
+                      </p>
+                    </div>
+
+                    <div className="rounded-[22px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4">
+                      <div className="flex items-start gap-3">
+                        <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                          <ExternalLink className="size-4" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-[var(--foreground)]">
+                            광고·제휴 안내
+                          </div>
+                          <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
+                            {coupangDisclosureText}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {affiliateActions.map((item) => (
+                        <Button key={item.title} asChild variant={item.variant} size="sm">
+                          <a
+                            href={item.href}
+                            target="_blank"
+                            rel="nofollow sponsored noopener"
+                            referrerPolicy="unsafe-url"
+                          >
+                            {item.title}
+                          </a>
+                        </Button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  {affiliateWidgets.map((widget) => (
+                    <Card
+                      key={widget.src}
+                      className="h-full border-[rgba(21,37,58,0.08)] bg-[rgba(255,255,255,0.9)] shadow-none"
+                    >
+                      <CardContent className="flex h-full flex-col p-4">
+                        <div className="flex min-h-11 items-start justify-between gap-2">
+                          <Badge
+                            variant="muted"
+                            className="shrink-0 whitespace-nowrap px-2.5 py-1 text-[11px] tracking-normal sm:text-xs"
+                          >
+                            {widget.badge}
+                          </Badge>
+                          <span className="shrink-0 whitespace-nowrap pt-1 text-[11px] text-[var(--foreground-subtle)] sm:text-xs">
+                            외부 상품
+                          </span>
+                        </div>
+                        <div className="mt-3 min-h-14 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--foreground)] sm:min-h-16 sm:text-base">
+                          {widget.headline}
+                        </div>
+                        <div className="mt-4 flex flex-1 items-start justify-center rounded-[22px] border border-[rgba(190,208,234,0.7)] bg-[linear-gradient(180deg,#ffffff,rgba(245,248,255,0.96))] px-2 py-3">
+                          <iframe
+                            src={widget.src}
+                            title={widget.title}
+                            width="120"
+                            height="240"
+                            frameBorder="0"
+                            scrolling="no"
+                            referrerPolicy="unsafe-url"
+                            loading="lazy"
+                            className="overflow-hidden rounded-[18px] bg-white"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </section>
+    </>
+  )
+}
 
 function App() {
   const {
@@ -156,44 +1023,103 @@ function App() {
     reset,
   } = useEligibilityStore()
 
-  function runQuickSearch(value: string) {
-    setIndustryQuery(value)
-    void discoverIndustry()
+  const initialHashState = getHashState(window.location.hash)
+  const [view, setView] = useState<AppView>(() => initialHashState.view)
+  const [guideCode, setGuideCode] = useState<string | null>(() => initialHashState.guideCode)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    function handleHashChange() {
+      const nextHashState = getHashState(window.location.hash)
+      setView(nextHashState.view)
+      setGuideCode(nextHashState.guideCode)
+    }
+
+    window.addEventListener('hashchange', handleHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [])
+
+  function openDirectoryView() {
+    setView('directory')
+    setGuideCode(null)
+    window.history.replaceState(null, '', '#directory')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const sideBannerStyles = {
-    left: {
-      left: 'max(8px, calc(50vw - 590px - 172px))',
-    },
-    right: {
-      right: 'max(8px, calc(50vw - 590px - 172px))',
-    },
-  } as const
+  function openLibraryView() {
+    setView('library')
+    setGuideCode(null)
+    window.history.replaceState(null, '', '#library')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
-  const canShowResult = Boolean(status === 'ready' && result)
-  const safeCurrentStep =
-    currentStep === 'result' && !canShowResult ? 'adjust' : currentStep
-  const currentWizardStep =
-    wizardSteps.find((step) => step.id === safeCurrentStep) ?? wizardSteps[0]
-  const currentWizardIndex = wizardSteps.findIndex(
-    (step) => step.id === safeCurrentStep,
+  function openUpdatesView() {
+    setView('updates')
+    setGuideCode(null)
+    window.history.replaceState(null, '', '#updates')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function openHomeView(sectionId = 'top') {
+    setView('home')
+    setGuideCode(null)
+    window.history.replaceState(null, '', `#${sectionId}`)
+    scrollToSection(sectionId)
+  }
+
+  function openGuideView(code: string) {
+    const normalizedCode = code.trim()
+
+    if (!normalizedCode) {
+      return
+    }
+
+    setView('guide')
+    setGuideCode(normalizedCode)
+    window.history.replaceState(null, '', `#guides/${encodeURIComponent(normalizedCode)}`)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleDirectoryApply(
+    entry: MagokCodeDirectoryEntry,
+    zoneType: DirectoryZoneType,
+  ) {
+    setField('zoneType', zoneType)
+    setField('ksicCode', entry.code)
+    setField('ksicName', entry.name)
+    setField('regulatoryFit', 'auto')
+    setFlag('isHosting63112', entry.code === '63112')
+    setCurrentStep('adjust')
+    openHomeView('finder')
+  }
+
+  const activeZoneLabel = getZoneLabel(
+    input.zoneType === 'industrialFacility'
+      ? 'industrialFacility'
+      : 'knowledgeIndustryCenter',
   )
+  const currentGuide = guideCode ? getGuideEntryByCode(guideCode) : null
 
   return (
     <div className="min-h-screen">
-      {(['left', 'right'] as const).map((side) => (
-        <CoupangSideBanner
-          key={side}
-          label={`쿠팡 파트너스 사이드 배너 ${side}`}
-          iframeSrc={sideAffiliateBanner.iframeSrc}
-          style={sideBannerStyles[side]}
-        />
-      ))}
-
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-2xl focus:bg-[var(--accent)] focus:px-6 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+      >
+        본문으로 바로가기
+      </a>
       <div className="mx-auto max-w-[1180px] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
         <header className="sticky top-4 z-20 rounded-[24px] border border-[var(--border)] bg-white/88 px-4 py-3 shadow-[0_18px_40px_rgba(28,33,43,0.08)] backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <a href="#top" className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => openHomeView('top')}
+              className="flex items-center gap-3 text-left"
+              aria-label="마곡 코드찾기 홈으로"
+            >
               <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[0_14px_30px_rgba(43,109,255,0.24)]">
                 <Building2 className="size-5" />
               </div>
@@ -205,485 +1131,196 @@ function App() {
                   마곡 코드찾기
                 </div>
               </div>
-            </a>
+            </button>
 
             <nav className="hidden items-center gap-1 md:flex">
-              <a
-                href="#how"
-                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(43,109,255,0.08)] hover:text-[var(--foreground)]"
+              <Button
+                variant={view === 'home' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => openHomeView('finder')}
               >
-                이용 방법
-              </a>
-              <a
-                href="#finder"
-                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(43,109,255,0.08)] hover:text-[var(--foreground)]"
+                검색 홈
+              </Button>
+              <Button
+                variant={view === 'directory' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={openDirectoryView}
               >
-                코드 찾기
-              </a>
-              <a
-                href="#criteria"
-                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] transition hover:bg-[rgba(43,109,255,0.08)] hover:text-[var(--foreground)]"
+                전수 코드 사전
+              </Button>
+              <Button
+                variant={view === 'library' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={openLibraryView}
               >
-                판정 기준
-              </a>
+                법령 라이브러리
+              </Button>
+              <Button
+                variant={view === 'updates' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={openUpdatesView}
+              >
+                업데이트 로그
+              </Button>
+              {view === 'home' ? (
+                <Button variant="ghost" size="sm" onClick={() => openHomeView('criteria')}>
+                  법령 참고
+                </Button>
+              ) : null}
             </nav>
 
-            <Button asChild size="sm">
-              <a href="#finder">
-                바로 시작
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="muted" className="hidden sm:inline-flex">{activeZoneLabel} 기본</Badge>
+              <Button
+                size="sm"
+                onClick={() => (view === 'home' ? openDirectoryView() : openHomeView('finder'))}
+              >
+                {view === 'home' ? '코드 사전 열기' : '검색 홈으로'}
                 <ArrowRight className="size-4" />
-              </a>
-            </Button>
+              </Button>
+              <button
+                type="button"
+                className="inline-flex size-11 items-center justify-center rounded-2xl text-[var(--foreground-muted)] transition-colors hover:bg-[rgba(43,109,255,0.06)] hover:text-[var(--foreground)] md:hidden"
+                onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-nav-panel"
+              >
+                {isMobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              </button>
+            </div>
           </div>
+
+          {isMobileMenuOpen ? (
+            <nav
+              id="mobile-nav-panel"
+              className="mt-2 flex animate-slide-down flex-col gap-1 border-t border-[var(--border)] pt-3 md:hidden"
+              aria-label="모바일 내비게이션"
+            >
+              <Button
+                variant={view === 'home' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => { openHomeView('finder'); setIsMobileMenuOpen(false) }}
+                className="justify-start"
+              >
+                검색 홈
+              </Button>
+              <Button
+                variant={view === 'directory' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => { openDirectoryView(); setIsMobileMenuOpen(false) }}
+                className="justify-start"
+              >
+                전수 코드 사전
+              </Button>
+              <Button
+                variant={view === 'library' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => { openLibraryView(); setIsMobileMenuOpen(false) }}
+                className="justify-start"
+              >
+                법령 라이브러리
+              </Button>
+              <Button
+                variant={view === 'updates' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => { openUpdatesView(); setIsMobileMenuOpen(false) }}
+                className="justify-start"
+              >
+                업데이트 로그
+              </Button>
+              {view === 'home' ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { openHomeView('criteria'); setIsMobileMenuOpen(false) }}
+                  className="justify-start"
+                >
+                  법령 참고
+                </Button>
+              ) : null}
+            </nav>
+          ) : null}
         </header>
 
-        <main id="top" className="space-y-8 pb-12 pt-6 lg:space-y-10 lg:pt-8">
-          <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_380px] lg:items-stretch">
-            <div className="flex h-full flex-col rounded-[36px] border border-[var(--border)] bg-white/88 px-6 py-8 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:px-8 lg:px-10 lg:py-10">
-              <Badge variant="muted">마곡 일반산업단지 전용</Badge>
-              <h1 className="mt-5 max-w-4xl font-display text-4xl font-semibold tracking-[-0.06em] text-[var(--foreground)] sm:text-5xl lg:text-6xl">
-                업종코드 찾기부터
-                <br />
-                입주 가능성 확인까지
-                <br />
-                한 화면에서 끝냅니다.
-              </h1>
-              <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--foreground-muted)] sm:text-lg">
-                사업 설명이나 사업자등록증의 업태·종목을 넣으면 가장 가까운 업종코드를
-                먼저 찾고, 이어서 마곡 기준의 입주 가능성을 바로 보여드립니다.
-              </p>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild size="lg">
-                  <a href="#finder">
-                    지금 코드 찾기
-                    <ArrowRight className="size-4" />
-                  </a>
-                </Button>
-                <Button asChild variant="secondary" size="lg">
-                  <a href="#criteria">판정 기준 보기</a>
-                </Button>
-              </div>
-
-              <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                {introFacts.map((fact) => (
-                  <div
-                    key={fact.label}
-                    className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4"
-                  >
-                    <div className="text-xs font-medium text-[var(--foreground-subtle)]">
-                      {fact.label}
-                    </div>
-                    <div className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                      {fact.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Card className="h-full bg-[linear-gradient(180deg,rgba(243,248,255,0.98),rgba(255,255,255,0.94))]">
-              <CardContent className="flex h-full flex-col space-y-5 p-6">
-                <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
-                  <FileSearch className="size-6" />
-                </div>
-                <div>
-                  <h2 className="font-display text-2xl font-semibold text-[var(--foreground)]">
-                    처음 오셨다면 이렇게 보세요
+        <main id="main-content" className="animate-fade-in space-y-8 pb-12 pt-6 lg:space-y-10 lg:pt-8">
+          <Suspense fallback={<SkeletonCard />}>
+          {view === 'directory' ? (
+            <CodeDirectoryPage
+              defaultZoneType={
+                input.zoneType === 'industrialFacility'
+                  ? 'industrialFacility'
+                  : 'knowledgeIndustryCenter'
+              }
+              onBackHome={() => openHomeView('finder')}
+              onApplyCode={handleDirectoryApply}
+            />
+          ) : view === 'guide' ? (
+            currentGuide ? (
+              <GuidePage
+                guide={currentGuide}
+                onBackHome={() => openHomeView('finder')}
+                onOpenDirectory={openDirectoryView}
+                onOpenGuide={openGuideView}
+              />
+            ) : (
+              <Card className="border-[rgba(43,109,255,0.12)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+                <CardContent className="space-y-4 p-6">
+                  <Badge variant="muted">가이드 없음</Badge>
+                  <h2 className="font-display text-3xl font-semibold text-[var(--foreground)]">
+                    요청한 가이드를 찾지 못했습니다
                   </h2>
-                  <p className="mt-2 text-sm leading-7 text-[var(--foreground-muted)]">
-                    이 서비스는 업종코드표를 뒤지는 시간을 줄이기 위한 1차 확인 도구입니다.
+                  <p className="text-sm leading-7 text-[var(--foreground-muted)]">
+                    현재 생성된 가이드 범위 안에 없는 코드이거나 주소 해시가 잘못된
+                    상태입니다. 검색 홈이나 전수 코드 사전으로 돌아가 다시 진입해 주세요.
                   </p>
-                </div>
-
-                <div className="space-y-3">
-                  {steps.map((item) => (
-                    <div
-                      key={item.step}
-                      className="rounded-[24px] border border-[var(--border)] bg-white px-4 py-4"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="inline-flex size-8 items-center justify-center rounded-full bg-[rgba(43,109,255,0.12)] text-sm font-semibold text-[var(--accent)]">
-                          {item.step}
-                        </div>
-                        <div className="text-sm font-semibold text-[var(--foreground)]">
-                          {item.title}
-                        </div>
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                        {item.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-auto flex flex-wrap gap-2">
-                  <Badge variant="muted">
-                    시행령 기준일 {formatKoreanDate('2026-01-02')}
-                  </Badge>
-                  <Badge variant="muted">
-                    관리기본계획 고시일 {formatKoreanDate('2025-10-30')}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section id="how" className="grid gap-4 md:grid-cols-3">
-            {steps.map((item) => (
-              <Card key={item.step}>
-                <CardContent className="p-6">
-                  <div className="inline-flex size-10 items-center justify-center rounded-full bg-[rgba(43,109,255,0.12)] text-base font-semibold text-[var(--accent)]">
-                    {item.step}
-                  </div>
-                  <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)]">
-                    {item.title}
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-                    {item.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </section>
-
-          <section className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-            <Card>
-              <CardContent className="p-6">
-                <Badge variant="muted">이런 분께 맞습니다</Badge>
-                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
-                  누가 써도
-                  <br />
-                  첫 단계가 바로 보이도록 정리했습니다.
-                </h2>
-                <div className="mt-5 space-y-3">
-                  {useCases.map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-start gap-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4"
-                    >
-                      <CheckCircle2 className="mt-0.5 size-5 text-[var(--accent)]" />
-                      <p className="text-sm leading-6 text-[var(--foreground-muted)]">
-                        {item}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <Badge variant="muted">판정 원칙</Badge>
-                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
-                  빠르게 보여주되,
-                  <br />
-                  보수적으로 안내합니다.
-                </h2>
-                <div className="mt-5 space-y-3">
-                  {trustPoints.map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-start gap-3 rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-4 py-4"
-                    >
-                      <Landmark className="mt-0.5 size-5 text-[var(--accent)]" />
-                      <p className="text-sm leading-6 text-[var(--foreground-muted)]">
-                        {item}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section
-            id="finder"
-            aria-label="업종코드 분석 위저드"
-            className="rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(242,247,255,0.94))] p-6 shadow-[0_24px_70px_rgba(28,33,43,0.08)] sm:p-8"
-          >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <Badge variant="muted">핵심 기능</Badge>
-                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
-                  지금 바로 업종코드를 찾고 결과를 확인하세요
-                </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-                  자유 문장, 사업자등록증 업태·종목, 실무 메모 형태 모두 괜찮습니다.
-                  가장 가까운 후보를 먼저 보여드리고, 선택한 코드로 바로 판정합니다.
-                </p>
-              </div>
-              <div className="rounded-[24px] border border-[var(--border)] bg-white px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] lg:max-w-sm">
-                입력이 애매하면 관련 업종을 추천하고, 애매한 판정은 `심의 필요` 또는
-                `정보 부족`으로 보수적으로 표시합니다.
-              </div>
-            </div>
-
-            <div className="mt-8 space-y-6">
-              <div className="grid gap-3 lg:grid-cols-3">
-                {wizardSteps.map((step, index) => {
-                  const isActive = step.id === safeCurrentStep
-                  const isComplete = currentWizardIndex > index
-
-                  return (
-                    <div
-                      key={step.id}
-                      className={`rounded-[24px] border px-4 py-4 transition ${
-                        isActive
-                          ? 'border-[rgba(43,109,255,0.2)] bg-[rgba(239,245,255,0.96)] shadow-[0_18px_32px_rgba(43,109,255,0.08)]'
-                          : isComplete
-                            ? 'border-[rgba(43,109,255,0.16)] bg-white'
-                            : 'border-[var(--border)] bg-white/72'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold ${
-                            isActive || isComplete
-                              ? 'bg-[rgba(43,109,255,0.12)] text-[var(--accent)]'
-                              : 'bg-[rgba(130,147,173,0.18)] text-[var(--foreground-subtle)]'
-                          }`}
-                        >
-                          {isComplete ? <CheckCircle2 className="size-4" /> : index + 1}
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-[var(--foreground-subtle)]">
-                            {step.badge}
-                          </div>
-                          <div className="text-sm font-semibold text-[var(--foreground)]">
-                            {step.title}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              <Card className="bg-white/92">
-                <CardContent className="space-y-6 p-6">
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                    <div>
-                      <Badge variant="muted">{currentWizardStep.badge}</Badge>
-                      <h3 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
-                        {currentWizardStep.title}
-                      </h3>
-                      <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-                        {currentWizardStep.description}
-                      </p>
-                    </div>
-                    {safeCurrentStep !== 'discover' ? (
-                      <Button
-                        variant="secondary"
-                        onClick={() => setCurrentStep('discover')}
-                      >
-                        처음 단계로 돌아가기
-                      </Button>
-                    ) : null}
-                  </div>
-
-                  {safeCurrentStep === 'discover' ? (
-                    <IndustryDiscoveryPanel
-                      input={input}
-                      query={industryQuery}
-                      suggestions={industrySuggestions}
-                      status={discoveryStatus}
-                      error={discoveryError}
-                      onQueryChange={setIndustryQuery}
-                      onDiscover={discoverIndustry}
-                      onSuggestionSelect={applyIndustrySuggestion}
-                      onExampleSelect={runQuickSearch}
-                      onContinueManual={() => setCurrentStep('adjust')}
-                    />
-                  ) : null}
-
-                  {safeCurrentStep === 'adjust' ? (
-                    <div className="space-y-5">
-                      <Card className="bg-[rgba(239,245,255,0.86)]">
-                        <CardContent className="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-4">
-                          <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-                            <div className="text-xs text-[var(--foreground-subtle)]">
-                              선택한 업종코드
-                            </div>
-                            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                              {input.ksicCode.trim() || '직접 입력 예정'}
-                            </div>
-                          </div>
-                          <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-                            <div className="text-xs text-[var(--foreground-subtle)]">
-                              선택한 업종명
-                            </div>
-                            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                              {input.ksicName.trim() || '아직 선택 전'}
-                            </div>
-                          </div>
-                          <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-                            <div className="text-xs text-[var(--foreground-subtle)]">
-                              현재 구역
-                            </div>
-                            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                              {input.zoneType === 'industrialFacility'
-                                ? '산업시설구역'
-                                : input.zoneType === 'knowledgeIndustryCenter'
-                                  ? '지식산업센터'
-                                  : '지원시설구역'}
-                            </div>
-                          </div>
-                          <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-                            <div className="text-xs text-[var(--foreground-subtle)]">
-                              안내
-                            </div>
-                            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                              필요하면 조건만 보정하고 결과 보기로 이동
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <EligibilityForm
-                        input={input}
-                        status={status}
-                        onFieldChange={setField}
-                        onFlagChange={setFlag}
-                        onEvaluate={evaluate}
-                        onReset={reset}
-                        onPrevious={() => setCurrentStep('discover')}
-                        primaryActionLabel="결과 보기"
-                        secondaryActionLabel="이전 단계"
-                        defaultExpanded
-                      />
-                    </div>
-                  ) : null}
-
-                  {safeCurrentStep === 'result' ? (
-                    <ResultPanel
-                      input={input}
-                      result={result}
-                      status={status}
-                      error={error}
-                      onEvaluate={evaluate}
-                      onAdjust={() => setCurrentStep('adjust')}
-                      sticky={false}
-                      stepLabel="3단계"
-                    />
-                  ) : null}
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          <section
-            id="affiliate"
-            className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(248,252,255,0.96),rgba(255,255,255,0.94))] p-6 shadow-[0_20px_56px_rgba(28,33,43,0.08)] sm:p-8"
-          >
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,448px)] lg:items-start">
-              <div>
-                <Badge variant="muted">추천 상품</Badge>
-                <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
-                  업무용 추천 상품
-                </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-                  업무 공간이나 사무환경을 준비할 때 참고할 수 있는 외부 추천 상품입니다.
-                  필요한 경우에만 가볍게 확인해 보세요.
-                </p>
-
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {affiliateActions.map((item) => (
-                    <Button
-                      key={item.title}
-                      asChild
-                      variant={item.variant}
-                      className="h-auto rounded-2xl px-5 py-4"
-                    >
-                      <a
-                        href={item.href}
-                        target="_blank"
-                        rel="nofollow sponsored noopener"
-                        referrerPolicy="unsafe-url"
-                      >
-                        <span className="flex flex-col items-start gap-1 text-left">
-                          <span className="font-semibold">{item.title}</span>
-                          <span className="text-xs font-medium opacity-80">
-                            {item.description}
-                          </span>
-                        </span>
-                      </a>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="secondary" onClick={() => openHomeView('finder')}>
+                      검색 홈으로 돌아가기
                     </Button>
-                  ))}
-                </div>
-
-                <div className="mt-6 rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4">
-                  <div className="flex items-start gap-3">
-                    <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
-                      <ExternalLink className="size-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-[var(--foreground)]">
-                        제휴 안내
-                      </div>
-                      <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                        {coupangDisclosureText}
-                      </p>
-                    </div>
+                    <Button variant="outline" onClick={openDirectoryView}>
+                      코드 사전 보기
+                    </Button>
                   </div>
-                </div>
-              </div>
-
-              <div className="rounded-[28px] border border-[var(--border)] bg-white p-5 shadow-[0_18px_34px_rgba(43,109,255,0.08)]">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-xs font-semibold tracking-[0.14em] text-[var(--foreground-subtle)]">
-                      추천 위젯 3종
-                    </div>
-                    <div className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                      책상 주변이나 사무환경 준비에 참고할 수 있는 추천 위젯입니다.
-                    </div>
-                  </div>
-                  <Badge variant="muted">120 x 240</Badge>
-                </div>
-
-                <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {affiliateWidgets.map((widget, index) => (
-                    <div
-                      key={widget.src}
-                      className="rounded-[22px] border border-[var(--border)] bg-[rgba(243,248,255,0.78)] p-3"
-                    >
-                      <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
-                        추천 위젯 {index + 1}
-                      </div>
-                      <div className="mt-3 flex justify-center rounded-[18px] bg-white px-2 py-3 shadow-[inset_0_0_0_1px_rgba(190,208,234,0.45)]">
-                        <iframe
-                          src={widget.src}
-                          title={widget.title}
-                          width="120"
-                          height="240"
-                          frameBorder="0"
-                          scrolling="no"
-                          referrerPolicy="unsafe-url"
-                          loading="lazy"
-                          className="overflow-hidden rounded-[18px] bg-white"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="criteria" className="space-y-4">
-            <div className="max-w-3xl">
-              <Badge variant="muted">판정 기준</Badge>
-              <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
-                어떤 기준으로 보는지 아래에서 바로 확인할 수 있습니다
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-                산업시설구역, 지식산업센터 특례, 심의 필요 업종, 명시적 제한 업종을
-                각각 나눠 두었습니다.
-              </p>
-            </div>
-            <RulebookTabs />
-          </section>
+                </CardContent>
+              </Card>
+            )
+          ) : view === 'library' ? (
+            <LegalLibraryPage
+              onBackHome={() => openHomeView('finder')}
+              onOpenUpdates={openUpdatesView}
+            />
+          ) : view === 'updates' ? (
+            <UpdateLogPage
+              onBackHome={() => openHomeView('finder')}
+              onOpenLibrary={openLibraryView}
+            />
+          ) : (
+            <HomeSections
+              input={input}
+              status={status}
+              result={result}
+              error={error}
+              industryQuery={industryQuery}
+              industrySuggestions={industrySuggestions}
+              discoveryStatus={discoveryStatus}
+              discoveryError={discoveryError}
+              currentStep={currentStep}
+              setField={setField}
+              setFlag={setFlag}
+              setCurrentStep={setCurrentStep}
+              setIndustryQuery={setIndustryQuery}
+              discoverIndustry={discoverIndustry}
+              applyIndustrySuggestion={applyIndustrySuggestion}
+              evaluate={evaluate}
+              reset={reset}
+              onOpenDirectory={openDirectoryView}
+              onOpenLibrary={openLibraryView}
+              onOpenUpdates={openUpdatesView}
+              onOpenGuide={openGuideView}
+            />
+          )}
+          </Suspense>
 
           <footer className="space-y-6 rounded-[32px] border border-[var(--border)] bg-white/88 px-6 py-6 shadow-[0_20px_50px_rgba(28,33,43,0.06)]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -695,15 +1332,17 @@ function App() {
                   마곡 코드찾기
                 </div>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--foreground-muted)]">
-                  마곡 일반산업단지 입주 검토를 더 빨리 시작할 수 있도록, 업종코드
-                  추천과 예비판정을 한 화면에 정리한 서비스입니다.
+                  마곡 일반산업단지 입주 검토를 더 빨리 시작할 수 있도록, 업종코드 추천,
+                  전체 코드 사전, 예비판정을 한 화면 체계로 정리한 서비스입니다.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <Badge variant="muted">업종코드 추천</Badge>
+                <Badge variant="muted">전수 코드 사전</Badge>
                 <Badge variant="muted">입주 예비판정</Badge>
-                <Badge variant="muted">법령 근거 정리</Badge>
+                <Badge variant="muted">법령 라이브러리</Badge>
+                <Badge variant="muted">업데이트 로그</Badge>
               </div>
             </div>
 
@@ -718,7 +1357,7 @@ function App() {
               ))}
             </div>
 
-            <div className="rounded-[26px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm leading-6 text-sky-900">
+            <div className="rounded-[26px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4 text-sm leading-6 text-[var(--info-foreground)]">
               제휴 링크가 포함된 영역에서는 대가성 안내를 함께 표기합니다.
             </div>
           </footer>

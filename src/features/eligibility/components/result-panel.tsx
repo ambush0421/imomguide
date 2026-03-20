@@ -10,7 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { ConvergenceReviewCard } from '@/features/eligibility/components/convergence-review-card'
+import { ExpertInsightCard } from '@/features/eligibility/components/expert-insight-card'
+import { LegalFootnotes } from '@/features/eligibility/components/legal-footnotes'
+import { LayoutSimulator } from '@/features/eligibility/components/layout-simulator'
+import { getConvergenceReviewPlaybook } from '@/features/eligibility/data/convergence-review-playbook'
+import { getExpertInsights } from '@/features/eligibility/data/expert-insights'
 import { getEligibilityScreenInsight } from '@/features/eligibility/data/screen-insights'
+import { getGuideEntryByCode } from '@/features/guides/data/guide-catalog'
 import type {
   EligibilityInput,
   EligibilityResult,
@@ -30,6 +37,7 @@ interface ResultPanelProps {
   error: string | null
   onEvaluate: () => void
   onAdjust?: () => void
+  onOpenGuide?: (code: string) => void
   sticky?: boolean
   stepLabel?: string
 }
@@ -57,11 +65,17 @@ export function ResultPanel({
   error,
   onEvaluate,
   onAdjust,
+  onOpenGuide,
   sticky = true,
   stepLabel = '2단계',
 }: ResultPanelProps) {
   const hasManualInput = Boolean(input.ksicCode.trim() || input.ksicName.trim())
   const screenInsight = getEligibilityScreenInsight(input, result)
+  const expertInsights = getExpertInsights(input, result)
+  const convergencePlaybook = getConvergenceReviewPlaybook(input, result)
+  const guideEntry = input.ksicCode.trim()
+    ? getGuideEntryByCode(input.ksicCode.trim())
+    : null
 
   return (
     <Card className={sticky ? 'sticky top-6 overflow-hidden bg-white/96' : 'overflow-hidden bg-white/96'}>
@@ -192,6 +206,24 @@ export function ResultPanel({
               </section>
             ) : null}
 
+            {expertInsights.length > 0 ? (
+              <section className="space-y-4 rounded-[24px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="muted">전문가 인사이트</Badge>
+                  <Badge variant="muted">실무형 해설</Badge>
+                </div>
+                <div className="grid gap-4 xl:grid-cols-2">
+                  {expertInsights.map((insight) => (
+                    <ExpertInsightCard key={insight.id} insight={insight} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {convergencePlaybook ? (
+              <ConvergenceReviewCard playbook={convergencePlaybook} />
+            ) : null}
+
             <div className="grid gap-4 md:grid-cols-2">
               <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -228,30 +260,35 @@ export function ResultPanel({
               </section>
             </div>
 
-            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
-              <div className="flex items-center justify-between gap-3">
-                <h4 className="font-display text-lg font-semibold text-[var(--foreground)]">
-                  세부 근거
+            {guideEntry && onOpenGuide ? (
+              <section className="rounded-[24px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="muted">연관 가이드</Badge>
+                  <Badge variant="muted">{guideEntry.code}</Badge>
+                </div>
+                <h4 className="mt-4 font-display text-lg font-semibold text-[var(--foreground)]">
+                  이 업종 기준 설명을 문서형 가이드로 다시 읽을 수 있습니다
                 </h4>
-                <Badge variant="muted">{result.legalBases.length}건</Badge>
-              </div>
-              <div className="mt-4 space-y-3">
-                {result.legalBases.map((basis) => (
-                  <article
-                    key={basis.id}
-                    className="rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4"
+                <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                  결과 화면의 요약보다 더 긴 설명, 구역 비교, 자주 묻는 질문을 한 번에
+                  보는 가이드 페이지입니다.
+                </p>
+                <div className="mt-4">
+                  <Button
+                    variant="secondary"
+                    onClick={() => onOpenGuide(guideEntry.code)}
+                    aria-label={`${guideEntry.code} 가이드 보기`}
                   >
-                    <div className="text-xs uppercase tracking-[0.14em] text-[var(--foreground-subtle)]">
-                      {basis.source === 'magokPlan' ? '고시문' : '시행령'} ·{' '}
-                      {basis.citation}
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                      {basis.summary}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </section>
+                    이 코드 가이드 보기
+                    <ArrowRight className="size-4" />
+                  </Button>
+                </div>
+              </section>
+            ) : null}
+
+            <LayoutSimulator input={input} />
+
+            <LegalFootnotes legalBases={result.legalBases} />
           </div>
         ) : null}
       </CardContent>

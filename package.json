@@ -12,9 +12,13 @@
   "scripts": {
     "dev": "npm run web:dev",
     "web:dev": "vite --host 0.0.0.0",
+    "prebuild": "npm run export:seo-pages",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest run --pool=threads --maxWorkers=1",
+    "export:directory": "npx vite-node scripts/export-magok-directory.mts && python scripts/export_magok_directory_xlsx.py",
+    "export:guides": "npx vite-node scripts/export-magok-guides.mts",
+    "export:seo-pages": "npx vite-node scripts/export-magok-seo-pages.mts",
     "preview": "npm run web:preview",
     "web:preview": "vite preview --host 0.0.0.0",
     "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 5180\" \"wait-on tcp:127.0.0.1:5180 && cross-env ELECTRON_RENDERER_URL=http://127.0.0.1:5180 electron electron/main.mjs\"",

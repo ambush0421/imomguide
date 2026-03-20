@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://loopincode.com/</loc>
-    <lastmod>2026-03-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-</urlset>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://loopincode.com/sitemaps/core.xml</loc>
+    <lastmod>2026-03-20</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://loopincode.com/sitemaps/guides.xml</loc>
+    <lastmod>2026-03-20</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://loopincode.com/sitemaps/faq.xml</loc>
+    <lastmod>2026-03-20</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://loopincode.com/sitemaps/library.xml</loc>
+    <lastmod>2026-03-20</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://loopincode.com/sitemaps/updates.xml</loc>
+    <lastmod>2026-03-20</lastmod>
+  </sitemap>
+</sitemapindex>

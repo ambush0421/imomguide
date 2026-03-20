@@ -45,6 +45,9 @@ const defaultInput: EligibilityInput = {
   zoneType: 'knowledgeIndustryCenter',
   ksicCode: '',
   ksicName: '',
+  companyScale: 'sme',
+  grossAreaPy: '',
+  rndHeadcount: '',
   applicantType: 'company',
   regulatoryFit: 'auto',
   notes: '',
@@ -143,7 +146,13 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
 
     try {
       await wait(220)
-      const industrySuggestions = discoverIndustrySuggestions(get().industryQuery)
+      const { industryQuery, input } = get()
+      const industrySuggestions = discoverIndustrySuggestions(
+        industryQuery,
+        input.zoneType === 'supportFacility'
+          ? 'knowledgeIndustryCenter'
+          : input.zoneType,
+      )
 
       set({
         industrySuggestions,

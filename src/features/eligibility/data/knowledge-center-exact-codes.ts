@@ -1,6 +1,6 @@
 import knowledgeCenterExactCodesCsv from '../../../../docs/codex-brain/magok_knowledge_industry_center_exact_5digit_codes.csv?raw'
 
-type KnowledgeCenterCsvVerdict =
+export type KnowledgeCenterCsvVerdict =
   | '자동 허용'
   | '조건부 허용'
   | '추가 확인'
@@ -13,6 +13,15 @@ interface KnowledgeCenterCsvRow {
   code: string
   name: string
   note: string
+}
+
+export interface KnowledgeCenterCatalogEntry {
+  verdict: KnowledgeCenterCsvVerdict
+  category: string
+  code: string
+  name: string
+  note: string
+  isExactCode: boolean
 }
 
 export interface KnowledgeCenterExactCodeEntry {
@@ -110,6 +119,16 @@ function toEntryMap(rows: KnowledgeCenterCsvRow[]) {
 }
 
 const knowledgeCenterRows = parseKnowledgeCenterRows(knowledgeCenterExactCodesCsv)
+
+export const KNOWLEDGE_CENTER_CATALOG_ENTRIES: KnowledgeCenterCatalogEntry[] =
+  knowledgeCenterRows.map((row) => ({
+    verdict: row.verdict,
+    category: row.category,
+    code: row.code,
+    name: row.name,
+    note: row.note,
+    isExactCode: /^\d{5}$/.test(row.code),
+  }))
 
 const autoAllowedRows = knowledgeCenterRows.filter((row) => row.verdict === '자동 허용')
 const conditionalRows = knowledgeCenterRows.filter((row) => row.verdict === '조건부 허용')

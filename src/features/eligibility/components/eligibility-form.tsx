@@ -391,6 +391,77 @@ export function EligibilityForm({
                 </div>
                 <div>
                   <h3 className="font-display text-lg font-semibold text-[var(--foreground)]">
+                    마곡 입주 레이아웃 시뮬레이션
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
+                    총 면적과 기업 규모를 입력하면 연구시설 최소 면적과 제조시설 상한을
+                    보수적으로 계산해 결과 화면에 함께 보여줍니다.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label>기업 규모</Label>
+                  <Select
+                    value={input.companyScale}
+                    onValueChange={(value) =>
+                      onFieldChange(
+                        'companyScale',
+                        value as EligibilityInput['companyScale'],
+                      )
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="기업 규모 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sme">중소기업</SelectItem>
+                      <SelectItem value="large">대기업</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="grossAreaPy">총 면적(평)</Label>
+                  <Input
+                    id="grossAreaPy"
+                    inputMode="decimal"
+                    value={input.grossAreaPy}
+                    placeholder="예: 1000"
+                    onChange={(event) =>
+                      onFieldChange('grossAreaPy', event.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rndHeadcount">예상 연구개발 인력(명)</Label>
+                  <Input
+                    id="rndHeadcount"
+                    inputMode="numeric"
+                    value={input.rndHeadcount}
+                    placeholder="예: 18"
+                    onChange={(event) =>
+                      onFieldChange('rndHeadcount', event.target.value)
+                    }
+                  />
+                </div>
+              </div>
+
+              <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
+                현재 MVP는 관리기본계획상 연구시설 비율과 제조시설 20% 조건을 빠르게
+                예비 계산하는 용도입니다. 최종 심사는 관리기관 확인이 필요합니다.
+              </p>
+            </section>
+
+            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+              <div className="mb-4 flex items-start gap-3">
+                <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                  <Factory className="size-4" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-semibold text-[var(--foreground)]">
                     제한·예외 조건
                   </h3>
                   <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
