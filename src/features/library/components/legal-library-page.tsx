@@ -20,17 +20,17 @@ export function LegalLibraryPage({
   return (
     <section
       id="library"
-      className="space-y-6 rounded-[36px] border border-[var(--border)] bg-[var(--surface-strong)] p-6 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-8"
+      className="space-y-5 rounded-[20px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-6 lg:p-7"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
+        <div className="max-w-3xl">
           <Badge variant="muted">법령 라이브러리</Badge>
-          <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
+          <h1 className="mt-4 max-w-3xl font-display text-[2rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.4rem]">
             판정에 쓰인 문서를
             <br />
             한 번에 볼 수 있습니다
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-[15px]">
             결과 화면에 나온 근거를 문서별로 다시 모아봤습니다. 궁금한 문장을 직접
             확인하거나, 원문으로 이어서 볼 때 편하게 참고할 수 있습니다.
           </p>
@@ -50,13 +50,13 @@ export function LegalLibraryPage({
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
         {entries.map((entry) => (
           <Card
             key={entry.id}
             className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]"
           >
-            <CardContent className="space-y-5 p-5">
+            <CardContent className="space-y-5 p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="muted">
                   {entry.sourceKind === 'magokPlan' ? '마곡 고시문' : '산업집적법 시행령'}
@@ -76,8 +76,8 @@ export function LegalLibraryPage({
                 </p>
               </div>
 
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4">
+              <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
+                <div className="rounded-[14px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                     <Scale className="size-4 text-[var(--accent)]" />
                     문서 정보
@@ -100,7 +100,7 @@ export function LegalLibraryPage({
                   ) : null}
                 </div>
 
-                <div className="rounded-[22px] border border-[var(--border)] bg-white/92 p-4">
+                <div className="rounded-[14px] border border-[var(--border)] bg-white/92 p-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                     <ExternalLink className="size-4 text-[var(--accent)]" />
                     원문 출처
@@ -128,7 +128,7 @@ export function LegalLibraryPage({
                 </div>
               </div>
 
-              <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4">
+              <div className="rounded-[14px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                   <BookOpenText className="size-4 text-[var(--accent)]" />
                   이 문서를 언제 보나요?
@@ -142,7 +142,7 @@ export function LegalLibraryPage({
                 {entry.bases.map((basis) => (
                   <article
                     key={basis.id}
-                    className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.84)] p-4"
+                    className="rounded-[14px] border border-[var(--border)] bg-[rgba(255,255,255,0.84)] p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge>{basis.citation}</Badge>
@@ -155,7 +155,7 @@ export function LegalLibraryPage({
                       {basis.summary}
                     </p>
                     {basis.quote ? (
-                      <div className="mt-3 rounded-xl bg-[rgba(239,245,255,0.84)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                      <div className="mt-3 rounded-[12px] bg-[rgba(239,245,255,0.84)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
                         쉽게 풀면: {basis.quote}
                       </div>
                     ) : null}
@@ -167,7 +167,7 @@ export function LegalLibraryPage({
         ))}
       </div>
 
-      <div className="rounded-[28px] border border-[var(--border)] bg-white/92 p-5">
+      <div className="rounded-[18px] border border-[var(--border)] bg-white/92 p-5 sm:p-6">
         <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
           <Scale className="size-4 text-[var(--accent)]" />
           이렇게 보면 좋습니다

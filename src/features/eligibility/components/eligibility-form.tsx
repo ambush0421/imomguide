@@ -144,18 +144,18 @@ export function EligibilityForm({
           직접 바꾸고 싶을 때만 이 섹션을 열어 주세요.
         </CardDescription>
       </CardHeader>
-      <CardContent className={embedded ? 'space-y-4 p-0 sm:space-y-6' : 'space-y-6'}>
-        <section className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] p-3.5 shadow-none sm:rounded-[24px] sm:p-5 sm:shadow-[var(--shadow-sm)]">
+      <CardContent className={embedded ? 'space-y-5 p-0 sm:space-y-7' : 'space-y-7'}>
+        <section className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] p-4 shadow-none sm:rounded-[24px] sm:p-6 sm:shadow-[var(--shadow-sm)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)] sm:size-10">
                 <SearchCheck className="size-4" />
               </div>
               <div>
-                <h3 className="font-display text-base font-semibold text-[var(--foreground)] sm:text-lg">
+                <h3 className="font-display text-lg font-semibold text-[var(--foreground)] sm:text-xl">
                   현재 판정 설정
                 </h3>
-                <p className="mt-1 text-[13px] leading-5 text-[var(--foreground-muted)] sm:text-sm sm:leading-6">
+                <p className="mt-2 max-w-[34rem] text-[13px] leading-6 text-[var(--foreground-muted)] sm:text-[15px] sm:leading-7">
                   필요한 항목만 아래에서 바꾸고 다시 판정하면 됩니다.
                 </p>
               </div>
@@ -180,28 +180,28 @@ export function EligibilityForm({
             </Button>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)] sm:px-4">
+          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]">
               <div className="text-xs text-[var(--foreground-subtle)]">구역</div>
-              <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
+              <div className="mt-1 text-sm font-medium leading-6 text-[var(--foreground)]">
                 {zoneTypeLabels[input.zoneType]}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)] sm:px-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]">
               <div className="text-xs text-[var(--foreground-subtle)]">회사/기관 유형</div>
-              <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
+              <div className="mt-1 text-sm font-medium leading-6 text-[var(--foreground)]">
                 {applicantTypeLabels[input.applicantType]}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)] sm:px-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]">
               <div className="text-xs text-[var(--foreground-subtle)]">선택한 업종코드</div>
-              <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
+              <div className="mt-1 text-sm font-medium leading-6 text-[var(--foreground)]">
                 {input.ksicCode.trim() || '직접 입력 예정'}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)] sm:px-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]">
               <div className="text-xs text-[var(--foreground-subtle)]">예외조건</div>
-              <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
+              <div className="mt-1 text-sm font-medium leading-6 text-[var(--foreground)]">
                 {enabledFlagCount > 0 ? `${enabledFlagCount}개 적용 중` : '없음'}
               </div>
             </div>
@@ -242,7 +242,7 @@ export function EligibilityForm({
 
         {isExpanded ? (
           <>
-            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:p-6">
               <div className="mb-4 flex items-start gap-3">
                 <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                   <Building2 className="size-4" />
@@ -257,7 +257,7 @@ export function EligibilityForm({
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>구역 또는 건물 유형</Label>
                   <Select
@@ -394,7 +394,7 @@ export function EligibilityForm({
               </div>
             </section>
 
-            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:p-6">
               <div className="mb-4 flex items-start gap-3">
                 <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                   <Factory className="size-4" />
@@ -463,7 +463,7 @@ export function EligibilityForm({
               </p>
             </section>
 
-            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:p-6">
               <div className="mb-4 flex items-start gap-3">
                 <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                   <Factory className="size-4" />
@@ -482,13 +482,13 @@ export function EligibilityForm({
                 {switchRows.map((row) => (
                   <label
                     key={row.key}
-                    className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3 shadow-[var(--shadow-sm)]"
+                    className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-4 shadow-[var(--shadow-sm)]"
                   >
                     <div className="space-y-1 pr-4">
                       <span className="block text-sm font-medium text-[var(--foreground)]">
                         {row.label}
                       </span>
-                      <span className="block text-xs leading-5 text-[var(--foreground-muted)]">
+                      <span className="block text-xs leading-6 text-[var(--foreground-muted)]">
                         {row.description}
                       </span>
                     </div>
@@ -502,7 +502,7 @@ export function EligibilityForm({
               </div>
             </section>
 
-            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
+            <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:p-6">
               <div className="mb-4 flex items-start gap-3">
                 <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                   <FlaskConical className="size-4" />

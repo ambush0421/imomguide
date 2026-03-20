@@ -18,17 +18,17 @@ export function UpdateLogPage({
   return (
     <section
       id="updates"
-      className="space-y-6 rounded-[36px] border border-[var(--border)] bg-[var(--surface-strong)] p-6 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-8"
+      className="space-y-5 rounded-[20px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-6 lg:p-7"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
+        <div className="max-w-3xl">
           <Badge variant="muted">업데이트 로그</Badge>
-          <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
+          <h1 className="mt-4 max-w-3xl font-display text-[2rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.4rem]">
             최근에 달라진 내용을
             <br />
             한 번에 볼 수 있습니다
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-[15px]">
             언제 무엇이 바뀌었는지, 어떤 화면에 반영됐는지 한눈에 확인할 수 있습니다.
             이전과 지금이 어떻게 달라졌는지 보고 싶을 때 참고하기 좋습니다.
           </p>
@@ -54,8 +54,8 @@ export function UpdateLogPage({
             key={entry.id}
             className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]"
           >
-            <CardContent className="space-y-5 p-5">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <CardContent className="space-y-5 p-5 sm:p-6">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="muted">
@@ -71,7 +71,7 @@ export function UpdateLogPage({
                   </p>
                 </div>
 
-                <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] px-4 py-4 lg:max-w-xs">
+                <div className="rounded-[14px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] px-4 py-4 xl:max-w-xs">
                   <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                     <FileSearch className="size-4 text-[var(--accent)]" />
                     바뀐 화면
@@ -84,8 +84,8 @@ export function UpdateLogPage({
                 </div>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-                <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-4">
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start">
+                <div className="rounded-[16px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-4">
                   <div className="text-sm font-medium text-[var(--foreground)]">
                     이번에 달라진 점
                   </div>
@@ -96,7 +96,7 @@ export function UpdateLogPage({
                   </ul>
                 </div>
 
-                <div className="rounded-[24px] border border-[var(--border)] bg-white/92 p-4">
+                <div className="rounded-[16px] border border-[var(--border)] bg-white/92 p-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                     <ExternalLink className="size-4 text-[var(--accent)]" />
                     참고한 출처
@@ -106,7 +106,7 @@ export function UpdateLogPage({
                       {entry.sourceReferences.map((source) => (
                         <article
                           key={`${entry.id}-${source.url}`}
-                          className="rounded-[18px] border border-[var(--border)] bg-[rgba(248,251,255,0.82)] p-3"
+                          className="rounded-[12px] border border-[var(--border)] bg-[rgba(248,251,255,0.82)] p-3"
                         >
                           <a
                             className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--accent)] hover:underline"
@@ -148,7 +148,7 @@ export function UpdateLogPage({
         ))}
       </div>
 
-      <div className="rounded-[28px] border border-[var(--border)] bg-white/92 p-5">
+      <div className="rounded-[18px] border border-[var(--border)] bg-white/92 p-5 sm:p-6">
         <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
           <History className="size-4 text-[var(--accent)]" />
           이렇게 보면 좋습니다

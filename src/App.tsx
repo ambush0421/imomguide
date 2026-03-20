@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import {
   ArrowRight,
   BookOpenText,
-  Building2,
   CheckCircle2,
   ChevronDown,
   ExternalLink,
@@ -62,6 +61,7 @@ import { formatKoreanDate, formatNumber } from '@/utils/format'
 
 type AppView = 'home' | 'directory' | 'library' | 'updates' | 'guide'
 type DiscoverScreen = 'compose' | 'results'
+type ViewportTier = 'mobile' | 'tablet' | 'desktop'
 
 const introSteps = [
   {
@@ -175,6 +175,11 @@ const footerFacts = [
   '활동 페이지: https://loopincode.com',
 ]
 
+const brandAssets = {
+  symbol: '/brand/magok-codefinder-symbol.svg',
+  wordmark: '/brand/magok-codefinder-logo-horizontal.svg',
+} as const
+
 function getHashState(hash: string): { view: AppView; guideCode: string | null } {
   if (hash.startsWith('#guides/')) {
     const guideCode = decodeURIComponent(hash.slice('#guides/'.length)).trim()
@@ -278,8 +283,8 @@ function HomeSections({
     currentStep === 'result' && !canStayOnResultStep ? 'adjust' : currentStep
   const [isAffiliateExpanded, setIsAffiliateExpanded] = useState(false)
   const [discoverScreen, setDiscoverScreen] = useState<DiscoverScreen>('compose')
-  const [isMobileViewport, setIsMobileViewport] = useState(false)
-  const [isMobileFinderFocused, setIsMobileFinderFocused] = useState(false)
+  const [viewportTier, setViewportTier] = useState<ViewportTier>('desktop')
+  const [isWizardFocused, setIsWizardFocused] = useState(false)
   const activeDiscoverScreen =
     discoveryStatus === 'idle' &&
     industrySuggestions.length === 0 &&
@@ -322,7 +327,36 @@ function HomeSections({
   const featuredGuides = getFeaturedGuideEntries(3)
   const canOpenAdjustStep = Boolean(input.ksicCode.trim() || input.ksicName.trim())
   const canOpenResultStep = canStayOnResultStep
-  const isMobileWizardFocused = isMobileViewport && isMobileFinderFocused
+  const currentZoneLabel =
+    input.zoneType === 'industrialFacility'
+      ? '산업시설구역'
+      : input.zoneType === 'knowledgeIndustryCenter'
+        ? '지식산업센터'
+        : '지원시설구역'
+  const isDesktopViewport = viewportTier === 'desktop'
+  const isCompactWizardFocused = isWizardFocused && !isDesktopViewport
+  const isDesktopWizardFocused = isWizardFocused && isDesktopViewport
+  const showOverviewSections = !isWizardFocused
+  const focusContextCards = [
+    {
+      label: '입력한 설명',
+      value: industryQuery.trim() || input.ksicName.trim() || '아직 입력 전',
+    },
+    {
+      label: '선택 코드',
+      value: input.ksicCode.trim() || '아직 선택 전',
+    },
+    {
+      label: '현재 구역',
+      value: currentZoneLabel,
+    },
+  ] as const
+  const focusRailHint =
+    safeCurrentStep === 'discover'
+      ? '왼쪽에서 추천 코드 하나만 먼저 고르면 다음 단계로 자연스럽게 이어집니다.'
+      : safeCurrentStep === 'adjust'
+        ? '꼭 필요한 조건만 확인한 뒤 결과 보기 버튼으로 넘어가면 됩니다.'
+        : '결과 제목, 왜 그렇게 판단했는지, 다음에 확인할 것 순서로 읽으면 가장 빠릅니다.'
 
   const introFacts = [
     {
@@ -371,35 +405,58 @@ function HomeSections({
       return
     }
 
-    const mediaQuery = window.matchMedia('(max-width: 639px)')
+    const mobileQuery = window.matchMedia('(max-width: 639px)')
+    const tabletQuery = window.matchMedia('(min-width: 640px) and (max-width: 1023px)')
     const syncViewport = () => {
-      setIsMobileViewport(mediaQuery.matches)
+      if (mobileQuery.matches) {
+        setViewportTier('mobile')
+        return
+      }
+
+      if (tabletQuery.matches) {
+        setViewportTier('tablet')
+        return
+      }
+
+      setViewportTier('desktop')
     }
 
     syncViewport()
 
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', syncViewport)
-      return () => mediaQuery.removeEventListener('change', syncViewport)
+    if (
+      typeof mobileQuery.addEventListener === 'function' &&
+      typeof tabletQuery.addEventListener === 'function'
+    ) {
+      mobileQuery.addEventListener('change', syncViewport)
+      tabletQuery.addEventListener('change', syncViewport)
+      return () => {
+        mobileQuery.removeEventListener('change', syncViewport)
+        tabletQuery.removeEventListener('change', syncViewport)
+      }
     }
 
-    mediaQuery.addListener(syncViewport)
-    return () => mediaQuery.removeListener(syncViewport)
+    mobileQuery.addListener(syncViewport)
+    tabletQuery.addListener(syncViewport)
+    return () => {
+      mobileQuery.removeListener(syncViewport)
+      tabletQuery.removeListener(syncViewport)
+    }
   }, [])
 
   useEffect(() => {
-    if (!isMobileWizardFocused) {
+    if (!isWizardFocused) {
       return
     }
 
     scrollToSection('finder')
-  }, [activeDiscoverScreen, isMobileWizardFocused, safeCurrentStep])
+  }, [activeDiscoverScreen, isWizardFocused, safeCurrentStep])
+
+  function enterWizardFocus() {
+    setIsWizardFocused(true)
+  }
 
   function handleDiscoverSearch() {
-    if (isMobileViewport) {
-      setIsMobileFinderFocused(true)
-    }
-
+    enterWizardFocus()
     setDiscoverScreen('results')
     void discoverIndustry()
   }
@@ -409,9 +466,7 @@ function HomeSections({
   }
 
   function handleWizardStepSelect(step: EligibilityStep) {
-    if (isMobileViewport) {
-      setIsMobileFinderFocused(true)
-    }
+    enterWizardFocus()
 
     if (step === 'discover') {
       setCurrentStep('discover')
@@ -435,10 +490,7 @@ function HomeSections({
   }
 
   function runQuickSearch(value: string) {
-    if (isMobileViewport) {
-      setIsMobileFinderFocused(true)
-    }
-
+    enterWizardFocus()
     setIndustryQuery(value)
     setDiscoverScreen('results')
     void discoverIndustry()
@@ -447,184 +499,245 @@ function HomeSections({
   function handleSuggestionSelect(
     suggestion: ReturnType<typeof useEligibilityStore.getState>['industrySuggestions'][number],
   ) {
-    if (isMobileViewport) {
-      setIsMobileFinderFocused(true)
-    }
-
+    enterWizardFocus()
     void applyIndustrySuggestion(suggestion)
   }
 
   function handleEvaluateStep() {
-    if (isMobileViewport) {
-      setIsMobileFinderFocused(true)
-    }
-
+    enterWizardFocus()
     void evaluate()
   }
 
   function handleContinueManualStep() {
-    if (isMobileViewport) {
-      setIsMobileFinderFocused(true)
-    }
-
+    enterWizardFocus()
     setCurrentStep('adjust')
   }
 
   function handleFinderEntry() {
-    if (isMobileViewport) {
-      setIsMobileFinderFocused(true)
-    }
-
+    enterWizardFocus()
     scrollToSection('finder')
   }
 
-  function handleExitMobileWizardFocus() {
-    setIsMobileFinderFocused(false)
+  function handleExitWizardFocus() {
+    setIsWizardFocused(false)
     scrollToSection('top')
   }
 
   return (
     <>
-      {!isMobileWizardFocused ? (
+      {showOverviewSections ? (
         <>
-          <section className="grid gap-4 lg:grid-cols-[minmax(0,1.14fr)_320px] lg:items-stretch lg:gap-6">
-            <div className="flex h-full flex-col rounded-[30px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] px-5 py-6 shadow-[var(--shadow-xl)] sm:rounded-[38px] sm:px-8 sm:py-8 lg:px-10 lg:py-10">
-              <Badge variant="muted" className="w-fit">마곡 일반산업단지 전용</Badge>
-              <h1 className="mt-4 max-w-4xl font-display text-[2.35rem] font-semibold leading-[1.02] tracking-[-0.06em] text-[var(--foreground)] sm:mt-5 sm:text-5xl lg:text-6xl">
-                입주 가능한 업종코드를
-                <br />
-                쉽게 찾고
-                <br />
-                바로 확인합니다
-              </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:mt-5 sm:text-lg sm:leading-8">
-                업종코드를 몰라도 괜찮습니다. 하고 싶은 일을 적거나 사업자등록증의
-                업태·종목을 넣으면, 마곡에서 먼저 검토할 만한 코드를 추천하고 입주 가능성까지
-                이어서 보여드립니다.
-              </p>
-
-              <div className="mt-6 flex flex-col gap-2 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-3">
-                <Button
-                  size="lg"
-                  onClick={handleFinderEntry}
-                  className="w-full justify-center whitespace-nowrap sm:w-auto"
-                >
-                  코드 추천받기
-                  <ArrowRight className="size-4" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={onOpenDirectory}
-                  className="w-full justify-center whitespace-nowrap sm:w-auto"
-                >
-                  가능 코드 전체 보기
-                </Button>
-              </div>
-
-              <div className="mt-6 hidden gap-3 sm:mt-7 sm:grid sm:grid-cols-3">
-                {introFacts.map((fact) => (
-                  <div
-                    key={fact.label}
-                      className={`rounded-[22px] border px-4 py-4 sm:rounded-[24px] ${
-                      fact.tone === 'hero'
-                        ? 'border-[var(--border-accent-strong)] bg-[var(--surface-strong)] shadow-[var(--shadow-md)]'
-                        : 'border-[var(--border-soft)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
-                    }`}
-                  >
-                    <div className="text-xs font-medium text-[var(--foreground-subtle)]">
-                      {fact.label}
+          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)] xl:items-stretch">
+            <div className="relative h-full overflow-hidden rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] shadow-[var(--shadow-xl)] sm:rounded-[24px]">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top_left,rgba(31,94,255,0.15),transparent_72%)]" />
+              <div className="relative flex h-full flex-col px-5 py-5 sm:px-7 sm:py-6 lg:px-8 lg:py-7">
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_220px] xl:items-start">
+                  <div>
+                    <Badge variant="muted" className="w-fit">마곡 일반산업단지 전용</Badge>
+                    <div className="mt-3 hidden flex-wrap gap-2 sm:flex">
+                      <div className="rounded-[12px] border border-[var(--border-accent)] bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                        주소 확인 전 바로 검토
+                      </div>
+                      <div className="rounded-[12px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-medium text-[var(--foreground-subtle)]">
+                        추천부터 예비판정까지 한 흐름
+                      </div>
                     </div>
+                    <h1 className="mt-4 max-w-3xl font-display text-[2.35rem] font-semibold leading-[1.04] tracking-[-0.055em] text-[var(--foreground)] sm:text-[3.2rem] lg:text-[4rem]">
+                      입주 가능한 업종코드를
+                      <br />
+                      쉽게 찾고
+                      <br />
+                      바로 확인합니다
+                    </h1>
+                    <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-[15px] sm:leading-7">
+                      업종코드를 몰라도 괜찮습니다. 하고 싶은 일을 적거나 사업자등록증의
+                      업태·종목을 넣으면, 마곡에서 먼저 검토할 만한 코드를 추천하고 입주 가능성까지
+                      이어서 보여드립니다.
+                    </p>
+
+                    <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
+                      <Button
+                        size="lg"
+                        onClick={handleFinderEntry}
+                        className="w-full justify-center whitespace-nowrap sm:w-auto"
+                      >
+                        코드 추천받기
+                        <ArrowRight className="size-4" />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        onClick={onOpenDirectory}
+                        className="w-full justify-center whitespace-nowrap sm:w-auto"
+                      >
+                        가능 코드 전체 보기
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid auto-rows-fr gap-3">
+                    <div className="flex h-full flex-col justify-center rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
+                      <div className="text-xs text-[var(--foreground-subtle)]">시행령 기준일</div>
+                      <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                        {formatKoreanDate('2026-01-02')}
+                      </div>
+                    </div>
+                    <div className="flex h-full flex-col justify-center rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
+                      <div className="text-xs text-[var(--foreground-subtle)]">관리기본계획 고시일</div>
+                      <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                        {formatKoreanDate('2025-10-30')}
+                      </div>
+                    </div>
+                    <div className="flex h-full flex-col justify-center rounded-[14px] border border-[var(--border-accent)] bg-[var(--surface-muted)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                      추천부터 보고, 기준은 뒤에서 확인합니다.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-3 sm:auto-rows-fr">
+                  {introFacts.map((fact) => (
                     <div
-                      className={`mt-2 font-semibold text-[var(--foreground)] ${
-                        fact.tone === 'hero' ? 'text-2xl' : 'text-xl'
+                      key={fact.label}
+                      className={`flex h-full flex-col rounded-[14px] border px-4 py-4 ${
+                        fact.tone === 'hero'
+                          ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
+                          : 'border-[var(--border-soft)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
                       }`}
                     >
-                      {fact.value}
-                    </div>
-                    <div className="mt-1 text-xs leading-5 text-[var(--foreground-subtle)]">
-                      {fact.note}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 grid grid-cols-3 gap-2 lg:hidden">
-                {introSteps.map((item) => (
-                  <div
-                    key={item.step}
-                    className="rounded-[18px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)]"
-                  >
-                    <div className="text-[11px] font-semibold tracking-[0.04em] text-[var(--foreground-subtle)]">
-                      {item.step}단계
-                    </div>
-                    <div className="mt-1 text-sm font-semibold leading-5 text-[var(--foreground)]">
-                      {item.mobileTitle}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Card className="hidden h-full border-[var(--border-soft)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)] lg:block">
-              <CardContent className="flex h-full flex-col space-y-5 p-6">
-                <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
-                  <FileSearch className="size-6" />
-                </div>
-                <div>
-                  <h2 className="font-display text-2xl font-semibold text-[var(--foreground)]">
-                    처음 오셨다면 이렇게 보세요
-                  </h2>
-                  <p className="mt-2 text-sm leading-7 text-[var(--foreground-muted)]">
-                    먼저 쉽게 찾고, 필요할 때만 자세한 기준을 다시 보는 순서로 구성했습니다.
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  {introSteps.map((item) => (
-                    <div
-                      key={item.step}
-                      className="rounded-[22px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="inline-flex size-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent-strong)]">
-                          {item.step}
-                        </div>
-                        <div className="text-sm font-semibold text-[var(--foreground)]">
-                          {item.title}
-                        </div>
+                      <div className="text-xs font-medium text-[var(--foreground-subtle)]">
+                        {fact.label}
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                        {item.description}
-                      </p>
+                      <div
+                        className={`mt-2 font-semibold text-[var(--foreground)] ${
+                          fact.tone === 'hero' ? 'text-2xl' : 'text-xl'
+                        }`}
+                      >
+                        {fact.value}
+                      </div>
+                      <div className="mt-1 text-xs leading-5 text-[var(--foreground-subtle)]">
+                        {fact.note}
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-auto flex flex-wrap gap-2">
-                  <Badge variant="muted">
-                    시행령 기준일 {formatKoreanDate('2026-01-02')}
-                  </Badge>
-                  <Badge variant="muted">
-                    관리기본계획 고시일 {formatKoreanDate('2025-10-30')}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section className="hidden gap-3 sm:grid md:grid-cols-3">
-            {promisePoints.map((item) => (
-              <div
-                key={item}
-                className="rounded-[24px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-5 py-5 shadow-[var(--shadow-sm)]"
-              >
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[var(--accent)]" />
-                  <p className="text-sm leading-7 text-[var(--foreground-muted)]">{item}</p>
+                <div className="mt-4 grid grid-cols-3 gap-2 lg:hidden">
+                  {introSteps.map((item) => (
+                    <div
+                      key={item.step}
+                      className="rounded-[12px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)]"
+                    >
+                      <div className="text-[11px] font-semibold tracking-[0.04em] text-[var(--foreground-subtle)]">
+                        {item.step}단계
+                      </div>
+                      <div className="mt-1 text-sm font-semibold leading-5 text-[var(--foreground)]">
+                        {item.mobileTitle}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
+            </div>
+
+            <div className="hidden gap-4 xl:grid xl:h-full xl:grid-rows-[auto_minmax(0,1fr)]">
+              <Card className="h-full border-[var(--border-soft)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
+                <CardContent className="space-y-4 p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
+                        처음 오셨다면
+                      </div>
+                      <h2 className="mt-2 font-display text-[1.7rem] font-semibold leading-[1.08] text-[var(--foreground)]">
+                        이 순서대로 보면 됩니다
+                      </h2>
+                    </div>
+                    <div className="inline-flex size-10 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+                      <FileSearch className="size-5" />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-3 md:auto-rows-fr">
+                    {introSteps.map((item) => (
+                      <div
+                        key={item.step}
+                        className="flex h-full flex-col rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="inline-flex size-7 items-center justify-center rounded-[10px] bg-[var(--accent)] text-xs font-semibold text-[var(--accent-foreground)]">
+                            {item.step}
+                          </div>
+                          <div className="text-sm font-semibold text-[var(--foreground)]">
+                            {item.title}
+                          </div>
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                          {item.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid gap-4 xl:grid-cols-2 xl:items-stretch">
+                <Card className="h-full border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
+                  <CardContent className="flex h-full flex-col space-y-4 p-5">
+                    <div className="text-sm font-semibold text-[var(--foreground)]">
+                      바로 볼 핵심 기준
+                    </div>
+                    <div className="grid auto-rows-fr gap-3">
+                      <div className="flex h-full flex-col justify-center rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
+                        <div className="text-xs text-[var(--foreground-subtle)]">검토 시작점</div>
+                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                          쉬운 검색부터 확인
+                        </div>
+                      </div>
+                      <div className="flex h-full flex-col justify-center rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
+                        <div className="text-xs text-[var(--foreground-subtle)]">정밀 확인</div>
+                        <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                          법령과 가이드에서 재검토
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="h-full border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
+                  <CardContent className="flex h-full flex-col space-y-3 p-5">
+                    <div className="text-sm font-semibold text-[var(--foreground)]">
+                      읽는 포인트
+                    </div>
+                    <div className="grid auto-rows-fr gap-3">
+                      <div className="flex h-full items-center rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                        1. 추천 코드부터 고릅니다.
+                      </div>
+                      <div className="flex h-full items-center rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                        2. 이유와 조건을 함께 읽습니다.
+                      </div>
+                      <div className="flex h-full items-center rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                        3. 애매하면 법령으로 이어갑니다.
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3 sm:auto-rows-fr xl:col-span-2">
+              {promisePoints.map((item, index) => (
+                <div
+                  key={item}
+                  className="h-full rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="inline-flex size-7 shrink-0 items-center justify-center rounded-[10px] bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-strong)]">
+                      {index + 1}
+                    </div>
+                    <p className="text-sm leading-6 text-[var(--foreground-muted)]">{item}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         </>
       ) : null}
@@ -633,19 +746,21 @@ function HomeSections({
         id="finder"
         aria-label="업종코드 분석 위저드"
         className={`${
-          isMobileWizardFocused
+          isCompactWizardFocused
             ? 'rounded-none border-0 bg-transparent p-0 shadow-none'
-                : 'rounded-[24px] border border-[var(--border-accent)] bg-[var(--surface-strong)] p-3.5 shadow-[var(--shadow-xl)] sm:rounded-[36px] sm:p-8'
+            : isDesktopWizardFocused
+              ? 'rounded-[18px] border border-[var(--border-accent)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-xl)] xl:p-6'
+              : 'rounded-[16px] border border-[var(--border-accent)] bg-[var(--surface-strong)] p-3.5 shadow-[var(--shadow-xl)] sm:rounded-[20px] sm:p-8'
         }`}
       >
-        {isMobileWizardFocused ? (
-          <div className="mb-3 flex items-start justify-between gap-3 sm:mb-6 sm:hidden">
-            <div className="min-w-0">
+        {isCompactWizardFocused ? (
+          <div className="mb-4 flex items-start justify-between gap-4 lg:hidden">
+            <div className="min-w-0 max-w-2xl">
               <Badge variant="muted" className="w-fit">{currentWizardBadge}</Badge>
-              <h2 className="mt-3 font-display text-[1.95rem] font-semibold leading-[1.02] text-[var(--foreground)]">
+              <h2 className="mt-3 font-display text-[2rem] font-semibold leading-[1.04] text-[var(--foreground)] sm:text-[2.45rem]">
                 {currentWizardTitle}
               </h2>
-              <p className="mt-2 text-[13px] leading-5 text-[var(--foreground-subtle)]">
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--foreground-muted)] sm:text-[15px] sm:leading-7">
                 {currentWizardHint}
               </p>
             </div>
@@ -653,7 +768,7 @@ function HomeSections({
               variant="ghost"
               size="sm"
               className="shrink-0"
-              onClick={handleExitMobileWizardFocus}
+              onClick={handleExitWizardFocus}
             >
               전체 보기
             </Button>
@@ -662,7 +777,7 @@ function HomeSections({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <Badge variant="muted" className="w-fit">쉬운 검색 홈</Badge>
-              <h2 className="mt-3 font-display text-[1.8rem] font-semibold leading-[1.06] text-[var(--foreground)] sm:mt-4 sm:text-4xl">
+              <h2 className="mt-3 max-w-3xl font-display text-[1.8rem] font-semibold leading-[1.06] text-[var(--foreground)] sm:mt-4 sm:text-4xl">
                 업종코드를 몰라도
                 <br />
                 바로 찾고 확인합니다
@@ -676,193 +791,293 @@ function HomeSections({
                 수 있습니다.
               </p>
             </div>
-                <div className="hidden rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] lg:block lg:max-w-sm">
+            <div className="hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] lg:block lg:max-w-sm">
               `내가 하는 일이 어떤 코드에 가까운지`, `그 코드가 마곡에서 가능한지`,
               `왜 그런지`, `더 확인해야 할 게 있는지` 순서로 보여줍니다.
             </div>
           </div>
         )}
 
-        <div className={`${isMobileWizardFocused ? 'space-y-3 sm:space-y-6' : 'mt-4 space-y-3.5 sm:mt-8 sm:space-y-6'}`}>
-          <div className={`${isMobileWizardFocused ? 'hidden sm:grid sm:grid-cols-3 sm:gap-3' : 'grid grid-cols-3 gap-2 sm:gap-3'}`}>
-            {wizardSteps.map((step, index) => {
-              const isActive = step.id === safeCurrentStep
-              const isComplete = currentWizardIndex > index
-              const isLocked =
-                (step.id === 'adjust' && !canOpenAdjustStep) ||
-                (step.id === 'result' && !canOpenResultStep)
+        <div className={`${isCompactWizardFocused ? 'space-y-4 sm:space-y-6' : isDesktopWizardFocused ? 'space-y-4' : 'mt-4 space-y-3.5 sm:mt-8 sm:space-y-6'}`}>
+          <div className={isDesktopWizardFocused ? 'grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start' : undefined}>
+            <div className="space-y-3.5 sm:space-y-6">
+              <div className={`${isCompactWizardFocused ? 'hidden sm:grid sm:grid-cols-3 sm:gap-3' : 'grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4'}`}>
+                {wizardSteps.map((step, index) => {
+                  const isActive = step.id === safeCurrentStep
+                  const isComplete = currentWizardIndex > index
+                  const isLocked =
+                    (step.id === 'adjust' && !canOpenAdjustStep) ||
+                    (step.id === 'result' && !canOpenResultStep)
 
-              return (
-                <button
-                  type="button"
-                  key={step.id}
-                  onClick={() => handleWizardStepSelect(step.id)}
-                  disabled={isLocked}
-                  aria-pressed={isActive}
-                  className={`rounded-[18px] border px-2.5 py-2.5 text-left transition sm:rounded-[24px] sm:px-4 sm:py-4 ${
-                    isActive
-                      ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
-                      : isComplete
-                        ? 'border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
-                        : 'border-[var(--border)] bg-[var(--surface)]'
-                  } ${
-                    isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-[var(--border-accent-strong)] hover:bg-[var(--surface-strong)]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div
-                      className={`inline-flex size-7 items-center justify-center rounded-full text-[11px] font-semibold sm:size-9 sm:text-sm ${
-                        isActive || isComplete
-                          ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
-                          : 'bg-[rgba(124,136,155,0.18)] text-[var(--foreground-subtle)]'
+                  return (
+                    <button
+                      type="button"
+                      key={step.id}
+                      onClick={() => handleWizardStepSelect(step.id)}
+                      disabled={isLocked}
+                      aria-pressed={isActive}
+                      className={`rounded-[12px] border px-2.5 py-2.5 text-left transition sm:rounded-[14px] sm:px-4 sm:py-4 lg:px-5 lg:py-5 ${
+                        isActive
+                          ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
+                          : isComplete
+                            ? 'border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
+                            : 'border-[var(--border)] bg-[var(--surface)]'
+                      } ${
+                        isLocked
+                          ? 'cursor-not-allowed opacity-60'
+                          : 'cursor-pointer hover:border-[var(--border-accent-strong)] hover:bg-[var(--surface-strong)]'
                       }`}
                     >
-                      {isComplete ? <CheckCircle2 className="size-4" /> : index + 1}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="hidden text-xs font-medium text-[var(--foreground-subtle)] sm:block">
-                        {step.badge}
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div
+                          className={`inline-flex size-7 items-center justify-center rounded-[10px] text-[11px] font-semibold sm:size-9 sm:text-sm ${
+                            isActive || isComplete
+                              ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+                              : 'bg-[rgba(124,136,155,0.18)] text-[var(--foreground-subtle)]'
+                          }`}
+                        >
+                          {isComplete ? <CheckCircle2 className="size-4" /> : index + 1}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="hidden text-xs font-medium text-[var(--foreground-subtle)] sm:block">
+                            {step.badge}
+                          </div>
+                          <div className="text-[11px] font-semibold leading-4 text-[var(--foreground)] sm:hidden">
+                            {step.shortTitle}
+                          </div>
+                          <div className="hidden text-sm font-semibold leading-5 text-[var(--foreground)] sm:block lg:text-base">
+                            {step.title}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-[11px] font-semibold leading-4 text-[var(--foreground)] sm:hidden">
-                        {step.shortTitle}
-                      </div>
-                      <div className="hidden text-sm font-semibold text-[var(--foreground)] sm:block">
-                        {step.title}
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-
-          <Card className={`${isMobileWizardFocused ? 'rounded-[28px] border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]' : 'rounded-[22px] border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)] sm:rounded-[28px]'}`}>
-            <CardContent className={`${isMobileWizardFocused ? 'space-y-4 p-4 sm:space-y-6 sm:p-6' : 'space-y-3 p-3.5 sm:space-y-6 sm:p-6'}`}>
-              {!isMobileWizardFocused || safeCurrentStep !== 'discover' ? (
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                  <div className={isMobileWizardFocused ? 'hidden sm:block' : undefined}>
-                    <Badge variant="muted" className="w-fit">{currentWizardBadge}</Badge>
-                    <h3 className="mt-2 font-display text-xl font-semibold text-[var(--foreground)] sm:mt-4 sm:text-3xl">
-                      {currentWizardTitle}
-                    </h3>
-                    <p className="mt-2 hidden max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:block">
-                      {currentWizardDescription}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                    {safeCurrentStep !== 'discover' ? (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setCurrentStep('discover')}
-                        className="w-full whitespace-nowrap sm:w-auto sm:flex-none"
-                      >
-                        <span className="sm:hidden">처음으로</span>
-                        <span className="hidden sm:inline">처음 단계로 돌아가기</span>
-                      </Button>
-                    ) : null}
-                    {isMobileWizardFocused ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleExitMobileWizardFocus}
-                        className="hidden whitespace-nowrap sm:inline-flex"
-                      >
-                        전체 보기
-                      </Button>
-                    ) : null}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={onOpenDirectory}
-                      className="hidden whitespace-nowrap sm:inline-flex"
-                    >
-                      전체 코드 사전 열기
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              ) : null}
-
-              <div
-                key={panelTransitionKey}
-                className="animate-fade-in space-y-4 sm:space-y-6"
-              >
-                {safeCurrentStep === 'discover' ? (
-                  <IndustryDiscoveryPanel
-                    input={input}
-                    query={industryQuery}
-                    suggestions={industrySuggestions}
-                    status={discoveryStatus}
-                    error={discoveryError}
-                    screen={activeDiscoverScreen}
-                    embedded
-                    onQueryChange={setIndustryQuery}
-                    onSubmitSearch={handleDiscoverSearch}
-                    onSuggestionSelect={handleSuggestionSelect}
-                    onExampleSelect={runQuickSearch}
-                    onBackToSearch={handleBackToDiscoverSearch}
-                    onContinueManual={handleContinueManualStep}
-                  />
-                ) : null}
-
-                {safeCurrentStep === 'adjust' ? (
-                  <EligibilityForm
-                    input={input}
-                    status={status}
-                    onFieldChange={setField}
-                    onFlagChange={setFlag}
-                    onEvaluate={handleEvaluateStep}
-                    onReset={reset}
-                    onPrevious={() => setCurrentStep('discover')}
-                    primaryActionLabel="결과 보기"
-                    secondaryActionLabel="이전 단계"
-                    defaultExpanded
-                    embedded
-                  />
-                ) : null}
-
-                {safeCurrentStep === 'result' ? (
-                  <ResultPanel
-                    input={input}
-                    result={result}
-                    status={status}
-                    error={error}
-                    onEvaluate={evaluate}
-                    onAdjust={() => setCurrentStep('adjust')}
-                    onOpenGuide={onOpenGuide}
-                    sticky={false}
-                    stepLabel="3단계"
-                    embedded
-                  />
-                ) : null}
+                    </button>
+                  )
+                })}
               </div>
-            </CardContent>
-          </Card>
+
+              <Card className={`${isCompactWizardFocused ? 'rounded-[18px] border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]' : isDesktopWizardFocused ? 'rounded-[18px] border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-xl)]' : 'rounded-[16px] border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)] sm:rounded-[18px]'}`}>
+                <CardContent className={`${isCompactWizardFocused ? 'space-y-5 p-4 sm:space-y-7 sm:p-7' : isDesktopWizardFocused ? 'space-y-6 p-5 xl:space-y-7 xl:p-7' : 'space-y-3 p-3.5 sm:space-y-6 sm:p-6'}`}>
+                  {!isCompactWizardFocused || safeCurrentStep !== 'discover' ? (
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                      <div className={isCompactWizardFocused ? 'hidden sm:block' : undefined}>
+                        <Badge variant="muted" className="w-fit">{currentWizardBadge}</Badge>
+                        <h3 className="mt-2 max-w-3xl font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:mt-4 sm:text-[2.2rem] xl:text-[2.45rem]">
+                          {currentWizardTitle}
+                        </h3>
+                        <p className="mt-3 hidden max-w-2xl text-[15px] leading-7 text-[var(--foreground-muted)] sm:block">
+                          {currentWizardDescription}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        {safeCurrentStep !== 'discover' ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setCurrentStep('discover')}
+                            className="w-full whitespace-nowrap sm:w-auto sm:flex-none"
+                          >
+                            <span className="sm:hidden">처음으로</span>
+                            <span className="hidden sm:inline">처음 단계로 돌아가기</span>
+                          </Button>
+                        ) : null}
+                        {isWizardFocused ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleExitWizardFocus}
+                            className="hidden whitespace-nowrap sm:inline-flex"
+                          >
+                            전체 보기
+                          </Button>
+                        ) : null}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={onOpenDirectory}
+                          className="hidden whitespace-nowrap sm:inline-flex"
+                        >
+                          전체 코드 사전 열기
+                          <ArrowRight className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div
+                    key={panelTransitionKey}
+                    className="animate-fade-in space-y-5 sm:space-y-6"
+                  >
+                    {safeCurrentStep === 'discover' ? (
+                      <IndustryDiscoveryPanel
+                        input={input}
+                        query={industryQuery}
+                        suggestions={industrySuggestions}
+                        status={discoveryStatus}
+                        error={discoveryError}
+                        screen={activeDiscoverScreen}
+                        embedded
+                        onQueryChange={setIndustryQuery}
+                        onSubmitSearch={handleDiscoverSearch}
+                        onSuggestionSelect={handleSuggestionSelect}
+                        onExampleSelect={runQuickSearch}
+                        onBackToSearch={handleBackToDiscoverSearch}
+                        onContinueManual={handleContinueManualStep}
+                      />
+                    ) : null}
+
+                    {safeCurrentStep === 'adjust' ? (
+                      <EligibilityForm
+                        input={input}
+                        status={status}
+                        onFieldChange={setField}
+                        onFlagChange={setFlag}
+                        onEvaluate={handleEvaluateStep}
+                        onReset={reset}
+                        onPrevious={() => setCurrentStep('discover')}
+                        primaryActionLabel="결과 보기"
+                        secondaryActionLabel="이전 단계"
+                        defaultExpanded
+                        embedded
+                      />
+                    ) : null}
+
+                    {safeCurrentStep === 'result' ? (
+                      <ResultPanel
+                        input={input}
+                        result={result}
+                        status={status}
+                        error={error}
+                        onEvaluate={evaluate}
+                        onAdjust={() => setCurrentStep('adjust')}
+                        onOpenGuide={onOpenGuide}
+                        sticky={false}
+                        stepLabel="3단계"
+                        embedded
+                      />
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {isDesktopWizardFocused ? (
+              <aside className="hidden lg:block">
+                <div className="sticky top-6 space-y-4">
+                  <Card className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
+                    <CardContent className="space-y-4 p-5">
+                      <Badge variant="muted" className="w-fit">집중 모드</Badge>
+                      <div>
+                        <h3 className="font-display text-2xl font-semibold leading-[1.15] text-[var(--foreground)]">
+                          지금은 이 흐름만 보면 됩니다
+                        </h3>
+                        <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                          큰 화면에서도 한 단계씩만 읽기 쉽게 정리했습니다. 왼쪽은 입력과 결과,
+                          오른쪽은 참고 정보만 남겨 집중도를 높였습니다.
+                        </p>
+                      </div>
+                      <div className="space-y-3">
+                        {wizardSteps.map((step, index) => {
+                          const isActive = step.id === safeCurrentStep
+                          const isComplete = currentWizardIndex > index
+
+                          return (
+                            <div
+                              key={step.id}
+                      className={`rounded-[14px] border px-4 py-4 ${
+                                isActive
+                                  ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
+                                  : isComplete
+                                    ? 'border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
+                                    : 'border-[var(--border-soft)] bg-[var(--surface-strong)]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div
+                          className={`inline-flex size-8 items-center justify-center rounded-[10px] text-sm font-semibold ${
+                                    isActive || isComplete
+                                      ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+                                      : 'bg-[rgba(124,136,155,0.18)] text-[var(--foreground-subtle)]'
+                                  }`}
+                                >
+                                  {index + 1}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-xs font-medium text-[var(--foreground-subtle)]">
+                                    {step.badge}
+                                  </div>
+                                  <div className="mt-1 text-sm font-semibold leading-5 text-[var(--foreground)]">
+                                    {step.title}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
+                    <CardContent className="space-y-4 p-5">
+                      <div>
+                        <div className="text-sm font-semibold text-[var(--foreground)]">
+                          지금 입력한 내용
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                          {focusRailHint}
+                        </p>
+                      </div>
+                      <div className="grid gap-3">
+                        {focusContextCards.map((item) => (
+                          <div
+                            key={item.label}
+                            className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3"
+                          >
+                            <div className="text-xs text-[var(--foreground-subtle)]">{item.label}</div>
+                            <div className="mt-1 text-sm font-medium leading-6 text-[var(--foreground)]">
+                              {item.value}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button variant="secondary" size="sm" onClick={handleExitWizardFocus}>
+                          전체 보기
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={onOpenDirectory}>
+                          코드 사전 열기
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </aside>
+            ) : null}
+          </div>
         </div>
       </section>
 
-      {!isMobileWizardFocused ? (
+      {showOverviewSections ? (
         <>
-          <section className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <Card className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
-          <CardContent className="p-6">
+          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)] xl:items-stretch">
+        <Card className="h-full border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
+          <CardContent className="flex h-full flex-col space-y-5 p-5 sm:p-6">
             <Badge variant="muted">전수 코드 사전</Badge>
-            <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+            <h2 className="font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.2rem]">
               모든 코드를 한 번에 보고 싶다면
               <br />
               전용 코드 사전에서 찾으면 됩니다
             </h2>
-            <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+            <p className="max-w-2xl text-sm leading-7 text-[var(--foreground-muted)]">
               코드를 모르면 쉬운 검색에서 시작하고, 전체 코드를 보고 싶으면 여기서 바로
               찾아보면 됩니다.
             </p>
 
-            <div className="mt-6 space-y-3">
+            <div className="grid gap-3 sm:grid-cols-3 sm:auto-rows-fr">
               {dictionaryPreviewCards.map((item) => (
                 <div
                   key={item.title}
-                  className={`rounded-[24px] border px-4 py-4 ${
+                  className={`flex h-full flex-col rounded-[14px] border px-4 py-4 ${
                     item.tone === 'strong'
                       ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
                       : 'border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
@@ -881,7 +1096,7 @@ function HomeSections({
               ))}
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-auto flex flex-wrap gap-3">
               <Button onClick={onOpenDirectory}>
                 코드 사전 열기
                 <LibraryBig className="size-4" />
@@ -893,13 +1108,13 @@ function HomeSections({
           </CardContent>
         </Card>
 
-        <Card className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
-          <CardContent className="space-y-4 p-6">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+        <Card className="h-full border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
+          <CardContent className="flex h-full flex-col space-y-4 p-5 sm:p-6">
+            <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <BookOpenText className="size-5" />
             </div>
             <div>
-              <h2 className="font-display text-3xl font-semibold text-[var(--foreground)]">
+              <h2 className="font-display text-[1.8rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.1rem]">
                 이렇게 읽으면 더 쉽습니다
               </h2>
               <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
@@ -908,11 +1123,11 @@ function HomeSections({
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-3 sm:auto-rows-fr xl:grid-cols-1">
               {introSteps.map((item) => (
                 <div
                   key={item.title}
-                className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
+                className="flex h-full flex-col rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
                 >
                   <div className="text-sm font-semibold text-[var(--foreground)]">
                     {item.title}
@@ -927,7 +1142,7 @@ function HomeSections({
         </Card>
       </section>
 
-      <section id="criteria" className="space-y-4">
+      <section id="criteria" className="space-y-3">
         <div className="max-w-3xl">
           <Badge variant="muted">법령 참고</Badge>
           <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
@@ -941,15 +1156,15 @@ function HomeSections({
         <RulebookTabs onOpenDirectory={onOpenDirectory} />
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]">
+      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
         <Card className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
-          <CardContent className="space-y-5 p-6">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+          <CardContent className="space-y-5 p-5 sm:p-6">
+            <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <BookOpenText className="size-5" />
             </div>
             <div>
               <Badge variant="muted">참조 법령 라이브러리</Badge>
-              <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+              <h2 className="mt-4 font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.2rem]">
                 판정 근거를
                 <br />
                 문서 단위로 다시 읽을 수 있습니다
@@ -961,7 +1176,7 @@ function HomeSections({
               </p>
             </div>
             <div className="grid gap-3">
-                <div className="rounded-[22px] border border-[var(--border-accent)] bg-[var(--surface-muted)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
+                <div className="rounded-[14px] border border-[var(--border-accent)] bg-[var(--surface-muted)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
                 `산업집적법 시행령`과 `마곡 관리기본계획`을 문서 단위로 나눠, 어떤
                 판정이 어디에서 왔는지 더 쉽게 추적할 수 있습니다.
               </div>
@@ -981,13 +1196,13 @@ function HomeSections({
         </Card>
 
         <Card className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
-          <CardContent className="space-y-5 p-6">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+          <CardContent className="space-y-5 p-5 sm:p-6">
+            <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <FileSearch className="size-5" />
             </div>
             <div>
               <Badge variant="muted">데이터 업데이트 로그</Badge>
-              <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+              <h2 className="mt-4 font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.2rem]">
                 최근에 무엇이 바뀌었는지
                 <br />
                 빠르게 확인할 수 있습니다
@@ -998,11 +1213,11 @@ function HomeSections({
                 정리할 때 유용합니다.
               </p>
             </div>
-            <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {recentUpdates.map((entry) => (
                 <div
                   key={entry.id}
-                className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
+                className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="muted">{formatKoreanDate(entry.date)}</Badge>
@@ -1026,7 +1241,7 @@ function HomeSections({
         </Card>
       </section>
 
-      <section className="space-y-4">
+      <section className="space-y-3">
         <div className="max-w-3xl">
           <Badge variant="muted">대표 업종 가이드</Badge>
           <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
@@ -1039,7 +1254,7 @@ function HomeSections({
             가이드 페이지를 준비했습니다.
           </p>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {featuredGuides.map((guide) => (
             <Card
               key={guide.code}
@@ -1074,9 +1289,9 @@ function HomeSections({
 
       <section
         id="affiliate"
-              className="rounded-[32px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6"
+              className="rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6"
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
             <Badge variant="muted">참고용 제휴 링크</Badge>
             <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)] sm:text-[2rem]">
@@ -1089,14 +1304,14 @@ function HomeSections({
             </p>
           </div>
 
-                    <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
+                    <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
             광고보다 본문이 먼저 보이도록
             <br />
             제휴 영역은 기본 접힘 상태로 제공합니다.
           </div>
         </div>
 
-                  <div className="mt-5 rounded-[28px] border border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
+                  <div className="mt-4 rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
           <button
             type="button"
             onClick={() => setIsAffiliateExpanded((current) => !current)}
@@ -1129,8 +1344,8 @@ function HomeSections({
               id="affiliate-links-panel"
               className="border-t border-[var(--border)] px-4 py-4 sm:px-5 sm:py-5"
             >
-              <div className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
-            <Card className="h-full border-[var(--border)] bg-[var(--surface-soft)] shadow-[var(--shadow-sm)]">
+              <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:items-start">
+            <Card className="border-[var(--border)] bg-[var(--surface-soft)] shadow-[var(--shadow-sm)]">
                   <CardContent className="space-y-4 p-5">
                     <div>
                       <div className="text-sm font-semibold text-[var(--foreground)]">
@@ -1143,9 +1358,9 @@ function HomeSections({
                       </p>
                     </div>
 
-                    <div className="rounded-[22px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4">
+                    <div className="rounded-[14px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4">
                       <div className="flex items-start gap-3">
-                        <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+                        <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
                           <ExternalLink className="size-4" />
                         </div>
                         <div>
@@ -1176,14 +1391,14 @@ function HomeSections({
                   </CardContent>
                 </Card>
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-4">
                   {affiliateWidgets.map((widget) => (
                     <Card
                       key={widget.src}
-              className="h-full border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]"
+              className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]"
                     >
-                      <CardContent className="flex h-full flex-col p-4">
-                        <div className="flex min-h-11 items-start justify-between gap-2">
+                      <CardContent className="flex flex-col p-4 sm:p-5">
+                        <div className="flex items-start justify-between gap-2">
                           <Badge
                             variant="muted"
                             className="shrink-0 whitespace-nowrap px-2.5 py-1 text-[11px] tracking-normal sm:text-xs"
@@ -1194,10 +1409,10 @@ function HomeSections({
                             외부 상품
                           </span>
                         </div>
-                        <div className="mt-3 min-h-14 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--foreground)] sm:min-h-16 sm:text-base">
+                        <div className="mt-3 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--foreground)] sm:text-base">
                           {widget.headline}
                         </div>
-              <div className="mt-4 flex flex-1 items-start justify-center rounded-[22px] border border-[var(--border)] bg-[var(--surface-soft)] px-2 py-3">
+              <div className="mt-3 flex items-start justify-center rounded-[14px] border border-[var(--border)] bg-[var(--surface-soft)] px-2 py-3">
                           <iframe
                             src={widget.src}
                             title={widget.title}
@@ -1207,7 +1422,7 @@ function HomeSections({
                             scrolling="no"
                             referrerPolicy="unsafe-url"
                             loading="lazy"
-            className="overflow-hidden rounded-[18px] bg-[var(--surface-strong)]"
+            className="overflow-hidden rounded-[12px] bg-[var(--surface-strong)]"
                           />
                         </div>
                       </CardContent>
@@ -1330,25 +1545,32 @@ function App() {
     <div className="min-h-screen overflow-x-hidden">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-2xl focus:bg-[var(--accent)] focus:px-6 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-[14px] focus:bg-[var(--accent)] focus:px-6 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
       >
         본문으로 바로가기
       </a>
       <div className="mx-auto max-w-[1180px] px-3 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-6">
-        <header className="sticky top-3 z-20 rounded-[20px] border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-2.5 py-2.5 shadow-[var(--shadow-md)] sm:top-4 sm:rounded-[24px] sm:px-4 sm:py-3 sm:shadow-[var(--shadow-lg)] sm:backdrop-blur">
+        <header className="sticky top-3 z-20 rounded-[16px] border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-2.5 py-2.5 shadow-[var(--shadow-md)] sm:top-4 sm:rounded-[18px] sm:px-4 sm:py-3 sm:shadow-[var(--shadow-lg)] sm:backdrop-blur">
           <div className="flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => openHomeView('top')}
-              className="min-w-0 flex items-center gap-2 text-left"
+              className="min-w-0 flex items-center gap-3 text-left"
               aria-label="마곡 코드찾기 홈으로"
             >
-              <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[var(--shadow-accent)] sm:size-11">
-                <Building2 className="size-5" />
+              <div className="inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px] ring-1 ring-[var(--border-accent)] shadow-[var(--shadow-accent)] sm:size-11">
+                <img
+                  src={brandAssets.symbol}
+                  alt=""
+                  aria-hidden="true"
+                  width="44"
+                  height="44"
+                  className="size-full object-cover"
+                />
               </div>
               <div className="min-w-0">
                 <div className="hidden truncate text-[11px] font-semibold tracking-[0.16em] text-[var(--foreground-subtle)] sm:block sm:text-xs">
-                  LOOPIN LAB
+                  입주 업종코드 서비스
                 </div>
                 <div className="truncate text-base font-semibold text-[var(--foreground)] sm:text-base">
                   마곡 코드찾기
@@ -1416,7 +1638,7 @@ function App() {
               </Button>
               <button
                 type="button"
-                className="inline-flex size-10 items-center justify-center rounded-2xl text-[var(--foreground-muted)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
+                className="inline-flex size-10 items-center justify-center rounded-[14px] text-[var(--foreground-muted)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                 aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
                 aria-expanded={isMobileMenuOpen}
@@ -1479,7 +1701,7 @@ function App() {
           ) : null}
         </header>
 
-        <main id="main-content" className="animate-fade-in space-y-6 pb-12 pt-4 sm:space-y-8 sm:pt-6 lg:space-y-10 lg:pt-8">
+        <main id="main-content" className="animate-fade-in space-y-5 pb-12 pt-4 sm:space-y-6 sm:pt-5 lg:space-y-8 lg:pt-7">
           <Suspense fallback={<SkeletonCard />}>
           {view === 'directory' ? (
             <CodeDirectoryPage
@@ -1558,16 +1780,36 @@ function App() {
           )}
           </Suspense>
 
-<footer className="space-y-6 rounded-[32px] border border-[var(--border)] bg-[var(--surface-strong)] px-6 py-6 shadow-[var(--shadow-lg)]">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <div className="text-xs font-semibold tracking-[0.16em] text-[var(--foreground-subtle)]">
-                  LOOPIN LAB
+<footer className="space-y-6 rounded-[20px] border border-[var(--border)] bg-[var(--surface-strong)] px-6 py-6 shadow-[var(--shadow-lg)]">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <img
+                  src={brandAssets.wordmark}
+                  alt=""
+                  aria-hidden="true"
+                  width="920"
+                  height="220"
+                  className="hidden h-12 w-auto sm:block"
+                />
+                <div className="flex items-center gap-3 sm:hidden">
+                  <img
+                    src={brandAssets.symbol}
+                    alt=""
+                    aria-hidden="true"
+                    width="44"
+                    height="44"
+                    className="size-11 rounded-[14px] ring-1 ring-[var(--border-accent)]"
+                  />
+                  <div>
+                    <div className="text-xs font-semibold tracking-[0.16em] text-[var(--foreground-subtle)]">
+                      입주 업종코드 서비스
+                    </div>
+                    <div className="mt-1 font-display text-2xl font-semibold text-[var(--foreground)]">
+                      마곡 코드찾기
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-2 font-display text-2xl font-semibold text-[var(--foreground)]">
-                  마곡 코드찾기
-                </div>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--foreground-muted)]">
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--foreground-muted)]">
                   마곡 일반산업단지 입주 검토를 더 빨리 시작할 수 있도록, 업종코드 추천,
                   전체 코드 사전, 예비판정을 한 화면 체계로 정리한 서비스입니다.
                 </p>
@@ -1586,14 +1828,14 @@ function App() {
               {footerFacts.map((item) => (
                 <div
                   key={item}
-                  className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]"
+                  className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]"
                 >
                   {item}
                 </div>
               ))}
             </div>
 
-            <div className="rounded-[26px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4 text-sm leading-6 text-[var(--info-foreground)]">
+            <div className="rounded-[16px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4 text-sm leading-6 text-[var(--info-foreground)]">
               제휴 링크가 포함된 영역에서는 대가성 안내를 함께 표기합니다.
             </div>
           </footer>

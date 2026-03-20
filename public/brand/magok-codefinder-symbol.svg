@@ -1,16 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 160 160" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="마곡 코드찾기 심볼">
   <defs>
-    <linearGradient id="favicon-bg" x1="24" y1="18" x2="136" y2="142" gradientUnits="userSpaceOnUse">
+    <linearGradient id="symbol-bg" x1="24" y1="18" x2="136" y2="142" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#2F74FF" />
       <stop offset="1" stop-color="#1F5EFF" />
     </linearGradient>
-    <radialGradient id="favicon-glow" cx="0" cy="0" r="1" gradientTransform="translate(44 32) rotate(41.381) scale(76.1323)" gradientUnits="userSpaceOnUse">
+    <radialGradient id="symbol-glow" cx="0" cy="0" r="1" gradientTransform="translate(44 32) rotate(41.381) scale(76.1323)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.28" />
       <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
     </radialGradient>
   </defs>
 
-  <rect width="160" height="160" rx="38" fill="url(#favicon-bg)" />
+  <rect width="160" height="160" rx="38" fill="url(#symbol-bg)" />
   <rect
     x="10"
     y="10"
@@ -22,7 +22,7 @@
     stroke-opacity="0.34"
     stroke-width="2"
   />
-  <circle cx="44" cy="34" r="52" fill="url(#favicon-glow)" />
+  <circle cx="44" cy="34" r="52" fill="url(#symbol-glow)" />
 
   <circle cx="80" cy="44" r="16" fill="#8CB4FF" fill-opacity="0.26" />
   <circle

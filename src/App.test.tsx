@@ -161,21 +161,43 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
+  it('데스크톱에서는 위저드 진입 후 중앙 단계와 우측 참고 패널을 함께 보여준다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: '코드 추천받기' }))
+
+    expect(
+      screen.queryByRole('heading', {
+        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+      }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText('지금은 이 흐름만 보면 됩니다')).toBeInTheDocument()
+    expect(screen.getByText('지금 입력한 내용')).toBeInTheDocument()
+    expect(screen.getByText('어떤 일을 하시나요?')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: '전체 보기' }).length).toBeGreaterThan(0)
+
+    await user.click(screen.getAllByRole('button', { name: '전체 보기' })[0])
+
+    expect(
+      screen.getByRole('heading', {
+        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+      }),
+    ).toBeInTheDocument()
+  })
+
   it('전수 코드 사전 화면에서 5자리 코드를 검색할 수 있다', async () => {
     render(<App />)
     const user = userEvent.setup()
 
-    await user.click(screen.getAllByRole('button', { name: '코드 사전 열기' })[0])
+    await user.click(screen.getByRole('button', { name: '가능 코드 전체 보기' }))
 
-    expect(
-      await screen.findByRole('heading', {
-        name: /입주 가능한 업종코드를\s*전체로 찾아보는 화면입니다/,
-      }),
-    ).toBeInTheDocument()
-
-    const searchInput = screen.getByPlaceholderText(
+    const searchInput = await screen.findByPlaceholderText(
       '예: 광고대행업 / 앱 개발 / 72121 / 63112',
     )
+
+    expect(searchInput).toBeInTheDocument()
+    expect(screen.getByText('전용 코드 사전')).toBeInTheDocument()
 
     await user.type(searchInput, '72121')
 

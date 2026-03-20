@@ -1,5 +1,303 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-20 V 상단 돋보기 로고 리디자인
+
+### 작업 배경
+
+- 사용자는 현재 로고가 마음에 들지 않으며, `V 위에 돋보기 같은 모양`이 보이는 더 단순한 심볼을 원했다.
+- 기존 심볼은 문서 아이콘과 우하단 확대경 조합이라 기능 설명은 가능하지만, 브랜드 인상은 다소 일반적이었다.
+- 이번 작업은 화면 레이아웃을 건드리지 않고 브랜드 자산만 교체하면서, 헤더/푸터/파비콘/OG 기본 이미지가 같은 심볼 언어를 공유하도록 맞추는 데 초점을 뒀다.
+
+### 반영 내용
+
+- `public/brand/magok-codefinder-symbol.svg`
+  - 기존 `문서 + 돋보기` 심볼 대신 `굵은 V + 상단 돋보기 링` 구조로 교체했다.
+  - 서비스가 쓰던 블루 라운드 사각형과 밝은 내부 하이라이트는 유지하면서, 중심 형태는 더 단순하고 기억하기 쉬운 방향으로 정리했다.
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+  - 가로형 워드마크의 좌측 심볼을 동일한 `V 위 돋보기` 콘셉트로 다시 그렸다.
+  - 텍스트 워드마크는 유지해 기존 서비스명 가독성은 그대로 가져갔다.
+- `public/favicon.svg`
+  - 파비콘도 같은 심볼 구조로 동기화해 브라우저 탭 아이콘과 기본 OG 이미지가 새 브랜드와 맞도록 정리했다.
+- 연결 확인
+  - `src/App.tsx`에서 헤더와 푸터가 계속 `brandAssets`를 통해 같은 자산 경로를 바라보는 점을 확인했다.
+  - `index.html`과 `src/features/guides/seo/seo-page-builder.ts`가 `favicon.svg`를 참조하고 있어, 추가 코드 수정 없이 새 아이콘이 반영되는 구조를 유지했다.
+  - React 컴포넌트 구조나 상태 컴포넌트는 수정하지 않아 로딩/에러/빈 상태 처리에는 영향이 없음을 함께 확인했다.
+
+### 구현 파일
+
+- `public/brand/magok-codefinder-symbol.svg`
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+- `public/favicon.svg`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- SVG XML 파싱 확인 통과
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 8 passed`
+  - `Tests 77 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size`와 `plugin timing` 경고는 기존과 같은 성격의 경고로 유지됐다.
+
+### 결과 요약
+
+- 브랜드 심볼이 더 이상 `문서 아이콘` 중심으로 읽히지 않고, 사용자가 요청한 `V 위 돋보기` 인상이 먼저 들어오도록 바뀌었다.
+- 파비콘, 헤더 심볼, 푸터 워드마크가 같은 시각 언어를 쓰게 되어 브랜드 일관성도 함께 좋아졌다.
+
+## 2026-03-20 각진 레이아웃 재정렬 + 빈 공간 2차 보정
+
+### 작업 배경
+
+- 사용자는 이전 보정보다 더 강하게 `빈 공간이 싫다`, `모양이 딱딱 떨어지고 각이 맞았으면 좋겠다`고 요청했다.
+- 단순히 높이만 줄이는 수준이 아니라, 홈과 서브페이지 전반의 카드 반경과 보조 정보 배치를 더 각진 서비스형 UI로 다시 정리할 필요가 있었다.
+
+### 반영 내용
+
+- `src/components/ui/card.tsx`
+- `src/components/ui/button.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/async-state.tsx`
+  - 공통 `Card`, `Button`, `Badge`, `AsyncState`의 기본 라운드 반경을 줄여 화면 전체가 더 각지고 정리된 인상으로 보이게 바꿨다.
+- `src/App.tsx`
+  - 홈 첫 화면을 `메시지 + 기준 정보 + 수치 카드 + 우측 보조 격자` 구조로 다시 짜서, 카드 내부 하단이 허전해 보이는 느낌을 더 줄였다.
+  - 홈 중단 섹션, 위저드 래퍼, 제휴 영역, 헤더, 푸터의 큰 반경도 함께 줄여 전체 선 정렬감이 맞도록 조정했다.
+- `src/features/eligibility/components/code-directory-page.tsx`
+- `src/features/guides/components/guide-page.tsx`
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/updates/components/update-log-page.tsx`
+  - 코드 사전, 가이드, 법령, 업데이트 페이지의 상단 소개부와 요약 카드도 더 작은 반경과 반듯한 보조 박스 조합으로 맞춰, 페이지마다 모양이 제각각으로 느껴지지 않게 통일했다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `src/components/ui/card.tsx`
+- `src/components/ui/button.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/async-state.tsx`
+- `src/features/eligibility/components/code-directory-page.tsx`
+- `src/features/guides/components/guide-page.tsx`
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/updates/components/update-log-page.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 8 passed`
+  - `Tests 77 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - chunk size / plugin timing 경고는 남아 있지만 빌드를 막는 오류는 아니었다.
+
+### 결과 요약
+
+- 홈 첫 화면의 배치를 더 각지고 촘촘한 격자형으로 바꿔, 사용자가 싫어하던 `카드 안 하단 빈 공간` 인상을 한 단계 더 줄였다.
+- 공통 반경 스케일을 낮춰 사이트 전체가 둥글고 느슨한 느낌보다 `딱 맞고 단정한 서비스 UI`에 가깝게 보이도록 정리했다.
+
+## 2026-03-20 데스크 홈 상단 빈 공간 제거 2차
+
+### 작업 배경
+
+- 밀도 재배치 이후에도 데스크톱 홈 첫 섹션에서 오른쪽 안내 영역이 여러 카드로 세로 분리되어 있어, 왼쪽 히어로 아래가 비어 보인다는 피드백이 남아 있었다.
+- 문제는 카드 안의 공백보다 `오른쪽 스택 전체 높이 > 왼쪽 히어로 높이`인 구조였기 때문에, 카드 개수를 줄여 하나의 흐름으로 다시 묶는 것이 핵심이었다.
+
+### 반영 내용
+
+- `src/App.tsx`
+  - 오른쪽의 `처음 오셨다면 이렇게 보세요`, `바로 볼 핵심 정보`, `왜 이 흐름이 편한가요?`를 분리 카드 3개에서 단일 통합 카드 1개로 재구성했다.
+  - 통합 카드 안에서는 `단계 안내`, `핵심 정보`, `흐름 설명`만 섹션으로 구분하고, 외부 그리드에서는 하나의 덩어리처럼 보여 상단 좌우 높이 균형을 맞췄다.
+  - 각 보조 섹션의 패딩과 border radius를 약간 줄여 전체 높이도 함께 압축했다.
+  - 같은 줄에 놓인 카드 그룹에는 `auto-rows-fr`와 `h-full`을 적용하고, 긴 문장은 짧게 줄여 카드 폭/높이가 들쑥날쑥해 보이지 않게 정리했다.
+  - 히어로 아래 설명 카드 행은 좌우 전체 폭을 쓰는 별도 줄로 이동시켜, 상단 큰 박스와 하단 카드 행이 반듯하게 끊겨 보이도록 재배치했다.
+- `docs/pdca/2026-03-20-home-top-gap-removal.md`
+  - 이번 2차 보정 내용을 별도 PDCA 파일로 남겼다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `docs/pdca/2026-03-20-home-top-gap-removal.md`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 8 passed`
+  - `Tests 77 passed`
+- `npm run build` 통과
+  - 기존과 같은 chunk size / plugin timing 경고만 유지
+
+### 결과 요약
+
+- 데스크톱 홈 첫 섹션의 오른쪽 정보가 하나의 카드 흐름으로 묶이면서, 왼쪽 히어로 아래가 통째로 비어 보이는 인상이 줄었다.
+- 이제 상단은 `왼쪽 핵심 히어로 + 오른쪽 통합 안내 카드` 구조라 이전보다 훨씬 딱 맞는 배치로 읽힌다.
+
+## 2026-03-20 전체 웹사이트 밀도 재배치 + 빈 공간 제거
+
+### 작업 배경
+
+- 사용자는 특정 카드 한 장이 아니라 사이트 전반에서 “비어 보이는 카드 하단”과 “늘어진 2열 소개 영역”을 정리해 달라고 요청했다.
+- 특히 홈, 전수 코드 사전, 가이드, 법령 라이브러리, 업데이트 로그가 서로 다른 밀도 규칙을 쓰고 있어, 같은 서비스 안에서도 정보 압축감이 들쭉날쭉하다는 문제가 있었다.
+
+### 반영 내용
+
+- `src/App.tsx`
+  - 홈 첫 화면은 `lg:items-start` 기반 2열 구조로 바꿔, 히어로 카드가 옆 카드에 끌려 늘어지지 않게 정리했다.
+  - 히어로 패딩, 헤드라인 폭, 첫 진입 안내 카드 내부 스텝 배치를 압축해 상단 밀도를 높였다.
+  - 홈 본문에서는 전수 코드 사전, 법령/업데이트, 가이드, 제휴, 푸터 섹션의 카드 간격과 프리뷰 카드 배치를 다시 잡아 스크롤 흐름을 더 촘촘하게 만들었다.
+  - 제휴 위젯에서는 `h-full`, `min-h-*`를 걷어내어 카드 높이가 내용에 맞게 자연스럽게 줄어들게 했다.
+- `src/features/eligibility/components/code-directory-page.tsx`
+  - 상단 검색/필터 패널과 우측 조건 요약 영역을 적응형 2열로 통일하고, 중간 폭 화면에서는 보조 카드가 자연스럽게 아래로 흐르도록 바꿨다.
+- `src/features/guides/components/guide-page.tsx`
+  - 가이드 상단 소개와 FAQ/법령 2열 블록을 더 늦은 breakpoint에서만 분리하도록 조정해, 짧은 요약 카드 때문에 하단이 비는 인상을 줄였다.
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/updates/components/update-log-page.tsx`
+  - 문서 정보/원문 출처, 변경점/출처 같은 2열 보조 블록의 분할 시점을 `xl`로 늦춰, 중간 폭에서 카드가 어색하게 길어지지 않게 정리했다.
+- `src/components/async-state.tsx`
+  - 공통 빈/로딩/에러 상태의 기본 최소 높이를 낮춰 과한 세로 여백을 줄였다.
+- `docs/pdca/README.md`
+  - 저장소 안에서 PDCA 루프를 기록하는 규칙과 파일 네이밍 기준을 정리했다.
+- `docs/pdca/2026-03-20-overall-density-relayout.md`
+  - 이번 작업의 `Plan / Do / Check / Act`를 별도 파일로 기록했다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `src/components/async-state.tsx`
+- `src/features/eligibility/components/code-directory-page.tsx`
+- `src/features/guides/components/guide-page.tsx`
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/updates/components/update-log-page.tsx`
+- `docs/pdca/README.md`
+- `docs/pdca/2026-03-20-overall-density-relayout.md`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 8 passed`
+  - `Tests 77 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - 빌드 마지막의 chunk size 경고와 plugin timing 경고는 기존과 같은 성격의 경고이며, 이번 변경으로 새 오류는 생기지 않았다.
+
+### 결과 요약
+
+- 사이트 전반의 카드가 더 촘촘해졌고, 특히 첫 화면과 소개형 2열 섹션에서 불필요한 하단 빈 공간이 줄었다.
+- 이번 작업부터는 `docs/pdca/` 폴더에서도 같은 변경을 PDCA 루프로 별도 추적할 수 있게 됐다.
+
+## 2026-03-20 탭·데스크 혼합형 위저드 모드 + 가독성 보정
+
+### 작업 배경
+
+- 사용자는 모바일에서만 제공되던 집중형 위저드 흐름을 태블릿과 데스크톱에도 확장하되, 데스크톱은 화면을 꽉 채운 단일 패널보다 `중앙 위저드 + 참고 패널` 조합이 더 적절하다고 요청했다.
+- 동시에 현재 위저드 문장들이 길게 이어져 보여 읽는 속도가 떨어진다고 느꼈고, 문단 간격은 완전히 없애지 말고 줄 길이와 패딩을 조정하는 방향으로 가독성을 개선하기로 했다.
+
+### 반영 내용
+
+- `src/App.tsx`
+  - viewport를 `mobile / tablet / desktop`으로 나누고, 기존 모바일 집중 모드를 태블릿 집중형과 데스크 혼합형으로 확장했다.
+  - 태블릿에서는 현재 단계에만 집중하는 단일 위저드 레이아웃을 유지하고, 데스크톱에서는 중앙 단계 카드와 우측 참고 레일을 함께 보여주도록 재구성했다.
+  - 위저드 진입 시 현재 단계, 빠른 힌트, 입력 컨텍스트를 우측 패널에서 바로 볼 수 있게 해 데스크톱의 빈 공간을 줄였다.
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+  - 추천 단계의 제목, 설명, textarea, 추천 카드 이유 문구 폭과 줄간격을 조정했다.
+  - 우측 도움말 카드와 요약 박스 패딩을 키워 텍스트가 숨 가쁘게 붙어 보이지 않게 했다.
+- `src/features/eligibility/components/eligibility-form.tsx`
+  - 2단계 조건 설정 카드와 요약 카드의 세로 간격을 다시 잡고, 설명 문장의 폭과 줄간격을 넓혀 읽기 쉽게 정리했다.
+  - 문단 앞뒤 공백은 제거하지 않고, 대신 과한 공백만 줄여 위계는 유지하면서 밀도를 다듬었다.
+- `src/features/eligibility/components/result-panel.tsx`
+  - 결과 제목, 요약 설명, 상세 해설 카드, 후속 액션 섹션의 패딩과 line-height를 조정해 긴 판단 문장이 덜 답답하게 보이도록 했다.
+- `src/App.test.tsx`
+  - 모바일 집중형 테스트는 유지하고, 데스크톱에서 위저드 진입 시 우측 참고 패널이 함께 노출되는지 검증하는 테스트를 추가했다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `src/App.test.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 8 passed`
+  - `Tests 77 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - chunk size 경고와 plugin timing 경고는 기존처럼 유지되며, 이번 변경으로 새 오류는 생기지 않았다.
+
+### 결과 요약
+
+- 이제 위저드는 모바일과 태블릿에서는 집중형으로, 데스크톱에서는 중앙 작업 영역과 참고 패널이 함께 보이는 혼합형으로 동작한다.
+- 가독성은 문단 간격을 없애는 대신, 줄 길이와 카드 패딩, 제목/본문 line-height를 조정해 더 안정적으로 읽히는 방향으로 정리됐다.
+
 ## 2026-03-20 단색 블루 적용
 
 ### 작업 배경

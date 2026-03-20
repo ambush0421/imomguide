@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 512" role="img" aria-label="Loopin Lab horizontal logo">
+  
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1016" />
+      <stop offset="100%" stop-color="#2B323B" />
+    </linearGradient>
+    <linearGradient id="gold-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9E6A31" />
+      <stop offset="52%" stop-color="#D5B170" />
+      <stop offset="100%" stop-color="#F2E1B3" />
+    </linearGradient>
+    <radialGradient id="glow-gradient" cx="0%" cy="0%" r="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <g transform="translate(0 0)">
+    
+  <rect width="512" height="512" rx="120" fill="url(#bg-gradient)" />
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="2" />
+  <circle cx="150" cy="126" r="170" fill="url(#glow-gradient)" />
+  <path d="M146 374V138H222V298H366V374H146Z" fill="url(#gold-gradient)" />
+  <circle cx="308" cy="220" r="34" fill="url(#gold-gradient)" />
+
+  </g>
+  <g transform="translate(600 0)">
+    <text
+      x="0"
+      y="214"
+      fill="#111827"
+      font-family="'Pretendard', 'SUIT', 'Segoe UI', sans-serif"
+      font-size="108"
+      font-weight="700"
+      letter-spacing="8"
+    >
+      LOOPIN LAB
+    </text>
+    <text
+      x="0"
+      y="302"
+      fill="url(#gold-gradient)"
+      font-family="'Pretendard', 'SUIT', 'Segoe UI', sans-serif"
+      font-size="40"
+      font-weight="700"
+      letter-spacing="6"
+    >
+      COMMERCIAL REAL ESTATE DECISION OS
+    </text>
+    <text
+      x="0"
+      y="370"
+      fill="#6B7280"
+      font-family="'Pretendard', 'SUIT', 'Segoe UI', sans-serif"
+      font-size="34"
+      font-weight="500"
+      letter-spacing="1"
+    >
+      loop-in-lab.com
+    </text>
+  </g>
+</svg>

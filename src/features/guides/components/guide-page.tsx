@@ -38,15 +38,15 @@ export function GuidePage({
   return (
     <section
       id="guide"
-      className="space-y-6 rounded-[36px] border border-[var(--border)] bg-[var(--surface-strong)] p-6 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-8"
+      className="space-y-5 rounded-[20px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-6 lg:p-7"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
+        <div className="max-w-3xl">
           <Badge variant="muted">업종별 입주 가이드</Badge>
-          <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
+          <h1 className="mt-4 max-w-3xl font-display text-[2rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.4rem]">
             {guide.title}
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-[15px]">
             {guide.summary}
           </p>
         </div>
@@ -65,9 +65,9 @@ export function GuidePage({
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_320px]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.14fr)_minmax(300px,0.86fr)] xl:items-start">
         <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
-          <CardContent className="space-y-5 p-5">
+          <CardContent className="space-y-5 p-5 sm:p-6">
             <div className="flex flex-wrap items-center gap-2">
               <Badge>{guide.code}</Badge>
               <Badge variant="muted">{guide.browseCategory}</Badge>
@@ -78,7 +78,7 @@ export function GuidePage({
               {guide.zoneSummaries.map((zoneSummary) => (
                 <div
                   key={`${guide.code}-${zoneSummary.zoneType}`}
-                  className="rounded-[24px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4"
+                  className="rounded-[16px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={getVerdictBadgeVariant(zoneSummary.verdict)}>
@@ -90,7 +90,7 @@ export function GuidePage({
                     {zoneSummary.reason}
                   </p>
                   {zoneSummary.notes[0] ? (
-                    <div className="mt-3 rounded-2xl border border-[var(--border)] bg-white/90 px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                    <div className="mt-3 rounded-[14px] border border-[var(--border)] bg-white/90 px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
                       {zoneSummary.notes[0]}
                     </div>
                   ) : null}
@@ -98,7 +98,7 @@ export function GuidePage({
               ))}
             </div>
 
-            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-4">
+            <div className="rounded-[16px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-4">
               <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                 <BookOpenText className="size-4 text-[var(--accent)]" />
                 핵심 해설
@@ -112,29 +112,68 @@ export function GuidePage({
           </CardContent>
         </Card>
 
-        <Card className="border-[var(--border-soft)] bg-[rgba(248,251,255,0.84)] shadow-none">
-          <CardContent className="space-y-4 p-5">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
-              <LibraryBig className="size-5" />
-            </div>
-            <div>
-              <div className="text-sm font-medium text-[var(--foreground-subtle)]">
-                먼저 볼 구역
+        <div className="space-y-4">
+          <Card className="border-[var(--border-soft)] bg-[rgba(248,251,255,0.84)] shadow-none">
+            <CardContent className="space-y-5 p-5 sm:p-6">
+              <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[rgba(43,109,255,0.12)] text-[var(--accent)]">
+                <LibraryBig className="size-5" />
               </div>
-              <div className="mt-2 text-2xl font-semibold text-[var(--foreground)]">
-                {guide.recommendedZoneLabel}
+              <div>
+                <div className="text-sm font-medium text-[var(--foreground-subtle)]">
+                  먼저 볼 구역
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-[var(--foreground)]">
+                  {guide.recommendedZoneLabel}
+                </div>
               </div>
-            </div>
-            <div className="rounded-[22px] border border-[var(--border)] bg-white/90 px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
-              이 업종을 더 자세히 읽고 싶을 때 보는 안내입니다.
-            </div>
-          </CardContent>
-        </Card>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <div className="rounded-[14px] border border-[var(--border)] bg-white/90 px-4 py-3">
+                  <div className="text-xs text-[var(--foreground-subtle)]">대표 코드</div>
+                  <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                    {guide.code}
+                  </div>
+                </div>
+                <div className="rounded-[14px] border border-[var(--border)] bg-white/90 px-4 py-3">
+                  <div className="text-xs text-[var(--foreground-subtle)]">업데이트</div>
+                  <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                    {formatKoreanDate(guide.updatedAt)}
+                  </div>
+                </div>
+                <div className="rounded-[14px] border border-[var(--border)] bg-white/90 px-4 py-3 sm:col-span-2 lg:col-span-1">
+                  <div className="text-xs text-[var(--foreground-subtle)]">업무군</div>
+                  <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                    {guide.browseCategory}
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-[14px] border border-[var(--border)] bg-white/90 px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
+                이 업종을 더 자세히 읽고 싶을 때 보는 안내입니다.
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
+            <CardContent className="space-y-3 p-5">
+              <div className="text-sm font-medium text-[var(--foreground)]">
+                읽는 순서
+              </div>
+              <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                1. 먼저 볼 구역과 판정 뱃지를 확인합니다.
+              </div>
+              <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                2. 핵심 해설에서 왜 가능한지, 어디가 애매한지 빠르게 읽습니다.
+              </div>
+              <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                3. 마지막으로 FAQ와 관련 법령을 확인하면 실무 검토가 훨씬 수월합니다.
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+      <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
         <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
-          <CardContent className="space-y-4 p-5">
+          <CardContent className="space-y-4 p-5 sm:p-6">
             <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
               <FileQuestion className="size-4 text-[var(--accent)]" />
               자주 묻는 질문
@@ -143,7 +182,7 @@ export function GuidePage({
               {guide.faq.map((item) => (
                 <div
                   key={item.id}
-                  className="rounded-[22px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-4"
+                  className="rounded-[14px] border border-[var(--border)] bg-[rgba(248,251,255,0.86)] p-4"
                 >
                   <div className="text-sm font-semibold text-[var(--foreground)]">
                     {item.question}
@@ -158,7 +197,7 @@ export function GuidePage({
         </Card>
 
         <Card className="border-[var(--border-soft)] bg-[rgba(248,251,255,0.84)] shadow-none">
-          <CardContent className="space-y-4 p-5">
+          <CardContent className="space-y-4 p-5 sm:p-6">
             <div className="text-sm font-medium text-[var(--foreground)]">
               관련 법령
             </div>
@@ -166,7 +205,7 @@ export function GuidePage({
               {guide.legalBases.map((basis) => (
                 <div
                   key={basis.id}
-                  className="rounded-[22px] border border-[var(--border)] bg-white/90 p-4"
+                  className="rounded-[14px] border border-[var(--border)] bg-white/90 p-4"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge>{basis.citation}</Badge>
@@ -186,7 +225,7 @@ export function GuidePage({
       </div>
 
       <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
-        <CardContent className="space-y-4 p-5">
+        <CardContent className="space-y-4 p-5 sm:p-6">
           <div className="text-sm font-medium text-[var(--foreground)]">연관 코드</div>
           <div className="flex flex-wrap gap-2">
             {guide.relatedCodes.map((relatedCode) => (

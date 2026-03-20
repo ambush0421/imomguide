@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 220" role="img" aria-label="마곡 코드찾기 로고">
+  <defs>
+    <linearGradient id="wordmark-bg" x1="24" y1="48" x2="136" y2="172" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2F74FF" />
+      <stop offset="1" stop-color="#1F5EFF" />
+    </linearGradient>
+    <radialGradient id="wordmark-glow" cx="0" cy="0" r="1" gradientTransform="translate(44 62) rotate(41.381) scale(76.1323)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.28" />
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <g transform="translate(0 30)">
+    <rect width="160" height="160" rx="38" fill="url(#wordmark-bg)" />
+    <rect
+      x="10"
+      y="10"
+      width="140"
+      height="140"
+      rx="30"
+      fill="none"
+      stroke="#DCE7FF"
+      stroke-opacity="0.34"
+      stroke-width="2"
+    />
+    <circle cx="44" cy="34" r="52" fill="url(#wordmark-glow)" />
+
+    <circle cx="80" cy="44" r="16" fill="#8CB4FF" fill-opacity="0.26" />
+    <circle
+      cx="80"
+      cy="44"
+      r="13"
+      fill="none"
+      stroke="#DCE7FF"
+      stroke-width="6"
+    />
+    <path
+      d="M89.5 53.5L102.5 66.5"
+      stroke="#DCE7FF"
+      stroke-width="7"
+      stroke-linecap="round"
+    />
+
+    <path
+      d="M47 60L80 114L113 60"
+      fill="none"
+      stroke="#FFFFFF"
+      stroke-width="16"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M58 61L80 97L102 61"
+      fill="none"
+      stroke="#CFE0FF"
+      stroke-opacity="0.85"
+      stroke-width="6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <text
+    x="210"
+    y="102"
+    fill="#141C2B"
+    font-family="'Gmarket Sans', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif"
+    font-size="72"
+    font-weight="700"
+    letter-spacing="-2"
+  >
+    마곡 코드찾기
+  </text>
+  <text
+    x="210"
+    y="144"
+    fill="#1F5EFF"
+    font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif"
+    font-size="22"
+    font-weight="700"
+    letter-spacing="6"
+  >
+    MAGOK CODE FINDER
+  </text>
+  <text
+    x="210"
+    y="178"
+    fill="#4A5568"
+    font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif"
+    font-size="24"
+    font-weight="500"
+  >
+    입주 업종코드 탐색과 예비판정을 한 화면에서
+  </text>
+</svg>

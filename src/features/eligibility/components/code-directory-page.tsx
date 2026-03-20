@@ -133,17 +133,17 @@ export function CodeDirectoryPage({
   return (
     <section
       id="directory"
-      className="space-y-6 rounded-[36px] border border-[var(--border-soft)] bg-[var(--surface-strong)] p-6 shadow-[var(--shadow-lg)] sm:p-8"
+      className="space-y-5 rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6 lg:p-7"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
+        <div className="max-w-3xl">
           <Badge variant="muted">전용 코드 사전</Badge>
-          <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
+          <h1 className="mt-4 max-w-3xl font-display text-[2rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.4rem]">
             입주 가능한 업종코드를
             <br />
             전체로 찾아보는 화면입니다
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-[15px]">
             코드를 몰라도 업종명으로 검색할 수 있고, 알고 있다면 5자리 코드 그대로 넣어도
             됩니다. 찾은 코드는 바로 판정 흐름으로 넘길 수 있습니다.
           </p>
@@ -155,10 +155,10 @@ export function CodeDirectoryPage({
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_320px]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(280px,0.88fr)] xl:items-start">
         <Card className="border-[var(--border-accent-strong)] bg-[var(--surface-strong)] shadow-[var(--shadow-md)]">
-          <CardContent className="space-y-5 p-5">
-            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_200px_220px]">
+          <CardContent className="space-y-4 p-5 sm:p-6">
+            <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_200px]">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--foreground-subtle)]" />
                 <Input
@@ -244,54 +244,72 @@ export function CodeDirectoryPage({
           </CardContent>
         </Card>
 
-        <Card className="border-[var(--border-soft)] bg-[var(--surface-soft)] shadow-none">
-          <CardContent className="space-y-4 p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
-              <Filter className="size-4 text-[var(--accent)]" />
-              현재 선택한 조건
-            </div>
-            <div className="grid gap-3">
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
-                <div className="text-xs text-[var(--foreground-subtle)]">전체 코드</div>
-                <div className="mt-1 text-lg font-semibold text-[var(--foreground)]">
-                  {formatNumber(MAGOK_CODE_DIRECTORY_TOTAL_COUNT)}개
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 xl:content-start">
+          <Card className="border-[var(--border-soft)] bg-[var(--surface-soft)] shadow-none">
+            <CardContent className="space-y-4 p-5">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
+                <Filter className="size-4 text-[var(--accent)]" />
+                현재 선택한 조건
+              </div>
+              <div className="grid gap-3">
+                <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
+                  <div className="text-xs text-[var(--foreground-subtle)]">전체 코드</div>
+                  <div className="mt-1 text-lg font-semibold text-[var(--foreground)]">
+                    {formatNumber(MAGOK_CODE_DIRECTORY_TOTAL_COUNT)}개
+                  </div>
+                </div>
+                <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
+                  <div className="text-xs text-[var(--foreground-subtle)]">현재 구역</div>
+                  <div className="mt-1 text-lg font-semibold text-[var(--foreground)]">
+                    {zoneTypeLabels[zoneType]}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
+                    <div className="text-xs text-[var(--foreground-subtle)]">가능</div>
+                    <div className="mt-1 text-base font-semibold text-[var(--foreground)]">
+                      {formatNumber(verdictCounts.eligible)}
+                    </div>
+                  </div>
+                  <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
+                    <div className="text-xs text-[var(--foreground-subtle)]">조건부</div>
+                    <div className="mt-1 text-base font-semibold text-[var(--foreground)]">
+                      {formatNumber(verdictCounts.conditional)}
+                    </div>
+                  </div>
+                  <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
+                    <div className="text-xs text-[var(--foreground-subtle)]">심의 필요</div>
+                    <div className="mt-1 text-base font-semibold text-[var(--foreground)]">
+                      {formatNumber(verdictCounts.reviewRequired)}
+                    </div>
+                  </div>
+                  <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
+                    <div className="text-xs text-[var(--foreground-subtle)]">추가 확인</div>
+                    <div className="mt-1 text-base font-semibold text-[var(--foreground)]">
+                      {formatNumber(verdictCounts.insufficient)}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
-                <div className="text-xs text-[var(--foreground-subtle)]">현재 구역</div>
-                <div className="mt-1 text-lg font-semibold text-[var(--foreground)]">
-                  {zoneTypeLabels[zoneType]}
-                </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
+            <CardContent className="space-y-3 p-5">
+              <div className="text-sm font-semibold text-[var(--foreground)]">
+                이렇게 찾으면 더 빠릅니다
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
-                  <div className="text-xs text-[var(--foreground-subtle)]">가능</div>
-                  <div className="mt-1 text-base font-semibold text-[var(--foreground)]">
-                    {formatNumber(verdictCounts.eligible)}
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
-                  <div className="text-xs text-[var(--foreground-subtle)]">조건부</div>
-                  <div className="mt-1 text-base font-semibold text-[var(--foreground)]">
-                    {formatNumber(verdictCounts.conditional)}
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
-                  <div className="text-xs text-[var(--foreground-subtle)]">심의 필요</div>
-                  <div className="mt-1 text-base font-semibold text-[var(--foreground)]">
-                    {formatNumber(verdictCounts.reviewRequired)}
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3">
-                  <div className="text-xs text-[var(--foreground-subtle)]">추가 확인</div>
-                  <div className="mt-1 text-base font-semibold text-[var(--foreground)]">
-                    {formatNumber(verdictCounts.insufficient)}
-                  </div>
-                </div>
+              <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                업종명이 애매하면 먼저 쉬운 말로 검색한 뒤, 여기서 5자리 코드를 다시 확인하면
+                찾는 속도가 빨라집니다.
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                `가능 / 조건부 / 심의 필요 / 추가 확인`만 먼저 좁혀 보고, 상세 이유는 펼쳐서
+                읽는 순서가 가장 편합니다.
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {filteredEntries.length === 0 ? (
@@ -299,14 +317,14 @@ export function CodeDirectoryPage({
           variant="empty"
           title="조건에 맞는 코드를 찾지 못했습니다."
           description="업종명 표현을 조금 더 짧게 바꾸거나, 결과 필터를 `전체`로 바꿔 다시 찾아보세요."
-          className="min-h-56 rounded-[28px] border border-[var(--border)] bg-[var(--surface-strong)]"
+          className="min-h-40 rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)]"
         />
       ) : (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
               <Badge variant="muted">검색 결과</Badge>
-              <div className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-sm font-semibold text-[var(--accent)]">
+              <div className="rounded-[12px] bg-[var(--accent-soft)] px-3 py-1 text-sm font-semibold text-[var(--accent)]">
                 {formatNumber(filteredEntries.length)}개 찾음
               </div>
               <p className="text-sm leading-6 text-[var(--foreground-muted)]">
@@ -326,7 +344,7 @@ export function CodeDirectoryPage({
               return (
                 <details
                   key={`${zoneType}-${entry.code}`}
-                  className="group overflow-hidden rounded-[26px] border border-[var(--border-soft)] bg-[var(--surface-strong)]"
+                  className="group overflow-hidden rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-strong)]"
                 >
                   <div className={`h-1.5 w-full ${getVerdictAccentClass(zoneVerdict.verdict)}`} />
                   <summary className="cursor-pointer list-none px-5 py-5">
@@ -352,25 +370,25 @@ export function CodeDirectoryPage({
 
                   <div className="border-t border-[var(--border)] px-5 py-5">
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
+                      <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
                         <div className="text-xs text-[var(--foreground-subtle)]">대분류</div>
                         <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
                           {entry.sectionCode} · {entry.sectionName}
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
+                      <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
                         <div className="text-xs text-[var(--foreground-subtle)]">중분류</div>
                         <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
                           {entry.divisionCode} · {entry.divisionName}
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
+                      <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
                         <div className="text-xs text-[var(--foreground-subtle)]">소분류</div>
                         <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
                           {entry.groupCode} · {entry.groupName}
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
+                      <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3">
                         <div className="text-xs text-[var(--foreground-subtle)]">세분류</div>
                         <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
                           {entry.categoryCode} · {entry.categoryName}
@@ -383,7 +401,7 @@ export function CodeDirectoryPage({
                         {zoneVerdict.notes.map((note) => (
                           <div
                             key={`${entry.code}-${note}`}
-                            className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
+                      className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]"
                           >
                             {note}
                           </div>
@@ -396,7 +414,7 @@ export function CodeDirectoryPage({
                         {legalBases.map((basis) => (
                           <div
                             key={`${entry.code}-${basis.id}`}
-                            className="rounded-2xl border border-[var(--border-soft)] bg-[var(--info-bg)] px-4 py-3"
+                    className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--info-bg)] px-4 py-3"
                           >
                             <div className="text-xs uppercase tracking-[0.12em] text-[var(--foreground-subtle)]">
                               {basis.source === 'magokPlan' ? '고시문' : '시행령'} ·{' '}
@@ -423,7 +441,7 @@ export function CodeDirectoryPage({
           </div>
 
           {totalPages > 1 ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4">
               <p className="text-sm leading-6 text-[var(--foreground-muted)]">
                 코드를 놓치지 않도록 페이지로 나눠 보여드립니다.
               </p>
@@ -455,19 +473,19 @@ export function CodeDirectoryPage({
         </div>
       )}
 
-      <div className="rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-5">
+        <div className="rounded-[18px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-5">
         <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
           <BookOpenText className="size-4 text-[var(--accent)]" />
           보는 법
         </div>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+            <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
             `가능`은 지금 선택한 구역에서 먼저 확인해볼 만한 코드입니다.
           </div>
-          <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+            <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
             `조건부 가능`과 `심의 필요`는 추가 확인이 함께 필요한 경우입니다.
           </div>
-          <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+            <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
             `추가 확인`은 업종 설명을 조금 더 구체적으로 보고 판단해야 하는 경우입니다.
           </div>
         </div>
