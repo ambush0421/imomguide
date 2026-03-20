@@ -9,7 +9,7 @@ interface ExpertInsightCardProps {
 
 export function ExpertInsightCard({ insight }: ExpertInsightCardProps) {
   return (
-    <article className="rounded-[24px] border border-[var(--border)] bg-white p-5">
+    <article className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={insight.tone}>전문가 인사이트</Badge>
         <Badge variant="muted">실무 해설</Badge>
@@ -22,7 +22,7 @@ export function ExpertInsightCard({ insight }: ExpertInsightCardProps) {
       </p>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
             <Lightbulb className="size-4 text-[var(--accent)]" />
             바로 써먹는 포인트
@@ -34,7 +34,7 @@ export function ExpertInsightCard({ insight }: ExpertInsightCardProps) {
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[rgba(255,249,243,0.75)] p-4">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
             <ShieldAlert className="size-4 text-[var(--accent)]" />
             놓치기 쉬운 리스크

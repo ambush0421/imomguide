@@ -1,48 +1,84 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css');
 @import 'tailwindcss';
+
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('/fonts/gmarket-sans/GmarketSansLight.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('/fonts/gmarket-sans/GmarketSansMedium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('/fonts/gmarket-sans/GmarketSansMedium.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('/fonts/gmarket-sans/GmarketSansBold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   color-scheme: light;
-  --background: #f3f7fc;
-  --surface: rgba(255, 255, 255, 0.97);
+  --font-body: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI',
+    sans-serif;
+  --font-heading: 'Gmarket Sans', 'Pretendard', 'Apple SD Gothic Neo',
+    'Malgun Gothic', sans-serif;
+  --background: #f5f6f8;
+  --surface: rgba(255, 255, 255, 0.98);
   --surface-strong: #ffffff;
-  --surface-muted: #edf3ff;
-  --surface-soft: #f7faff;
-  --foreground: #0f172a;
-  --foreground-muted: #334155;
-  --foreground-subtle: #5f708d;
-  --border: rgba(15, 23, 42, 0.16);
-  --ring: rgba(20, 92, 255, 0.32);
-  --accent: #145cff;
-  --accent-strong: #0b46d1;
-  --accent-soft: #d8e5ff;
+  --surface-muted: #f3f5f8;
+  --surface-soft: #fafbfc;
+  --foreground: #141c2b;
+  --foreground-muted: #4a5568;
+  --foreground-subtle: #788396;
+  --border: rgba(20, 28, 43, 0.12);
+  --ring: rgba(31, 94, 255, 0.24);
+  --accent: #1f5eff;
+  --accent-strong: #1f5eff;
+  --accent-soft: rgba(31, 94, 255, 0.07);
   --accent-foreground: #ffffff;
-  --info-border: #7dd3fc;
-  --info-bg: #eaf6ff;
-  --info-foreground: #0b4f73;
+  --info-border: #d8e1ed;
+  --info-bg: #f7f9fc;
+  --info-foreground: #314867;
 
   /* Semantic status colors */
-  --success-bg: #e9fbf3;
-  --success-border: #6ee7b7;
-  --success-foreground: #047857;
-  --warning-bg: #fff7dd;
-  --warning-border: #fbbf24;
-  --warning-foreground: #92400e;
-  --danger-bg: #fff0f3;
-  --danger-border: #fb7185;
-  --danger-foreground: #be123c;
+  --success-bg: #fbfefc;
+  --success-border: #a7d2be;
+  --success-foreground: #1f6a4d;
+  --warning-bg: #fffdfa;
+  --warning-border: #e4c89a;
+  --warning-foreground: #7a5318;
+  --danger-bg: #fffafb;
+  --danger-border: #e1bcc6;
+  --danger-foreground: #8b3650;
   --danger-icon: #e11d48;
 
   /* Border accent tokens */
-  --border-accent: rgba(20, 92, 255, 0.18);
-  --border-accent-strong: rgba(20, 92, 255, 0.28);
-  --border-soft: rgba(15, 23, 42, 0.1);
+  --border-accent: rgba(31, 94, 255, 0.18);
+  --border-accent-strong: rgba(31, 94, 255, 0.28);
+  --border-soft: rgba(20, 28, 43, 0.09);
 
   /* Status dot colors */
   --dot-success: #059669;
-  --dot-warning: #f59e0b;
+  --dot-warning: #c08b27;
   --dot-danger: #e11d48;
-  --dot-neutral: #94a3b8;
+  --dot-neutral: #8994a7;
 
   /* Rounding scale */
   --radius-sm: 16px;
@@ -54,11 +90,11 @@
   --radius-full: 9999px;
 
   /* Shadow scale */
-  --shadow-sm: 0 8px 18px rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 16px 34px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 24px 52px rgba(15, 23, 42, 0.12);
-  --shadow-xl: 0 32px 84px rgba(15, 23, 42, 0.14);
-  --shadow-accent: 0 22px 44px rgba(20, 92, 255, 0.28);
+  --shadow-sm: 0 10px 20px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 16px 32px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 24px 48px rgba(15, 23, 42, 0.08);
+  --shadow-xl: 0 30px 60px rgba(15, 23, 42, 0.1);
+  --shadow-accent: 0 20px 36px rgba(24, 63, 199, 0.18);
 }
 
 @layer base {
@@ -74,12 +110,9 @@
   body {
     margin: 0;
     min-width: 320px;
-    font-family: 'IBM Plex Sans KR', sans-serif;
+    font-family: var(--font-body);
     color: var(--foreground);
-    background:
-      radial-gradient(circle at top left, rgba(20, 92, 255, 0.22), transparent 30%),
-      radial-gradient(circle at right top, rgba(56, 189, 248, 0.16), transparent 22%),
-      linear-gradient(180deg, #fbfdff 0%, #f4f8ff 44%, #edf3fb 100%);
+    background: var(--background);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -95,8 +128,8 @@
   h3,
   h4 {
     margin: 0;
-    font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
-    letter-spacing: -0.03em;
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
   }
 
   p,
@@ -116,13 +149,13 @@
   }
 
   ::selection {
-    background: rgba(20, 92, 255, 0.24);
+    background: rgba(31, 94, 255, 0.16);
     color: var(--foreground);
   }
 }
 
 @theme inline {
-  --font-display: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  --font-display: var(--font-heading);
   --animate-shimmer: shimmer 2s infinite;
   --animate-fade-in: fade-in 0.2s ease-out;
   --animate-slide-down: slide-down 0.2s ease-out;

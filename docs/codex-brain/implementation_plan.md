@@ -1,5 +1,419 @@
 # 입주가능판별기 구현 계획
 
+## 2026-03-20 단색 블루 적용
+
+### 목표
+
+- 화면 전체에서 gradient와 섞인 면을 제거하고, 단색 면 중심의 더 또렷한 UI로 정리한다.
+- 포인트 컬러는 한 가지 블루 축으로만 사용하고, 큰 면은 화이트/라이트 뉴트럴 배경으로 고정한다.
+- 사용자가 올린 홈 스크린샷처럼 첫 화면이 단정하고 명확하게 읽히도록 만든다.
+
+### 현재 문제 진단
+
+1. 전역 토큰이 중성으로 정리되어도, 아직 여러 컴포넌트와 페이지에 남아 있는 `linear-gradient`가 화면 인상을 섞어 보이게 한다.
+2. 기본 버튼, 기본 배지, 기본 카드가 모두 gradient를 쓰고 있어 단색 레이아웃으로 읽히지 않는다.
+3. 홈 첫 화면과 일부 상세 페이지 카드가 단색보다 `면이 흐르는 UI`처럼 보여 사용자 의도와 다르다.
+
+### 구현 방향
+
+1. `src/index.css`
+   - 바디 배경을 gradient 없이 단색 `background`로 고정한다.
+   - `accent`와 `accent-strong`을 사실상 같은 블루 축으로 맞춰 단색 사용 원칙을 강화한다.
+2. `src/components/ui/button.tsx`, `src/components/ui/badge.tsx`, `src/components/ui/card.tsx`
+   - 기본 variant에서 모든 gradient를 제거하고 단색 배경으로 전환한다.
+3. `src/App.tsx`
+   - 홈 히어로, 우측 안내 카드, 위저드 래퍼, 하단 카드, 푸터에 남은 gradient 배경을 단색 면으로 정리한다.
+4. `src/features/*/components/*page.tsx`
+   - 코드 사전, 가이드, 라이브러리, 업데이트 페이지 카드에 남은 gradient 배경을 단색으로 맞춘다.
+5. `src/features/eligibility/components/industry-discovery-panel.tsx`
+   - 검색/추천 패널 내 강조 박스의 gradient 배경도 단색으로 통일한다.
+
+### 예상 영향 범위
+
+- `src/index.css`
+- `src/components/ui/button.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/ui/card.tsx`
+- `src/App.tsx`
+- `src/features/eligibility/components/code-directory-page.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/guides/components/guide-page.tsx`
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/updates/components/update-log-page.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 파스텔 제거형 색 보정
+
+### 목표
+
+- 사용자가 유치하게 느끼는 파스텔 블루 큰 면을 줄이고, 더 성숙하고 제품적인 화면 무드로 재정렬한다.
+- 전체를 어둡게 누르지 않으면서도 `화이트 중심`, `그래파이트 텍스트`, `짧고 강한 블루 포인트` 구조로 바꾼다.
+- 특히 모바일 결과 화면처럼 정보 밀도가 높은 구간에서 학습앱 같은 느낌 대신 전문 서비스 UI처럼 보이게 만든다.
+
+### 현재 문제 진단
+
+1. 전역 `surface-muted`, `surface-soft`, `accent-soft`가 모두 파란 기운을 가지고 있어 큰 면적에 깔리면 유치한 인상으로 읽힌다.
+2. `ResultPanel`의 핵심 결과 카드와 상세 해설 필드가 연한 블루 면을 반복해서 사용해, 모바일 화면에서 파스텔이 겹겹이 쌓여 보인다.
+3. `EligibilityForm`과 모바일 위저드 카드도 같은 톤을 공유하고 있어, 흐름 전체가 다소 장난스럽게 느껴진다.
+
+### 구현 방향
+
+1. `src/index.css`
+   - `surface` 계열을 거의 화이트/라이트 그레이에 가깝게 재정의하고, 바디 배경의 블루 기운도 크게 줄인다.
+   - `accent-soft`는 작은 인터랙션용 수준으로만 남기고, `info`, `success`, `warning`, `danger` 배경도 파스텔 면이 아니라 거의 화이트 기반으로 바꾼다.
+2. `src/components/ui/button.tsx`, `src/components/ui/badge.tsx`
+   - 기본 버튼의 베이비 블루 느낌을 줄이고 더 간결한 블루 그라데이션으로 정리한다.
+   - muted/success/warning/danger 배지는 채운 파스텔 면보다 얇은 선과 가벼운 백색 면 중심으로 바꾼다.
+3. `src/App.tsx`
+   - 모바일 집중 위저드와 메인 히어로/안내 카드의 하드코딩 블루 끝색을 제거하고, 큰 면은 화이트 중심으로 되돌린다.
+4. `src/features/eligibility/components/result-panel.tsx`
+   - 결과 요약 카드, 상세 해설 필드, 이유/가이드 섹션의 연한 블루 면을 없애고 중성 표면 중심으로 재구성한다.
+5. `src/features/eligibility/components/eligibility-form.tsx`
+   - 상단 설정 요약 카드의 파스텔 그라데이션을 제거해 2단계/3단계가 같은 시각 언어를 쓰도록 맞춘다.
+
+### 예상 영향 범위
+
+- `src/index.css`
+- `src/components/ui/button.tsx`
+- `src/components/ui/badge.tsx`
+- `src/App.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 컬러 무드 2차 보정
+
+### 목표
+
+- 사용자가 느끼는 `할아버지 아저씨들이 쓸 법한 색` 인상을 줄이고, 더 젊고 제품적인 화면 톤으로 다시 보정한다.
+- 전반적인 카드와 섹션의 테두리를 한 단계 더 또렷하게 세워 정보 구획이 선명하게 읽히도록 만든다.
+- 기존의 신뢰감은 유지하되, 포인트 컬러를 더 현대적인 코발트 블루 축으로 이동시켜 덜 보수적인 첫인상을 만든다.
+
+### 현재 문제 진단
+
+1. 현재 토큰은 베이지는 사라졌지만, `화이트 + 파우더 블루 + 점잖은 네이비` 인상이 아직 강해 화면이 다소 보수적으로 읽힌다.
+2. 공통 카드와 배지의 외곽선이 여전히 얇고 은은해, 화면 구조가 또렷하게 잡히지 않는다.
+3. 첫 화면 히어로와 우측 안내 카드가 모두 연한 표면색이라, 포인트 블루가 살아도 전체 무드는 여전히 얌전하게 느껴진다.
+
+### 구현 방향
+
+1. `src/index.css`
+   - `--accent`, `--accent-strong`, `--accent-soft`를 더 선명한 코발트 블루 축으로 이동한다.
+   - `--border`, `--border-soft`, `--border-accent*`를 진하게 올리고, 그림자도 더 차가운 톤으로 재정의한다.
+   - 바디 배경은 깨끗한 화이트 기반 위에 밝은 블루 기운을 조금 더 살려 제품 톤을 젊게 만든다.
+2. `src/components/ui/button.tsx`
+   - 기본 버튼을 더 생기 있는 블루 그라데이션으로 보정하고, 보조 버튼의 ring과 hover 대비를 강화한다.
+3. `src/components/ui/badge.tsx`, `src/components/ui/card.tsx`
+   - muted 배지와 기본 카드의 선을 더 또렷하게 세우고, 표면색을 더 차갑고 깨끗한 방향으로 정리한다.
+4. `src/App.tsx`
+   - 메인 히어로, 우측 안내 카드, 사실 카드의 배경/테두리 위계를 재보정해 첫 화면 인상이 덜 점잖고 더 현대적으로 보이게 한다.
+5. `src/features/eligibility/components/code-directory-page.tsx`
+   - 상단 루트 섹션과 검색 카드의 경계선을 더 분명하게 만들어 홈과 동일한 톤으로 맞춘다.
+
+### 예상 영향 범위
+
+- `src/index.css`
+- `src/components/ui/button.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/ui/card.tsx`
+- `src/App.tsx`
+- `src/features/eligibility/components/code-directory-page.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 컬러 무드 리디자인
+
+### 목표
+
+- 현재의 `웜 베이지 + 강한 코발트 + 반투명 화이트` 조합에서 벗어나, 더 차분하고 제품적인 컬러 체계로 재정리한다.
+- 폰트는 유지하고 색만 정리해도 인상이 크게 달라지도록 `src/index.css` 토큰과 공통 UI 컴포넌트부터 다시 잡는다.
+- 부동산/법령/판정 서비스에 맞게 `신뢰감`, `정돈감`, `정보 밀도`가 먼저 느껴지도록 만든다.
+
+### 현재 문제 진단
+
+1. `src/index.css`의 베이지 배경 그라데이션과 코발트 포인트가 서로 다른 무드를 가져 전체 인상이 어색하다.
+2. 공통 `Button`, `Badge`, `Card`가 여전히 광택형 블루 그라데이션, 반투명 화이트, 큰 그림자를 많이 써서 화면이 가볍지 않고 촌스럽게 보인다.
+3. `App.tsx`, `code-directory-page.tsx`, `eligibility-form.tsx` 등에서 `rgba(244,248,255,...)`, `rgba(239,245,255,...)` 같은 연파랑 박스가 많이 남아 있어 전역 토큰을 바꿔도 화면이 통일되지 않는다.
+4. 헤더/히어로/우측 설명 패널이 모두 밝은 카드인데 배경에도 컬러가 많아, 대비보다 산만함이 먼저 느껴진다.
+
+### 제안 방향
+
+1. 전역 배경은 `도자기 화이트` 계열의 아주 옅은 뉴트럴로 정리하고, 현재 베이지/골드 느낌은 거의 제거한다.
+2. 본문과 선은 `차콜 잉크 + 뉴트럴 그레이`로 정리해 정보 서비스다운 밀도를 만든다.
+3. 포인트 컬러는 지금보다 채도를 낮춘 `딥 네이비` 한 축으로 줄이고, hover/soft/selected 상태도 같은 계열 안에서만 움직이게 만든다.
+4. 카드 배경은 불투명한 오프화이트 중심으로 바꾸고, 큰 그림자보다 얇은 경계선과 짧은 그림자로 정리한다.
+5. 우측 설명 패널과 요약 카드 같은 보조 영역은 연파랑 박스를 남발하지 않고, 배경 차이보다 선과 여백으로 위계를 만든다.
+
+### 구현 방향
+
+1. `src/index.css`
+   - `--background`, `--surface*`, `--foreground*`, `--border*`, `--accent*`, `--ring`, `--shadow*` 토큰을 새 무드로 재정의한다.
+   - 바디 배경의 `radial-gradient`와 베이지 톤을 줄여 더 정제된 뉴트럴 배경으로 교체한다.
+2. `src/components/ui/button.tsx`
+   - 기본 버튼의 강한 블루 그라데이션과 과한 hover shadow를 줄이고, 더 평평한 네이비 솔리드 중심으로 바꾼다.
+   - `secondary`, `ghost`, `outline`도 현재의 떠 있는 유리판 느낌을 줄인다.
+3. `src/components/ui/badge.tsx`, `src/components/ui/card.tsx`
+   - 배지와 카드의 반투명 광택 톤을 줄이고, 오프화이트 면 + 얇은 선 중심으로 정리한다.
+4. `src/App.tsx`
+   - 헤더, 메인 히어로, 우측 안내 패널, 푸터의 하드코딩된 밝은 배경과 블루 계열 보조 박스를 새 토큰 기준으로 정리한다.
+5. `src/features/eligibility/components/code-directory-page.tsx`
+   - 상단 섹션과 내부 요약 박스의 연파랑 배경을 줄이고, 필요한 강조만 남긴다.
+6. `src/features/eligibility/components/eligibility-form.tsx`
+   - 단계 카드와 보조 요약 박스의 블루 tint를 낮추고 뉴트럴 위계 중심으로 다시 정리한다.
+
+### 예상 영향 범위
+
+- `src/index.css`
+- `src/components/ui/button.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/ui/card.tsx`
+- `src/App.tsx`
+- `src/features/eligibility/components/code-directory-page.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- 필요 시 `src/features/eligibility/components/convergence-review-card.tsx`
+- 필요 시 `src/features/eligibility/components/expert-insight-card.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- 홈 첫 화면에서 헤더/히어로/우측 패널 색 위계 시각 확인
+- 코드 사전/판정 화면에서 하드코딩 블루 박스 잔존 여부 확인
+
+## 2026-03-20 지마켓 산스 + 프리텐다드 전역 폰트 전환
+
+### 목표
+
+- 제목은 `Gmarket Sans`, 본문은 `Pretendard`로 전환해 또렷하면서도 친근한 인상을 만든다.
+- 현재 전역 폰트 진입점인 `src/index.css` 한 곳에서 기본 서체와 제목 서체를 정리해 변경 범위를 최소화한다.
+- 이미 광범위하게 쓰이는 `font-display` 유틸이 새 제목 폰트를 자연스럽게 타도록 유지한다.
+
+### 구현 방향
+
+1. `Pretendard`는 공식 저장소 CDN import를 사용해 본문용 sans 서체를 안정적으로 로드한다.
+2. `Gmarket Sans`는 공식 배포 ZIP에서 받은 OTF 파일을 `public/fonts/gmarket-sans`로 self-hosting 한다.
+3. `src/index.css`의 `body` 기본 `font-family`를 `Pretendard` 중심으로 바꾸고, 한국어 UI에 맞는 sans-serif fallback을 함께 정리한다.
+4. `h1`~`h4`와 `@theme inline`의 `--font-display`를 `Gmarket Sans` 기반으로 바꿔, 현재 `font-display` 클래스가 붙은 카드 제목과 주요 헤딩이 자동으로 새 조합을 사용하게 한다.
+5. `Gmarket Sans`는 공식적으로 `Light/Medium/Bold` 3종만 제공되므로, 현재 많이 쓰이는 `font-semibold` 계열에는 `Medium/Bold` 매핑이 자연스럽게 이어지도록 `@font-face` weight를 정리한다.
+6. 변경 후 홈, 코드 사전, 라이브러리처럼 헤딩 밀도가 다른 화면에서 제목/본문 대비가 과하지 않은지 확인한다.
+
+### 예상 영향 범위
+
+- `src/index.css`
+- 필요 시 `src/components/ui/card.tsx`
+- 필요 시 `src/App.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 리스크 및 확인 포인트
+
+- `Gmarket Sans`는 3개 굵기만 제공되므로 `500/600/700` 매핑을 CSS에서 명시해 현재 클래스 체계와 어긋나지 않게 해야 한다.
+- 현재 `font-display`가 카드 타이틀처럼 비교적 작은 텍스트에도 쓰이고 있어, 일부 작은 제목은 자간 보정이 필요할 수 있다.
+- AGENTS 문서에서 우선 읽으라고 한 `Codex_System_Prompt.md`, `GEMINI.md`, `docs/pdca/`는 현재 워크스페이스에서 확인되지 않아, 실제 소스 구조를 기준으로 계획을 수립한다.
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- 주요 헤딩/본문이 함께 있는 화면에서 시각 확인
+- 모바일/데스크톱에서 제목 대비와 줄바꿈 확인
+
+## 2026-03-20 모바일 집중형 위저드 + 트렌디 비주얼 리디자인
+
+### 목표
+
+- 모바일에서 사용자가 위저드에 들어오면 이전/이후 카드가 겹쳐 보이지 않도록, 현재 단계만 남는 집중형 흐름으로 전환한다.
+- 홈 전반의 연한 파랑 위주 톤을 덜어내고, 더 세련된 중성 배경과 짙은 잉크 텍스트, 정제된 코발트 포인트를 중심으로 사이트 분위기를 다시 잡는다.
+- 데스크톱 정보 구조는 유지하되, 모바일에서는 더 앱처럼 읽히고 데스크톱에서는 더 선명하고 현대적인 화면으로 느껴지게 만든다.
+
+### 구현 방향
+
+1. `src/App.tsx` 안에 모바일 전용 `finder` 집중 모드 상태를 추가하고, 위저드 진입 후에는 히어로/보조 섹션을 접은 채 현재 단계 패널만 보이도록 조건부 렌더링한다.
+2. 모바일 집중 모드에서는 단계 칩, 상단 요약, 닫기/복귀 액션을 더 간결하게 바꿔 `현재 어디인지`만 짧게 보여준다.
+3. `src/index.css`의 전역 토큰을 연파랑 SaaS 팔레트에서 벗어나 `웜 화이트 배경 + 잉크 네이비 + 코발트 포인트` 중심으로 다시 정의한다.
+4. `src/components/ui/button.tsx`, `src/components/ui/badge.tsx`, `src/components/ui/card.tsx`의 그림자, 배경, hover 질감을 새 토큰과 맞추고 과한 광택 느낌을 줄인다.
+5. `src/App.tsx`, `IndustryDiscoveryPanel`, `EligibilityForm`, `ResultPanel`의 핵심 그라데이션/하드코딩 블루 톤도 새 무드에 맞게 일부 직접 보정한다.
+6. 마지막에 `npm run lint`, `npm run test`, `npm run build`를 돌리고 결과를 `walkthrough.md`에 정리한다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/index.css`
+- `src/components/ui/button.tsx`
+- `src/components/ui/badge.tsx`
+- `src/components/ui/card.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 모바일 오버플로/잘림 보정
+
+### 목표
+
+- 모바일에서 화면 오른쪽이 잘리는 실제 오버플로 문제를 먼저 없애고, 사용자가 가로 스크롤 없이 위저드를 읽을 수 있게 만든다.
+- 특히 헤더의 `코드 사전 열기` 버튼과 1단계 내부의 긴 보조 버튼·예시 칩이 좁은 폭에서 전체 레이아웃을 밀어내지 않도록 모바일 전용 압축 규칙을 추가한다.
+- 단순히 `overflow-x-hidden`으로 가리는 데서 끝내지 않고, 원인 요소의 라벨 길이와 노출량도 함께 줄여 구조적으로 안전한 모바일 화면으로 정리한다.
+
+### 구현 방향
+
+1. `src/App.tsx`의 모바일 헤더 CTA는 짧은 라벨과 더 작은 가로 패딩으로 줄이고, 루트 래퍼에는 `overflow-x-hidden`을 추가한다.
+2. 브랜드 보조 텍스트와 헤더 간격도 모바일 기준으로 조금 더 압축해 로고/버튼/메뉴가 한 줄 안에서 안정적으로 들어오게 한다.
+3. `IndustryDiscoveryPanel`에서는 모바일용 보조 버튼 문구를 `직접 입력`처럼 짧게 바꾸고, 긴 라벨은 데스크톱 이상에서만 풀 텍스트를 보이게 한다.
+4. 예시 칩은 모바일에서 처음 2개만 보이게 하고, `더 보기`를 눌렀을 때만 전체 칩을 펼쳐 첫 화면 폭과 높이를 동시에 안정화한다.
+5. 마지막에 `npm run lint`, `npm run test`, `npm run build`를 다시 실행해 회귀 여부를 확인하고 결과를 문서에 남긴다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 모바일 압축형 2차 보정
+
+### 목표
+
+- 모바일에서 첫 스크린 안에 `제목`, `현재 단계`, `입력 시작점`이 더 빨리 들어오도록 홈과 `finder`의 세로 길이를 한 번 더 줄인다.
+- 이미 단일 패널로 바뀐 구조는 유지하되, 여전히 무겁게 느껴지는 `사실 카드`, `보조 포인트`, `두꺼운 보조 CTA`를 더 가볍게 만들어 실제 앱형 위저드처럼 읽히게 한다.
+- 사용자는 스크롤보다 `입력 -> 추천 -> 결과` 행동 흐름을 먼저 이해하고, 모바일에서 넘침이나 중첩감 없이 주요 버튼을 누를 수 있어야 한다.
+
+### 구현 방향
+
+1. `src/App.tsx`에서 모바일 기준으로 히어로의 `introFacts`, 보조 포인트 섹션을 줄이거나 숨겨 `finder`가 더 빨리 보이게 만든다.
+2. `finder` 외곽 패딩, 내부 헤더, 3단계 탭 버튼의 모바일 높이와 그림자 강도를 더 낮춰 카드가 여러 겹 뜬 느낌을 줄인다.
+3. `IndustryDiscoveryPanel`의 입력 설명은 모바일에서 더 짧게 보이게 하고, `textarea` 높이와 예시 칩 간격, 보조 CTA의 시각적 무게를 한 번 더 줄인다.
+4. `EligibilityForm`, `ResultPanel`은 상단 요약 카드 그리드와 제목 크기, 버튼 배치를 모바일 우선 밀도로 다시 조정한다.
+5. 구조/카피 회귀가 없는지 `npm run lint`, `npm run test`, `npm run build`로 다시 확인하고 결과를 `walkthrough.md`에 남긴다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 사용자 관점 문구 최적화
+
+### 목표
+
+- 사용자가 이 사이트를 이용하면서 바로 이해하고 행동할 수 있는 문구만 남기고, 운영자나 내부 담당자에게 설명하듯 쓰인 문장을 줄인다.
+- 기능 구조는 바꾸지 않고, 홈/위저드/결과/참고 영역의 보조 설명을 사용자 시선의 언어로 다시 다듬는다.
+
+### 구현 방향
+
+1. `src/App.tsx`의 히어로 보조 설명, 사실 카드, 코드 사전 소개 문구에서 내부 구현 설명이나 제도 해설 톤을 줄인다.
+2. `IndustryDiscoveryPanel`, `EligibilityForm`, `ResultPanel`의 설명문은 `무엇을 하면 되는지`, `지금 무엇을 보여주는지` 중심으로 다시 쓴다.
+3. `RulebookTabs`는 법령 자체를 숨기지 않되, 섹션 소개 문구를 사용자 참고용 안내 톤으로 바꾼다.
+4. 테스트에 직접 걸리는 헤딩은 가능한 유지하고, 설명/보조 카피 중심으로 손본 뒤 `lint/test/build`로 회귀를 확인한다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/features/eligibility/components/code-directory-page.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/features/eligibility/components/rulebook-tabs.tsx`
+- `src/features/guides/components/guide-page.tsx`
+- `src/features/library/components/legal-library-page.tsx`
+- `src/features/updates/components/update-log-page.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-20 모바일 위계 중심 리디자인
+
+### 목표
+
+- 모바일에서 첫 화면을 가리는 과도한 헤더 높이와 중복 카드 깊이를 줄여, 사용자가 `무엇을 눌러야 하는지`를 더 빨리 이해하게 만든다.
+- 기존 블루 톤은 유지하되, 구조적으로 과했던 `큰 헤더 + 큰 소개 카드 + 큰 위저드 헤더 + 긴 추천 카드`를 압축해 실제 SaaS 제품처럼 읽히는 화면으로 다듬는다.
+- 특히 추천 결과 카드와 핵심 CTA가 모바일에서 두 줄로 꺾이거나 설명에 묻히지 않도록 정보 위계를 다시 잡는다.
+
+### 구현 방향
+
+1. `src/App.tsx`의 sticky 헤더를 모바일 기준 2줄 컴팩트 구조로 재배치하고, 큰 빈 여백 없이 `로고 / 핵심 CTA / 메뉴`가 빠르게 읽히도록 정리한다.
+2. 상단 히어로 우측의 긴 보조 설명 카드는 모바일에서 숨기거나 축약하고, 대신 더 짧은 단계 요약만 남겨 첫 화면 길이를 줄인다.
+3. `finder` 섹션 상단의 소개 문구와 3단계 스텝 UI를 모바일 우선으로 압축해, 바깥 설명보다 실제 위저드 본문이 먼저 보이게 만든다.
+4. `IndustryDiscoveryPanel`의 예시 버튼과 안내 박스는 모바일에서 덜 길게 보이도록 정리하고, 추천 카드와 CTA는 줄바꿈 없이 더 컴팩트한 레이아웃으로 다시 맞춘다.
+5. 필요 시 `EligibilityForm`과 `ResultPanel`의 상단 요약 영역도 모바일 스캔 속도 기준으로 여백과 버튼 배치를 다듬고, 마지막에 `lint/test/build`로 회귀를 확인한다.
+
+### 예상 영향 범위
+
+- `src/App.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
 ## 2026-03-20 쉬운 검색 홈 단일 패널 전환 정리
 
 ### 목표

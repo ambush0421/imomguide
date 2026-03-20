@@ -9,7 +9,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          'border-[var(--accent-strong)] bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[0_10px_20px_rgba(20,92,255,0.18)]',
+          'border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[0_10px_18px_rgba(31,94,255,0.14)]',
         success:
           'border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-foreground)]',
         warning:
@@ -17,7 +17,7 @@ const badgeVariants = cva(
         danger:
           'border-[var(--danger-border)] bg-[var(--danger-bg)] text-[var(--danger-foreground)]',
         muted:
-          'border-[var(--border)] bg-[var(--surface-muted)] text-[var(--foreground-muted)]',
+          'border-[var(--border-soft)] bg-[var(--surface-strong)] text-[var(--foreground-muted)]',
       },
     },
     defaultVariants: {

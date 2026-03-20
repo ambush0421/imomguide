@@ -66,18 +66,21 @@ type DiscoverScreen = 'compose' | 'results'
 const introSteps = [
   {
     step: '1',
+    mobileTitle: '한 줄 입력',
     title: '하고 싶은 일을 적습니다',
     description:
       '업종코드를 몰라도 됩니다. 광고대행업처럼 한 줄로 적거나 사업자등록증의 업태·종목을 붙여 넣으면 됩니다.',
   },
   {
     step: '2',
+    mobileTitle: '코드 추천',
     title: '가장 가까운 코드를 추천받습니다',
     description:
       '정확한 코드가 있으면 바로 보여주고, 없으면 현재 구역에서 검토 가능한 비슷한 코드를 먼저 추천합니다.',
   },
   {
     step: '3',
+    mobileTitle: '결과 확인',
     title: '마곡에서 가능한지 확인합니다',
     description:
       '선택한 코드 기준으로 가능, 조건부 가능, 심의 필요, 추가 확인, 불가를 이유와 함께 보여줍니다.',
@@ -87,12 +90,14 @@ const introSteps = [
 const wizardSteps: Array<{
   id: EligibilityStep
   badge: string
+  shortTitle: string
   title: string
   description: string
 }> = [
   {
     id: 'discover',
     badge: '1단계',
+    shortTitle: '추천',
     title: '업종코드 추천받기',
     description:
       '하고 싶은 일을 적으면 마곡에서 먼저 검토할 만한 코드를 추천합니다.',
@@ -100,6 +105,7 @@ const wizardSteps: Array<{
   {
     id: 'adjust',
     badge: '2단계',
+    shortTitle: '보정',
     title: '선택한 코드 확인하기',
     description:
       '구역과 예외 조건만 필요한 만큼 손보고 결과 보기로 넘어가면 됩니다.',
@@ -107,6 +113,7 @@ const wizardSteps: Array<{
   {
     id: 'result',
     badge: '3단계',
+    shortTitle: '결과',
     title: '입주 가능성 보기',
     description:
       '선택한 코드가 왜 가능 또는 불가인지, 어떤 조문을 봐야 하는지 쉽게 설명합니다.',
@@ -114,7 +121,7 @@ const wizardSteps: Array<{
 ]
 
 const promisePoints = [
-  '전체 KSIC 11차 5자리 코드를 전수로 찾을 수 있습니다.',
+  '찾고 싶은 업종코드를 한 번에 찾아볼 수 있습니다.',
   '업종코드를 몰라도 쉬운 말로 검색할 수 있습니다.',
   '애매한 업종은 무리하게 가능으로 찍지 않고 더 확인할 점을 함께 보여줍니다.',
 ]
@@ -271,6 +278,8 @@ function HomeSections({
     currentStep === 'result' && !canStayOnResultStep ? 'adjust' : currentStep
   const [isAffiliateExpanded, setIsAffiliateExpanded] = useState(false)
   const [discoverScreen, setDiscoverScreen] = useState<DiscoverScreen>('compose')
+  const [isMobileViewport, setIsMobileViewport] = useState(false)
+  const [isMobileFinderFocused, setIsMobileFinderFocused] = useState(false)
   const activeDiscoverScreen =
     discoveryStatus === 'idle' &&
     industrySuggestions.length === 0 &&
@@ -294,6 +303,14 @@ function HomeSections({
     safeCurrentStep === 'discover' && activeDiscoverScreen === 'results'
       ? '추천된 코드 중 하나를 고르면 다음 화면으로 넘어갑니다.'
       : currentWizardStep.description
+  const currentWizardHint =
+    safeCurrentStep === 'discover'
+      ? activeDiscoverScreen === 'results'
+        ? '코드를 고르면 바로 다음 단계로 넘어갑니다.'
+        : '한 줄로 적고 추천 코드를 바로 받아보세요.'
+      : safeCurrentStep === 'adjust'
+        ? '필요한 조건만 보고 결과 보기로 넘어가면 됩니다.'
+        : '판정 결과와 이유를 한 화면에서 바로 읽습니다.'
   const panelTransitionKey =
     safeCurrentStep === 'discover'
       ? `discover-${activeDiscoverScreen}`
@@ -305,24 +322,25 @@ function HomeSections({
   const featuredGuides = getFeaturedGuideEntries(3)
   const canOpenAdjustStep = Boolean(input.ksicCode.trim() || input.ksicName.trim())
   const canOpenResultStep = canStayOnResultStep
+  const isMobileWizardFocused = isMobileViewport && isMobileFinderFocused
 
   const introFacts = [
     {
       label: '전체 전수 코드',
       value: `${formatNumber(MAGOK_CODE_DIRECTORY_TOTAL_COUNT)}개`,
-      note: 'KSIC 11차 5자리 기준',
+      note: '전체 코드를 한 번에 살펴볼 수 있습니다',
       tone: 'hero',
     },
     {
       label: '지식산업센터 검토 가능',
       value: `${formatNumber(getReviewableCount(knowledgeCounts))}개`,
-      note: '가능·조건부·심의·추가 확인 포함',
+      note: '먼저 확인해볼 만한 코드를 모아 보여드립니다',
       tone: 'support',
     },
     {
       label: '산업시설구역 검토 가능',
       value: `${formatNumber(getReviewableCount(industrialCounts))}개`,
-      note: '관리기본계획 허용 기준 반영',
+      note: '산업시설구역에서 먼저 볼 코드를 정리했습니다',
       tone: 'support',
     },
   ] as const
@@ -331,24 +349,57 @@ function HomeSections({
     {
       title: '지식산업센터',
       count: `${formatNumber(getReviewableCount(knowledgeCounts))}개`,
-      note: 'exact 코드표, 시행령 대응표, 예외 규칙을 함께 반영했습니다.',
+      note: '먼저 살펴볼 만한 코드를 빠르게 둘러볼 수 있습니다.',
       tone: 'strong',
     },
     {
       title: '산업시설구역',
       count: `${formatNumber(getReviewableCount(industrialCounts))}개`,
-      note: '마곡 관리기본계획 허용군과 prefix를 전체 KSIC 코드에 투영했습니다.',
+      note: '산업시설구역에서 볼 수 있는 코드를 한 번에 찾기 좋습니다.',
       tone: 'soft',
     },
     {
       title: '쉽게 검색',
       count: '자유 문장 가능',
-      note: '광고대행업, 앱 개발, 호스팅처럼 쉬운 표현으로도 추천을 시작할 수 있습니다.',
+      note: '하고 싶은 일을 적으면 가까운 코드를 먼저 추천합니다.',
       tone: 'soft',
     },
   ] as const
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return
+    }
+
+    const mediaQuery = window.matchMedia('(max-width: 639px)')
+    const syncViewport = () => {
+      setIsMobileViewport(mediaQuery.matches)
+    }
+
+    syncViewport()
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncViewport)
+      return () => mediaQuery.removeEventListener('change', syncViewport)
+    }
+
+    mediaQuery.addListener(syncViewport)
+    return () => mediaQuery.removeListener(syncViewport)
+  }, [])
+
+  useEffect(() => {
+    if (!isMobileWizardFocused) {
+      return
+    }
+
+    scrollToSection('finder')
+  }, [activeDiscoverScreen, isMobileWizardFocused, safeCurrentStep])
+
   function handleDiscoverSearch() {
+    if (isMobileViewport) {
+      setIsMobileFinderFocused(true)
+    }
+
     setDiscoverScreen('results')
     void discoverIndustry()
   }
@@ -358,6 +409,10 @@ function HomeSections({
   }
 
   function handleWizardStepSelect(step: EligibilityStep) {
+    if (isMobileViewport) {
+      setIsMobileFinderFocused(true)
+    }
+
     if (step === 'discover') {
       setCurrentStep('discover')
       return
@@ -380,6 +435,10 @@ function HomeSections({
   }
 
   function runQuickSearch(value: string) {
+    if (isMobileViewport) {
+      setIsMobileFinderFocused(true)
+    }
+
     setIndustryQuery(value)
     setDiscoverScreen('results')
     void discoverIndustry()
@@ -388,158 +447,244 @@ function HomeSections({
   function handleSuggestionSelect(
     suggestion: ReturnType<typeof useEligibilityStore.getState>['industrySuggestions'][number],
   ) {
+    if (isMobileViewport) {
+      setIsMobileFinderFocused(true)
+    }
+
     void applyIndustrySuggestion(suggestion)
   }
 
   function handleEvaluateStep() {
+    if (isMobileViewport) {
+      setIsMobileFinderFocused(true)
+    }
+
     void evaluate()
+  }
+
+  function handleContinueManualStep() {
+    if (isMobileViewport) {
+      setIsMobileFinderFocused(true)
+    }
+
+    setCurrentStep('adjust')
+  }
+
+  function handleFinderEntry() {
+    if (isMobileViewport) {
+      setIsMobileFinderFocused(true)
+    }
+
+    scrollToSection('finder')
+  }
+
+  function handleExitMobileWizardFocus() {
+    setIsMobileFinderFocused(false)
+    scrollToSection('top')
   }
 
   return (
     <>
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.14fr)_320px] lg:items-stretch">
-        <div className="flex h-full flex-col rounded-[38px] border border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,#ffffff_0%,rgba(230,238,255,0.98)_100%)] px-6 py-8 shadow-[var(--shadow-xl)] sm:px-8 lg:px-10 lg:py-10">
-          <Badge variant="muted">마곡 일반산업단지 전용</Badge>
-          <h1 className="mt-5 max-w-4xl font-display text-4xl font-semibold tracking-[-0.06em] text-[var(--foreground)] sm:text-5xl lg:text-6xl">
-            입주 가능한 업종코드를
-            <br />
-            쉽게 찾고
-            <br />
-            바로 확인합니다
-          </h1>
-          <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--foreground-muted)] sm:text-lg">
-            업종코드를 몰라도 괜찮습니다. 하고 싶은 일을 적거나 사업자등록증의
-            업태·종목을 넣으면, 마곡에서 먼저 검토할 만한 코드를 추천하고 입주 가능성까지
-            이어서 보여드립니다.
-          </p>
+      {!isMobileWizardFocused ? (
+        <>
+          <section className="grid gap-4 lg:grid-cols-[minmax(0,1.14fr)_320px] lg:items-stretch lg:gap-6">
+            <div className="flex h-full flex-col rounded-[30px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] px-5 py-6 shadow-[var(--shadow-xl)] sm:rounded-[38px] sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+              <Badge variant="muted" className="w-fit">마곡 일반산업단지 전용</Badge>
+              <h1 className="mt-4 max-w-4xl font-display text-[2.35rem] font-semibold leading-[1.02] tracking-[-0.06em] text-[var(--foreground)] sm:mt-5 sm:text-5xl lg:text-6xl">
+                입주 가능한 업종코드를
+                <br />
+                쉽게 찾고
+                <br />
+                바로 확인합니다
+              </h1>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:mt-5 sm:text-lg sm:leading-8">
+                업종코드를 몰라도 괜찮습니다. 하고 싶은 일을 적거나 사업자등록증의
+                업태·종목을 넣으면, 마곡에서 먼저 검토할 만한 코드를 추천하고 입주 가능성까지
+                이어서 보여드립니다.
+              </p>
 
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button size="lg" onClick={() => scrollToSection('finder')}>
-              코드 추천받기
-              <ArrowRight className="size-4" />
-            </Button>
-            <Button variant="secondary" size="lg" onClick={onOpenDirectory}>
-              가능 코드 전체 보기
-            </Button>
-          </div>
-
-          <div className="mt-7 grid gap-3 sm:grid-cols-3">
-            {introFacts.map((fact) => (
-              <div
-                key={fact.label}
-                className={`rounded-[24px] border px-4 py-4 ${
-                  fact.tone === 'hero'
-                    ? 'border-[var(--border-accent-strong)] bg-[rgba(223,234,255,0.98)] shadow-[0_18px_36px_rgba(20,92,255,0.16)]'
-                    : 'border-[var(--border)] bg-[rgba(255,255,255,0.92)] shadow-[var(--shadow-sm)]'
-                }`}
-              >
-                <div className="text-xs font-medium text-[var(--foreground-subtle)]">
-                  {fact.label}
-                </div>
-                <div
-                  className={`mt-2 font-semibold text-[var(--foreground)] ${
-                    fact.tone === 'hero' ? 'text-2xl' : 'text-xl'
-                  }`}
+              <div className="mt-6 flex flex-col gap-2 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-3">
+                <Button
+                  size="lg"
+                  onClick={handleFinderEntry}
+                  className="w-full justify-center whitespace-nowrap sm:w-auto"
                 >
-                  {fact.value}
+                  코드 추천받기
+                  <ArrowRight className="size-4" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={onOpenDirectory}
+                  className="w-full justify-center whitespace-nowrap sm:w-auto"
+                >
+                  가능 코드 전체 보기
+                </Button>
+              </div>
+
+              <div className="mt-6 hidden gap-3 sm:mt-7 sm:grid sm:grid-cols-3">
+                {introFacts.map((fact) => (
+                  <div
+                    key={fact.label}
+                      className={`rounded-[22px] border px-4 py-4 sm:rounded-[24px] ${
+                      fact.tone === 'hero'
+                        ? 'border-[var(--border-accent-strong)] bg-[var(--surface-strong)] shadow-[var(--shadow-md)]'
+                        : 'border-[var(--border-soft)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
+                    }`}
+                  >
+                    <div className="text-xs font-medium text-[var(--foreground-subtle)]">
+                      {fact.label}
+                    </div>
+                    <div
+                      className={`mt-2 font-semibold text-[var(--foreground)] ${
+                        fact.tone === 'hero' ? 'text-2xl' : 'text-xl'
+                      }`}
+                    >
+                      {fact.value}
+                    </div>
+                    <div className="mt-1 text-xs leading-5 text-[var(--foreground-subtle)]">
+                      {fact.note}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2 lg:hidden">
+                {introSteps.map((item) => (
+                  <div
+                    key={item.step}
+                    className="rounded-[18px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)]"
+                  >
+                    <div className="text-[11px] font-semibold tracking-[0.04em] text-[var(--foreground-subtle)]">
+                      {item.step}단계
+                    </div>
+                    <div className="mt-1 text-sm font-semibold leading-5 text-[var(--foreground)]">
+                      {item.mobileTitle}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Card className="hidden h-full border-[var(--border-soft)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)] lg:block">
+              <CardContent className="flex h-full flex-col space-y-5 p-6">
+                <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+                  <FileSearch className="size-6" />
                 </div>
-                <div className="mt-1 text-xs leading-5 text-[var(--foreground-subtle)]">
-                  {fact.note}
+                <div>
+                  <h2 className="font-display text-2xl font-semibold text-[var(--foreground)]">
+                    처음 오셨다면 이렇게 보세요
+                  </h2>
+                  <p className="mt-2 text-sm leading-7 text-[var(--foreground-muted)]">
+                    먼저 쉽게 찾고, 필요할 때만 자세한 기준을 다시 보는 순서로 구성했습니다.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {introSteps.map((item) => (
+                    <div
+                      key={item.step}
+                      className="rounded-[22px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="inline-flex size-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent-strong)]">
+                          {item.step}
+                        </div>
+                        <div className="text-sm font-semibold text-[var(--foreground)]">
+                          {item.title}
+                        </div>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                        {item.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto flex flex-wrap gap-2">
+                  <Badge variant="muted">
+                    시행령 기준일 {formatKoreanDate('2026-01-02')}
+                  </Badge>
+                  <Badge variant="muted">
+                    관리기본계획 고시일 {formatKoreanDate('2025-10-30')}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="hidden gap-3 sm:grid md:grid-cols-3">
+            {promisePoints.map((item) => (
+              <div
+                key={item}
+                className="rounded-[24px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-5 py-5 shadow-[var(--shadow-sm)]"
+              >
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[var(--accent)]" />
+                  <p className="text-sm leading-7 text-[var(--foreground-muted)]">{item}</p>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        <Card className="h-full border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(238,244,255,0.96))] shadow-[var(--shadow-lg)]">
-          <CardContent className="flex h-full flex-col space-y-5 p-6">
-            <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
-              <FileSearch className="size-6" />
-            </div>
-            <div>
-              <h2 className="font-display text-2xl font-semibold text-[var(--foreground)]">
-                처음 오셨다면 이렇게 보세요
-              </h2>
-              <p className="mt-2 text-sm leading-7 text-[var(--foreground-muted)]">
-                고등학생도 이해할 수 있을 만큼 쉽게 찾고, 필요한 법령 근거는 뒤에서
-                확인할 수 있게 순서를 나눴습니다.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {introSteps.map((item) => (
-                <div
-                  key={item.step}
-                  className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-4 py-4 shadow-[var(--shadow-sm)]"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="inline-flex size-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent-strong)]">
-                      {item.step}
-                    </div>
-                    <div className="text-sm font-semibold text-[var(--foreground)]">
-                      {item.title}
-                    </div>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                    {item.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-auto flex flex-wrap gap-2">
-              <Badge variant="muted">
-                시행령 기준일 {formatKoreanDate('2026-01-02')}
-              </Badge>
-              <Badge variant="muted">
-                관리기본계획 고시일 {formatKoreanDate('2025-10-30')}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="grid gap-3 md:grid-cols-3">
-        {promisePoints.map((item) => (
-          <div
-            key={item}
-            className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-5 py-5 shadow-[var(--shadow-sm)]"
-          >
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[var(--accent)]" />
-              <p className="text-sm leading-7 text-[var(--foreground-muted)]">{item}</p>
-            </div>
-          </div>
-        ))}
-      </section>
+          </section>
+        </>
+      ) : null}
 
       <section
         id="finder"
         aria-label="업종코드 분석 위저드"
-        className="rounded-[36px] border border-[var(--border-accent)] bg-[linear-gradient(180deg,#ffffff_0%,rgba(236,243,255,0.98)_100%)] p-6 shadow-[var(--shadow-xl)] sm:p-8"
+        className={`${
+          isMobileWizardFocused
+            ? 'rounded-none border-0 bg-transparent p-0 shadow-none'
+                : 'rounded-[24px] border border-[var(--border-accent)] bg-[var(--surface-strong)] p-3.5 shadow-[var(--shadow-xl)] sm:rounded-[36px] sm:p-8'
+        }`}
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <Badge variant="muted">쉬운 검색 홈</Badge>
-            <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
-              하고 싶은 일을 적으면
-              <br />
-              추천 코드와 결과를 바로 보여드립니다
-            </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-              자유 문장, 사업자등록증 업태·종목, 실무 메모 모두 괜찮습니다.
-              업종코드를 몰라도 검색할 수 있고, 추천된 코드로 바로 입주 가능 여부를 확인할
-              수 있습니다.
-            </p>
+        {isMobileWizardFocused ? (
+          <div className="mb-3 flex items-start justify-between gap-3 sm:mb-6 sm:hidden">
+            <div className="min-w-0">
+              <Badge variant="muted" className="w-fit">{currentWizardBadge}</Badge>
+              <h2 className="mt-3 font-display text-[1.95rem] font-semibold leading-[1.02] text-[var(--foreground)]">
+                {currentWizardTitle}
+              </h2>
+              <p className="mt-2 text-[13px] leading-5 text-[var(--foreground-subtle)]">
+                {currentWizardHint}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="shrink-0"
+              onClick={handleExitMobileWizardFocus}
+            >
+              전체 보기
+            </Button>
           </div>
-          <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] lg:max-w-sm">
-            `내가 하는 일이 어떤 코드에 가까운지`, `그 코드가 마곡에서 가능한지`,
-            `왜 그런지`, `더 확인해야 할 게 있는지` 순서로 보여줍니다.
+        ) : (
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <Badge variant="muted" className="w-fit">쉬운 검색 홈</Badge>
+              <h2 className="mt-3 font-display text-[1.8rem] font-semibold leading-[1.06] text-[var(--foreground)] sm:mt-4 sm:text-4xl">
+                업종코드를 몰라도
+                <br />
+                바로 찾고 확인합니다
+              </h2>
+              <p className="mt-2 text-[13px] leading-5 text-[var(--foreground-subtle)] sm:hidden">
+                {currentWizardHint}
+              </p>
+              <p className="mt-3 hidden max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:block">
+                자유 문장, 사업자등록증 업태·종목, 실무 메모 모두 괜찮습니다.
+                업종코드를 몰라도 검색할 수 있고, 추천된 코드로 바로 입주 가능 여부를 확인할
+                수 있습니다.
+              </p>
+            </div>
+                <div className="hidden rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] lg:block lg:max-w-sm">
+              `내가 하는 일이 어떤 코드에 가까운지`, `그 코드가 마곡에서 가능한지`,
+              `왜 그런지`, `더 확인해야 할 게 있는지` 순서로 보여줍니다.
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="mt-8 space-y-6">
-          <div className="grid gap-3 lg:grid-cols-3">
+        <div className={`${isMobileWizardFocused ? 'space-y-3 sm:space-y-6' : 'mt-4 space-y-3.5 sm:mt-8 sm:space-y-6'}`}>
+          <div className={`${isMobileWizardFocused ? 'hidden sm:grid sm:grid-cols-3 sm:gap-3' : 'grid grid-cols-3 gap-2 sm:gap-3'}`}>
             {wizardSteps.map((step, index) => {
               const isActive = step.id === safeCurrentStep
               const isComplete = currentWizardIndex > index
@@ -554,31 +699,34 @@ function HomeSections({
                   onClick={() => handleWizardStepSelect(step.id)}
                   disabled={isLocked}
                   aria-pressed={isActive}
-                  className={`rounded-[24px] border px-4 py-4 transition ${
+                  className={`rounded-[18px] border px-2.5 py-2.5 text-left transition sm:rounded-[24px] sm:px-4 sm:py-4 ${
                     isActive
-                      ? 'border-[var(--border-accent-strong)] bg-[rgba(221,233,255,0.98)] shadow-[0_20px_36px_rgba(20,92,255,0.18)]'
+                      ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
                       : isComplete
-                        ? 'border-[var(--border-accent)] bg-[rgba(255,255,255,0.98)] shadow-[var(--shadow-sm)]'
-                        : 'border-[var(--border)] bg-[rgba(255,255,255,0.84)]'
+                        ? 'border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
+                        : 'border-[var(--border)] bg-[var(--surface)]'
                   } ${
-                    isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-[var(--border-accent-strong)] hover:bg-white'
+                    isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-[var(--border-accent-strong)] hover:bg-[var(--surface-strong)]'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div
-                      className={`inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold ${
+                      className={`inline-flex size-7 items-center justify-center rounded-full text-[11px] font-semibold sm:size-9 sm:text-sm ${
                         isActive || isComplete
                           ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
-                          : 'bg-[rgba(95,112,141,0.18)] text-[var(--foreground-subtle)]'
+                          : 'bg-[rgba(124,136,155,0.18)] text-[var(--foreground-subtle)]'
                       }`}
                     >
                       {isComplete ? <CheckCircle2 className="size-4" /> : index + 1}
                     </div>
-                    <div>
-                      <div className="text-xs font-medium text-[var(--foreground-subtle)]">
+                    <div className="min-w-0">
+                      <div className="hidden text-xs font-medium text-[var(--foreground-subtle)] sm:block">
                         {step.badge}
                       </div>
-                      <div className="text-sm font-semibold text-[var(--foreground)]">
+                      <div className="text-[11px] font-semibold leading-4 text-[var(--foreground)] sm:hidden">
+                        {step.shortTitle}
+                      </div>
+                      <div className="hidden text-sm font-semibold text-[var(--foreground)] sm:block">
                         {step.title}
                       </div>
                     </div>
@@ -588,34 +736,57 @@ function HomeSections({
             })}
           </div>
 
-          <Card className="border-[var(--border-accent)] bg-[rgba(255,255,255,0.98)] shadow-[var(--shadow-lg)]">
-            <CardContent className="space-y-6 p-6">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <Badge variant="muted">{currentWizardBadge}</Badge>
-                  <h3 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
-                    {currentWizardTitle}
-                  </h3>
-                  <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-                    {currentWizardDescription}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {safeCurrentStep !== 'discover' ? (
-                    <Button variant="secondary" onClick={() => setCurrentStep('discover')}>
-                      처음 단계로 돌아가기
+          <Card className={`${isMobileWizardFocused ? 'rounded-[28px] border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]' : 'rounded-[22px] border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)] sm:rounded-[28px]'}`}>
+            <CardContent className={`${isMobileWizardFocused ? 'space-y-4 p-4 sm:space-y-6 sm:p-6' : 'space-y-3 p-3.5 sm:space-y-6 sm:p-6'}`}>
+              {!isMobileWizardFocused || safeCurrentStep !== 'discover' ? (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div className={isMobileWizardFocused ? 'hidden sm:block' : undefined}>
+                    <Badge variant="muted" className="w-fit">{currentWizardBadge}</Badge>
+                    <h3 className="mt-2 font-display text-xl font-semibold text-[var(--foreground)] sm:mt-4 sm:text-3xl">
+                      {currentWizardTitle}
+                    </h3>
+                    <p className="mt-2 hidden max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:block">
+                      {currentWizardDescription}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    {safeCurrentStep !== 'discover' ? (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setCurrentStep('discover')}
+                        className="w-full whitespace-nowrap sm:w-auto sm:flex-none"
+                      >
+                        <span className="sm:hidden">처음으로</span>
+                        <span className="hidden sm:inline">처음 단계로 돌아가기</span>
+                      </Button>
+                    ) : null}
+                    {isMobileWizardFocused ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleExitMobileWizardFocus}
+                        className="hidden whitespace-nowrap sm:inline-flex"
+                      >
+                        전체 보기
+                      </Button>
+                    ) : null}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onOpenDirectory}
+                      className="hidden whitespace-nowrap sm:inline-flex"
+                    >
+                      전체 코드 사전 열기
+                      <ArrowRight className="size-4" />
                     </Button>
-                  ) : null}
-                  <Button variant="ghost" onClick={onOpenDirectory}>
-                    전체 코드 사전 열기
-                    <ArrowRight className="size-4" />
-                  </Button>
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               <div
                 key={panelTransitionKey}
-                className="animate-fade-in space-y-6"
+                className="animate-fade-in space-y-4 sm:space-y-6"
               >
                 {safeCurrentStep === 'discover' ? (
                   <IndustryDiscoveryPanel
@@ -631,7 +802,7 @@ function HomeSections({
                     onSuggestionSelect={handleSuggestionSelect}
                     onExampleSelect={runQuickSearch}
                     onBackToSearch={handleBackToDiscoverSearch}
-                    onContinueManual={() => setCurrentStep('adjust')}
+                    onContinueManual={handleContinueManualStep}
                   />
                 ) : null}
 
@@ -671,8 +842,10 @@ function HomeSections({
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <Card className="border-[var(--border-accent)] bg-[linear-gradient(180deg,#ffffff_0%,rgba(236,243,255,0.98)_100%)] shadow-[var(--shadow-lg)]">
+      {!isMobileWizardFocused ? (
+        <>
+          <section className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <Card className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
           <CardContent className="p-6">
             <Badge variant="muted">전수 코드 사전</Badge>
             <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
@@ -681,8 +854,8 @@ function HomeSections({
               전용 코드 사전에서 찾으면 됩니다
             </h2>
             <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-              검색과 탐색을 분리했습니다. 코드를 모를 때는 쉬운 검색 홈에서, 전체 코드를
-              훑고 싶을 때는 전용 코드 사전에서 시작하면 더 편합니다.
+              코드를 모르면 쉬운 검색에서 시작하고, 전체 코드를 보고 싶으면 여기서 바로
+              찾아보면 됩니다.
             </p>
 
             <div className="mt-6 space-y-3">
@@ -691,8 +864,8 @@ function HomeSections({
                   key={item.title}
                   className={`rounded-[24px] border px-4 py-4 ${
                     item.tone === 'strong'
-                      ? 'border-[var(--border-accent-strong)] bg-[rgba(223,234,255,0.98)] shadow-[var(--shadow-sm)]'
-                      : 'border-[var(--border)] bg-[rgba(255,255,255,0.92)] shadow-[var(--shadow-sm)]'
+                      ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
+                      : 'border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
                   }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -720,7 +893,7 @@ function HomeSections({
           </CardContent>
         </Card>
 
-        <Card className="border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,246,255,0.96))] shadow-[var(--shadow-lg)]">
+        <Card className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
           <CardContent className="space-y-4 p-6">
             <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <BookOpenText className="size-5" />
@@ -739,7 +912,7 @@ function HomeSections({
               {introSteps.map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-4 py-4 shadow-[var(--shadow-sm)]"
+                className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
                 >
                   <div className="text-sm font-semibold text-[var(--foreground)]">
                     {item.title}
@@ -769,7 +942,7 @@ function HomeSections({
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]">
-        <Card className="border-[var(--border-accent)] bg-[linear-gradient(180deg,#ffffff_0%,rgba(236,243,255,0.98)_100%)] shadow-[var(--shadow-lg)]">
+        <Card className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
           <CardContent className="space-y-5 p-6">
             <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <BookOpenText className="size-5" />
@@ -788,7 +961,7 @@ function HomeSections({
               </p>
             </div>
             <div className="grid gap-3">
-              <div className="rounded-[22px] border border-[var(--border-accent)] bg-[rgba(232,241,255,0.94)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
+                <div className="rounded-[22px] border border-[var(--border-accent)] bg-[var(--surface-muted)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
                 `산업집적법 시행령`과 `마곡 관리기본계획`을 문서 단위로 나눠, 어떤
                 판정이 어디에서 왔는지 더 쉽게 추적할 수 있습니다.
               </div>
@@ -807,7 +980,7 @@ function HomeSections({
           </CardContent>
         </Card>
 
-        <Card className="border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,246,255,0.96))] shadow-[var(--shadow-lg)]">
+        <Card className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
           <CardContent className="space-y-5 p-6">
             <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <FileSearch className="size-5" />
@@ -829,7 +1002,7 @@ function HomeSections({
               {recentUpdates.map((entry) => (
                 <div
                   key={entry.id}
-                  className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.94)] px-4 py-4 shadow-[var(--shadow-sm)]"
+                className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="muted">{formatKoreanDate(entry.date)}</Badge>
@@ -870,7 +1043,7 @@ function HomeSections({
           {featuredGuides.map((guide) => (
             <Card
               key={guide.code}
-              className="border-[var(--border-accent)] bg-[rgba(255,255,255,0.98)] shadow-[var(--shadow-lg)]"
+                className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]"
             >
               <CardContent className="space-y-4 p-5">
                 <div className="flex flex-wrap items-center gap-2">
@@ -901,7 +1074,7 @@ function HomeSections({
 
       <section
         id="affiliate"
-        className="rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,246,255,0.98))] p-5 shadow-[var(--shadow-lg)] sm:p-6"
+              className="rounded-[32px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6"
       >
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
@@ -916,14 +1089,14 @@ function HomeSections({
             </p>
           </div>
 
-          <div className="rounded-[20px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] px-4 py-3 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
+                    <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
             광고보다 본문이 먼저 보이도록
             <br />
             제휴 영역은 기본 접힘 상태로 제공합니다.
           </div>
         </div>
 
-        <div className="mt-5 rounded-[28px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] shadow-[var(--shadow-sm)]">
+                  <div className="mt-5 rounded-[28px] border border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
           <button
             type="button"
             onClick={() => setIsAffiliateExpanded((current) => !current)}
@@ -957,7 +1130,7 @@ function HomeSections({
               className="border-t border-[var(--border)] px-4 py-4 sm:px-5 sm:py-5"
             >
               <div className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
-                <Card className="h-full border-[var(--border)] bg-[rgba(245,248,255,0.96)] shadow-[var(--shadow-sm)]">
+            <Card className="h-full border-[var(--border)] bg-[var(--surface-soft)] shadow-[var(--shadow-sm)]">
                   <CardContent className="space-y-4 p-5">
                     <div>
                       <div className="text-sm font-semibold text-[var(--foreground)]">
@@ -1007,7 +1180,7 @@ function HomeSections({
                   {affiliateWidgets.map((widget) => (
                     <Card
                       key={widget.src}
-                      className="h-full border-[var(--border)] bg-[rgba(255,255,255,0.96)] shadow-[var(--shadow-sm)]"
+              className="h-full border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]"
                     >
                       <CardContent className="flex h-full flex-col p-4">
                         <div className="flex min-h-11 items-start justify-between gap-2">
@@ -1024,7 +1197,7 @@ function HomeSections({
                         <div className="mt-3 min-h-14 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--foreground)] sm:min-h-16 sm:text-base">
                           {widget.headline}
                         </div>
-                        <div className="mt-4 flex flex-1 items-start justify-center rounded-[22px] border border-[var(--border)] bg-[linear-gradient(180deg,#ffffff,rgba(236,243,255,0.96))] px-2 py-3">
+              <div className="mt-4 flex flex-1 items-start justify-center rounded-[22px] border border-[var(--border)] bg-[var(--surface-soft)] px-2 py-3">
                           <iframe
                             src={widget.src}
                             title={widget.title}
@@ -1034,7 +1207,7 @@ function HomeSections({
                             scrolling="no"
                             referrerPolicy="unsafe-url"
                             loading="lazy"
-                            className="overflow-hidden rounded-[18px] bg-white"
+            className="overflow-hidden rounded-[18px] bg-[var(--surface-strong)]"
                           />
                         </div>
                       </CardContent>
@@ -1046,6 +1219,8 @@ function HomeSections({
           ) : null}
         </div>
       </section>
+        </>
+      ) : null}
     </>
   )
 }
@@ -1152,30 +1327,30 @@ function App() {
   const currentGuide = guideCode ? getGuideEntryByCode(guideCode) : null
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-2xl focus:bg-[var(--accent)] focus:px-6 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
       >
         본문으로 바로가기
       </a>
-      <div className="mx-auto max-w-[1180px] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-        <header className="sticky top-4 z-20 rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] px-4 py-3 shadow-[var(--shadow-lg)] backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="mx-auto max-w-[1180px] px-3 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-6">
+        <header className="sticky top-3 z-20 rounded-[20px] border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-2.5 py-2.5 shadow-[var(--shadow-md)] sm:top-4 sm:rounded-[24px] sm:px-4 sm:py-3 sm:shadow-[var(--shadow-lg)] sm:backdrop-blur">
+          <div className="flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => openHomeView('top')}
-              className="flex items-center gap-3 text-left"
+              className="min-w-0 flex items-center gap-2 text-left"
               aria-label="마곡 코드찾기 홈으로"
             >
-              <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[var(--shadow-accent)]">
+              <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-foreground)] shadow-[var(--shadow-accent)] sm:size-11">
                 <Building2 className="size-5" />
               </div>
-              <div>
-                <div className="text-xs font-semibold tracking-[0.16em] text-[var(--foreground-subtle)]">
+              <div className="min-w-0">
+                <div className="hidden truncate text-[11px] font-semibold tracking-[0.16em] text-[var(--foreground-subtle)] sm:block sm:text-xs">
                   LOOPIN LAB
                 </div>
-                <div className="text-base font-semibold text-[var(--foreground)]">
+                <div className="truncate text-base font-semibold text-[var(--foreground)] sm:text-base">
                   마곡 코드찾기
                 </div>
               </div>
@@ -1217,18 +1392,31 @@ function App() {
               ) : null}
             </nav>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="hidden flex-wrap items-center gap-2 md:flex">
               <Badge variant="muted" className="hidden sm:inline-flex">{activeZoneLabel} 기본</Badge>
               <Button
                 size="sm"
                 onClick={() => (view === 'home' ? openDirectoryView() : openHomeView('finder'))}
+                className="whitespace-nowrap"
               >
                 {view === 'home' ? '코드 사전 열기' : '검색 홈으로'}
                 <ArrowRight className="size-4" />
               </Button>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5 md:hidden">
+              <Button
+                size="sm"
+                onClick={() => (view === 'home' ? openDirectoryView() : openHomeView('finder'))}
+                aria-label={view === 'home' ? '코드 사전 열기' : '검색 홈으로'}
+                className="h-10 min-h-10 shrink-0 px-3"
+              >
+                <span>{view === 'home' ? '사전' : '검색'}</span>
+                <ArrowRight className="size-4" />
+              </Button>
               <button
                 type="button"
-                className="inline-flex size-11 items-center justify-center rounded-2xl text-[var(--foreground-muted)] transition-colors hover:bg-[rgba(20,92,255,0.08)] hover:text-[var(--accent-strong)] md:hidden"
+                className="inline-flex size-10 items-center justify-center rounded-2xl text-[var(--foreground-muted)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                 aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
                 aria-expanded={isMobileMenuOpen}
@@ -1291,7 +1479,7 @@ function App() {
           ) : null}
         </header>
 
-        <main id="main-content" className="animate-fade-in space-y-8 pb-12 pt-6 lg:space-y-10 lg:pt-8">
+        <main id="main-content" className="animate-fade-in space-y-6 pb-12 pt-4 sm:space-y-8 sm:pt-6 lg:space-y-10 lg:pt-8">
           <Suspense fallback={<SkeletonCard />}>
           {view === 'directory' ? (
             <CodeDirectoryPage
@@ -1312,7 +1500,7 @@ function App() {
                 onOpenGuide={openGuideView}
               />
             ) : (
-              <Card className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]">
+              <Card className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-md)]">
                 <CardContent className="space-y-4 p-6">
                   <Badge variant="muted">가이드 없음</Badge>
                   <h2 className="font-display text-3xl font-semibold text-[var(--foreground)]">
@@ -1370,7 +1558,7 @@ function App() {
           )}
           </Suspense>
 
-          <footer className="space-y-6 rounded-[32px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] px-6 py-6 shadow-[var(--shadow-lg)]">
+<footer className="space-y-6 rounded-[32px] border border-[var(--border)] bg-[var(--surface-strong)] px-6 py-6 shadow-[var(--shadow-lg)]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="text-xs font-semibold tracking-[0.16em] text-[var(--foreground-subtle)]">
@@ -1398,7 +1586,7 @@ function App() {
               {footerFacts.map((item) => (
                 <div
                   key={item}
-                  className="rounded-[22px] border border-[var(--border)] bg-[rgba(239,245,255,0.94)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]"
+                  className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]"
                 >
                   {item}
                 </div>

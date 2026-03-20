@@ -111,18 +111,23 @@ export function ResultPanel({
         </div>
         {status === 'ready' && result && onAdjust ? (
           <div className="pt-3">
-            <Button variant="secondary" onClick={onAdjust}>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full whitespace-nowrap sm:w-auto"
+              onClick={onAdjust}
+            >
               조건 다시 수정
             </Button>
           </div>
         ) : null}
       </CardHeader>
-      <CardContent className={embedded ? 'p-0 pt-5' : undefined}>
+      <CardContent className={embedded ? 'p-0 pt-4 sm:pt-5' : undefined}>
         {status === 'idle' ? (
           <AsyncState
             variant="empty"
             title="업종을 고르면 결과가 여기에 바로 나옵니다."
-            description="먼저 왼쪽에서 사업 설명을 입력하고 추천 업종을 선택해 주세요. 직접 코드를 넣었다면 아래 버튼으로 바로 판정할 수 있습니다."
+            description="먼저 사업 설명을 입력하고 업종을 선택해 주세요. 직접 코드를 넣었다면 아래 버튼으로 바로 확인할 수 있습니다."
             actions={
               hasManualInput ? (
                 <Button onClick={onEvaluate}>현재 설정으로 결과 보기</Button>
@@ -134,8 +139,8 @@ export function ResultPanel({
         {status === 'loading' ? (
           <AsyncState
             variant="loading"
-            title="법령과 관리기본계획을 대조하고 있습니다."
-            description="허용 업종, 심의 필요 조건, 명시적 제한 문구를 순서대로 확인하는 중입니다."
+            title="입주 가능 여부를 확인하고 있습니다."
+            description="결과와 함께 확인할 내용을 정리하는 중입니다."
           />
         ) : null}
 
@@ -143,7 +148,7 @@ export function ResultPanel({
           <AsyncState
             variant="error"
             title="판정 중 오류가 발생했습니다."
-            description={error ?? '입력값 또는 내부 판정 엔진을 다시 확인해 주세요.'}
+            description={error ?? '잠시 후 다시 시도해 주세요.'}
             actions={
               <Button variant="secondary" onClick={onEvaluate}>
                 다시 시도
@@ -154,7 +159,7 @@ export function ResultPanel({
 
         {status === 'ready' && result ? (
           <div className="space-y-4">
-            <section className="rounded-[24px] border border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,var(--surface-strong)_0%,var(--surface-muted)_100%)] p-5 shadow-[var(--shadow-md)]">
+            <section className="rounded-[22px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-md)] sm:rounded-[24px] sm:p-5">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={getBadgeVariant(result.verdict)}>
                   {formatVerdictLabel(result.verdict)}
@@ -164,7 +169,7 @@ export function ResultPanel({
                   <Badge variant="muted">{input.ksicCode.trim()}</Badge>
                 ) : null}
               </div>
-              <h3 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)]">
+              <h3 className="mt-3 font-display text-xl font-semibold text-[var(--foreground)] sm:mt-4 sm:text-2xl">
                 {result.title}
               </h3>
               <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
@@ -180,10 +185,10 @@ export function ResultPanel({
             </section>
 
             {screenInsight ? (
-              <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
+              <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={screenInsight.tone}>업종코드 상세 해설</Badge>
-                  <Badge variant="muted">화면 기준 재정리</Badge>
+                  <Badge variant="muted">쉽게 풀어보기</Badge>
                 </div>
                 <h4 className="mt-4 font-display text-lg font-semibold text-[var(--foreground)]">
                   {screenInsight.title}
@@ -192,7 +197,7 @@ export function ResultPanel({
                   {screenInsight.fields.map((field) => (
                     <div
                       key={`${field.label}-${field.value}`}
-                      className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 shadow-[var(--shadow-sm)]"
+                      className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 shadow-[var(--shadow-sm)]"
                     >
                       <div className="text-xs text-[var(--foreground-subtle)]">
                         {field.label}
@@ -219,10 +224,10 @@ export function ResultPanel({
             ) : null}
 
             {expertInsights.length > 0 ? (
-              <section className="space-y-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-soft)] p-5 shadow-[var(--shadow-sm)]">
+              <section className="space-y-4 rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="muted">전문가 인사이트</Badge>
-                  <Badge variant="muted">실무형 해설</Badge>
+                  <Badge variant="muted">도움말</Badge>
                 </div>
                 <div className="grid gap-4 xl:grid-cols-2">
                   {expertInsights.map((insight) => (
@@ -237,7 +242,7 @@ export function ResultPanel({
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-2">
-              <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
+              <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:p-5">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                   <ArrowRight className="size-4 text-[var(--accent)]" />
                   왜 이렇게 판단했나요?
@@ -246,7 +251,7 @@ export function ResultPanel({
                   {result.reasons.map((reason) => (
                     <li
                       key={reason}
-                      className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 shadow-[var(--shadow-sm)]"
+                      className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 shadow-[var(--shadow-sm)]"
                     >
                       {reason}
                     </li>
@@ -254,7 +259,7 @@ export function ResultPanel({
                 </ul>
               </section>
 
-              <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)]">
+              <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:p-5">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                   <FileStack className="size-4 text-[var(--accent)]" />
                   다음에 확인할 것
@@ -273,7 +278,7 @@ export function ResultPanel({
             </div>
 
             {guideEntry && onOpenGuide ? (
-              <section className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-soft)] p-5 shadow-[var(--shadow-sm)]">
+              <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="muted">연관 가이드</Badge>
                   <Badge variant="muted">{guideEntry.code}</Badge>
@@ -282,12 +287,12 @@ export function ResultPanel({
                   이 업종 기준 설명을 문서형 가이드로 다시 읽을 수 있습니다
                 </h4>
                 <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                  결과 화면의 요약보다 더 긴 설명, 구역 비교, 자주 묻는 질문을 한 번에
-                  보는 가이드 페이지입니다.
+                  결과를 더 길게 읽고 싶을 때 참고할 수 있는 가이드입니다.
                 </p>
                 <div className="mt-4">
                   <Button
                     variant="secondary"
+                    className="w-full justify-center sm:w-auto"
                     onClick={() => onOpenGuide(guideEntry.code)}
                     aria-label={`${guideEntry.code} 가이드 보기`}
                   >

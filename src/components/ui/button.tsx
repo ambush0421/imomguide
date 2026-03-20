@@ -11,13 +11,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[var(--accent)] px-5 py-3 text-[var(--accent-foreground)] shadow-[var(--shadow-accent)] hover:-translate-y-0.5 hover:bg-[var(--accent-strong)] hover:shadow-[0_26px_48px_rgba(20,92,255,0.34)]',
+          'bg-[var(--accent)] px-5 py-3 text-[var(--accent-foreground)] shadow-[var(--shadow-accent)] hover:-translate-y-0.5 hover:brightness-[0.97] hover:shadow-[0_20px_34px_rgba(31,94,255,0.18)]',
         secondary:
-          'bg-[var(--surface-strong)] px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] shadow-[var(--shadow-sm)] hover:bg-[var(--surface-muted)]',
+          'bg-[var(--surface-strong)] px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border-soft)] shadow-[var(--shadow-sm)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)] hover:ring-[var(--border-accent-strong)]',
         ghost:
-          'px-4 py-3 text-[var(--foreground)] hover:bg-[rgba(20,92,255,0.08)] hover:text-[var(--accent-strong)]',
+          'px-4 py-3 text-[var(--foreground)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]',
         outline:
-          'bg-transparent px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-[rgba(20,92,255,0.08)]',
+          'bg-[var(--surface-strong)] px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border-soft)] hover:bg-[var(--surface-muted)] hover:ring-[var(--border-accent-strong)]',
       },
       size: {
         default: 'h-11',

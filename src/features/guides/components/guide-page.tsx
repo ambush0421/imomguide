@@ -38,7 +38,7 @@ export function GuidePage({
   return (
     <section
       id="guide"
-      className="space-y-6 rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.96))] p-6 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-8"
+      className="space-y-6 rounded-[36px] border border-[var(--border)] bg-[var(--surface-strong)] p-6 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-8"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -126,7 +126,7 @@ export function GuidePage({
               </div>
             </div>
             <div className="rounded-[22px] border border-[var(--border)] bg-white/90 px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
-              이 가이드는 코드 사전, 결과 패널, 법적 근거 데이터를 합쳐 만든 문서형 요약입니다.
+              이 업종을 더 자세히 읽고 싶을 때 보는 안내입니다.
             </div>
           </CardContent>
         </Card>

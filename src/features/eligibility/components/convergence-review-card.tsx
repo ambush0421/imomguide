@@ -9,7 +9,7 @@ interface ConvergenceReviewCardProps {
 
 export function ConvergenceReviewCard({ playbook }: ConvergenceReviewCardProps) {
   return (
-    <section className="rounded-[24px] border border-[rgba(43,109,255,0.18)] bg-[rgba(239,245,255,0.9)] p-5">
+    <section className="rounded-[24px] border border-[var(--border-accent)] bg-[var(--surface-muted)] p-5">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="warning">융복합 심의 경로</Badge>
         {playbook.candidateClusters.map((cluster) => (
@@ -26,7 +26,7 @@ export function ConvergenceReviewCard({ playbook }: ConvergenceReviewCardProps) 
       </p>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-[var(--border)] bg-white/90 p-4">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
             <Network className="size-4 text-[var(--accent)]" />
             사업계획서에 먼저 들어갈 문장
@@ -38,7 +38,7 @@ export function ConvergenceReviewCard({ playbook }: ConvergenceReviewCardProps) 
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-white/90 p-4">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
             <ArrowUpRight className="size-4 text-[var(--accent)]" />
             심의 전 체크 자료

@@ -20,20 +20,19 @@ export function LegalLibraryPage({
   return (
     <section
       id="library"
-      className="space-y-6 rounded-[36px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.96))] p-6 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-8"
+      className="space-y-6 rounded-[36px] border border-[var(--border)] bg-[var(--surface-strong)] p-6 shadow-[0_24px_60px_rgba(28,33,43,0.08)] sm:p-8"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <Badge variant="muted">법령 라이브러리</Badge>
           <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
-            판정 근거를
+            판정에 쓰인 문서를
             <br />
-            문서 단위로 읽는 화면입니다
+            한 번에 볼 수 있습니다
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-base">
-            결과 화면에서 쓰인 시행령과 마곡 고시문을 문서 단위로 다시 정리했습니다.
-            어떤 판정이 어느 문서에서 왔는지, 실무에서 자주 인용하는 조문이 무엇인지
-            한 번에 볼 수 있습니다.
+            결과 화면에 나온 근거를 문서별로 다시 모아봤습니다. 궁금한 문장을 직접
+            확인하거나, 원문으로 이어서 볼 때 편하게 참고할 수 있습니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -62,7 +61,7 @@ export function LegalLibraryPage({
                 <Badge variant="muted">
                   {entry.sourceKind === 'magokPlan' ? '마곡 고시문' : '산업집적법 시행령'}
                 </Badge>
-                <Badge variant="muted">공개일 {formatKoreanDate(entry.effectiveDate)}</Badge>
+                <Badge variant="muted">기준일 {formatKoreanDate(entry.effectiveDate)}</Badge>
                 {entry.officialSource.documentNumber ? (
                   <Badge variant="muted">{entry.officialSource.documentNumber}</Badge>
                 ) : null}
@@ -81,7 +80,7 @@ export function LegalLibraryPage({
                 <div className="rounded-[22px] border border-[var(--border)] bg-[rgba(241,247,255,0.9)] p-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                     <Scale className="size-4 text-[var(--accent)]" />
-                    문서 메타
+                    문서 정보
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Badge>{entry.officialSource.authority}</Badge>
@@ -157,7 +156,7 @@ export function LegalLibraryPage({
                     </p>
                     {basis.quote ? (
                       <div className="mt-3 rounded-xl bg-[rgba(239,245,255,0.84)] px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                        실무 해석: {basis.quote}
+                        쉽게 풀면: {basis.quote}
                       </div>
                     ) : null}
                   </article>
@@ -171,12 +170,12 @@ export function LegalLibraryPage({
       <div className="rounded-[28px] border border-[var(--border)] bg-white/92 p-5">
         <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
           <Scale className="size-4 text-[var(--accent)]" />
-          라이브러리 활용 팁
+          이렇게 보면 좋습니다
         </div>
         <ul className="mt-4 space-y-2 text-sm leading-6 text-[var(--foreground-muted)]">
-          <li>입주 상담 전에는 결과 화면의 각주와 여기 라이브러리 문장을 함께 보여주면 설득력이 높습니다.</li>
-          <li>산업시설구역은 고시문 우선, 지식산업센터 예외 허용은 시행령과 고시문을 같이 읽는 편이 안전합니다.</li>
-          <li>심의 필요나 경계 업종은 업데이트 로그까지 같이 보면 최근 기준 반영 여부를 설명하기 쉽습니다.</li>
+          <li>결과 화면에서 본 근거가 궁금하면 여기서 같은 문서를 다시 찾아보면 됩니다.</li>
+          <li>지식산업센터와 산업시설구역이 헷갈릴 때는 문서별 설명을 차례로 읽어보면 이해가 쉽습니다.</li>
+          <li>최근에 달라진 내용까지 보고 싶다면 업데이트 로그로 이어서 보면 됩니다.</li>
         </ul>
         <div className="mt-4">
           <Button variant="outline" onClick={onOpenUpdates}>

@@ -151,8 +151,8 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
             <Badge variant="muted">법령 참고</Badge>
             <CardTitle className="mt-4 text-2xl">판정 기준은 여기서 다시 확인합니다</CardTitle>
             <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-              이 영역은 법적 기준과 예외 규칙만 빠르게 훑는 참고 화면입니다. 모든 코드를
-              전체로 찾고 싶다면 전용 코드 사전에서 보는 편이 더 쉽습니다.
+              궁금할 때 기준을 직접 찾아볼 수 있는 참고 화면입니다. 전체 코드를 보고
+              싶다면 전용 코드 사전에서 찾는 편이 더 쉽습니다.
             </p>
           </div>
           {onOpenDirectory ? (
@@ -184,7 +184,7 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
 
             <Summary
               title="산업시설구역 허용 업종표"
-              description="산업시설구역은 마곡 관리기본계획에 적힌 허용 그룹과 prefix 기준으로 먼저 판단합니다."
+              description="산업시설구역에서 먼저 확인해볼 수 있는 업종을 빠르게 찾아볼 수 있습니다."
               countLabel={`${formatRuleCount(MAGOK_INDUSTRIAL_RULES.length)} 규칙`}
             />
 
@@ -230,12 +230,12 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
               <Summary
                 title="시행령 제6조제2항 1~27호 대응표"
-                description="조문별 허용 범위를 보고, 어떤 코드는 바로 가능하고 어떤 코드는 조건부인지 다시 확인합니다."
+                description="지식산업센터에서 바로 가능한지, 더 확인이 필요한지 다시 볼 수 있습니다."
                 countLabel={`${formatRuleCount(KNOWLEDGE_INDUSTRY_REVIEW_ROWS.length)} 조문`}
               />
               <Summary
                 title="지식산업센터 특례와 예외"
-                description="부동산임대·공급업, 신탁업, 호스팅 같은 별도 조건 업종은 고시문 예외 규칙을 같이 봅니다."
+                description="자주 헷갈리는 업종은 따로 모아서 쉽게 확인할 수 있습니다."
                 countLabel={`${formatRuleCount(KNOWLEDGE_CENTER_EXTRA_RULES.length)} 특례`}
               />
             </div>

@@ -1,5 +1,123 @@
 # 입주가능판별기 작업 체크리스트
 
+## 2026-03-20 단색 블루 적용
+
+- [x] 전역 gradient 사용 지점과 단색 전환 범위 재확인
+- [x] 전역 배경과 `surface` 계열을 단색 중심으로 정리
+- [x] 기본 버튼/배지/카드의 gradient 제거
+- [x] 홈 첫 화면과 주요 페이지 카드 배경을 단색 면으로 통일
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 파스텔 제거형 색 보정
+
+- [x] 모바일 결과 화면 기준 파스텔 톤이 유치하게 보이는 원인 재정리
+- [x] 전역 `surface`, `surface-muted`, `surface-soft`, `accent-soft`를 더 중성적인 톤으로 재정의
+- [x] 공통 `Badge`, `Button`의 과한 파스텔/베이비 블루 인상 축소
+- [x] `ResultPanel`, `EligibilityForm`, 모바일 위저드 카드의 큰 블루 면 제거
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 컬러 무드 2차 보정
+
+- [x] 현재 토큰 기준으로 화면이 점잖고 올드하게 보이는 원인 재정리
+- [x] 전역 `border`, `border-accent`, `shadow`, `accent` 토큰을 더 선명하고 또렷한 방향으로 재정의
+- [x] 공통 `Button`, `Badge`, `Card`의 외곽선과 강조색 대비 상향
+- [x] 홈 첫 화면 히어로/안내 카드의 표면색과 테두리 밀도 보정
+- [x] 코드 사전 상단 섹션의 외곽선과 배경 무드 동기화
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 컬러 무드 리디자인
+
+- [x] 현재 전역 색 토큰과 하드코딩 배경/강조색 사용 지점 재확인
+- [x] 스크린샷 기준 촌스러운 인상을 만드는 핵심 조합 식별
+- [x] 전역 팔레트를 `밝은 화이트 + 잉크 텍스트 + 선명하지만 절제된 블루` 중심으로 재정의
+- [x] 헤더/히어로/우측 안내 패널의 과한 베이지-블루 혼합 톤 제거
+- [x] 버튼/배지/카드의 광택형 블루 그라데이션과 반투명 화이트 톤 정리
+- [x] 주요 화면에서 하드코딩된 연파랑/하늘색 박스 색상 통일
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 승인 대기
+
+## 2026-03-20 지마켓 산스 + 프리텐다드 전역 적용
+
+- [x] 현재 전역 폰트 import와 제목/본문 분기 지점 확인
+- [x] `font-display` 유틸이 제목 계열 전반에 연결된 구조 확인
+- [x] `Gmarket Sans` 공식 배포 파일 확보 및 self-hosting 경로 준비
+- [x] `Gmarket Sans` + `Pretendard` 조합으로 전역 폰트 교체
+- [x] 제목 계열(`h1`~`h4`, `font-display`)을 `Gmarket Sans`로 전환
+- [x] 본문 계열(`body`)을 `Pretendard`로 전환하고 fallback 정리
+- [x] 제목 자간과 작은 헤딩 가독성 영향 확인
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 승인 대기
+
+## 2026-03-20 모바일 집중형 위저드 + 트렌디 비주얼 리디자인
+
+- [x] 모바일에서 위저드 진입 시 현재 단계만 보이는 집중 모드 구현
+- [x] 모바일 집중 모드용 상단 안내/복귀 흐름 정리
+- [x] 홈과 위저드의 컬러 토큰을 더 세련된 톤으로 재정의
+- [x] 공통 `Button`/`Badge`/`Card`의 무드와 그림자 재정비
+- [x] `finder`, `discover`, `adjust`, `result` 핵심 패널 톤 정리
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 모바일 오버플로/잘림 보정
+
+- [x] 모바일 헤더 CTA 폭 축소와 라벨 압축
+- [x] 루트 래퍼 `overflow-x-hidden` 안전장치 추가
+- [x] 모바일 `직접 입력으로 계속` 문구/버튼 폭 축소
+- [x] 예시 칩 모바일 2개 우선 노출 + 더 보기 보정
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 모바일 압축형 2차 보정
+
+- [x] 모바일 히어로의 사실 카드/보조 포인트 노출량 축소
+- [x] `finder` 외곽 패딩과 단계 탭의 모바일 높이 재압축
+- [x] 추천 입력 화면의 설명/textarea/CTA를 모바일 우선으로 재배치
+- [x] 2단계/3단계 요약 카드의 모바일 밀도 추가 보정
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 사용자 관점 문구 최적화
+
+- [x] 홈/위저드/결과/참고 영역의 관리자 설명형 문구 식별
+- [x] 사용자 행동 중심 문구로 카피 정리
+- [x] 내부 운영/절차 설명성 문구 축소 또는 제거
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-20 모바일 위계 중심 리디자인
+
+- [x] 모바일 헤더 높이와 액션 배치 압축
+- [x] 상단 히어로 보조 카드의 모바일 구조 단순화
+- [x] `finder` 외곽 설명과 스텝 UI의 모바일 위계 재정리
+- [x] 추천 카드/CTA의 모바일 컴팩트 레이아웃 보정
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
 ## 2026-03-20 쉬운 검색 홈 단일 패널 전환 정리
 
 - [x] 현재 `finder`의 중첩 카드 구조 확인

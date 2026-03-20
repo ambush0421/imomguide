@@ -10,6 +10,20 @@ describe('App', () => {
     useEligibilityStore.getState().reset()
     window.history.replaceState(null, '', '#top')
     window.scrollTo = vi.fn()
+    Element.prototype.scrollIntoView = vi.fn()
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    })
   })
 
   it('초기에는 쉬운 검색 홈과 전수 코드 사전 진입이 함께 보인다', async () => {
@@ -112,6 +126,41 @@ describe('App', () => {
     expect(within(finderSection).getByText('직접 입력 예정')).toBeInTheDocument()
   })
 
+  it('모바일에서는 위저드 진입 후 현재 단계 화면만 집중해서 보여준다', async () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(max-width: 639px)',
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+
+    render(<App />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: '코드 추천받기' }))
+
+    expect(
+      screen.queryByRole('heading', {
+        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+      }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText('참고용 제휴 링크')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '전체 보기' })).toBeInTheDocument()
+    expect(screen.getByText('어떤 일을 하시나요?')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '전체 보기' }))
+
+    expect(
+      screen.getByRole('heading', {
+        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+      }),
+    ).toBeInTheDocument()
+  })
+
   it('전수 코드 사전 화면에서 5자리 코드를 검색할 수 있다', async () => {
     render(<App />)
     const user = userEvent.setup()
@@ -151,7 +200,7 @@ describe('App', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: /판정 근거를\s*문서 단위로 읽는 화면입니다/,
+        name: /판정에 쓰인 문서를\s*한 번에 볼 수 있습니다/,
       }),
     ).toBeInTheDocument()
     expect(
@@ -164,7 +213,7 @@ describe('App', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: /기준 변경과 제품 보강 이력을\s*한 번에 봅니다/,
+        name: /최근에 달라진 내용을\s*한 번에 볼 수 있습니다/,
       }),
     ).toBeInTheDocument()
     expect(screen.getByText('레이아웃 시뮬레이션 1차 추가')).toBeInTheDocument()
@@ -174,7 +223,7 @@ describe('App', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: /판정 근거를\s*문서 단위로 읽는 화면입니다/,
+        name: /판정에 쓰인 문서를\s*한 번에 볼 수 있습니다/,
       }),
     ).toBeInTheDocument()
   })

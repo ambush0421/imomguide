@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { ArrowRight, ChevronLeft, SearchCheck } from 'lucide-react'
 
 import { AsyncState } from '@/components/async-state'
@@ -36,6 +37,25 @@ interface IndustryDiscoveryPanelProps {
   onBackToSearch: () => void
   onContinueManual: () => void
 }
+
+const MOBILE_DISCOVERY_EXAMPLES = [
+  {
+    prompt: DISCOVERY_EXAMPLE_PROMPTS[0],
+    label: '광고대행업',
+  },
+  {
+    prompt: DISCOVERY_EXAMPLE_PROMPTS[1],
+    label: '업태/종목 입력',
+  },
+  {
+    prompt: DISCOVERY_EXAMPLE_PROMPTS[2],
+    label: '앱 개발/SaaS',
+  },
+  {
+    prompt: DISCOVERY_EXAMPLE_PROMPTS[3],
+    label: '행사 대행',
+  },
+] as const
 
 function getVerdictBadgeVariant(verdict: ReturnType<typeof evaluateEligibility>['verdict']) {
   if (verdict === 'eligible') {
@@ -94,9 +114,9 @@ function SuggestionCard({
 
   return (
     <article
-      className={`rounded-[26px] border p-5 ${
+      className={`rounded-[24px] border p-4 sm:rounded-[26px] sm:p-5 ${
         isExact
-          ? 'border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,var(--surface-strong)_0%,rgba(216,229,255,0.92)_100%)] shadow-[var(--shadow-md)]'
+          ? 'border-[var(--border-accent-strong)] bg-[var(--surface-strong)] shadow-[var(--shadow-md)]'
           : 'border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-sm)]'
       }`}
     >
@@ -110,7 +130,7 @@ function SuggestionCard({
         </Badge>
       </div>
 
-      <h3 className="mt-4 font-display text-xl font-semibold text-[var(--foreground)]">
+      <h3 className="mt-3 font-display text-lg font-semibold text-[var(--foreground)] sm:mt-4 sm:text-xl">
         {suggestion.name}
       </h3>
       <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
@@ -118,13 +138,13 @@ function SuggestionCard({
       </p>
 
       {suggestion.reason !== headlineReason ? (
-        <p className="mt-3 rounded-2xl bg-[var(--surface-soft)] px-3 py-2 text-xs leading-5 text-[var(--foreground-subtle)]">
+        <p className="mt-3 hidden rounded-2xl bg-[var(--surface-soft)] px-3 py-2 text-xs leading-5 text-[var(--foreground-subtle)] sm:block">
           추천 근거: {suggestion.reason}
         </p>
       ) : null}
 
       {suggestion.catalogNote ? (
-        <p className="mt-2 text-xs leading-5 text-[var(--foreground-subtle)]">
+        <p className="mt-2 hidden text-xs leading-5 text-[var(--foreground-subtle)] sm:block">
           참고: {suggestion.catalogNote}
         </p>
       ) : null}
@@ -132,6 +152,7 @@ function SuggestionCard({
       <div className="mt-5">
         <Button
           variant={suggestion.matchKind === 'exact' ? 'default' : 'secondary'}
+          className="w-full whitespace-nowrap sm:w-auto"
           onClick={() => onSelect(suggestion)}
         >
           <ArrowRight className="size-4" />
@@ -158,6 +179,7 @@ export function IndustryDiscoveryPanel({
   onContinueManual,
 }: IndustryDiscoveryPanelProps) {
   const isLoading = status === 'loading'
+  const [showAllMobileExamples, setShowAllMobileExamples] = useState(false)
   const exactSuggestions = suggestions.filter(
     (suggestion) => suggestion.matchKind === 'exact',
   )
@@ -165,6 +187,9 @@ export function IndustryDiscoveryPanel({
     (suggestion) => suggestion.matchKind === 'related',
   )
   const totalSuggestionCount = exactSuggestions.length + relatedSuggestions.length
+  const visibleMobileExamples = showAllMobileExamples
+    ? MOBILE_DISCOVERY_EXAMPLES
+    : MOBILE_DISCOVERY_EXAMPLES.slice(0, 2)
 
   if (screen === 'compose') {
     return (
@@ -186,27 +211,32 @@ export function IndustryDiscoveryPanel({
           </CardDescription>
         </CardHeader>
 
-        <CardContent className={embedded ? 'space-y-6 p-0' : 'space-y-6'}>
-          <section className="rounded-[28px] border border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,var(--surface-strong)_0%,rgba(216,229,255,0.92)_100%)] p-5 shadow-[var(--shadow-md)] sm:p-6">
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
+        <CardContent className={embedded ? 'space-y-4 p-0 sm:space-y-6' : 'space-y-6'}>
+          <section className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] p-3.5 shadow-none sm:rounded-[28px] sm:p-6 sm:shadow-[var(--shadow-md)]">
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
               <div>
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 inline-flex size-10 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+                  <div className="mt-1 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)] sm:size-10">
                     <SearchCheck className="size-4" />
                   </div>
                   <div>
                     <h3 className="font-display text-lg font-semibold text-[var(--foreground)]">
                       어떤 일을 하시나요?
                     </h3>
-                    <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                      업종코드를 몰라도 됩니다. 어떤 일을 하는지 쉬운 말로 적어 주세요.
-                      버튼을 누르면 추천 결과 화면으로 넘어가 바로 확인할 수 있습니다.
+                    <p className="mt-1 max-w-[34rem] text-sm leading-6 text-[var(--foreground-muted)]">
+                      <span className="sm:hidden">
+                        어떤 일을 하는지 적고 추천 코드를 바로 확인해 보세요.
+                      </span>
+                      <span className="hidden sm:inline">
+                        업종코드를 몰라도 됩니다. 어떤 일을 하는지 쉬운 말로 적어 주세요.
+                        버튼을 누르면 추천 결과 화면으로 넘어가 바로 확인할 수 있습니다.
+                      </span>
                     </p>
                   </div>
                 </div>
 
                 <Textarea
-                  className="mt-4 min-h-36 bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]"
+                  className="mt-4 min-h-28 bg-[var(--surface-strong)] text-base leading-6 shadow-[var(--shadow-sm)] sm:min-h-36 sm:text-sm"
                   value={query}
                   placeholder={
                     '예: 광고대행업을 해요\n예: 업태: 서비스 / 종목: 광고대행업\n예: 모바일 앱 개발과 SaaS 운영을 합니다'
@@ -214,12 +244,39 @@ export function IndustryDiscoveryPanel({
                   onChange={(event) => onQueryChange(event.target.value)}
                 />
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-3 space-y-2 sm:hidden">
+                  <div className="grid grid-cols-2 gap-2">
+                    {visibleMobileExamples.map((item) => (
+                      <Button
+                        key={item.prompt}
+                        variant="secondary"
+                        size="sm"
+                        className="min-w-0 justify-center px-3"
+                        onClick={() => onExampleSelect(item.prompt)}
+                      >
+                        <span className="truncate">{item.label}</span>
+                      </Button>
+                    ))}
+                  </div>
+                  {MOBILE_DISCOVERY_EXAMPLES.length > 2 ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto min-h-0 px-0 py-1 text-[var(--foreground-muted)]"
+                      onClick={() => setShowAllMobileExamples((prev) => !prev)}
+                    >
+                      {showAllMobileExamples ? '예시 접기' : '예시 더 보기'}
+                    </Button>
+                  ) : null}
+                </div>
+
+                <div className="mt-3 hidden gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex">
                   {DISCOVERY_EXAMPLE_PROMPTS.map((prompt) => (
                     <Button
                       key={prompt}
                       variant="secondary"
                       size="sm"
+                      className="shrink-0 whitespace-nowrap"
                       onClick={() => onExampleSelect(prompt)}
                     >
                       {prompt}
@@ -227,22 +284,30 @@ export function IndustryDiscoveryPanel({
                   ))}
                 </div>
 
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="mt-4 grid gap-1.5 sm:flex sm:flex-wrap sm:items-center">
                   <Button
                     disabled={isLoading || !query.trim()}
                     loading={isLoading}
+                    className="w-full justify-center whitespace-nowrap sm:w-auto"
                     onClick={onSubmitSearch}
                   >
                     {!isLoading ? <SearchCheck className="size-4" /> : null}
                     {isLoading ? '추천 코드 찾는 중...' : '추천 코드 찾기'}
                   </Button>
-                  <Button variant="secondary" onClick={onContinueManual}>
-                    직접 입력으로 계속
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="직접 입력으로 계속"
+                    className="w-full justify-center text-[var(--foreground-muted)] sm:w-auto"
+                    onClick={onContinueManual}
+                  >
+                    <span className="sm:hidden">직접 입력</span>
+                    <span className="hidden sm:inline">직접 입력으로 계속</span>
                   </Button>
                 </div>
               </div>
 
-              <div className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]">
+              <div className="hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)] xl:block">
                 <div className="text-xs font-semibold tracking-[0.08em] text-[var(--foreground-subtle)]">
                   이렇게 넘어갑니다
                 </div>
@@ -273,7 +338,7 @@ export function IndustryDiscoveryPanel({
           : 'overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-md)]'
       }
     >
-      <CardHeader className={embedded ? 'space-y-5 px-0 pt-0 pb-0' : 'space-y-5'}>
+      <CardHeader className={embedded ? 'space-y-4 px-0 pt-0 pb-0 sm:space-y-5' : 'space-y-5'}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className={embedded ? 'hidden' : undefined}>
             <Badge variant="muted" className="w-fit">
@@ -285,31 +350,38 @@ export function IndustryDiscoveryPanel({
               없으면 다시 검색하거나 직접 입력으로 이어갈 수 있습니다.
             </CardDescription>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={onBackToSearch}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button variant="secondary" size="sm" className="w-full whitespace-nowrap sm:w-auto" onClick={onBackToSearch}>
               <ChevronLeft className="size-4" />
               다시 검색
             </Button>
-            <Button variant="ghost" onClick={onContinueManual}>
-              직접 입력으로 계속
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label="직접 입력으로 계속"
+              className="w-full justify-center text-[var(--foreground-muted)] sm:w-auto"
+              onClick={onContinueManual}
+            >
+              <span className="sm:hidden">직접 입력</span>
+              <span className="hidden sm:inline">직접 입력으로 계속</span>
             </Button>
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 shadow-[var(--shadow-sm)]">
+        <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 sm:gap-3">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-muted)] px-3.5 py-3 shadow-[var(--shadow-sm)] sm:rounded-[22px] sm:px-4">
             <div className="text-xs text-[var(--foreground-subtle)]">입력한 설명</div>
             <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
               {query.trim() || '아직 입력 전'}
             </div>
           </div>
-          <div className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 shadow-[var(--shadow-sm)]">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-muted)] px-3.5 py-3 shadow-[var(--shadow-sm)] sm:rounded-[22px] sm:px-4">
             <div className="text-xs text-[var(--foreground-subtle)]">현재 기준 구역</div>
             <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
               {getZoneLabel(input)}
             </div>
           </div>
-          <div className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 shadow-[var(--shadow-sm)]">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-muted)] px-3.5 py-3 shadow-[var(--shadow-sm)] sm:rounded-[22px] sm:px-4">
             <div className="text-xs text-[var(--foreground-subtle)]">추천 상태</div>
             <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
               {status === 'loading'
@@ -324,7 +396,7 @@ export function IndustryDiscoveryPanel({
         </div>
       </CardHeader>
 
-      <CardContent className={embedded ? 'space-y-6 p-0 pt-6' : 'space-y-6'}>
+      <CardContent className={embedded ? 'space-y-4 p-0 pt-4 sm:space-y-6 sm:pt-6' : 'space-y-6'}>
         {status === 'idle' ? (
           <AsyncState
             variant="empty"
@@ -344,7 +416,7 @@ export function IndustryDiscoveryPanel({
           <AsyncState
             variant="loading"
             title="추천 결과 화면을 준비하고 있습니다."
-            description="입력한 설명과 사업자등록증 표현을 함께 비교해 가장 가까운 KSIC 코드를 정리하는 중입니다."
+            description="입력한 설명과 가장 가까운 업종코드를 찾는 중입니다."
             className="min-h-44"
           />
         ) : null}
@@ -360,7 +432,10 @@ export function IndustryDiscoveryPanel({
                   <ChevronLeft className="size-4" />
                   다시 검색
                 </Button>
-                <Button onClick={onContinueManual}>직접 입력으로 계속</Button>
+                <Button aria-label="직접 입력으로 계속" onClick={onContinueManual}>
+                  <span className="sm:hidden">직접 입력</span>
+                  <span className="hidden sm:inline">직접 입력으로 계속</span>
+                </Button>
               </div>
             }
             className="min-h-44"
@@ -378,7 +453,10 @@ export function IndustryDiscoveryPanel({
                   <ChevronLeft className="size-4" />
                   입력 화면으로 돌아가기
                 </Button>
-                <Button onClick={onContinueManual}>직접 입력으로 계속</Button>
+                <Button aria-label="직접 입력으로 계속" onClick={onContinueManual}>
+                  <span className="sm:hidden">직접 입력</span>
+                  <span className="hidden sm:inline">직접 입력으로 계속</span>
+                </Button>
               </div>
             }
             className="min-h-44"
@@ -387,7 +465,7 @@ export function IndustryDiscoveryPanel({
 
         {status === 'ready' && suggestions.length > 0 ? (
           <div className="space-y-6">
-            <div className="rounded-[24px] border border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,var(--surface-strong)_0%,var(--surface-muted)_100%)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
+            <div className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] px-3.5 py-3 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:px-4 sm:py-4 sm:text-sm sm:leading-6">
               추천된 카드를 누르면 바로 다음 화면으로 넘어갑니다. 먼저 볼 코드가 있으면
               그 코드부터 확인하는 편이 가장 빠릅니다.
             </div>

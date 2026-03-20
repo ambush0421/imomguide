@@ -144,24 +144,26 @@ export function EligibilityForm({
           직접 바꾸고 싶을 때만 이 섹션을 열어 주세요.
         </CardDescription>
       </CardHeader>
-      <CardContent className={embedded ? 'space-y-6 p-0' : 'space-y-6'}>
-        <section className="rounded-[24px] border border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,var(--surface-strong)_0%,var(--surface-muted)_100%)] p-5 shadow-[var(--shadow-sm)]">
+      <CardContent className={embedded ? 'space-y-4 p-0 sm:space-y-6' : 'space-y-6'}>
+        <section className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] p-3.5 shadow-none sm:rounded-[24px] sm:p-5 sm:shadow-[var(--shadow-sm)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+              <div className="mt-0.5 inline-flex size-9 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)] sm:size-10">
                 <SearchCheck className="size-4" />
               </div>
               <div>
-                <h3 className="font-display text-lg font-semibold text-[var(--foreground)]">
+                <h3 className="font-display text-base font-semibold text-[var(--foreground)] sm:text-lg">
                   현재 판정 설정
                 </h3>
-                <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
+                <p className="mt-1 text-[13px] leading-5 text-[var(--foreground-muted)] sm:text-sm sm:leading-6">
                   필요한 항목만 아래에서 바꾸고 다시 판정하면 됩니다.
                 </p>
               </div>
             </div>
             <Button
               variant="secondary"
+              size="sm"
+              className="w-full whitespace-nowrap sm:w-auto"
               onClick={() => setIsExpanded((value) => !value)}
             >
               {isExpanded ? (
@@ -178,26 +180,26 @@ export function EligibilityForm({
             </Button>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 shadow-[var(--shadow-sm)]">
+          <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)] sm:px-4">
               <div className="text-xs text-[var(--foreground-subtle)]">구역</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {zoneTypeLabels[input.zoneType]}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 shadow-[var(--shadow-sm)]">
-              <div className="text-xs text-[var(--foreground-subtle)]">신청 주체</div>
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)] sm:px-4">
+              <div className="text-xs text-[var(--foreground-subtle)]">회사/기관 유형</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {applicantTypeLabels[input.applicantType]}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 shadow-[var(--shadow-sm)]">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)] sm:px-4">
               <div className="text-xs text-[var(--foreground-subtle)]">선택한 업종코드</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {input.ksicCode.trim() || '직접 입력 예정'}
               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 shadow-[var(--shadow-sm)]">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-3 shadow-[var(--shadow-sm)] sm:px-4">
               <div className="text-xs text-[var(--foreground-subtle)]">예외조건</div>
               <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
                 {enabledFlagCount > 0 ? `${enabledFlagCount}개 적용 중` : '없음'}
@@ -205,9 +207,9 @@ export function EligibilityForm({
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-3">
             <Button
-              className="sm:flex-1"
+              className="w-full justify-center whitespace-nowrap sm:flex-1"
               loading={isLoading}
               onClick={onEvaluate}
             >
@@ -216,7 +218,7 @@ export function EligibilityForm({
             </Button>
             {onPrevious ? (
               <Button
-                className="sm:flex-1"
+                className="w-full justify-center whitespace-nowrap sm:flex-1"
                 variant="secondary"
                 disabled={isLoading}
                 onClick={onPrevious}
@@ -226,7 +228,7 @@ export function EligibilityForm({
               </Button>
             ) : (
               <Button
-                className="sm:flex-1"
+                className="w-full justify-center whitespace-nowrap sm:flex-1"
                 variant="secondary"
                 disabled={isLoading}
                 onClick={onReset}
@@ -278,7 +280,7 @@ export function EligibilityForm({
                 </div>
 
                 <div className="space-y-2">
-                  <Label>신청 주체</Label>
+                  <Label>회사/기관 유형</Label>
                   <Select
                     value={input.applicantType}
                     onValueChange={(value) =>
@@ -331,7 +333,7 @@ export function EligibilityForm({
               </div>
 
               <div className="mt-4 space-y-2">
-                <Label>지식산업센터 예외 판정용 법령 분류</Label>
+                <Label>세부 업종 분류</Label>
                 <Select
                   value={input.regulatoryFit}
                   onValueChange={(value) =>
@@ -342,10 +344,10 @@ export function EligibilityForm({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="자동 매칭만 사용" />
+                    <SelectValue placeholder="추천 결과대로 사용" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="auto">자동 매칭만 사용</SelectItem>
+                  <SelectItem value="auto">추천 결과대로 사용</SelectItem>
                     <SelectItem value="knowledgeIndustry">지식산업</SelectItem>
                     <SelectItem value="informationIndustry">정보통신산업</SelectItem>
                     <SelectItem value="otherPermittedIndustry">
@@ -366,7 +368,7 @@ export function EligibilityForm({
                   </SelectContent>
                 </Select>
                 <p className="text-xs leading-5 text-[var(--foreground-subtle)]">
-                  주로 지식산업센터에서 KSIC 코드만으로 분류가 애매할 때만 수동 선택해 주세요.
+                  추천된 업종이 내 일과 다르게 보일 때만 바꿔 주세요.
                 </p>
               </div>
             </section>
@@ -402,8 +404,7 @@ export function EligibilityForm({
                     마곡 입주 레이아웃 시뮬레이션
                   </h3>
                   <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                    총 면적과 기업 규모를 입력하면 연구시설 최소 면적과 제조시설 상한을
-                    보수적으로 계산해 결과 화면에 함께 보여줍니다.
+                    총 면적과 기업 규모를 넣으면 필요한 면적을 바로 가늠해 볼 수 있습니다.
                   </p>
                 </div>
               </div>
@@ -458,8 +459,7 @@ export function EligibilityForm({
               </div>
 
               <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
-                현재 MVP는 관리기본계획상 연구시설 비율과 제조시설 20% 조건을 빠르게
-                예비 계산하는 용도입니다. 최종 심사는 관리기관 확인이 필요합니다.
+                실제 계약이나 입주 전에는 한 번 더 확인해 보시는 것을 권장합니다.
               </p>
             </section>
 
