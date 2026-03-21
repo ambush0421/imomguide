@@ -44,10 +44,12 @@
   --surface-strong: #ffffff;
   --surface-muted: #f3f5f8;
   --surface-soft: #fafbfc;
+  --surface-neutral: #f7f9fc;
   --foreground: #141c2b;
   --foreground-muted: #4a5568;
   --foreground-subtle: #788396;
   --border: rgba(20, 28, 43, 0.12);
+  --border-neutral: #d8e1ed;
   --ring: rgba(31, 94, 255, 0.24);
   --accent: #1f5eff;
   --accent-strong: #1f5eff;

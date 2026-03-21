@@ -36,12 +36,24 @@ describe('App', () => {
     expect(screen.getAllByText('마곡 코드찾기').length).toBeGreaterThan(0)
     expect(
       screen.getByRole('heading', {
-        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+        name: /마곡 입주,\s*업종코드부터 예비판정까지 한 번에/,
       }),
     ).toBeInTheDocument()
-    expect(screen.getByText('전체 전수 코드')).toBeInTheDocument()
-    expect(screen.getByText('가능 코드 전체 보기')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /업태·종목이나 하는 일을 적으면 마곡에서 먼저 볼 업종코드를 추천하고,/,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText('업종코드를 몰라도 검색')).toBeInTheDocument()
+    expect(screen.getByText('마곡 기준 자동 추천')).toBeInTheDocument()
+    expect(screen.getByText('가능·조건부·심의 필요 바로 확인')).toBeInTheDocument()
+    expect(screen.getAllByText('업종코드 추천받기').length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: '전체 코드 사전 보기' }).length).toBeGreaterThan(0)
     expect(within(finderSection).getByText('어떤 일을 하시나요?')).toBeInTheDocument()
+    expect(screen.getByText('실무에서는 보통 이렇게 봅니다')).toBeInTheDocument()
+    expect(screen.getByText('하는 일을 한 줄로 적습니다.')).toBeInTheDocument()
+    expect(screen.getByText('가까운 업종코드를 추천받습니다.')).toBeInTheDocument()
+    expect(screen.getByText('마곡 입주 가능성을 근거와 함께 확인합니다.')).toBeInTheDocument()
     expect(screen.getByText('참고용 제휴 링크')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /사무환경 참고 상품 펼치기/i })).toBeInTheDocument()
     expect(screen.queryByText('광고·제휴 안내')).not.toBeInTheDocument()
@@ -141,11 +153,11 @@ describe('App', () => {
     render(<App />)
     const user = userEvent.setup()
 
-    await user.click(screen.getByRole('button', { name: '코드 추천받기' }))
+    await user.click(screen.getByRole('button', { name: '업종코드 추천받기' }))
 
     expect(
       screen.queryByRole('heading', {
-        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+        name: /마곡 입주,\s*업종코드부터 예비판정까지 한 번에/,
       }),
     ).not.toBeInTheDocument()
     expect(screen.queryByText('참고용 제휴 링크')).not.toBeInTheDocument()
@@ -156,7 +168,7 @@ describe('App', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+        name: /마곡 입주,\s*업종코드부터 예비판정까지 한 번에/,
       }),
     ).toBeInTheDocument()
   })
@@ -165,11 +177,11 @@ describe('App', () => {
     render(<App />)
     const user = userEvent.setup()
 
-    await user.click(screen.getByRole('button', { name: '코드 추천받기' }))
+    await user.click(screen.getByRole('button', { name: '업종코드 추천받기' }))
 
     expect(
       screen.queryByRole('heading', {
-        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+        name: /마곡 입주,\s*업종코드부터 예비판정까지 한 번에/,
       }),
     ).not.toBeInTheDocument()
     expect(screen.getByText('지금은 이 흐름만 보면 됩니다')).toBeInTheDocument()
@@ -181,7 +193,7 @@ describe('App', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+        name: /마곡 입주,\s*업종코드부터 예비판정까지 한 번에/,
       }),
     ).toBeInTheDocument()
   })
@@ -190,7 +202,7 @@ describe('App', () => {
     render(<App />)
     const user = userEvent.setup()
 
-    await user.click(screen.getByRole('button', { name: '가능 코드 전체 보기' }))
+    await user.click(screen.getAllByRole('button', { name: '전체 코드 사전 보기' })[0])
 
     const searchInput = await screen.findByPlaceholderText(
       '예: 광고대행업 / 앱 개발 / 72121 / 63112',
@@ -209,7 +221,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: '검색 홈으로 돌아가기' }))
     expect(
       screen.getByRole('heading', {
-        name: /입주 가능한 업종코드를\s*쉽게 찾고\s*바로 확인합니다/,
+        name: /마곡 입주,\s*업종코드부터 예비판정까지 한 번에/,
       }),
     ).toBeInTheDocument()
   })

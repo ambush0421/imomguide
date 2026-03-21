@@ -1023,3 +1023,14 @@
 - [x] `.gitignore`, `README.md`를 현재 구조 기준으로 정리
 - [x] lint/test/build 재검증
 - [x] walkthrough.md 갱신
+
+## 2026-03-21 홈 전환 카피·시각 위계 개선
+
+- [x] 현재 홈 히어로와 반복 단계 안내 구조 재확인
+- [x] `implementation_plan.md`에 이번 루프 구현 계획 추가
+- [x] 히어로를 혜택 중심 헤드라인/서브 문장/CTA로 재작성
+- [x] 상단 우측 보조 영역을 `가치 + 신뢰` 카드로 재구성
+- [x] 단계 설명 정본과 법령/업데이트 섹션 카피 재정리
+- [x] `App.test.tsx` 기대값 갱신
+- [x] lint/test/build 재검증
+- [x] walkthrough.md 갱신
