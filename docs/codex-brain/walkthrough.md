@@ -4133,3 +4133,87 @@ npm run test
 
 - 헤더와 히어로는 한 줄/두 줄 기준이 더 안정적으로 보이게 정리됐고, 빠른 검색의 비활성 상태도 이유를 바로 이해할 수 있게 됐다.
 - 대표 업종 가이드의 `가능로` 문제는 데이터 생성 단계에서 막히도록 수정해, 같은 조사 오류가 다시 나오지 않게 정리했다.
+
+---
+
+## 2026-03-21 워크스페이스 시작 구조 정리
+
+### 작업 배경
+
+- 사용자는 `입주 예비판정 워크스페이스`에서 시작 가이드가 1단계 패널 안에 섞여 보이고, 잠긴 2·3단계가 기능이 없는 것처럼 느껴진다고 지적했다.
+- 이번 루프는 첫 진입 시 `어디서 시작하는지`와 `왜 다음 단계가 잠겨 있는지`를 더 빠르게 이해하게 만드는 데 초점을 맞췄다.
+
+### 반영 내용
+
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - `showSlimDiscoverOverview` 상태일 때 탭 위에 `이렇게 시작하세요` 안내 박스를 별도로 배치했다.
+  - 이 박스에서 `빠른 검색으로 올라가기`와 `직접 입력으로 계속`을 바로 선택할 수 있게 해, 시작 방법을 탭 내부가 아니라 워크스페이스 상단에서 먼저 보여주도록 바꿨다.
+  - 잠긴 2·3단계 버튼에는 숫자 대신 잠금 아이콘을 노출하고, `검색 후 활성화` 문구를 붙여 현재 상태를 더 명확히 설명하게 했다.
+  - 기존 1단계 카드 내부의 큰 가이드는 제거하고, 대신 `검색을 시작하면 추천 결과가 이 영역에 이어진다`는 중립적인 안내 카드만 남겼다.
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
+  - 초기 렌더 시 `이렇게 시작하세요`와 `검색 후 활성화`가 보이는지 검증하도록 기대값을 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 8개 테스트 파일
+  - 78개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-BK-S3eoj.js`
+  - `dist/assets/index-wagI6031.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+
+### 결과 요약
+
+- 워크스페이스 첫 화면은 이제 `시작 안내 → 단계 탭 → 결과 영역` 순서가 더 분명해졌고, 잠긴 단계도 아직 비활성인 이유를 더 쉽게 이해할 수 있게 됐다.
+
+---
+
+## 2026-03-21 결과 공유/저장 기능
+
+### 작업 배경
+
+- 사용자는 컨설턴트 실무 기준으로 `판정 결과를 저장하거나 바로 공유할 방법이 없다`는 점을 가장 먼저 보완해야 할 기능으로 지목했다.
+- 이번 루프는 1번 기능만 완결하는 범위로 묶어, 링크 공유, 요약 복사, 인쇄/PDF 저장이 결과 화면에서 바로 이어지도록 만드는 데 집중했다.
+
+### 반영 내용
+
+- [share-result.ts](C:/projects/magok/src/features/eligibility/share-result.ts)
+  - `EligibilityInput`을 URL-safe Base64 문자열로 직렬화/복원하는 공유 유틸을 추가했다.
+  - 공유 해시 `#finder?share=...` 생성, 판정 요약 텍스트 생성, 인쇄용 HTML 문서 생성을 한 파일로 묶어 같은 입력 기준을 재사용하게 했다.
+- [eligibility-store.ts](C:/projects/magok/src/store/eligibility-store.ts)
+  - `loadSharedResult(input)` 메서드를 추가해 공유 링크 진입 시 곧바로 `status: ready`, `currentStep: result` 상태를 만들게 했다.
+  - 이 메서드는 입력을 세팅한 뒤 `evaluateEligibility`를 동기 실행해 동일한 결과를 복원한다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - `getHashState`가 `#finder?share=...`를 해석해 `sharedInput`과 홈 내부 섹션 id를 함께 반환하도록 확장했다.
+  - 초기 로드/해시 변경 시 공유 입력이 있으면 store의 `loadSharedResult`를 호출하도록 연결했다.
+  - 결과 화면 액션으로 `공유 링크 복사`, `판정 요약 복사`, `인쇄 / PDF 저장` 콜백을 내려주고, 인쇄는 전용 팝업 문서로 열어 PDF 저장에도 바로 쓸 수 있게 했다.
+- [result-panel.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.tsx)
+  - 결과 상단 카드에 3개 액션 버튼을 추가했다.
+  - 복사 성공/실패 메시지를 짧게 보여줘 사용자가 방금 어떤 전달 액션을 했는지 바로 확인할 수 있게 했다.
+- 테스트
+  - [share-result.test.ts](C:/projects/magok/src/features/eligibility/share-result.test.ts)에서 공유 해시 round-trip과 요약 텍스트 생성을 검증했다.
+  - [result-panel.test.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.test.tsx)에서 새 액션 버튼 노출과 콜백 호출을 확인했다.
+  - [App.test.tsx](C:/projects/magok/src/App.test.tsx)에서 공유 해시 진입 시 결과 화면이 바로 복원되는 흐름을 검증했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 9개 테스트 파일
+  - 82개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-B4mCdYDa.js`
+  - `dist/assets/index-wagI6031.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - `npm run build`의 prebuild 단계로 `public/` 아래 SEO 산출물이 다시 export됐다.
+
+### 결과 요약
+
+- 컨설턴트는 이제 결과 화면에서 바로 공유 링크를 만들고, 고객 전달용 요약을 복사하고, PDF 저장용 인쇄 화면까지 한 번에 이어갈 수 있다.
+- 공유 해시로 진입하면 같은 입력과 판정 결과가 복원돼, `이 링크 그대로 열면 같은 화면이 나온다`는 전달 경험이 가능해졌다.

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 
 import { discoverIndustrySuggestions } from '@/features/eligibility/data/industry-discovery'
 import { evaluateEligibility } from '@/features/eligibility/evaluator'
+import { defaultSharedEligibilityInput } from '@/features/eligibility/share-result'
 import type {
   EligibilityFlags,
   EligibilityInput,
@@ -36,31 +37,11 @@ interface EligibilityStore {
   discoverIndustry: () => Promise<void>
   applyIndustrySuggestion: (suggestion: IndustrySuggestion) => Promise<void>
   evaluate: () => Promise<void>
+  loadSharedResult: (input: EligibilityInput) => void
   reset: () => void
 }
 
-const defaultInput: EligibilityInput = {
-  companyName: '',
-  address: '',
-  zoneType: 'knowledgeIndustryCenter',
-  ksicCode: '',
-  ksicName: '',
-  companyScale: 'sme',
-  grossAreaPy: '',
-  rndHeadcount: '',
-  applicantType: 'company',
-  regulatoryFit: 'auto',
-  notes: '',
-  flags: {
-    isPackagingAndFilling: false,
-    isResourceStockpile: false,
-    isHosting63112: false,
-    isRealEstateOnly: false,
-    isTrustOnly: false,
-    hasManufacturingFacility: false,
-    requiresCommitteeReview: false,
-  },
-}
+const defaultInput: EligibilityInput = defaultSharedEligibilityInput
 
 function wait(ms: number) {
   return new Promise((resolve) => {
@@ -218,6 +199,28 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
         currentStep: 'result',
       })
     }
+  },
+  loadSharedResult: (input) => {
+    const nextInput: EligibilityInput = {
+      ...defaultInput,
+      ...input,
+      flags: {
+        ...defaultInput.flags,
+        ...input.flags,
+      },
+    }
+
+    set({
+      input: nextInput,
+      result: evaluateEligibility(nextInput),
+      status: 'ready',
+      error: null,
+      industryQuery: '',
+      industrySuggestions: [],
+      discoveryStatus: 'idle',
+      discoveryError: null,
+      currentStep: 'result',
+    })
   },
   reset: () =>
     set({

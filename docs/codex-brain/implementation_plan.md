@@ -2056,6 +2056,43 @@ src/
 
 ---
 
+## 2026-03-21 결과 공유/저장 기능 계획
+
+### 변경 목표
+
+- 컨설턴트가 판정 결과를 바로 전달할 수 있도록 `공유 링크`, `요약 복사`, `인쇄/PDF 저장` 흐름을 결과 화면에 추가한다.
+- 공유 링크로 진입했을 때 해시만으로 같은 입력과 결과를 복원해, 별도 설명 없이도 동일한 예비판정 화면이 바로 열리게 만든다.
+- 이번 루프는 1번 기능만 완결하는 범위로 제한하고, 동시 비교·멀티 코드·히스토리·더 보기 같은 다음 기능은 건드리지 않는다.
+
+### 구현 메모
+
+1. `src/features/eligibility/share-result.ts`
+   - `EligibilityInput` 직렬화/복원을 담당하는 유틸 파일을 새로 만든다.
+   - Base64 URL-safe 문자열로 인코딩하고, 복원 시 enum/boolean/string 값을 안전하게 정규화한다.
+   - 공유용 해시 `#finder?share=...` 생성 헬퍼와 결과 요약 텍스트 생성 헬퍼를 함께 둔다.
+2. `src/store/eligibility-store.ts`
+   - 공유 링크 진입 시 즉시 결과 화면을 만들 수 있도록 `loadSharedResult(input)` 메서드를 추가한다.
+   - 이 메서드는 입력을 세팅하고 `evaluateEligibility`를 동기 실행해 `status: ready`, `currentStep: result` 상태를 만든다.
+3. `src/App.tsx`
+   - `getHashState`가 `#finder?share=...`를 읽어 `sharedInput`을 반환하도록 확장한다.
+   - 해시 변경 시 공유 입력이 있으면 store의 `loadSharedResult`를 호출하고, 홈 화면 결과가 준비된 상태에서는 현재 입력으로 공유 해시를 다시 써준다.
+   - `HomeSections`와 `ResultPanel`에 공유/복사/인쇄 콜백을 내려준다.
+4. `src/features/eligibility/components/result-panel.tsx`
+   - 결과 카드 상단에 `공유 링크 복사`, `판정 요약 복사`, `인쇄 / PDF 저장` 버튼을 추가한다.
+   - 복사 성공 시 짧은 상태 문구가 바뀌도록 로컬 피드백을 넣고, 인쇄는 전용 팝업 문서로 열어 PDF 저장에도 바로 쓸 수 있게 한다.
+5. 테스트
+   - `src/features/eligibility/share-result.test.ts`에서 직렬화/복원 round-trip을 검증한다.
+   - `src/features/eligibility/components/result-panel.test.tsx`에서 새 액션 버튼과 콜백 실행을 확인한다.
+   - `src/App.test.tsx`에서 공유 해시 진입 복원과 링크 복사 동작을 확인한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
 ## 2026-03-21 홈 전환 카피·시각 위계 개선 계획
 
 ### 변경 목표
@@ -3088,6 +3125,30 @@ src/
    - 판정 라벨 뒤 조사(`로/으로`)를 자동으로 붙이는 helper를 만들어 `가능로` 같은 문법 오류가 생기지 않게 한다.
 5. `src/App.test.tsx`
    - 축약된 네비 명칭과 새 힌트 텍스트 기준으로 기대값을 업데이트한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 워크스페이스 시작 구조 정리 계획
+
+### 변경 목표
+
+- `입주 예비판정 워크스페이스` 첫 화면에서 어디서 시작해야 하는지 더 즉시 이해되도록, 시작 가이드를 탭 바깥으로 분리한다.
+- 잠긴 2·3단계는 `비활성 기능`이 아니라 `아직 조건이 충족되지 않은 단계`라는 점이 더 명확히 보이게 만든다.
+
+### 구현 메모
+
+1. `src/App.tsx`
+   - `showSlimDiscoverOverview` 상태에서 탭 위에 `이렇게 시작하세요` 안내 박스를 별도로 렌더링한다.
+   - 기존 1단계 패널 안에 있던 시작 가이드는 제거하고, 대신 `검색을 시작하면 결과가 이 영역에 이어진다`는 중립적 안내 카드로 축소한다.
+   - 잠긴 step 버튼에는 숫자 대신 잠금 아이콘을 보여주고, `검색 후 활성화` 텍스트를 함께 붙인다.
+2. `src/App.test.tsx`
+   - 초기 홈 렌더 시 `이렇게 시작하세요`와 `검색 후 활성화`가 보이는지 검증한다.
 
 ### 검증 메모
 

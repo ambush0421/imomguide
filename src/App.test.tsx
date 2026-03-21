@@ -3,7 +3,32 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import App from '@/App'
+import { createSharedFinderHash } from '@/features/eligibility/share-result'
+import type { EligibilityInput } from '@/features/eligibility/types'
 import { useEligibilityStore } from '@/store/eligibility-store'
+
+const sharedResultInput: EligibilityInput = {
+  companyName: '공유 테스트 기업',
+  address: '서울 강서구 마곡중앙로',
+  zoneType: 'knowledgeIndustryCenter',
+  ksicCode: '73905',
+  ksicName: '경영 컨설팅업',
+  companyScale: 'sme',
+  grossAreaPy: '',
+  rndHeadcount: '',
+  applicantType: 'company',
+  regulatoryFit: 'auto',
+  notes: '공유 링크 테스트',
+  flags: {
+    isPackagingAndFilling: false,
+    isResourceStockpile: false,
+    isHosting63112: false,
+    isRealEstateOnly: false,
+    isTrustOnly: false,
+    hasManufacturingFacility: false,
+    requiresCommitteeReview: false,
+  },
+}
 
 describe('App', () => {
   beforeEach(() => {
@@ -76,6 +101,8 @@ describe('App', () => {
         name: /위 빠른 검색에서 시작하거나\s*직접 입력으로 바로 넘어가세요/,
       }),
     ).toBeInTheDocument()
+    expect(within(finderSection).getByText('이렇게 시작하세요')).toBeInTheDocument()
+    expect(within(finderSection).getAllByText('검색 후 활성화').length).toBeGreaterThan(0)
     expect(screen.getByText('마곡 입주 가능성을 근거와 함께 확인합니다.')).toBeInTheDocument()
     expect(screen.getByText('참고용 제휴 링크')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /사무환경 참고 상품 펼치기/i })).toBeInTheDocument()
@@ -329,5 +356,17 @@ describe('App', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('자주 묻는 질문')).toBeInTheDocument()
     expect(screen.getByText('관련 법령')).toBeInTheDocument()
+  })
+
+  it('공유 해시로 진입하면 같은 입력의 결과 화면을 바로 복원한다', async () => {
+    window.history.replaceState(null, '', createSharedFinderHash(sharedResultInput))
+
+    render(<App />)
+
+    expect(await screen.findByRole('button', { name: '공유 링크 복사' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '판정 요약 복사' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '인쇄 / PDF 저장' })).toBeInTheDocument()
+    expect(screen.getAllByText('73905').length).toBeGreaterThan(0)
+    expect(screen.getByText('법적 근거 각주')).toBeInTheDocument()
   })
 })

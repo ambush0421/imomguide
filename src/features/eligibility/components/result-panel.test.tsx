@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
 
 import { ResultPanel } from '@/features/eligibility/components/result-panel'
 import { evaluateEligibility } from '@/features/eligibility/evaluator'
@@ -116,5 +117,37 @@ describe('ResultPanel', () => {
     expect(screen.getAllByText('400평').length).toBeGreaterThan(0)
     expect(screen.getByText('200평')).toBeInTheDocument()
     expect(screen.getByText('20평')).toBeInTheDocument()
+  })
+
+  it('결과 준비 상태에서는 공유 액션 버튼을 노출하고 콜백을 호출한다', async () => {
+    const user = userEvent.setup()
+    const result = evaluateEligibility(baseInput)
+    const onCopyShareLink = vi.fn().mockResolvedValue(undefined)
+    const onCopyResultSummary = vi.fn().mockResolvedValue(undefined)
+    const onPrintResult = vi.fn()
+
+    render(
+      <ResultPanel
+        input={baseInput}
+        result={result}
+        status="ready"
+        error={null}
+        onEvaluate={() => {}}
+        onCopyShareLink={onCopyShareLink}
+        onCopyResultSummary={onCopyResultSummary}
+        onPrintResult={onPrintResult}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: '공유 링크 복사' }))
+    expect(onCopyShareLink).toHaveBeenCalledTimes(1)
+    expect(await screen.findByText('공유 링크를 복사했습니다.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '판정 요약 복사' }))
+    expect(onCopyResultSummary).toHaveBeenCalledTimes(1)
+    expect(await screen.findByText('판정 요약을 복사했습니다.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '인쇄 / PDF 저장' }))
+    expect(onPrintResult).toHaveBeenCalledTimes(1)
   })
 })

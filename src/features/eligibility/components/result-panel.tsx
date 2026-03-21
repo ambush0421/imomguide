@@ -1,4 +1,5 @@
-import { ArrowRight, FileStack, MapPin } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ArrowRight, Copy, FileStack, Link2, MapPin, Printer } from 'lucide-react'
 
 import { AsyncState } from '@/components/async-state'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +39,9 @@ interface ResultPanelProps {
   onEvaluate: () => void
   onAdjust?: () => void
   onOpenGuide?: (code: string) => void
+  onCopyShareLink?: () => Promise<void> | void
+  onCopyResultSummary?: () => Promise<void> | void
+  onPrintResult?: () => void
   sticky?: boolean
   stepLabel?: string
   embedded?: boolean
@@ -67,6 +71,9 @@ export function ResultPanel({
   onEvaluate,
   onAdjust,
   onOpenGuide,
+  onCopyShareLink,
+  onCopyResultSummary,
+  onPrintResult,
   sticky = true,
   stepLabel = '2단계',
   embedded = false,
@@ -78,6 +85,57 @@ export function ResultPanel({
   const guideEntry = input.ksicCode.trim()
     ? getGuideEntryByCode(input.ksicCode.trim())
     : null
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null)
+  const [isCopyingLink, setIsCopyingLink] = useState(false)
+  const [isCopyingSummary, setIsCopyingSummary] = useState(false)
+
+  useEffect(() => {
+    if (!actionFeedback) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setActionFeedback(null)
+    }, 2400)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [actionFeedback])
+
+  async function handleCopyShareLink() {
+    if (!onCopyShareLink || isCopyingLink) {
+      return
+    }
+
+    setIsCopyingLink(true)
+
+    try {
+      await onCopyShareLink()
+      setActionFeedback('공유 링크를 복사했습니다.')
+    } catch {
+      setActionFeedback('공유 링크 복사에 실패했습니다.')
+    } finally {
+      setIsCopyingLink(false)
+    }
+  }
+
+  async function handleCopyResultSummary() {
+    if (!onCopyResultSummary || isCopyingSummary) {
+      return
+    }
+
+    setIsCopyingSummary(true)
+
+    try {
+      await onCopyResultSummary()
+      setActionFeedback('판정 요약을 복사했습니다.')
+    } catch {
+      setActionFeedback('판정 요약 복사에 실패했습니다.')
+    } finally {
+      setIsCopyingSummary(false)
+    }
+  }
 
   return (
     <Card
@@ -175,6 +233,48 @@ export function ResultPanel({
               <p className="mt-3 max-w-[42rem] text-[15px] leading-7 text-[var(--foreground-muted)]">
                 {result.summary}
               </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {onCopyShareLink ? (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="whitespace-nowrap"
+                    onClick={handleCopyShareLink}
+                    disabled={isCopyingLink}
+                  >
+                    <Link2 className="size-4" />
+                    {isCopyingLink ? '링크 복사 중...' : '공유 링크 복사'}
+                  </Button>
+                ) : null}
+                {onCopyResultSummary ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="whitespace-nowrap"
+                    onClick={handleCopyResultSummary}
+                    disabled={isCopyingSummary}
+                  >
+                    <Copy className="size-4" />
+                    {isCopyingSummary ? '요약 복사 중...' : '판정 요약 복사'}
+                  </Button>
+                ) : null}
+                {onPrintResult ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="whitespace-nowrap"
+                    onClick={onPrintResult}
+                  >
+                    <Printer className="size-4" />
+                    인쇄 / PDF 저장
+                  </Button>
+                ) : null}
+              </div>
+              {actionFeedback ? (
+                <p className="mt-3 text-sm font-medium text-[var(--accent-strong)]">
+                  {actionFeedback}
+                </p>
+              ) : null}
               {result.matchedRules.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {result.matchedRules.map((rule) => (

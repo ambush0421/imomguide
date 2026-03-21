@@ -7,6 +7,7 @@ import {
   ExternalLink,
   FileSearch,
   LibraryBig,
+  Lock,
   Menu,
   SearchCheck,
   X,
@@ -43,6 +44,12 @@ import { IndustryDiscoveryPanel } from '@/features/eligibility/components/indust
 import { ResultPanel } from '@/features/eligibility/components/result-panel'
 import { RulebookTabs } from '@/features/eligibility/components/rulebook-tabs'
 import {
+  buildEligibilityPrintDocument,
+  buildEligibilityResultSummary,
+  createSharedFinderHash,
+  decodeSharedEligibilityInput,
+} from '@/features/eligibility/share-result'
+import {
   getFeaturedGuideEntries,
   getGuideEntryByCode,
 } from '@/features/guides/data/guide-catalog'
@@ -52,6 +59,7 @@ import {
 } from '@/features/eligibility/data/magok-code-directory'
 import type {
   DirectoryZoneType,
+  EligibilityInput,
   MagokCodeDirectoryEntry,
 } from '@/features/eligibility/types'
 import {
@@ -193,29 +201,48 @@ const brandAssets = {
   wordmark: '/brand/magok-codefinder-logo-horizontal.svg',
 } as const
 
-function getHashState(hash: string): { view: AppView; guideCode: string | null } {
+interface HashState {
+  view: AppView
+  guideCode: string | null
+  sectionId: string
+  sharedInput: EligibilityInput | null
+}
+
+function getHashState(hash: string): HashState {
   if (hash.startsWith('#guides/')) {
     const guideCode = decodeURIComponent(hash.slice('#guides/'.length)).trim()
 
     return {
       view: 'guide',
       guideCode: guideCode || null,
+      sectionId: 'top',
+      sharedInput: null,
     }
   }
 
   if (hash.startsWith('#directory')) {
-    return { view: 'directory', guideCode: null }
+    return { view: 'directory', guideCode: null, sectionId: 'top', sharedInput: null }
   }
 
   if (hash.startsWith('#library')) {
-    return { view: 'library', guideCode: null }
+    return { view: 'library', guideCode: null, sectionId: 'top', sharedInput: null }
   }
 
   if (hash.startsWith('#updates')) {
-    return { view: 'updates', guideCode: null }
+    return { view: 'updates', guideCode: null, sectionId: 'top', sharedInput: null }
   }
 
-  return { view: 'home', guideCode: null }
+  const normalizedHash = hash.startsWith('#') ? hash.slice(1) : hash
+  const [sectionId = 'top', search = ''] = normalizedHash.split('?')
+  const params = new URLSearchParams(search)
+  const shareValue = params.get('share')
+
+  return {
+    view: 'home',
+    guideCode: null,
+    sectionId: sectionId || 'top',
+    sharedInput: shareValue ? decodeSharedEligibilityInput(shareValue) : null,
+  }
 }
 
 function scrollToSection(id: string) {
@@ -244,6 +271,34 @@ function getZoneLabel(zoneType: DirectoryZoneType) {
   return zoneType === 'industrialFacility' ? '산업시설구역' : '지식산업센터'
 }
 
+async function copyTextToClipboard(text: string) {
+  const clipboard =
+    typeof window !== 'undefined' ? window.navigator.clipboard : undefined
+
+  if (clipboard?.writeText) {
+    await clipboard.writeText(text)
+    return
+  }
+
+  const textArea = document.createElement('textarea')
+  textArea.value = text
+  textArea.setAttribute('readonly', 'true')
+  textArea.style.position = 'fixed'
+  textArea.style.top = '-9999px'
+  document.body.append(textArea)
+  textArea.select()
+
+  try {
+    const copied = document.execCommand('copy')
+
+    if (!copied) {
+      throw new Error('clipboard copy failed')
+    }
+  } finally {
+    textArea.remove()
+  }
+}
+
 function HomeSections({
   input,
   status,
@@ -266,6 +321,9 @@ function HomeSections({
   onOpenLibrary,
   onOpenUpdates,
   onOpenGuide,
+  onCopyShareLink,
+  onCopyResultSummary,
+  onPrintResult,
 }: {
   input: ReturnType<typeof useEligibilityStore.getState>['input']
   status: ReturnType<typeof useEligibilityStore.getState>['status']
@@ -288,6 +346,9 @@ function HomeSections({
   onOpenLibrary: () => void
   onOpenUpdates: () => void
   onOpenGuide: (code: string) => void
+  onCopyShareLink: () => Promise<void>
+  onCopyResultSummary: () => Promise<void>
+  onPrintResult: () => void
 }) {
   const canShowResult = Boolean(status === 'ready' && result)
   const canStayOnResultStep =
@@ -746,6 +807,34 @@ function HomeSections({
         <div className={`${isCompactWizardFocused ? 'space-y-4 sm:space-y-6' : isDesktopWizardFocused ? 'space-y-4' : 'mt-4 space-y-3.5 sm:mt-8 sm:space-y-6'}`}>
           <div className={isDesktopWizardFocused ? 'grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start' : undefined}>
             <div className="space-y-3.5 sm:space-y-6">
+              {!isCompactWizardFocused && showSlimDiscoverOverview ? (
+                <section className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-muted)] p-5 shadow-[var(--shadow-sm)] sm:p-6">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="max-w-2xl">
+                      <Badge variant="muted" className="w-fit">이렇게 시작하세요</Badge>
+                      <h3 className="mt-3 font-display text-[1.6rem] font-semibold leading-[1.12] text-[var(--foreground)] sm:text-[1.9rem]">
+                        위 빠른 검색에서 시작하거나
+                        <br />
+                        직접 입력으로 바로 넘어가세요
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                        히어로의 빠른 검색은 통화 중 들은 표현 그대로 후보 코드를 좁히는
+                        용도입니다. 업종코드를 이미 알고 있다면 아래 단계로 바로 예비판정을
+                        이어갈 수 있습니다.
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
+                      <Button variant="secondary" onClick={handleFinderEntry}>
+                        빠른 검색으로 올라가기
+                      </Button>
+                      <Button onClick={handleContinueManualStep}>
+                        직접 입력으로 계속
+                      </Button>
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+
               <div className={`${isCompactWizardFocused ? 'hidden sm:grid sm:grid-cols-3 sm:gap-3' : 'grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4'}`}>
                 {wizardSteps.map((step, index) => {
                   const isActive = step.id === safeCurrentStep
@@ -783,7 +872,13 @@ function HomeSections({
                               : 'bg-[rgba(124,136,155,0.18)] text-[var(--foreground-subtle)]'
                           }`}
                         >
-                          {isComplete ? <CheckCircle2 className="size-4" /> : index + 1}
+                          {isComplete ? (
+                            <CheckCircle2 className="size-4" />
+                          ) : isLocked ? (
+                            <Lock className="size-4" />
+                          ) : (
+                            index + 1
+                          )}
                         </div>
                         <div className="min-w-0">
                           <div className="hidden text-xs font-medium text-[var(--foreground-subtle)] sm:block">
@@ -796,7 +891,8 @@ function HomeSections({
                             {step.title}
                           </div>
                           {isLocked ? (
-                            <div className="mt-1 hidden text-xs font-medium leading-4 text-[var(--foreground-subtle)] sm:block">
+                            <div className="mt-1 hidden items-center gap-1 text-xs font-medium leading-4 text-[var(--foreground-subtle)] sm:inline-flex">
+                              <Lock className="size-3.5" />
                               검색 후 활성화
                             </div>
                           ) : null}
@@ -860,30 +956,14 @@ function HomeSections({
                     className="animate-fade-in space-y-5 sm:space-y-6"
                   >
                     {safeCurrentStep === 'discover' && showSlimDiscoverOverview ? (
-                      <section className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:p-6">
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                          <div className="max-w-2xl">
-                            <Badge variant="muted" className="w-fit">1단계 준비</Badge>
-                            <h3 className="mt-3 font-display text-[1.6rem] font-semibold leading-[1.12] text-[var(--foreground)] sm:text-[1.9rem]">
-                              위 빠른 검색에서 시작하거나
-                              <br />
-                              직접 입력으로 바로 넘어가세요
-                            </h3>
-                            <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-                              히어로의 빠른 검색은 통화 중 들은 표현 그대로 후보 코드를
-                              좁히는 용도입니다. 업종코드를 이미 알고 있다면 아래 흐름으로
-                              바로 예비판정을 이어갈 수 있습니다.
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
-                            <Button variant="secondary" onClick={handleFinderEntry}>
-                              빠른 검색으로 올라가기
-                            </Button>
-                            <Button onClick={handleContinueManualStep}>
-                              직접 입력으로 계속
-                            </Button>
-                          </div>
+                      <section className="rounded-[18px] border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-4 shadow-[var(--shadow-sm)] sm:px-5">
+                        <div className="text-sm font-semibold text-[var(--foreground)]">
+                          검색을 시작하면 추천 결과가 이 영역에 이어집니다
                         </div>
+                        <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                          위에서 검색을 시작하면 먼저 볼 코드와 비슷한 코드가 여기에 정리되고,
+                          그다음 2단계와 3단계가 순서대로 활성화됩니다.
+                        </p>
                       </section>
                     ) : null}
 
@@ -922,18 +1002,21 @@ function HomeSections({
                     ) : null}
 
                     {safeCurrentStep === 'result' ? (
-                      <ResultPanel
-                        input={input}
-                        result={result}
-                        status={status}
-                        error={error}
-                        onEvaluate={evaluate}
-                        onAdjust={() => setCurrentStep('adjust')}
-                        onOpenGuide={onOpenGuide}
-                        sticky={false}
-                        stepLabel="3단계"
-                        embedded
-                      />
+                <ResultPanel
+                  input={input}
+                  result={result}
+                  status={status}
+                  error={error}
+                  onEvaluate={evaluate}
+                  onAdjust={() => setCurrentStep('adjust')}
+                  onOpenGuide={onOpenGuide}
+                  onCopyShareLink={onCopyShareLink}
+                  onCopyResultSummary={onCopyResultSummary}
+                  onPrintResult={onPrintResult}
+                  sticky={false}
+                  stepLabel="3단계"
+                  embedded
+                />
                     ) : null}
                   </div>
                 </CardContent>
@@ -1461,6 +1544,7 @@ function App() {
     discoverIndustry,
     applyIndustrySuggestion,
     evaluate,
+    loadSharedResult,
     reset,
   } = useEligibilityStore()
 
@@ -1470,18 +1554,57 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
-    function handleHashChange() {
+    function syncFromHash() {
       const nextHashState = getHashState(window.location.hash)
       setView(nextHashState.view)
       setGuideCode(nextHashState.guideCode)
+
+      if (nextHashState.sharedInput) {
+        loadSharedResult(nextHashState.sharedInput)
+      }
+
+      if (nextHashState.view === 'home') {
+        scrollToSection(nextHashState.sectionId)
+      }
     }
 
-    window.addEventListener('hashchange', handleHashChange)
+    syncFromHash()
+    window.addEventListener('hashchange', syncFromHash)
 
     return () => {
-      window.removeEventListener('hashchange', handleHashChange)
+      window.removeEventListener('hashchange', syncFromHash)
     }
-  }, [])
+  }, [loadSharedResult])
+
+  async function handleCopyShareLink() {
+    const shareUrl = `${window.location.origin}${window.location.pathname}${createSharedFinderHash(input)}`
+    await copyTextToClipboard(shareUrl)
+  }
+
+  async function handleCopyResultSummary() {
+    if (!result) {
+      return
+    }
+
+    await copyTextToClipboard(buildEligibilityResultSummary(input, result))
+  }
+
+  function handlePrintResult() {
+    if (!result) {
+      return
+    }
+
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer')
+
+    if (!printWindow) {
+      window.print()
+      return
+    }
+
+    printWindow.document.open()
+    printWindow.document.write(buildEligibilityPrintDocument(input, result))
+    printWindow.document.close()
+  }
 
   function openDirectoryView() {
     setView('directory')
@@ -1784,6 +1907,9 @@ function App() {
               onOpenLibrary={openLibraryView}
               onOpenUpdates={openUpdatesView}
               onOpenGuide={openGuideView}
+              onCopyShareLink={handleCopyShareLink}
+              onCopyResultSummary={handleCopyResultSummary}
+              onPrintResult={handlePrintResult}
             />
           )}
           </Suspense>
