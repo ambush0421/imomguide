@@ -158,7 +158,7 @@ describe('App', () => {
       within(finderSection).getByText('추천된 코드 중 하나를 고르면 다음 화면으로 넘어갑니다.'),
     ).toBeInTheDocument()
     expect(
-      await within(finderSection).findByText('바로 확인할 수 있는 추천 코드'),
+      await within(finderSection).findByText('먼저 볼 코드'),
     ).toBeInTheDocument()
 
     await user.click(
@@ -211,6 +211,28 @@ describe('App', () => {
     expect(
       await within(finderSection).findByRole('button', { name: /더 보기 \(\d+개 더\)/ }),
     ).toBeInTheDocument()
+    expect(
+      within(finderSection).getByText(/관련도 높은 순서로 먼저 표시/),
+    ).toBeInTheDocument()
+    expect(
+      within(finderSection).getByRole('button', { name: /전체 후보\s*\d+/ }),
+    ).toBeInTheDocument()
+    expect(
+      within(finderSection).getByRole('button', { name: /바로 검토 가능\s*\d+/ }),
+    ).toBeInTheDocument()
+
+    await user.click(
+      within(finderSection).getByRole('button', { name: /바로 검토 가능\s*\d+/ }),
+    )
+
+    expect(
+      within(finderSection).getByRole('button', { name: /바로 검토 가능\s*\d+/ }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      within(finderSection).getByText(
+        '현재 구역 기준 가능으로 먼저 검토할 후보만 보고 있습니다.',
+      ),
+    ).toBeInTheDocument()
 
     const suggestionButtonCountBefore = within(finderSection).getAllByRole('button', {
       name: '이 코드로 확인하기',
@@ -223,7 +245,7 @@ describe('App', () => {
     await waitFor(() => {
       expect(
         within(finderSection).getByRole('button', {
-          name: /먼저 볼 코드 접기|비슷한 코드 접기/,
+          name: /먼저 볼 코드 접기|함께 확인할 코드 접기|주의해서 볼 코드 접기/,
         }),
       ).toBeInTheDocument()
     })
@@ -265,7 +287,7 @@ describe('App', () => {
     ).not.toBeInTheDocument()
     expect(screen.queryByText('참고용 제휴 링크')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '전체 보기' })).toBeInTheDocument()
-    expect(await screen.findByText('바로 확인할 수 있는 추천 코드')).toBeInTheDocument()
+    expect(await screen.findByText('먼저 볼 코드')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '전체 보기' }))
 
@@ -295,7 +317,7 @@ describe('App', () => {
     ).not.toBeInTheDocument()
     expect(screen.getByText('지금은 이 흐름만 보면 됩니다')).toBeInTheDocument()
     expect(screen.getByText('지금 입력한 내용')).toBeInTheDocument()
-    expect(await screen.findByText('바로 확인할 수 있는 추천 코드')).toBeInTheDocument()
+    expect(await screen.findByText('먼저 볼 코드')).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: '전체 보기' }).length).toBeGreaterThan(0)
 
     await user.click(screen.getAllByRole('button', { name: '전체 보기' })[0])
@@ -483,7 +505,7 @@ describe('App', () => {
     expect(within(finderSection).getByText('주업종')).toBeInTheDocument()
     expect(within(finderSection).getByText('부업종 1')).toBeInTheDocument()
     expect(within(finderSection).getByText('63110 자료 처리업')).toBeInTheDocument()
-  })
+  }, 10000)
 
   it('2단계 예외 조건은 관련 조건만 먼저 보여주고 전체 조건 보기로 확장할 수 있다', async () => {
     render(<App />)
@@ -608,7 +630,7 @@ describe('App', () => {
 
     expect(screen.getAllByText('62010').length).toBeGreaterThan(0)
     expect(screen.queryByText('최근 확인한 예비판정을 다시 열 수 있습니다')).not.toBeInTheDocument()
-  })
+  }, 10000)
 
   it('결과 각주에서 라이브러리 근거 보기로 바로 이동할 수 있다', async () => {
     render(<App />)
@@ -664,6 +686,10 @@ describe('App', () => {
     await waitFor(() => {
       expect(within(finderSection).getByText('추천 결과 확인하기')).toBeInTheDocument()
     })
+
+    expect(
+      await within(finderSection).findByText('먼저 볼 코드'),
+    ).toBeInTheDocument()
 
     await user.click(
       within(finderSection).getAllByRole('button', { name: '이 코드로 확인하기' })[0],

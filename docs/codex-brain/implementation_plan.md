@@ -3392,3 +3392,91 @@ src/
 - `npm run lint`
 - `npm run test -- --run`
 - `npm run build`
+
+---
+
+## 2026-03-21 추천 결과 그룹핑 계획
+
+### 변경 목표
+
+- 추천 결과가 `exact 3개만 보여주는 화면`처럼 보이지 않게, 현재 구역 판정과 매칭 강도를 함께 써서 `먼저 볼 코드 / 함께 확인할 코드 / 주의해서 볼 코드` 구조로 다시 묶는다.
+- 추천 엔진의 반환 방식은 그대로 유지하고, 프론트에서 그룹별 설명과 `더 보기`를 제공해 `왜 이 순서인지`를 더 쉽게 설명할 수 있게 만든다.
+- 홈/워크스페이스의 보조 카피도 새 그룹 기준으로 맞춰, 검색 후 다음 흐름이 더 자연스럽게 읽히게 한다.
+
+### 구현 메모
+
+1. `src/features/eligibility/components/industry-discovery-panel.tsx`
+   - `suggestion.matchKind`, `score`, `selectedZoneVerdict`를 기준으로 그룹 key를 계산하는 헬퍼를 추가한다.
+   - `먼저 볼 / 함께 확인 / 주의해서 볼` 섹션 메타데이터와 그룹별 설명 문구를 추가한다.
+   - 기존 `exact/related` 섹션을 그룹 기반 렌더링으로 교체하고, `더 보기`는 그룹별로 유지한다.
+   - 추천 상태 카드와 결과 상단 안내 문구도 `3개 먼저 표시` 대신 `관련도 높은 순서로 먼저 표시` 톤으로 바꾼다.
+2. `src/App.tsx`
+   - 위저드 slim overview와 검색 흐름 설명 문구를 새 그룹 구조에 맞게 수정한다.
+3. 테스트
+   - `src/App.test.tsx`에서 추천 결과 제목 기대값을 새 그룹 텍스트로 갱신한다.
+   - 넓은 검색어 흐름에서 `함께 확인할 코드`와 그룹별 접기 버튼이 동작하는지 검증한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 추천 결과 빠른 필터 계획
+
+### 변경 목표
+
+- 그룹핑된 추천 결과 위에 `전체 후보 / 바로 검토 가능 / 주의 후보만` 필터를 추가해, 상담 중에도 현재 구역 기준으로 후보를 빠르게 좁혀볼 수 있게 만든다.
+- 추천 엔진의 반환값은 유지하고, UI에서 현재 `selectedZoneVerdict`를 기준으로 필터링해 화면을 더 실무 친화적으로 만든다.
+- 필터로 후보가 없어지는 경우에도 `전체 후보로 돌아가기` 액션이 있는 empty state를 제공해 흐름이 끊기지 않게 한다.
+
+### 구현 메모
+
+1. `src/features/eligibility/components/industry-discovery-panel.tsx`
+   - 추천 결과 상단에 필터 버튼과 현재 필터 설명 문구를 추가한다.
+   - `all`, `eligible`, `caution` 필터 key와 verdict 기반 매칭 헬퍼를 만든다.
+   - 그룹핑 전 suggestions를 먼저 필터링하고, 그 결과를 기존 `먼저 볼 / 함께 확인 / 주의해서 볼` 그룹 렌더링에 연결한다.
+   - 필터 결과가 비면 `AsyncState` empty variant와 `전체 후보 보기` 액션을 보여준다.
+2. `src/App.test.tsx`
+   - broad query 흐름에서 필터 버튼이 보이고, `바로 검토 가능` 선택 시 활성 상태와 설명 문구가 바뀌는지 검증한다.
+3. 문서
+   - `task.md`, `walkthrough.md`에 이번 루프 결과를 기록한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 로고/파비콘 L 심볼 리프레시 계획
+
+### 변경 목표
+
+- 현재 `V + 돋보기` 인상에 가까운 심볼을 `L + 돋보기` 조합으로 바꿔, 서비스명 첫 글자와 검색 도구 이미지를 더 직접적으로 연결한다.
+- 브라우저 탭의 favicon과 앱 헤더/푸터에서 쓰는 브랜드 자산을 같은 심볼 계열로 통일한다.
+- 요청한 대로 favicon SVG뿐 아니라 재사용 가능한 SVG 일러스트 파일도 함께 생성해, 이후 소개 문서나 배너 작업에 바로 쓸 수 있게 한다.
+
+### 구현 메모
+
+1. `public/favicon.svg`
+   - 64px 이하에서도 식별되는 단순한 `L + 돋보기` 모노그램으로 교체한다.
+   - 기존 블루 톤은 유지하되, 내부 디테일은 줄여 소형 아이콘 가독성을 우선한다.
+2. `public/brand/magok-codefinder-symbol.svg`
+   - 헤더/모바일 푸터에서 쓰는 심볼 자산을 favicon과 같은 방향으로 교체한다.
+3. `public/brand/magok-codefinder-logo-horizontal.svg`
+   - 새 심볼을 포함한 가로형 워드마크로 교체한다.
+4. `public/brand/magok-codefinder-illustration.svg`
+   - 브랜드 소개용으로 쓸 수 있는 큰 SVG 일러스트 파일을 추가한다.
+5. 문서
+   - `task.md`의 2026-03-20 미완료 설계 묶음은 사용자 요청에 따라 `폐기`로 닫는다.
+   - `walkthrough.md`에 자산 교체와 검증 결과를 기록한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`

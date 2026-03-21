@@ -1,13 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="마곡 코드찾기 심볼">
   <defs>
-    <linearGradient id="symbol-bg" x1="24" y1="18" x2="136" y2="142" gradientUnits="userSpaceOnUse">
+    <linearGradient id="symbol-bg" x1="26" y1="18" x2="136" y2="144" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#2F74FF" />
       <stop offset="1" stop-color="#1F5EFF" />
     </linearGradient>
-    <radialGradient id="symbol-glow" cx="0" cy="0" r="1" gradientTransform="translate(44 32) rotate(41.381) scale(76.1323)" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.28" />
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
-    </radialGradient>
   </defs>
 
   <rect width="160" height="160" rx="38" fill="url(#symbol-bg)" />
@@ -19,42 +15,32 @@
     rx="30"
     fill="none"
     stroke="#DCE7FF"
-    stroke-opacity="0.34"
+    stroke-opacity="0.3"
     stroke-width="2"
   />
-  <circle cx="44" cy="34" r="52" fill="url(#symbol-glow)" />
 
-  <circle cx="80" cy="44" r="16" fill="#8CB4FF" fill-opacity="0.26" />
+  <path
+    d="M52 42V114H102"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="18"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <circle cx="106" cy="58" r="16" fill="#8CB4FF" fill-opacity="0.18" />
   <circle
-    cx="80"
-    cy="44"
+    cx="106"
+    cy="58"
     r="13"
     fill="none"
     stroke="#DCE7FF"
-    stroke-width="6"
+    stroke-width="7"
   />
   <path
-    d="M89.5 53.5L102.5 66.5"
+    d="M115 67L128 80"
     stroke="#DCE7FF"
     stroke-width="7"
     stroke-linecap="round"
-  />
-
-  <path
-    d="M47 60L80 114L113 60"
-    fill="none"
-    stroke="#FFFFFF"
-    stroke-width="16"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-  <path
-    d="M58 61L80 97L102 61"
-    fill="none"
-    stroke="#CFE0FF"
-    stroke-opacity="0.85"
-    stroke-width="6"
-    stroke-linecap="round"
-    stroke-linejoin="round"
   />
 </svg>

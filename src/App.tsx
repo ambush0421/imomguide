@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   BookOpenText,
@@ -1054,8 +1054,9 @@ function HomeSections({
                           검색을 시작하면 추천 결과가 이 영역에 이어집니다
                         </div>
                         <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                          위에서 검색을 시작하면 먼저 볼 코드와 비슷한 코드가 여기에 정리되고,
-                          그다음 2단계와 3단계가 순서대로 활성화됩니다.
+                          위에서 검색을 시작하면 먼저 볼 코드와 함께 확인할 후보가 여기에
+                          정리되고, 조건이 걸리는 업종은 따로 표시됩니다. 그다음 2단계와
+                          3단계가 순서대로 활성화됩니다.
                         </p>
                       </section>
                     ) : null}
@@ -1677,7 +1678,7 @@ function App() {
   const [recentHistory, setRecentHistory] = useState<RecentEligibilityHistoryEntry[]>(
     () => loadRecentEligibilityHistory(),
   )
-  const [lastTrackedResultKey, setLastTrackedResultKey] = useState<string | null>(null)
+  const lastTrackedResultKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
     function syncFromHash() {
@@ -1707,7 +1708,7 @@ function App() {
 
   useEffect(() => {
     if (status === 'loading') {
-      setLastTrackedResultKey(null)
+      lastTrackedResultKeyRef.current = null
     }
   }, [status])
 
@@ -1729,11 +1730,11 @@ function App() {
       result.verdict,
     ].join('|')
 
-    if (lastTrackedResultKey === nextKey) {
+    if (lastTrackedResultKeyRef.current === nextKey) {
       return
     }
 
-    setLastTrackedResultKey(nextKey)
+    lastTrackedResultKeyRef.current = nextKey
     trackEvent('eligibility_result_viewed', {
       zone_type: input.zoneType,
       verdict: result.verdict,
@@ -1747,7 +1748,6 @@ function App() {
     input.ksicCode,
     input.ksicName,
     input.zoneType,
-    lastTrackedResultKey,
     multiCodeResults,
     result,
     status,

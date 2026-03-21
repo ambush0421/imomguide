@@ -4502,3 +4502,168 @@ npm run test
 
 - 이제 결과 화면의 각주와 출처 카드에서 법령 라이브러리의 해당 문서·근거로 바로 이동할 수 있다.
 - 상담 중 `왜 이런 판정이 나왔는지` 설명할 때, 결과 카드에서 라이브러리 상세 근거까지 흐름이 끊기지 않게 됐다.
+
+---
+
+## 2026-03-21 퍼널 이벤트 계측
+
+### 작업 배경
+
+- 1~7번 기능이 모두 들어간 뒤에는 `어떤 기능이 실제로 쓰이고 어디에서 이탈하는지`를 보는 단계가 필요했다.
+- 이번 루프의 목표는 특정 벤더에 종속되지 않는 얇은 이벤트 레이어를 만들고, 검색부터 공유/라이브러리 이동까지 핵심 퍼널만 먼저 계측하는 것이었다.
+
+### 반영 내용
+
+- [analytics.ts](C:/projects/magok/src/utils/analytics.ts)
+  - `trackEvent()` 공통 유틸을 추가했다.
+  - `window.dataLayer`와 `window.gtag`를 모두 지원하고, 둘 다 없으면 no-op 되도록 정리했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 검색 제출, 예시 검색, 추천 코드 선택, 직접 입력 시작, 판정 요청, 결과 노출, 공유 링크 복사, 요약 복사, 인쇄, 최근 조회 복원, 법령 라이브러리 이동 이벤트를 추가했다.
+  - 자유 입력 문장은 보내지 않고, 코드·구역·비교 모드·부업종 개수·verdict 같은 구조화된 값만 보내도록 제한했다.
+  - 결과 노출 이벤트는 ref 기반 dedupe로 같은 결과가 중복 기록되지 않게 처리했다.
+- 테스트
+  - [analytics.test.ts](C:/projects/magok/src/utils/analytics.test.ts)에 `dataLayer`/`gtag` 브리지 테스트를 추가했다.
+  - [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 핵심 퍼널 이벤트가 `dataLayer`에 기록되는 통합 테스트를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 11개 테스트 파일
+  - 102개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-DI5_34f6.js`
+  - `dist/assets/index-CjgF2DGt.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - `npm run build`의 prebuild 단계로 `public/` 아래 SEO 산출물이 다시 export됐다.
+
+### 결과 요약
+
+- 이제 검색, 추천 선택, 결과 보기, 공유, 법령 근거 이동까지 핵심 퍼널이 `dataLayer`/`gtag`로 기록될 수 있다.
+- 분석 벤더가 아직 붙어 있지 않아도 코드 수준의 계측 포인트는 준비돼 있어서, 다음에는 실제 대시보드 연결이나 전환 개선 실험으로 바로 넘어갈 수 있다.
+
+---
+
+## 2026-03-21 추천 결과 그룹핑
+
+### 작업 배경
+
+- 추천 결과가 더 보기 기능을 갖고 있어도, 첫인상은 여전히 `exact/related 몇 개`를 나열하는 화면처럼 보였다.
+- 이번 루프의 목표는 추천 엔진을 다시 쓰지 않고도, 현재 구역 판정과 매칭 강도를 묶어서 `왜 이 순서로 봐야 하는지`를 더 쉽게 설명하는 것이었다.
+
+### 반영 내용
+
+- [industry-discovery-panel.tsx](C:/projects/magok/src/features/eligibility/components/industry-discovery-panel.tsx)
+  - 추천 결과를 `먼저 볼 코드`, `함께 확인할 코드`, `주의해서 볼 코드` 세 묶음으로 다시 구성했다.
+  - `selectedZoneVerdict`와 `matchKind`를 기준으로 그룹을 나누고, 각 섹션에 설명 문구와 그룹별 `더 보기` 버튼을 붙였다.
+  - 카드 상단 배지도 `우선 검토`, `함께 비교`, `주의 후보`, `직접 연결`, `유사 후보`처럼 역할이 더 바로 읽히게 정리했다.
+  - 추천 상태 문구도 `3개 먼저 표시` 대신 `관련도 높은 순서로 먼저 표시`로 바꿔, 고정 개수처럼 보이는 인상을 줄였다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 위저드 slim overview와 빠른 검색 흐름 설명을 새 그룹 구조에 맞는 문장으로 조정했다.
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
+  - 추천 결과 화면 기대 텍스트를 새 그룹 구조에 맞게 갱신했다.
+  - broad query에서 `더 보기`와 새 상태 문구가 함께 보이는지 검증하도록 바꿨다.
+  - 긴 플로우를 거치는 복수 업종/최근 조회 테스트는 실제 실행 시간에 맞게 타임아웃을 늘렸다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 11개 테스트 파일
+  - 102개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-BwPthb6B.js`
+  - `dist/assets/index-CjgF2DGt.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - 이번 변경은 추천 엔진이 아니라 화면 구성과 설명 문구 중심이라 데이터 결과 개수에는 영향이 없다.
+
+### 결과 요약
+
+- 이제 추천 결과가 단순한 `exact/related` 나열이 아니라, 상담 중 바로 설명하기 쉬운 `우선 검토 / 함께 비교 / 주의 후보` 흐름으로 읽힌다.
+- 사용자는 추천이 몇 개 남아 있는지뿐 아니라, 어떤 후보를 먼저 보고 어떤 후보는 이유를 읽으며 봐야 하는지까지 화면에서 바로 이해할 수 있다.
+
+---
+
+## 2026-03-21 추천 결과 빠른 필터
+
+### 작업 배경
+
+- 추천 결과를 그룹으로 재정리한 뒤에도, 실무에서는 `가능한 후보만 먼저 보자`거나 `주의 후보만 따로 보자`는 빠른 전환이 자주 필요했다.
+- 이번 루프의 목표는 추천 엔진이나 판정 로직은 그대로 두고, 현재 구역 verdict 기준으로 결과를 즉시 좁혀보는 필터 UX를 얹는 것이었다.
+
+### 반영 내용
+
+- [industry-discovery-panel.tsx](C:/projects/magok/src/features/eligibility/components/industry-discovery-panel.tsx)
+  - 추천 결과 상단에 `전체 후보`, `바로 검토 가능`, `주의 후보만` 필터 버튼을 추가했다.
+  - 각 버튼에는 현재 조건에 맞는 후보 개수를 같이 표시하고, 활성 필터 설명 문구도 함께 보여준다.
+  - 필터는 `selectedZoneVerdict` 기준으로 작동하며, 기존 `먼저 볼 / 함께 확인 / 주의해서 볼` 그룹 구조 위에서 그대로 동작한다.
+  - 선택한 필터에 맞는 후보가 없을 때는 `전체 후보 보기` 액션이 있는 empty state를 보여주도록 정리했다.
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
+  - broad query 결과 화면에서 필터 버튼이 보이고, `바로 검토 가능` 선택 시 활성 상태와 설명 문구가 바뀌는지 검증하도록 갱신했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 11개 테스트 파일
+  - 102개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-D0fg4-_b.js`
+  - `dist/assets/index-Czny_nW7.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - 필터는 화면 레벨에서만 동작하므로 추천 엔진의 반환 개수와 순서는 그대로 유지된다.
+
+### 결과 요약
+
+- 이제 같은 추천 결과 안에서도 `전체 비교`, `가능 후보 우선 검토`, `주의 후보만 분리`를 버튼 한 번으로 바로 전환할 수 있다.
+- 컨설턴트/중개사 기준으로 상담 중 설명 순서를 바꾸거나, 빠르게 리스크 후보만 따로 보여줄 때 훨씬 쓰기 쉬운 화면이 됐다.
+
+---
+
+## 2026-03-21 로고/파비콘 L 심볼 리프레시
+
+### 작업 배경
+
+- 최근 기능 개선 루프는 거의 정리됐고, 오래 남아 있던 2026-03-20 설계 미완료 묶음은 더 이상 현재 우선순위와 맞지 않아 사용자 요청에 따라 폐기 상태로 정리하기로 했다.
+- 동시에 브랜드 자산은 기존 `V형 심볼` 인상이 강했기 때문에, 서비스명 첫 글자와 검색 도구 이미지를 바로 연결하는 `L + 돋보기` 방향으로 심볼을 단순화하는 작업이 필요했다.
+
+### 반영 내용
+
+- [public/favicon.svg](C:/projects/magok/public/favicon.svg)
+  - 브라우저 탭에서 바로 식별되도록 `L + 돋보기` 모노그램으로 교체했다.
+  - 기존 블루 톤은 유지하고 내부 디테일은 줄여 작은 크기에서도 형태가 읽히게 정리했다.
+- [public/brand/magok-codefinder-symbol.svg](C:/projects/magok/public/brand/magok-codefinder-symbol.svg)
+  - 앱 헤더/모바일 푸터에서 쓰는 심볼 자산을 같은 방향으로 교체했다.
+- [public/brand/magok-codefinder-logo-horizontal.svg](C:/projects/magok/public/brand/magok-codefinder-logo-horizontal.svg)
+  - 새 심볼을 포함한 가로형 로고를 갱신했다.
+- [public/brand/magok-codefinder-illustration.svg](C:/projects/magok/public/brand/magok-codefinder-illustration.svg)
+  - 소개용으로 재사용할 수 있는 큰 SVG 일러스트 파일을 새로 추가했다.
+- [task.md](C:/projects/magok/docs/codex-brain/task.md)
+  - 2026-03-20 `홈 섹션 대비 강화 및 쉬운 검색 슬라이드 위저드 설계`의 남은 미완료 항목 5개를 `사용자 요청으로 폐기` 상태로 닫았다.
+- 코드 연결 메모
+  - [App.tsx](C:/projects/magok/src/App.tsx)는 이미 `/brand/magok-codefinder-symbol.svg`, `/brand/magok-codefinder-logo-horizontal.svg` 경로를 쓰고 있었기 때문에 TypeScript 코드는 수정하지 않았다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 11개 테스트 파일
+  - 102개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-D0fg4-_b.js`
+  - `dist/assets/index-Czny_nW7.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - 이번 변경은 공개 자산 교체 중심이라 애플리케이션 로직과 테스트 수에는 영향이 없었다.
+
+### 결과 요약
+
+- 이제 헤더 로고와 브라우저 파비콘이 모두 `L + 돋보기` 심볼로 통일돼, 검색 도구라는 인상이 더 직접적으로 전달된다.
+- 오래 남아 있던 미완료 task도 폐기 처리까지 정리돼서, 현재 PDCA 아티팩트 기준으로 남은 애매한 체크 항목이 없어졌다.
