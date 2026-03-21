@@ -1,8 +1,78 @@
-## 2026-03-20 V 상단 돋보기 로고 리디자인
+## 2026-03-21 전체 브랜드 로고/파비콘 일괄 교체
+
+- [x] 현재 참조 중인 로고/파비콘과 잔여 브랜드 자산 범위 확인
+- [x] `magok-codefinder` 로고/파비콘 세트 최신안 기준 재정렬
+- [x] `loopinlab` 심볼/가로 로고를 같은 시각 언어로 교체
+- [x] `magok-codefinder-illustration.svg` 내 심볼도 최신안으로 교체
+- [x] PNG/ICO 파생 자산 재생성
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 재요청으로 바로 실행 승인 확인
+
+## 2026-03-21 L 하단 가로획 길이 보정
+
+- [x] 하단 가로획이 실제로 짧게 보이는 현재 비율 확인
+- [x] 심볼/워드마크/파비콘의 L 가로획을 세로획 길이감과 맞게 보정
+- [x] `favicon.svg`와 파비콘 세트 재동기화
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 재요청으로 바로 실행 승인 확인
+
+## 2026-03-21 서있는 돋보기 가시성 보강
+
+- [x] 기존 `O` 치환이 실제 화면에서 왜 안 보였는지 노출 위치 재확인
+- [x] 심볼 로고의 원형 포인트를 세워진 돋보기 형태로 교체
+- [x] 가로형 로고의 `CODE` 내 돋보기 `O`를 더 크게 보이도록 보강
+- [x] `favicon.svg`와 파비콘 세트 재동기화
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 재요청으로 바로 실행 승인 확인
+
+## 2026-03-21 워드마크 O 세워진 돋보기 치환
+
+- [x] 영문 워드마크에서 치환할 `O` 위치를 `CODE` 기준으로 확정
+- [x] 가로형 로고의 영문 서브타이틀 `O`를 세워진 돋보기로 교체
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 재요청으로 바로 실행 승인 확인
+
+## 2026-03-21 L 블록형 로고 리파인 + 파비콘 전면 교체
+
+- [x] 첨부 시안 기준 형태와 현재 색상 유지 원칙 확인
+- [x] 실제 파비콘 세트(`svg/png/ico/apple-touch`) 범위 확인
+- [x] 블록형 `L` 심볼 SVG 반영
+- [x] 가로형 워드마크 좌측 심볼 동기화
+- [x] `favicon.svg`와 `public/brand` 파비콘 세트 전체 교체
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 재요청으로 바로 실행 승인 확인
+
+## 2026-03-21 L 상단 돋보기 로고 확인 및 문서 정리
+
+- [x] 현재 심볼/워드마크/파비콘이 이미 `L` 형태인지 확인
+- [x] `V` 기준으로 남아 있던 작업/계획/결과 문구를 `L` 기준으로 정리
+- [x] 헤더/푸터/파비콘 참조 경로 재확인
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 재요청으로 바로 실행 승인 확인
+
+## 2026-03-20 L 상단 돋보기 로고 리디자인
 
 - [x] 현재 심볼/워드마크/파비콘 적용 지점 확인
 - [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
-- [x] `V` 위에 돋보기 실루엣이 얹힌 새 심볼 SVG 시안 반영
+- [x] `L` 위에 돋보기 실루엣이 얹힌 새 심볼 SVG 시안 반영
 - [x] 가로형 워드마크의 좌측 심볼을 새 콘셉트로 교체
 - [x] `public/favicon.svg`를 새 심볼 기준으로 동기화
 - [x] 헤더/푸터 실제 연결 자산 확인

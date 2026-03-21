@@ -1,10 +1,323 @@
 # 입주가능판별기 구현 결과
 
-## 2026-03-20 V 상단 돋보기 로고 리디자인
+## 2026-03-21 전체 브랜드 로고/파비콘 일괄 교체
 
 ### 작업 배경
 
-- 사용자는 현재 로고가 마음에 들지 않으며, `V 위에 돋보기 같은 모양`이 보이는 더 단순한 심볼을 원했다.
+- 사용자는 `로고 파비콘 전부 싹다 바꿔줘`라고 요청했고, 실제 서비스에 쓰이는 자산뿐 아니라 브랜드 폴더에 남아 있던 예전 로고들까지 한 번에 정리할 필요가 있었다.
+- 확인 결과 `magok-codefinder` 세트는 이미 여러 차례 갱신 중이었지만, `loopinlab` 로고와 일러스트 안 심볼은 여전히 이전 무드를 유지하고 있었다.
+
+### 반영 내용
+
+- `magok-codefinder` 세트
+  - `public/brand/magok-codefinder-symbol.svg`
+  - `public/brand/magok-codefinder-logo-horizontal.svg`
+  - `public/favicon.svg`
+  - 최신 블록형 `L + 서있는 돋보기` 기준으로 정렬된 상태를 유지하면서 관련 파비콘 세트와 동기화했다.
+- 파비콘 세트
+  - `public/brand/apple-touch-icon.png`
+  - `public/brand/favicon-16.png`
+  - `public/brand/favicon-32.png`
+  - `public/brand/favicon-48.png`
+  - `public/brand/favicon.ico`
+  - 최신 `public/favicon.svg`를 기준으로 다시 생성해 브라우저와 모바일 홈 화면 아이콘도 같은 방향으로 맞췄다.
+- `loopinlab` 브랜드 자산
+  - `public/brand/loopinlab-symbol.svg`
+  - `public/brand/loopinlab-logo-horizontal.svg`
+  - `public/brand/loopinlab-symbol-512.png`
+  - 기존 다크/골드 무드 대신 현재 프로젝트의 블루 `L + 서있는 돋보기` 언어로 다시 그렸다.
+  - `Loopin Lab` 텍스트는 유지하면서 심볼과 보조 카피 색상만 최신 브랜드 언어에 맞췄다.
+- `magok-codefinder-illustration.svg`
+  - 대표 일러스트 안의 배지 심볼도 최신 블록형 `L + 서있는 돋보기` 구조로 교체했다.
+  - 설명 문구도 현재 심볼 표현과 맞게 갱신했다.
+
+### 구현 파일
+
+- `public/brand/magok-codefinder-symbol.svg`
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+- `public/favicon.svg`
+- `public/brand/apple-touch-icon.png`
+- `public/brand/favicon-16.png`
+- `public/brand/favicon-32.png`
+- `public/brand/favicon-48.png`
+- `public/brand/favicon.ico`
+- `public/brand/loopinlab-symbol.svg`
+- `public/brand/loopinlab-logo-horizontal.svg`
+- `public/brand/loopinlab-symbol-512.png`
+- `public/brand/magok-codefinder-illustration.svg`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 11 passed`
+  - `Tests 102 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size` / `plugin timing` 경고는 기존과 같은 성격으로 유지됐다.
+- 추가 확인
+  - `loopinlab-symbol-512.png` 재생성 완료
+  - `package.json`, `package-lock.json` 변경 없음
+
+### 결과 요약
+
+- 이제 실제 서비스에서 쓰는 로고/파비콘과 브랜드 폴더에 남아 있던 잔여 로고 자산이 모두 같은 시각 언어를 공유한다.
+- `magok-codefinder`, `loopinlab`, 대표 일러스트까지 더 이상 서로 다른 시대의 로고가 섞여 보이지 않게 정리됐다.
+
+## 2026-03-21 L 하단 가로획 길이 보정
+
+### 작업 배경
+
+- 사용자는 블록형 `L`의 아래 가로획이 위쪽 세로획에 비해 짧아 보여 균형이 어색하다고 피드백했다.
+- 실제 SVG 기준으로도 세로획은 `76`, 하단 가로획은 `60`이라 더 짧게 읽히는 비율이었다.
+
+### 반영 내용
+
+- `public/brand/magok-codefinder-symbol.svg`
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+- `public/favicon.svg`
+  - 하단 가로획 폭을 `60`에서 `76`으로 늘려 세로획 길이감과 더 가깝게 맞췄다.
+  - 블록형 `L`의 인상은 유지하면서 아래가 툭 끊겨 보이는 느낌을 줄였다.
+- 파비콘 세트
+  - `public/brand/apple-touch-icon.png`
+  - `public/brand/favicon-16.png`
+  - `public/brand/favicon-32.png`
+  - `public/brand/favicon-48.png`
+  - `public/brand/favicon.ico`
+  - 수정된 `favicon.svg` 기준으로 다시 생성해 탭 아이콘과 모바일 아이콘도 같은 비율로 맞췄다.
+
+### 구현 파일
+
+- `public/brand/magok-codefinder-symbol.svg`
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+- `public/favicon.svg`
+- `public/brand/apple-touch-icon.png`
+- `public/brand/favicon-16.png`
+- `public/brand/favicon-32.png`
+- `public/brand/favicon-48.png`
+- `public/brand/favicon.ico`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 11 passed`
+  - `Tests 102 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size` / `plugin timing` 경고는 기존과 같은 성격으로 유지됐다.
+
+### 결과 요약
+
+- 블록형 `L`의 아래 획이 더 길어져 세로획과 균형이 맞고, 전체 심볼이 훨씬 안정적으로 보인다.
+- 파비콘 세트도 같은 비율로 다시 맞춰 브라우저 탭 아이콘까지 일관성이 유지된다.
+
+## 2026-03-21 서있는 돋보기 가시성 보강
+
+### 작업 배경
+
+- 사용자는 이전에 요청한 `o를 서있는 돋보기로 바꾸기`가 실제 화면에서 보이지 않는다고 피드백을 줬다.
+- 확인해보니 이전 수정은 가로형 워드마크의 `CODE` 안 `O`만 바꿨고, 실제로 더 자주 보이는 심볼 로고는 그대로여서 체감상 변경이 없었다.
+
+### 반영 내용
+
+- `public/brand/magok-codefinder-symbol.svg`
+- `public/favicon.svg`
+  - 우상단의 작은 원형 포인트를 `원형 링 + 짧은 수직 손잡이` 구조의 세워진 돋보기로 교체했다.
+  - 블록형 `L`과 같은 밝은 블루 축을 유지하면서도, 점이 아니라 도구 형태로 읽히게 보강했다.
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+  - `CODE`의 `O`를 더 크게 키우고 수직 손잡이를 길게 조정해, 돋보기라는 의미가 더 직접적으로 보이게 바꿨다.
+  - 바로 뒤 텍스트 시작 위치도 함께 조정해 아이콘이 눌려 보이지 않게 정리했다.
+- 파비콘 세트
+  - `public/brand/apple-touch-icon.png`
+  - `public/brand/favicon-16.png`
+  - `public/brand/favicon-32.png`
+  - `public/brand/favicon-48.png`
+  - `public/brand/favicon.ico`
+  - 새 `favicon.svg` 기준으로 다시 생성해 브라우저 탭과 모바일 아이콘까지 같은 모양으로 맞췄다.
+
+### 구현 파일
+
+- `public/brand/magok-codefinder-symbol.svg`
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+- `public/favicon.svg`
+- `public/brand/apple-touch-icon.png`
+- `public/brand/favicon-16.png`
+- `public/brand/favicon-32.png`
+- `public/brand/favicon-48.png`
+- `public/brand/favicon.ico`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 11 passed`
+  - `Tests 102 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size` / `plugin timing` 경고는 기존과 같은 성격으로 유지됐다.
+
+### 결과 요약
+
+- 이제 심볼 로고에서도 작은 점이 아니라 `세워진 돋보기`가 직접 보인다.
+- 가로형 로고의 `O` 치환도 더 또렷해져, 사용자가 바로 변화를 인지할 수 있는 수준으로 보강됐다.
+
+## 2026-03-21 워드마크 O 세워진 돋보기 치환
+
+### 작업 배경
+
+- 사용자는 로고의 영문 영역에서 `o` 모양을 세워진 돋보기처럼 바꿀 수 있는지 요청했다.
+- `MAGOK CODE FINDER`에는 `O`가 여러 개 있지만, 모두 바꾸면 과해질 수 있어 가운데에 위치한 `CODE`의 `O` 하나만 치환하는 편이 가장 자연스럽다고 판단했다.
+
+### 반영 내용
+
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+  - 영문 서브타이틀을 단일 텍스트 대신 `MAGOK C` / 세워진 돋보기 / `DE FINDER`로 분리 렌더링했다.
+  - 돋보기는 원형 링 아래로 짧은 수직 손잡이가 내려오는 형태로 그려 `서있는` 인상이 보이게 맞췄다.
+  - 블록형 `L` 심볼과 충돌하지 않도록, 색상은 기존 서브타이틀 블루를 그대로 사용했다.
+
+### 구현 파일
+
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 11 passed`
+  - `Tests 102 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size`와 `plugin timing` 경고는 기존과 같은 성격으로 유지됐다.
+
+### 결과 요약
+
+- 영문 워드마크가 단순 텍스트보다 검색 서비스 느낌이 더 직접적으로 드러나는 형태로 바뀌었다.
+- 심볼은 건드리지 않고 워드마크 디테일만 조정해서, 전체 인상은 유지하면서 브랜드 캐릭터만 한 단계 더 살렸다.
+
+## 2026-03-21 L 블록형 로고 리파인 + 파비콘 전면 교체
+
+### 작업 배경
+
+- 사용자는 첨부한 시안처럼 더 단순하고 묵직한 `L` 블록 느낌을 원했고, 색상은 현재 블루 계열을 유지해 달라고 요청했다.
+- 동시에 브라우저 탭과 모바일 홈 화면에 보이는 파비콘 세트도 전부 같은 모양으로 맞춰 달라고 했다.
+
+### 반영 내용
+
+- `public/brand/magok-codefinder-symbol.svg`
+- `public/favicon.svg`
+  - 기존 선형 `L + 돋보기 링` 대신, 면으로 읽히는 블록형 `L`과 작은 원형 포인트 조합으로 재구성했다.
+  - 블루 그라데이션 배경, 연한 외곽선, 밝은 블루 포인트 색은 유지했다.
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+  - 좌측 심볼도 같은 블록형 `L` 구조로 맞췄다.
+- 파비콘 세트
+  - `public/brand/apple-touch-icon.png`
+  - `public/brand/favicon-16.png`
+  - `public/brand/favicon-32.png`
+  - `public/brand/favicon-48.png`
+  - `public/brand/favicon.ico`
+  - `public/favicon.svg` 기준으로 PNG/ICO를 다시 생성해 브라우저와 모바일 아이콘 묶음을 전부 교체했다.
+  - 아이콘 생성에는 `@resvg/resvg-js`, `png-to-ico`를 `--no-save`로 사용했고, `package.json` / `package-lock.json` 변경은 발생하지 않았다.
+
+### 구현 파일
+
+- `public/brand/magok-codefinder-symbol.svg`
+- `public/brand/magok-codefinder-logo-horizontal.svg`
+- `public/favicon.svg`
+- `public/brand/apple-touch-icon.png`
+- `public/brand/favicon-16.png`
+- `public/brand/favicon-32.png`
+- `public/brand/favicon-48.png`
+- `public/brand/favicon.ico`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 11 passed`
+  - `Tests 102 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size`와 `plugin timing` 경고는 기존처럼 유지됐다.
+- 추가 확인
+  - `package.json`, `package-lock.json` diff 없음
+  - PNG/ICO/apple-touch 파일 용량이 새 아이콘 기준으로 갱신됨 확인
+
+### 결과 요약
+
+- 심볼이 첨부 시안에 가까운 블록형 `L` 인상으로 정리되었고, 작은 포인트 점으로 브랜드 표식을 남겼다.
+- 루트 파비콘과 브랜드 파비콘 세트가 모두 새 심볼로 맞춰져 브라우저 탭, 북마크, 모바일 홈 화면 아이콘도 같은 방향으로 정리됐다.
+
+## 2026-03-20 L 상단 돋보기 로고 리디자인
+
+### 작업 배경
+
+- 사용자는 현재 로고가 마음에 들지 않으며, `L 위에 돋보기 같은 모양`이 보이는 더 단순한 심볼을 원했다.
 - 기존 심볼은 문서 아이콘과 우하단 확대경 조합이라 기능 설명은 가능하지만, 브랜드 인상은 다소 일반적이었다.
 - 이번 작업은 화면 레이아웃을 건드리지 않고 브랜드 자산만 교체하면서, 헤더/푸터/파비콘/OG 기본 이미지가 같은 심볼 언어를 공유하도록 맞추는 데 초점을 뒀다.
 
@@ -14,7 +327,7 @@
   - 기존 `문서 + 돋보기` 심볼 대신 `굵은 V + 상단 돋보기 링` 구조로 교체했다.
   - 서비스가 쓰던 블루 라운드 사각형과 밝은 내부 하이라이트는 유지하면서, 중심 형태는 더 단순하고 기억하기 쉬운 방향으로 정리했다.
 - `public/brand/magok-codefinder-logo-horizontal.svg`
-  - 가로형 워드마크의 좌측 심볼을 동일한 `V 위 돋보기` 콘셉트로 다시 그렸다.
+  - 가로형 워드마크의 좌측 심볼을 동일한 `L 위 돋보기` 콘셉트로 다시 그렸다.
   - 텍스트 워드마크는 유지해 기존 서비스명 가독성은 그대로 가져갔다.
 - `public/favicon.svg`
   - 파비콘도 같은 심볼 구조로 동기화해 브라우저 탭 아이콘과 기본 OG 이미지가 새 브랜드와 맞도록 정리했다.
@@ -55,7 +368,7 @@ npm run build
 
 ### 결과 요약
 
-- 브랜드 심볼이 더 이상 `문서 아이콘` 중심으로 읽히지 않고, 사용자가 요청한 `V 위 돋보기` 인상이 먼저 들어오도록 바뀌었다.
+- 브랜드 심볼이 더 이상 `문서 아이콘` 중심으로 읽히지 않고, 사용자가 요청한 `L 위 돋보기` 인상이 먼저 들어오도록 바뀌었다.
 - 파비콘, 헤더 심볼, 푸터 워드마크가 같은 시각 언어를 쓰게 되어 브랜드 일관성도 함께 좋아졌다.
 
 ## 2026-03-20 각진 레이아웃 재정렬 + 빈 공간 2차 보정

@@ -29,28 +29,20 @@
       stroke-width="3"
     />
 
-    <path
-      d="M116 94V264H230"
-      fill="none"
-      stroke="#FFFFFF"
-      stroke-width="32"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-
-    <circle cx="242" cy="130" r="34" fill="#8CB4FF" fill-opacity="0.18" />
+    <rect x="100" y="94" width="44" height="186" rx="6" fill="#FFFFFF" />
+    <rect x="100" y="236" width="186" height="44" rx="6" fill="#FFFFFF" />
     <circle
-      cx="242"
-      cy="130"
-      r="28"
+      cx="244"
+      cy="136"
+      r="20"
       fill="none"
-      stroke="#DCE7FF"
-      stroke-width="12"
+      stroke="#8CB4FF"
+      stroke-width="10"
     />
     <path
-      d="M262 150L290 178"
-      stroke="#DCE7FF"
-      stroke-width="12"
+      d="M244 154V196"
+      stroke="#8CB4FF"
+      stroke-width="10"
       stroke-linecap="round"
     />
   </g>
@@ -86,7 +78,7 @@
       font-size="24"
       font-weight="500"
     >
-      L 심볼과 돋보기로 업종 검색 도구의 인상을 단순하게 담았습니다.
+      블록형 L과 서있는 돋보기로 검색 도구의 인상을 더 또렷하게 담았습니다.
     </text>
 
     <g transform="translate(0 180)">

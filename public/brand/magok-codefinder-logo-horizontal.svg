@@ -20,28 +20,20 @@
       stroke-width="2"
     />
 
-    <path
-      d="M52 42V114H102"
-      fill="none"
-      stroke="#FFFFFF"
-      stroke-width="18"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-
-    <circle cx="106" cy="58" r="16" fill="#8CB4FF" fill-opacity="0.18" />
+    <rect x="50" y="38" width="22" height="76" rx="3" fill="#FFFFFF" />
+    <rect x="50" y="92" width="76" height="22" rx="3" fill="#FFFFFF" />
     <circle
-      cx="106"
-      cy="58"
-      r="13"
+      cx="98"
+      cy="55"
+      r="8"
       fill="none"
-      stroke="#DCE7FF"
-      stroke-width="7"
+      stroke="#8CB4FF"
+      stroke-width="5"
     />
     <path
-      d="M115 67L128 80"
-      stroke="#DCE7FF"
-      stroke-width="7"
+      d="M98 62V79"
+      stroke="#8CB4FF"
+      stroke-width="5"
       stroke-linecap="round"
     />
   </g>
@@ -66,7 +58,34 @@
     font-weight="700"
     letter-spacing="6"
   >
-    MAGOK CODE FINDER
+    MAGOK C
+  </text>
+  <g transform="translate(370 128)">
+    <circle
+      cx="0"
+      cy="0"
+      r="10"
+      fill="none"
+      stroke="#1F5EFF"
+      stroke-width="4.5"
+    />
+    <path
+      d="M0 9V25"
+      stroke="#1F5EFF"
+      stroke-width="4.5"
+      stroke-linecap="round"
+    />
+  </g>
+  <text
+    x="392"
+    y="142"
+    fill="#1F5EFF"
+    font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif"
+    font-size="22"
+    font-weight="700"
+    letter-spacing="6"
+  >
+    DE FINDER
   </text>
   <text
     x="210"

@@ -1,8 +1,235 @@
-## 2026-03-20 V 상단 돋보기 로고 리디자인
+## 2026-03-21 전체 브랜드 로고/파비콘 일괄 교체
 
 ### 목표
 
-- 기존 `문서 + 확대경` 중심 심볼 대신, 더 단순하고 기억하기 쉬운 `V 위 돋보기` 조합으로 브랜드 인상을 다시 만든다.
+- 현재 실제 서비스에서 쓰는 `magok-codefinder` 로고/파비콘 세트뿐 아니라, 브랜드 폴더에 남아 있는 관련 로고 자산까지 같은 시각 언어로 정리한다.
+- `L + 서있는 돋보기` 콘셉트와 블루 계열 무드를 모든 출력물에 통일해 “어떤 파일은 예전 로고, 어떤 파일은 새 로고” 상태를 없앤다.
+
+### 현재 구조 진단
+
+1. 실제 서비스는 [`src/App.tsx`](C:\projects\magok\src\App.tsx), [`index.html`](C:\projects\magok\index.html), [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)를 통해 `magok-codefinder` 로고와 파비콘 세트를 사용한다.
+2. 하지만 [`public/brand`](C:\projects\magok\public\brand)에는 여전히 과거 무드의 [`loopinlab-symbol.svg`](C:\projects\magok\public\brand\loopinlab-symbol.svg), [`loopinlab-logo-horizontal.svg`](C:\projects\magok\public\brand\loopinlab-logo-horizontal.svg), [`loopinlab-symbol-512.png`](C:\projects\magok\public\brand\loopinlab-symbol-512.png)이 남아 있다.
+3. [`public/brand/magok-codefinder-illustration.svg`](C:\projects\magok\public\brand\magok-codefinder-illustration.svg) 역시 아직 예전 `L + 비스듬한 돋보기` 표현을 포함하고 있어, 최신안과 완전히 같지 않다.
+
+### 구현 방향
+
+1. `magok-codefinder`
+   - 현재 최신 심볼 비율과 서있는 돋보기 형태를 유지하되, 관련 SVG/파비콘 세트를 다시 한 번 동기화한다.
+2. `loopinlab`
+   - `loopinlab-symbol.svg`, `loopinlab-logo-horizontal.svg`를 현재 블루 `L + 서있는 돋보기` 언어로 다시 그린다.
+   - 텍스트는 `Loopin Lab` 브랜드명을 유지하되, 심볼 무드는 프로젝트의 최신 브랜드 언어와 맞춘다.
+   - `loopinlab-symbol-512.png`도 SVG 기준으로 다시 생성한다.
+3. 일러스트
+   - `magok-codefinder-illustration.svg` 안의 배지 심볼을 최신 블록형 `L + 서있는 돋보기`로 교체한다.
+4. 검증
+   - `npm run lint`
+   - `npm run test`
+   - `npm run build`
+
+### 예상 영향 범위
+
+- [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+- [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+- [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)
+- [`public/brand/apple-touch-icon.png`](C:\projects\magok\public\brand\apple-touch-icon.png)
+- [`public/brand/favicon-16.png`](C:\projects\magok\public\brand\favicon-16.png)
+- [`public/brand/favicon-32.png`](C:\projects\magok\public\brand\favicon-32.png)
+- [`public/brand/favicon-48.png`](C:\projects\magok\public\brand\favicon-48.png)
+- [`public/brand/favicon.ico`](C:\projects\magok\public\brand\favicon.ico)
+- [`public/brand/loopinlab-symbol.svg`](C:\projects\magok\public\brand\loopinlab-symbol.svg)
+- [`public/brand/loopinlab-logo-horizontal.svg`](C:\projects\magok\public\brand\loopinlab-logo-horizontal.svg)
+- [`public/brand/loopinlab-symbol-512.png`](C:\projects\magok\public\brand\loopinlab-symbol-512.png)
+- [`public/brand/magok-codefinder-illustration.svg`](C:\projects\magok\public\brand\magok-codefinder-illustration.svg)
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+## 2026-03-21 L 하단 가로획 길이 보정
+
+### 목표
+
+- 블록형 `L`의 하단 가로획이 짧아 보이는 인상을 줄이고, 세로획과 더 균형 잡힌 비율로 맞춘다.
+- 심볼, 가로형 로고 좌측 심볼, 루트 파비콘, PNG/ICO 파비콘 세트가 모두 같은 수정 비율을 공유하게 한다.
+
+### 현재 구조 진단
+
+1. 현재 심볼은 세로획이 `height=76`, 하단 가로획이 `width=60`이라 사용자가 보기에는 아래가 짧게 끊긴 느낌이 있다.
+2. 형태가 단순할수록 이런 길이 차이가 더 크게 보이기 때문에, 블록형 `L`에서는 하단 가로획을 더 길게 잡는 편이 안정적으로 읽힌다.
+
+### 구현 방향
+
+1. [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+   - 하단 가로획 길이를 현재보다 늘려 세로획과 더 비슷한 길이감으로 맞춘다.
+2. [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+   - 좌측 심볼에도 같은 비율을 적용한다.
+3. [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)와 `public/brand` 파비콘 세트를 다시 생성한다.
+
+### 예상 영향 범위
+
+- [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+- [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+- [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)
+- [`public/brand/apple-touch-icon.png`](C:\projects\magok\public\brand\apple-touch-icon.png)
+- [`public/brand/favicon-16.png`](C:\projects\magok\public\brand\favicon-16.png)
+- [`public/brand/favicon-32.png`](C:\projects\magok\public\brand\favicon-32.png)
+- [`public/brand/favicon-48.png`](C:\projects\magok\public\brand\favicon-48.png)
+- [`public/brand/favicon.ico`](C:\projects\magok\public\brand\favicon.ico)
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+## 2026-03-21 서있는 돋보기 가시성 보강
+
+### 목표
+
+- 실제 화면에서 가장 먼저 보이는 심볼 로고에도 `서있는 돋보기` 인상이 확실히 드러나도록 수정한다.
+- 이미 반영한 워드마크의 `O` 치환도 더 눈에 띄게 키워, 사용자가 바로 인지할 수 있는 수준으로 보강한다.
+
+### 현재 구조 진단
+
+1. 이전 수정은 [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)의 `CODE` 안 `O`만 바꿨다.
+2. 하지만 실제 앱에서 자주 노출되는 헤더와 모바일 푸터는 [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)를 사용하므로, 사용자가 첨부한 심볼 기준으로는 변화가 거의 없었다.
+3. 따라서 이번에는 심볼의 작은 원형 포인트 자체를 `세워진 돋보기`로 바꾸고, 가로형 워드마크의 돋보기 `O`도 더 크게 키워야 한다.
+
+### 구현 방향
+
+1. [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+   - 우상단의 작은 원형 포인트를 원형 링 + 짧은 수직 손잡이 형태의 `세워진 돋보기`로 교체한다.
+2. [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+   - `CODE`의 `O`로 쓰인 돋보기를 더 크게 그리고, 인접 텍스트 간격을 조정해 돋보기로 읽히는 정도를 높인다.
+3. [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)와 `public/brand` 파비콘 세트를 다시 생성해 실제 브라우저 아이콘까지 같은 방향으로 맞춘다.
+
+### 예상 영향 범위
+
+- [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+- [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+- [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)
+- [`public/brand/apple-touch-icon.png`](C:\projects\magok\public\brand\apple-touch-icon.png)
+- [`public/brand/favicon-16.png`](C:\projects\magok\public\brand\favicon-16.png)
+- [`public/brand/favicon-32.png`](C:\projects\magok\public\brand\favicon-32.png)
+- [`public/brand/favicon-48.png`](C:\projects\magok\public\brand\favicon-48.png)
+- [`public/brand/favicon.ico`](C:\projects\magok\public\brand\favicon.ico)
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+## 2026-03-21 워드마크 O 세워진 돋보기 치환
+
+### 목표
+
+- 영문 워드마크 `MAGOK CODE FINDER` 안의 `O` 하나를 세워진 돋보기 형태로 치환해 검색 서비스 인상을 더 직접적으로 준다.
+- 기존 블록형 `L` 심볼과 블루 색상 체계는 그대로 유지하면서, 워드마크 디테일만 더 브랜드답게 다듬는다.
+
+### 현재 구조 진단
+
+1. 현재 가로형 로고의 영문 서브타이틀은 [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg) 안의 단일 `<text>` 요소로 렌더링되고 있어 특정 문자만 아이콘으로 치환하려면 분리 렌더링이 필요하다.
+2. `MAGOK CODE FINDER`에는 `O`가 여러 개 있지만, 사용자 요청을 과하게 적용하면 로고가 산만해질 수 있으므로 중심부에 있는 `CODE`의 `O` 하나만 치환하는 편이 가장 자연스럽다.
+
+### 구현 방향
+
+1. 영문 서브타이틀 텍스트를 `MAGOK C` / 돋보기 아이콘 / `DE FINDER`로 나눠 렌더링한다.
+2. 돋보기는 `세워진` 인상을 주기 위해 원형 링 아래로 짧은 수직 손잡이를 두고, 기존 서브타이틀과 같은 블루 톤으로 맞춘다.
+3. 변경 후 `npm run lint`, `npm run test`, `npm run build`를 다시 실행한다.
+
+### 예상 영향 범위
+
+- [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+## 2026-03-21 L 블록형 로고 리파인 + 파비콘 전면 교체
+
+### 목표
+
+- 사용자가 첨부한 시안처럼 `채워진 블록형 L`이 먼저 읽히는 심볼로 리파인하되, 현재 블루 계열 색상 체계는 유지한다.
+- 심볼, 가로형 워드마크, 루트 `favicon.svg`, `public/brand` 안의 PNG/ICO/apple-touch 자산까지 한 세트로 다시 맞춘다.
+- 실제 앱과 브라우저 탭, 모바일 홈 화면 아이콘까지 같은 인상으로 보이도록 favicon 묶음을 전면 교체한다.
+
+### 현재 구조 진단
+
+1. 현재 자산은 이미 `L` 중심으로 바뀌어 있지만, 표현 방식이 `얇은 선형 L + 돋보기 링`에 가까워 사용자가 첨부한 `두껍고 단순한 L 블록` 인상과는 차이가 있다.
+2. 브라우저는 [`index.html`](C:\projects\magok\index.html)에서 루트 [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)뿐 아니라 `public/brand/favicon-16.png`, `favicon-32.png`, `favicon.ico`, `apple-touch-icon.png`도 함께 참조한다.
+3. 현재 심볼/워드마크는 [`src/App.tsx`](C:\projects\magok\src\App.tsx)의 `brandAssets`를 통해 [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg), [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)를 사용한다.
+
+### 구현 방향
+
+1. 심볼 형태
+   - 배경의 블루 그라데이션, 라운드 사각형, 옅은 테두리는 유지한다.
+   - 중앙 마크는 stroke 기반이 아니라 fill 기반의 `블록형 L`로 다시 그린다.
+   - 첨부 시안의 포인트를 반영해 `L` 우상단 근처에 작은 원형 포인트를 배치하되, 현재 색상축 안에서 밝은 블루 포인트로 처리한다.
+2. 자산 반영
+   - [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+   - [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+   - [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)
+   - [`public/brand/apple-touch-icon.png`](C:\projects\magok\public\brand\apple-touch-icon.png)
+   - [`public/brand/favicon-16.png`](C:\projects\magok\public\brand\favicon-16.png)
+   - [`public/brand/favicon-32.png`](C:\projects\magok\public\brand\favicon-32.png)
+   - [`public/brand/favicon-48.png`](C:\projects\magok\public\brand\favicon-48.png)
+   - [`public/brand/favicon.ico`](C:\projects\magok\public\brand\favicon.ico)
+3. 검증
+   - `npm run lint`
+   - `npm run test`
+   - `npm run build`
+
+### 예상 영향 범위
+
+- [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+- [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+- [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)
+- [`public/brand/apple-touch-icon.png`](C:\projects\magok\public\brand\apple-touch-icon.png)
+- [`public/brand/favicon-16.png`](C:\projects\magok\public\brand\favicon-16.png)
+- [`public/brand/favicon-32.png`](C:\projects\magok\public\brand\favicon-32.png)
+- [`public/brand/favicon-48.png`](C:\projects\magok\public\brand\favicon-48.png)
+- [`public/brand/favicon.ico`](C:\projects\magok\public\brand\favicon.ico)
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+## 2026-03-21 L 상단 돋보기 로고 확인 및 문서 정리
+
+### 목표
+
+- 사용자의 후속 요청대로 심볼의 중심 글자가 `V`가 아니라 `L` 기준으로 정리되어 있는지 실제 자산 상태를 재확인한다.
+- 이미 `L` 심볼이 적용된 상태라면, 남아 있는 계획/결과 문서의 `V` 표기를 모두 현재 자산과 일치하게 정리한다.
+- 헤더, 푸터, 파비콘, OG 기본 이미지 연결 구조가 그대로 유효한지 다시 확인한 뒤 검증 기록까지 남긴다.
+
+### 현재 구조 진단
+
+1. 현재 워크스페이스의 [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg), [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg), [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)는 모두 이미 `L + 상단 돋보기` 형태로 구현되어 있다.
+2. 반면 [`docs/codex-brain/task.md`](C:\projects\magok\docs\codex-brain\task.md), [`docs/codex-brain/implementation_plan.md`](C:\projects\magok\docs\codex-brain\implementation_plan.md), [`docs/codex-brain/walkthrough.md`](C:\projects\magok\docs\codex-brain\walkthrough.md)에는 이전 표현인 `V 위 돋보기`가 남아 있어 실제 자산 상태와 문서가 어긋난다.
+3. 앱 연결 구조는 [`src/App.tsx`](C:\projects\magok\src\App.tsx), [`index.html`](C:\projects\magok\index.html), [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts) 기준으로 그대로 유지되므로, 이번 작업의 핵심은 자산 재제작보다 기록 정합성 회복이다.
+
+### 구현 방향
+
+1. 문서 정리
+   - `docs/codex-brain` 3종 문서의 최상단에 이번 후속 요청 기록을 추가한다.
+   - 기존 로고 관련 서술 중 현재 자산 상태와 직접 충돌하는 `V` 표현은 `L` 기준으로 정리한다.
+2. 연결 확인
+   - 헤더/푸터 심볼 경로와 파비콘/OG 기본 이미지 참조 경로를 다시 확인해, 실제 서비스 노출 경로가 여전히 일치하는지 검증한다.
+3. 검증
+   - `npm run lint`
+   - `npm run test`
+   - `npm run build`
+
+### 예상 영향 범위
+
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+- 확인 대상:
+  - [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+  - [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)
+  - [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)
+  - [`src/App.tsx`](C:\projects\magok\src\App.tsx)
+  - [`index.html`](C:\projects\magok\index.html)
+  - [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)
+
+## 2026-03-20 L 상단 돋보기 로고 리디자인
+
+### 목표
+
+- 기존 `문서 + 확대경` 중심 심볼 대신, 더 단순하고 기억하기 쉬운 `L 위 돋보기` 조합으로 브랜드 인상을 다시 만든다.
 - 현재 서비스가 쓰는 SVG 자산 구조를 유지하면서 헤더, 푸터, 파비콘에 같은 심볼이 일관되게 보이도록 정리한다.
 - 텍스트 로고는 유지하되, 좌측 심볼만 바꿔도 전체 무드가 더 또렷하게 읽히도록 만든다.
 
@@ -16,8 +243,8 @@
 
 1. 심볼 콘셉트
    - 배경의 강한 블루 정사각 라운드 박스는 유지한다.
-   - 중앙에는 두꺼운 `V` 골격을 두고, 꼭짓점 상단 또는 상부 중앙에 작은 돋보기 링을 얹어 `찾기/탐색` 의미를 남긴다.
-   - 손잡이는 너무 길지 않게 짧게 두어, 모바일 파비콘 크기에서도 `V`가 먼저 읽히게 만든다.
+   - 중앙에는 두꺼운 `L` 골격을 두고, 꼭짓점 상단 또는 상부 중앙에 작은 돋보기 링을 얹어 `찾기/탐색` 의미를 남긴다.
+   - 손잡이는 너무 길지 않게 짧게 두어, 모바일 파비콘 크기에서도 `L`이 먼저 읽히게 만든다.
 2. 자산 갱신
    - [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)를 새 심볼로 교체한다.
    - [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg)의 좌측 심볼도 같은 도형 언어로 다시 그린다.
