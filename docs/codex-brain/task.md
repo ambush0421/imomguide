@@ -1,3 +1,25 @@
+## 2026-03-21 파비콘 루트 fallback 및 캐시 버스트 보강
+
+- [x] 브라우저 탭에서 예전 파비콘이 남는 원인 재확인
+- [x] 루트 favicon fallback 파일 세트 추가
+- [x] `index.html` 파비콘 링크를 루트 경로 + 캐시 버스트 기준으로 정리
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 재요청으로 바로 실행 승인 확인
+
+## 2026-03-21 새 로고 기준 전체 브랜드 자산 최종 정리
+
+- [x] 실제 서비스 참조 자산과 브랜드 폴더 잔여 원본 자산 재점검
+- [x] `loopinlab-logo.ai`를 새 로고 기준 PDF 호환 원본으로 재생성
+- [x] SVG/PNG/ICO/AI 브랜드 자산 정합성 최종 점검
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 재요청으로 바로 실행 승인 확인
+
 ## 2026-03-21 전체 브랜드 로고/파비콘 일괄 교체
 
 - [x] 현재 참조 중인 로고/파비콘과 잔여 브랜드 자산 범위 확인

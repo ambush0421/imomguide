@@ -1,3 +1,77 @@
+## 2026-03-21 파비콘 루트 fallback 및 캐시 버스트 보강
+
+### 목표
+
+- 브라우저 탭에서 예전 파비콘이 계속 보이는 현상을 해결한다.
+- 새 로고 파비콘이 `index.html`의 선언 경로뿐 아니라 브라우저의 루트 fallback 요청과 캐시 갱신 경로까지 안정적으로 커버하도록 만든다.
+
+### 현재 구조 진단
+
+1. 현재 [`index.html`](C:\projects\magok\index.html)은 [`public/favicon.svg`](C:\projects\magok\public\favicon.svg), `public/brand/favicon-32.png`, `public/brand/favicon-16.png`, `public/brand/favicon.ico`, `public/brand/apple-touch-icon.png`를 직접 참조한다.
+2. 하지만 루트 [`public/favicon.ico`](C:\projects\magok\public\favicon.ico), [`public/favicon-32x32.png`](C:\projects\magok\public\favicon-32x32.png), [`public/favicon-16x16.png`](C:\projects\magok\public\favicon-16x16.png), [`public/apple-touch-icon.png`](C:\projects\magok\public\apple-touch-icon.png)이 없어, 일부 브라우저가 자동으로 찾는 fallback 경로를 만족시키지 못한다.
+3. 현재 링크에는 버전 쿼리가 없어, 개발 서버 `localhost:5173`에서 브라우저가 예전 탭 아이콘을 캐시한 채 유지할 가능성이 있다.
+
+### 구현 방향
+
+1. 루트 파비콘 세트 추가
+   - `public/brand`의 최신 파비콘 산출물을 루트 관례 파일명으로 복제한다.
+   - 대상 파일:
+     - `public/favicon.ico`
+     - `public/favicon-32x32.png`
+     - `public/favicon-16x16.png`
+     - `public/apple-touch-icon.png`
+2. `index.html` 링크 정리
+   - 파비콘 링크를 루트 관례 파일명으로 교체한다.
+   - `shortcut icon`을 함께 선언하고, 새 버전 쿼리를 붙여 캐시를 강제로 갱신한다.
+3. 검증
+   - `npm run lint`
+   - `npm run test`
+   - `npm run build`
+
+### 예상 영향 범위
+
+- [`index.html`](C:\projects\magok\index.html)
+- [`public/favicon.ico`](C:\projects\magok\public\favicon.ico)
+- [`public/favicon-32x32.png`](C:\projects\magok\public\favicon-32x32.png)
+- [`public/favicon-16x16.png`](C:\projects\magok\public\favicon-16x16.png)
+- [`public/apple-touch-icon.png`](C:\projects\magok\public\apple-touch-icon.png)
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+## 2026-03-21 새 로고 기준 전체 브랜드 자산 최종 정리
+
+### 목표
+
+- 앞선 수정으로 실사용 로고와 파비콘은 새 로고 기준으로 정렬됐으므로, 이번에는 브랜드 폴더에 남아 있던 원본 `.ai` 자산까지 같은 방향으로 정리해 “잔여 구 로고 파일”을 없앤다.
+- 새 `블록형 L + 서있는 돋보기` 심볼 언어가 SVG, PNG, ICO뿐 아니라 원본 보관 파일에도 일관되게 반영되도록 마무리한다.
+
+### 현재 구조 진단
+
+1. [`src/App.tsx`](C:\projects\magok\src\App.tsx), [`index.html`](C:\projects\magok\index.html), [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)가 참조하는 실사용 자산은 이미 새 로고 기준으로 연결돼 있다.
+2. [`public/brand`](C:\projects\magok\public\brand) 안의 SVG/PNG/ICO도 최근 작업에서 새 로고 기준으로 교체됐지만, [`public/brand/loopinlab-logo.ai`](C:\projects\magok\public\brand\loopinlab-logo.ai)는 이전 다크/골드 무드의 PDF 호환 원본이 그대로 남아 있었다.
+3. 정적 SEO 페이지들은 `https://loopincode.com/favicon.svg`를 OG/Twitter 이미지로 참조하고 있어, 루트 [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)가 최신 상태면 추가 변경 없이도 새 로고가 노출된다.
+
+### 구현 방향
+
+1. [`public/brand/loopinlab-logo.ai`](C:\projects\magok\public\brand\loopinlab-logo.ai)
+   - 기존처럼 PDF 호환 형식을 유지하되, 좌측 심볼과 텍스트 컬러를 현재 `loopinlab-logo-horizontal.svg`와 같은 시각 언어로 다시 생성한다.
+   - 심볼은 블루 배경, 화이트 블록형 `L`, 서있는 돋보기, 옅은 외곽선이 포함된 최신안으로 맞춘다.
+2. 브랜드 자산 정합성 점검
+   - `public/brand`의 SVG, PNG, ICO, AI 자산이 모두 같은 형태 언어를 쓰는지 최종 확인한다.
+   - 정적 페이지와 앱 코드가 새 로고 자산을 참조하는 구조를 다시 확인한다.
+3. 검증
+   - `npm run lint`
+   - `npm run test`
+   - `npm run build`
+
+### 예상 영향 범위
+
+- [`public/brand/loopinlab-logo.ai`](C:\projects\magok\public\brand\loopinlab-logo.ai)
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
 ## 2026-03-21 전체 브랜드 로고/파비콘 일괄 교체
 
 ### 목표

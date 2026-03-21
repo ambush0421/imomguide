@@ -1,5 +1,109 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-21 파비콘 루트 fallback 및 캐시 버스트 보강
+
+### 작업 배경
+
+- 사용자는 `아직까지 이전 파비콘이 사이트 내에 보이는데 왜 수정 안되었지?`라고 제보했고, 실제 스크린샷에서도 로컬 개발 서버 탭에 예전 파비콘이 남아 있었다.
+- 확인 결과 [`index.html`](C:\projects\magok\index.html)은 새 파비콘을 참조하고 있었지만, 루트 [`public/favicon.ico`](C:\projects\magok\public\favicon.ico)와 관례 파일명 PNG가 없어 브라우저 fallback 요청을 완전히 커버하지 못했다.
+- 여기에 파비콘 링크에 버전 쿼리도 없어서, `localhost:5173` 환경에서 브라우저가 예전 탭 아이콘을 캐시한 채 유지할 가능성이 있었다.
+
+### 반영 내용
+
+- [`index.html`](C:\projects\magok\index.html)
+  - 파비콘 링크를 `public/brand` 경로 대신 루트 관례 파일명으로 정리했다.
+  - `shortcut icon`을 추가했고, 모든 파비콘 링크에 `?v=20260321b`를 붙여 캐시를 강제로 갱신하도록 했다.
+- 루트 fallback 파일 추가
+  - [`public/favicon.ico`](C:\projects\magok\public\favicon.ico)
+  - [`public/favicon-32x32.png`](C:\projects\magok\public\favicon-32x32.png)
+  - [`public/favicon-16x16.png`](C:\projects\magok\public\favicon-16x16.png)
+  - [`public/apple-touch-icon.png`](C:\projects\magok\public\apple-touch-icon.png)
+  - 모두 최신 `public/brand` 파비콘 세트를 기준으로 복제해, 브라우저가 루트 fallback 경로를 먼저 찾더라도 새 로고가 나오도록 맞췄다.
+
+### 구현 파일
+
+- `index.html`
+- `public/favicon.ico`
+- `public/favicon-32x32.png`
+- `public/favicon-16x16.png`
+- `public/apple-touch-icon.png`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 11 passed`
+  - `Tests 102 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size` / `plugin timing` 경고는 기존과 같은 성격으로 유지됐다.
+
+### 결과 요약
+
+- 원인은 “새 파일을 안 만든 것”보다는 “브라우저 fallback 경로와 캐시 갱신을 충분히 커버하지 못한 것”에 가까웠다.
+- 이제 루트 파비콘 파일과 버전 쿼리까지 들어가서, 개발 서버와 실제 배포 환경 모두에서 새 탭 아이콘으로 바뀔 가능성이 훨씬 높아졌다.
+
+## 2026-03-21 새 로고 기준 전체 브랜드 자산 최종 정리
+
+### 작업 배경
+
+- 사용자는 `새로고로 맞춰서 전부 싹다 정리`를 요청했고, 이전 응답에서 따로 남겨뒀던 원본 [`public/brand/loopinlab-logo.ai`](C:\projects\magok\public\brand\loopinlab-logo.ai)까지 새 로고 기준으로 맞출 필요가 있었다.
+- 실제 서비스에서 쓰는 심볼, 워드마크, 파비콘 세트는 이미 새 로고 기준으로 정렬된 상태였으므로, 이번 작업의 핵심은 브랜드 폴더에 남아 있던 마지막 원본 자산을 동기화하는 것이었다.
+
+### 반영 내용
+
+- [`public/brand/loopinlab-logo.ai`](C:\projects\magok\public\brand\loopinlab-logo.ai)
+  - 기존처럼 PDF 호환 `.ai` 형식은 유지하면서, 좌측 배지와 텍스트 컬러를 현재 [`public/brand/loopinlab-logo-horizontal.svg`](C:\projects\magok\public\brand\loopinlab-logo-horizontal.svg)와 같은 블루 `L + 서있는 돋보기` 언어로 다시 생성했다.
+  - 구 다크/골드 무드를 제거하고, 화이트 블록형 `L`, 세워진 돋보기, 옅은 외곽선이 들어간 새 심볼로 통일했다.
+- 브랜드 자산 점검
+  - [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg), [`public/brand/magok-codefinder-logo-horizontal.svg`](C:\projects\magok\public\brand\magok-codefinder-logo-horizontal.svg), [`public/favicon.svg`](C:\projects\magok\public\favicon.svg), `public/brand` 파비콘 세트, [`public/brand/loopinlab-symbol.svg`](C:\projects\magok\public\brand\loopinlab-symbol.svg), [`public/brand/loopinlab-logo-horizontal.svg`](C:\projects\magok\public\brand\loopinlab-logo-horizontal.svg), [`public/brand/loopinlab-symbol-512.png`](C:\projects\magok\public\brand\loopinlab-symbol-512.png), [`public/brand/magok-codefinder-illustration.svg`](C:\projects\magok\public\brand\magok-codefinder-illustration.svg)이 모두 같은 시각 언어를 공유하는지 다시 확인했다.
+  - 앱 코드와 정적 SEO 페이지는 여전히 새 [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)를 기준으로 연결돼 있어 추가 코드 수정은 필요하지 않았다.
+
+### 구현 파일
+
+- `public/brand/loopinlab-logo.ai`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 11 passed`
+  - `Tests 102 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size` / `plugin timing` 경고는 기존과 같은 성격으로 유지됐다.
+
+### 결과 요약
+
+- 이제 브랜드 폴더에 남아 있던 원본 `.ai`까지 새 로고 기준으로 맞춰져, 실사용 자산과 보관용 원본 자산 사이의 불일치가 사라졌다.
+- 결과적으로 SVG, PNG, ICO, AI 전부가 같은 `블록형 L + 서있는 돋보기` 브랜드 언어로 정리됐다.
+
 ## 2026-03-21 전체 브랜드 로고/파비콘 일괄 교체
 
 ### 작업 배경
