@@ -149,10 +149,10 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <Badge variant="muted">법령 참고</Badge>
-            <CardTitle className="mt-4 text-2xl">판정 기준은 여기서 다시 확인합니다</CardTitle>
+            <CardTitle className="mt-4 text-2xl">업종별 허용 코드 목록</CardTitle>
             <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--foreground-muted)]">
-              궁금할 때 기준을 직접 찾아볼 수 있는 참고 화면입니다. 전체 코드를 보고
-              싶다면 전용 코드 사전에서 찾는 편이 더 쉽습니다.
+              아래는 업종별 허용 코드 목록입니다. 전체 코드를 넓게 보려면 전용 코드
+              사전을 이용하는 편이 더 쉽습니다.
             </p>
           </div>
           {onOpenDirectory ? (

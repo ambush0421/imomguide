@@ -118,6 +118,28 @@ function getPrimaryZoneType(entry: MagokCodeDirectoryEntry) {
     })[0]
 }
 
+function appendRoParticle(word: string) {
+  const lastChar = word.at(-1)
+
+  if (!lastChar) {
+    return word
+  }
+
+  const codePoint = lastChar.charCodeAt(0)
+
+  if (codePoint < 0xac00 || codePoint > 0xd7a3) {
+    return `${word}으로`
+  }
+
+  const jongseong = (codePoint - 0xac00) % 28
+
+  if (jongseong === 0 || jongseong === 8) {
+    return `${word}로`
+  }
+
+  return `${word}으로`
+}
+
 function buildZoneSummary(
   entry: MagokCodeDirectoryEntry,
   zoneType: DirectoryZoneType,
@@ -140,7 +162,7 @@ function buildGuideSummary(
   primaryZoneSummary: GuideZoneSummary,
   otherZoneSummary: GuideZoneSummary,
 ) {
-  return `${entry.name}(${entry.code})는 ${primaryZoneSummary.zoneLabel} 기준 ${primaryZoneSummary.verdictLabel}로 먼저 검토되며, ${otherZoneSummary.zoneLabel}에서는 ${otherZoneSummary.verdictLabel}로 정리됩니다.`
+  return `${entry.name}(${entry.code})는 ${primaryZoneSummary.zoneLabel} 기준 ${appendRoParticle(primaryZoneSummary.verdictLabel)} 먼저 검토되며, ${otherZoneSummary.zoneLabel}에서는 ${appendRoParticle(otherZoneSummary.verdictLabel)} 정리됩니다.`
 }
 
 function buildGuideHighlights(

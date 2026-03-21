@@ -44,7 +44,7 @@ describe('App', () => {
         /사업자 업태·종목이나 하는 일을 적으면 마곡에서 먼저 볼 업종코드를 추천하고,/,
       ),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '입주 예비판정 안내' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '예비판정 안내' })).toBeInTheDocument()
     expect(screen.getByText('업종코드를 몰라도 검색')).toBeInTheDocument()
     expect(screen.getByText('마곡 기준 자동 추천')).toBeInTheDocument()
     expect(screen.getByText('가능·조건부·심의 필요 바로 확인')).toBeInTheDocument()
@@ -67,6 +67,7 @@ describe('App', () => {
         '사업자등록증 업태·종목, 실무 메모, 통화 중에 들은 표현 그대로 적으셔도 됩니다.',
       ),
     ).toBeInTheDocument()
+    expect(screen.getAllByText("입력 후 '추천 코드 찾기' 버튼이 활성화됩니다.").length).toBeGreaterThan(0)
     expect(screen.getByText('실무에서는 보통 이렇게 봅니다')).toBeInTheDocument()
     expect(screen.getByText('하는 일을 한 줄로 적습니다.')).toBeInTheDocument()
     expect(screen.getByText('입주 판정을 설명할 수 있게 도와주는 도구들')).toBeInTheDocument()
@@ -262,14 +263,14 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
-  it('상단 메뉴의 입주 예비판정 안내를 누르면 practical-guide 섹션으로 이동한다', async () => {
+  it('상단 메뉴의 예비판정 안내를 누르면 practical-guide 섹션으로 이동한다', async () => {
     render(<App />)
     const user = userEvent.setup()
     const scrollIntoViewMock = vi.mocked(Element.prototype.scrollIntoView)
 
     scrollIntoViewMock.mockClear()
 
-    await user.click(screen.getByRole('button', { name: '입주 예비판정 안내' }))
+    await user.click(screen.getByRole('button', { name: '예비판정 안내' }))
 
     await waitFor(() => {
       expect(scrollIntoViewMock).toHaveBeenCalled()
@@ -281,7 +282,7 @@ describe('App', () => {
     render(<App />)
     const user = userEvent.setup()
 
-    await user.click(screen.getByRole('button', { name: '법령 라이브러리' }))
+    await user.click(screen.getByRole('button', { name: '법령 참고' }))
 
     expect(
       await screen.findByRole('heading', {

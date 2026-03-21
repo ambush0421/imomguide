@@ -237,16 +237,21 @@ export function IndustryDiscoveryPanel({
                 </div>
 
                 <Textarea
-                  className="mt-5 min-h-28 bg-[var(--surface-strong)] text-base leading-7 shadow-[var(--shadow-sm)] sm:min-h-36 sm:text-[15px] sm:leading-7"
+                  className="mt-5 min-h-24 bg-[var(--surface-strong)] text-base leading-7 shadow-[var(--shadow-sm)] sm:min-h-28 sm:text-[15px] sm:leading-7"
                   value={query}
                   placeholder="예: 소프트웨어 개발 도급, 온라인 교육 플랫폼 운영, 프랜차이즈 카페 본사"
                   onChange={(event) => onQueryChange(event.target.value)}
                 />
 
-                <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                  사업자등록증 업태·종목, 실무 메모, 통화 중에 들은 표현 그대로 적으셔도
-                  됩니다.
-                </p>
+                <div className="mt-3 space-y-1">
+                  <p className="text-sm leading-6 text-[var(--foreground-muted)]">
+                    사업자등록증 업태·종목, 실무 메모, 통화 중에 들은 표현 그대로 적으셔도
+                    됩니다.
+                  </p>
+                  <p className="text-xs leading-5 text-[var(--foreground-subtle)]">
+                    입력 후 '추천 코드 찾기' 버튼이 활성화됩니다.
+                  </p>
+                </div>
 
                 <div className="mt-3 space-y-2 sm:hidden">
                   <div className="grid grid-cols-2 gap-2">
@@ -288,8 +293,8 @@ export function IndustryDiscoveryPanel({
                   ))}
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 sm:auto-rows-fr">
+                  <div className="flex h-full flex-col gap-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
                     <Button
                       disabled={isLoading || !query.trim()}
                       loading={isLoading}
@@ -299,11 +304,11 @@ export function IndustryDiscoveryPanel({
                       {!isLoading ? <SearchCheck className="size-4" /> : null}
                       {isLoading ? '추천 코드 찾는 중...' : '추천 코드 찾기'}
                     </Button>
-                    <p className="text-sm leading-6 text-[var(--foreground-muted)]">
-                      자연어 설명으로 마곡 기준 후보 코드를 먼저 봅니다.
+                    <p className="min-h-12 text-sm leading-6 text-[var(--foreground-muted)]">
+                      설명을 적으면 마곡 기준 후보 코드를 먼저 보여드립니다.
                     </p>
                   </div>
-                  <div className="space-y-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                  <div className="flex h-full flex-col gap-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
                     <Button
                       variant="secondary"
                       aria-label="직접 입력으로 계속"
@@ -312,8 +317,8 @@ export function IndustryDiscoveryPanel({
                     >
                       직접 입력으로 계속
                     </Button>
-                    <p className="text-sm leading-6 text-[var(--foreground-muted)]">
-                      업종코드를 이미 알고 있을 때 바로 예비판정으로 넘어갑니다.
+                    <p className="min-h-12 text-sm leading-6 text-[var(--foreground-muted)]">
+                      코드를 알고 있으면 예비판정 화면으로 바로 넘어갑니다.
                     </p>
                   </div>
                 </div>
