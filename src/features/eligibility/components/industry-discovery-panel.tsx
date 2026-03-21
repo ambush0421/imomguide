@@ -204,10 +204,10 @@ export function IndustryDiscoveryPanel({
           <Badge variant="muted" className="w-fit">
             1단계
           </Badge>
-          <CardTitle className="pt-1">업종코드 추천받기</CardTitle>
+          <CardTitle className="pt-1">컨설턴트·중개사를 위한 빠른 검색 홈</CardTitle>
           <CardDescription className="max-w-3xl">
-            업종코드를 몰라도 됩니다. 사업 설명이나 사업자등록증의 `업태 / 종목`을 넣으면,
-            먼저 가장 가까운 코드를 추천해 드리고 바로 다음 화면으로 이어집니다.
+            업종코드는 몰라도 됩니다. 고객이 말한 업태·종목이나 업무 내용을 그대로 적고,
+            추천 코드와 예비판정을 한 번에 확인해 보세요.
           </CardDescription>
         </CardHeader>
 
@@ -221,15 +221,16 @@ export function IndustryDiscoveryPanel({
                   </div>
                   <div>
                     <h3 className="font-display text-xl font-semibold leading-[1.2] text-[var(--foreground)] sm:text-[1.45rem]">
-                      어떤 일을 하시나요?
+                      고객이 어떤 업태·종목으로 설명했나요?
                     </h3>
                     <p className="mt-2 max-w-[36rem] text-sm leading-6 text-[var(--foreground-muted)] sm:text-[15px] sm:leading-7">
                       <span className="sm:hidden">
-                        어떤 일을 하는지 적고 추천 코드를 바로 확인해 보세요.
+                        고객이 말한 표현 그대로 적고 추천 코드를 바로 확인해 보세요.
                       </span>
                       <span className="hidden sm:inline">
-                        업종코드를 몰라도 됩니다. 어떤 일을 하는지 쉬운 말로 적어 주세요.
-                        버튼을 누르면 추천 결과 화면으로 넘어가 바로 확인할 수 있습니다.
+                        업종코드는 몰라도 됩니다. 고객이 말한 업태·종목이나 업무 내용을
+                        그대로 적어 주세요. 버튼을 누르면 추천 결과 화면으로 넘어가 바로
+                        확인할 수 있습니다.
                       </span>
                     </p>
                   </div>
@@ -238,11 +239,14 @@ export function IndustryDiscoveryPanel({
                 <Textarea
                   className="mt-5 min-h-28 bg-[var(--surface-strong)] text-base leading-7 shadow-[var(--shadow-sm)] sm:min-h-36 sm:text-[15px] sm:leading-7"
                   value={query}
-                  placeholder={
-                    '예: 광고대행업을 해요\n예: 업태: 서비스 / 종목: 광고대행업\n예: 모바일 앱 개발과 SaaS 운영을 합니다'
-                  }
+                  placeholder="예: 소프트웨어 개발 도급, 온라인 교육 플랫폼 운영, 프랜차이즈 카페 본사"
                   onChange={(event) => onQueryChange(event.target.value)}
                 />
+
+                <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
+                  사업자등록증 업태·종목, 실무 메모, 통화 중에 들은 표현 그대로 적으셔도
+                  됩니다.
+                </p>
 
                 <div className="mt-3 space-y-2 sm:hidden">
                   <div className="grid grid-cols-2 gap-2">
@@ -284,42 +288,50 @@ export function IndustryDiscoveryPanel({
                   ))}
                 </div>
 
-                <div className="mt-5 grid gap-1.5 sm:flex sm:flex-wrap sm:items-center">
-                  <Button
-                    disabled={isLoading || !query.trim()}
-                    loading={isLoading}
-                    className="w-full justify-center whitespace-nowrap sm:w-auto"
-                    onClick={onSubmitSearch}
-                  >
-                    {!isLoading ? <SearchCheck className="size-4" /> : null}
-                    {isLoading ? '추천 코드 찾는 중...' : '추천 코드 찾기'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label="직접 입력으로 계속"
-                    className="w-full justify-center text-[var(--foreground-muted)] sm:w-auto"
-                    onClick={onContinueManual}
-                  >
-                    <span className="sm:hidden">직접 입력</span>
-                    <span className="hidden sm:inline">직접 입력으로 계속</span>
-                  </Button>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                    <Button
+                      disabled={isLoading || !query.trim()}
+                      loading={isLoading}
+                      className="w-full justify-center whitespace-nowrap"
+                      onClick={onSubmitSearch}
+                    >
+                      {!isLoading ? <SearchCheck className="size-4" /> : null}
+                      {isLoading ? '추천 코드 찾는 중...' : '추천 코드 찾기'}
+                    </Button>
+                    <p className="text-sm leading-6 text-[var(--foreground-muted)]">
+                      자연어 설명으로 마곡 기준 후보 코드를 먼저 봅니다.
+                    </p>
+                  </div>
+                  <div className="space-y-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                    <Button
+                      variant="secondary"
+                      aria-label="직접 입력으로 계속"
+                      className="w-full justify-center whitespace-nowrap"
+                      onClick={onContinueManual}
+                    >
+                      직접 입력으로 계속
+                    </Button>
+                    <p className="text-sm leading-6 text-[var(--foreground-muted)]">
+                      업종코드를 이미 알고 있을 때 바로 예비판정으로 넘어갑니다.
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <div className="hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-sm)] xl:block">
                 <div className="text-xs font-semibold tracking-[0.08em] text-[var(--foreground-subtle)]">
-                  이렇게 넘어갑니다
+                  상담 흐름은 이렇게 이어집니다
                 </div>
                 <div className="mt-3 space-y-3">
                   <div className="rounded-2xl bg-[var(--surface-soft)] px-4 py-3.5 text-sm leading-6 text-[var(--foreground-muted)]">
-                    1. 어떤 일을 하는지 적고 `추천 코드 찾기`를 누릅니다.
+                    1. 고객이 말한 업태·종목이나 업무 내용을 적고 '추천 코드 찾기'를 누릅니다.
                   </div>
                   <div className="rounded-2xl bg-[var(--surface-soft)] px-4 py-3.5 text-sm leading-6 text-[var(--foreground-muted)]">
-                    2. 다음 화면에서 `먼저 볼 코드`와 `비슷한 코드`를 비교합니다.
+                    2. 다음 화면에서 '먼저 볼 코드'와 '비슷한 코드'를 비교합니다.
                   </div>
                   <div className="rounded-2xl bg-[var(--surface-soft)] px-4 py-3.5 text-sm leading-6 text-[var(--foreground-muted)]">
-                    3. 원하는 코드를 누르면 2단계 조건 보정 화면으로 넘어갑니다.
+                    3. 원하는 코드를 누르면 조건 보정과 예비판정 화면으로 이어집니다.
                   </div>
                 </div>
               </div>

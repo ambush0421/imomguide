@@ -8,6 +8,7 @@ import {
   FileSearch,
   LibraryBig,
   Menu,
+  SearchCheck,
   X,
 } from 'lucide-react'
 
@@ -15,6 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
+import { Textarea } from '@/components/ui/textarea'
 
 const CodeDirectoryPage = lazy(() =>
   import('@/features/eligibility/components/code-directory-page').then((m) => ({
@@ -46,7 +48,6 @@ import {
 } from '@/features/guides/data/guide-catalog'
 import { getRecentUpdateLogEntries } from '@/features/updates/data/update-log'
 import {
-  MAGOK_CODE_DIRECTORY_TOTAL_COUNT,
   getZoneVerdictCounts,
 } from '@/features/eligibility/data/magok-code-directory'
 import type {
@@ -67,23 +68,23 @@ const introSteps = [
   {
     step: '1',
     title: '하는 일을 한 줄로 적습니다.',
-    summary: '먼저 내 일과 가장 가까운 코드를 찾습니다.',
+    summary: '고객이 하는 일을 한 줄로 적어, 내 일과 가장 가까운 코드를 찾습니다.',
     description:
-      '업태·종목, 실무 메모, 평소 쓰는 말 모두 괜찮습니다.',
+      '업태·종목, 실무 메모, 고객이 통화 중에 말한 표현 그대로 적어도 됩니다.',
   },
   {
     step: '2',
     title: '가까운 업종코드를 추천받습니다.',
-    summary: '정확한 코드가 없더라도 먼저 볼 후보를 좁혀 드립니다.',
+    summary: '정확한 코드가 없어도 먼저 볼 후보를 좁힙니다.',
     description:
-      '정확한 코드가 있으면 바로 보고, 애매하면 비슷한 코드까지 함께 비교합니다.',
+      '정확한 코드가 없어도 비슷한 코드들까지 한 번에 비교할 수 있습니다.',
   },
   {
     step: '3',
     title: '마곡 입주 가능성을 근거와 함께 확인합니다.',
-    summary: '가능, 조건부 가능, 심의 필요 순서로 읽으면 빠릅니다.',
+    summary: '가능·조건부·심의 결과와 이유, 조건, 확인 포인트를 한 화면에서 봅니다.',
     description:
-      '판정 이유, 조건, 더 확인할 점까지 한 화면에서 이어서 확인할 수 있습니다.',
+      '가능 / 조건부 가능 / 심의 필요 / 추가 확인 / 불가 순서로 읽으면 가장 빠릅니다.',
   },
 ]
 
@@ -123,32 +124,19 @@ const wizardSteps: Array<{
 const heroBenefitCards = [
   {
     title: '업종코드를 몰라도 검색',
-    description: '평소 쓰는 말이나 업태·종목 그대로 적으면 됩니다.',
+    description: '고객이 말한 그대로 적으면 됩니다.',
     tone: 'hero',
   },
   {
     title: '마곡 기준 자동 추천',
-    description: '마곡에서 먼저 볼 업종코드를 후보부터 바로 좁혀 드립니다.',
+    description: '먼저 볼 후보 코드를 좁혀 드립니다.',
     tone: 'support',
   },
   {
     title: '가능·조건부·심의 필요 바로 확인',
-    description: '억지로 단정하지 않고, 이유와 추가 확인 포인트까지 함께 보여드립니다.',
+    description: '판정 이유와 추가 확인 포인트까지 같이 보여드립니다.',
     tone: 'support',
   },
-] as const
-
-const serviceCapabilityPoints = [
-  '마곡 지식산업센터 사전 검토',
-  '일반산업단지 입주 가능성 예비 판정',
-  '판정 근거 정리용 리포트',
-] as const
-
-const evidenceTraceBadges = [
-  '시행령',
-  '마곡 고시문',
-  '조문 / 페이지 힌트',
-  '결과 패널 각주',
 ] as const
 
 const coupangDisclosureText =
@@ -362,6 +350,10 @@ function HomeSections({
   const isCompactWizardFocused = isWizardFocused && !isDesktopViewport
   const isDesktopWizardFocused = isWizardFocused && isDesktopViewport
   const showOverviewSections = !isWizardFocused
+  const showSlimDiscoverOverview =
+    showOverviewSections &&
+    safeCurrentStep === 'discover' &&
+    activeDiscoverScreen === 'compose'
   const focusContextCards = [
     {
       label: '입력한 설명',
@@ -387,19 +379,19 @@ function HomeSections({
     {
       title: '지식산업센터',
       count: `${formatNumber(getReviewableCount(knowledgeCounts))}개`,
-      note: '먼저 살펴볼 만한 코드를 빠르게 둘러볼 수 있습니다.',
+      note: '지식산업센터 상담 전에 먼저 살펴볼 만한 코드를 빠르게 둘러볼 수 있습니다.',
       tone: 'strong',
     },
     {
       title: '산업시설구역',
       count: `${formatNumber(getReviewableCount(industrialCounts))}개`,
-      note: '산업시설구역에서 볼 수 있는 코드를 한 번에 찾기 좋습니다.',
+      note: '산업시설구역 입주 가능성을 볼 때, 허용 코드를 한 번에 찾기 좋습니다.',
       tone: 'soft',
     },
     {
       title: '쉽게 검색',
       count: '자유 문장 가능',
-      note: '하고 싶은 일을 적으면 가까운 코드를 먼저 추천합니다.',
+      note: '고객 업태·종목을 적으면 가까운 코드를 먼저 추천합니다.',
       tone: 'soft',
     },
   ] as const
@@ -518,8 +510,16 @@ function HomeSections({
   }
 
   function handleFinderEntry() {
-    enterWizardFocus()
-    scrollToSection('finder')
+    setCurrentStep('discover')
+    setDiscoverScreen('compose')
+    scrollToSection('hero-search')
+    window.requestAnimationFrame(() => {
+      const textarea = document.getElementById('hero-discovery-query')
+
+      if (textarea instanceof HTMLTextAreaElement) {
+        textarea.focus()
+      }
+    })
   }
 
   function handleExitWizardFocus() {
@@ -531,187 +531,154 @@ function HomeSections({
     <>
       {showOverviewSections ? (
         <>
-          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)] xl:items-stretch">
-            <div className="relative h-full overflow-hidden rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] shadow-[var(--shadow-xl)] sm:rounded-[24px]">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top_left,rgba(31,94,255,0.15),transparent_72%)]" />
-              <div className="relative flex h-full flex-col px-5 py-5 sm:px-7 sm:py-6 lg:px-8 lg:py-7">
-                <div>
+          <section className="space-y-4">
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.03fr)_minmax(0,0.97fr)] xl:items-stretch">
+              <div className="relative overflow-hidden rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] shadow-[var(--shadow-xl)] sm:rounded-[24px]">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top_left,rgba(31,94,255,0.15),transparent_72%)]" />
+                <div className="relative flex h-full flex-col px-5 py-5 sm:px-7 sm:py-6 lg:px-8 lg:py-7">
                   <Badge variant="muted" className="w-fit">마곡 일반산업단지 전용</Badge>
                   <div className="mt-3 hidden flex-wrap gap-2 sm:flex">
                     <div className="rounded-[12px] border border-[var(--border-accent)] bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
-                      업종코드 추천부터 예비판정까지
+                      상담 준비용 빠른 검색
                     </div>
                     <div className="rounded-[12px] border border-[var(--border-soft)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-medium text-[var(--foreground-subtle)]">
-                      판정 근거 바로 추적
+                      판정 근거 바로 설명
                     </div>
                   </div>
-                  <h1 className="mt-4 max-w-[18ch] font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-0.045em] text-[var(--foreground)] sm:max-w-[16ch] sm:text-[2.9rem] lg:text-[3.5rem]">
-                    마곡 입주,
-                    <br className="hidden sm:block" />
-                    {' '}업종코드부터 예비판정까지 한 번에
+                  <h1 className="mt-4 max-w-[16ch] font-display text-[2.05rem] font-semibold leading-[1.08] tracking-[-0.045em] text-[var(--foreground)] sm:text-[2.9rem] lg:text-[3.45rem]">
+                    마곡 입주 상담,
+                    <br />
+                    업종코드부터 예비판정까지 한 번에
                   </h1>
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-[15px] sm:leading-7">
-                    업태·종목이나 하는 일을 적으면 마곡에서 먼저 볼 업종코드를 추천하고,
-                    가능·조건부·심의 필요까지 근거와 함께 보여드립니다.
+                    사업자 업태·종목이나 하는 일을 적으면 마곡에서 먼저 볼 업종코드를
+                    추천하고, 가능·조건부·심의 필요를 판정 근거와 함께 보여드립니다.
+                    상담 준비와 설명에 바로 쓸 수 있습니다.
                   </p>
 
-                  <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-3">
-                    <Button
-                      size="lg"
-                      onClick={handleFinderEntry}
-                      className="w-full justify-center whitespace-nowrap sm:w-auto"
-                    >
-                      업종코드 추천받기
-                      <ArrowRight className="size-4" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      onClick={onOpenDirectory}
-                      className="w-full justify-center whitespace-nowrap border border-[var(--border-accent-strong)] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)] hover:bg-[rgba(31,94,255,0.12)] hover:text-[var(--accent-strong)] sm:w-auto"
-                    >
-                      전체 코드 사전 보기
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-3 sm:auto-rows-fr">
-                  {heroBenefitCards.map((item, index) => (
-                    <div
-                      key={item.title}
-                      className={`flex h-full flex-col rounded-[14px] border px-4 py-4 ${
-                        item.tone === 'hero'
-                          ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
-                          : 'border-[var(--border-soft)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
-                      }`}
-                    >
-                      <div className="inline-flex size-8 items-center justify-center rounded-[12px] bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
-                        {index + 1}
-                      </div>
-                      <div className="mt-3 text-sm font-semibold leading-5 text-[var(--foreground)]">
-                        {item.title}
-                      </div>
-                      <div className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                        {item.description}
-                      </div>
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)]">
+                      <Button
+                        size="lg"
+                        onClick={handleFinderEntry}
+                        className="w-full justify-center whitespace-nowrap"
+                      >
+                        업종코드 추천받기
+                        <ArrowRight className="size-4" />
+                      </Button>
+                      <p className="text-sm leading-6 text-[var(--foreground-muted)]">
+                        고객 업태·종목만으로 후보 코드를 먼저 좁힙니다.
+                      </p>
                     </div>
-                  ))}
+
+                    <div className="space-y-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)]">
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        onClick={onOpenDirectory}
+                        className="w-full justify-center whitespace-nowrap"
+                      >
+                        전체 코드 사전 보기
+                      </Button>
+                      <p className="text-sm leading-6 text-[var(--foreground-muted)]">
+                        상담 전에 전체 허용 코드를 훑어볼 때 씁니다.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              <Card
+                id="hero-search"
+                className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-xl)]"
+              >
+                <CardContent className="space-y-5 p-5 sm:p-6">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 inline-flex size-10 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+                      <SearchCheck className="size-5" />
+                    </div>
+                    <div>
+                      <Badge variant="muted" className="w-fit">빠른 검색</Badge>
+                      <h2 className="mt-3 font-display text-[1.75rem] font-semibold leading-[1.1] text-[var(--foreground)] sm:text-[2.05rem]">
+                        컨설턴트·중개사를 위한
+                        <br />
+                        빠른 검색 홈
+                      </h2>
+                      <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                        업종코드는 몰라도 됩니다. 고객이 말한 업태·종목이나 업무 내용을
+                        그대로 적고, 추천 코드와 예비판정을 한 번에 확인해 보세요.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Textarea
+                      id="hero-discovery-query"
+                      className="min-h-32 bg-[var(--surface-strong)] text-base leading-7 shadow-[var(--shadow-sm)]"
+                      value={industryQuery}
+                      placeholder="예: 소프트웨어 개발 도급, 온라인 교육 플랫폼 운영, 프랜차이즈 카페 본사"
+                      onChange={(event) => setIndustryQuery(event.target.value)}
+                    />
+                    <p className="text-sm leading-6 text-[var(--foreground-muted)]">
+                      사업자등록증 업태·종목, 실무 메모, 통화 중에 들은 표현 그대로
+                      적으셔도 됩니다.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                      <Button
+                        disabled={discoveryStatus === 'loading' || !industryQuery.trim()}
+                        loading={discoveryStatus === 'loading'}
+                        className="w-full justify-center whitespace-nowrap"
+                        onClick={handleDiscoverSearch}
+                      >
+                        {discoveryStatus !== 'loading' ? <SearchCheck className="size-4" /> : null}
+                        {discoveryStatus === 'loading' ? '추천 코드 찾는 중...' : '추천 코드 찾기'}
+                      </Button>
+                      <p className="text-sm leading-6 text-[var(--foreground-muted)]">
+                        자연어 설명으로 마곡 기준 후보 코드를 먼저 봅니다.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2.5 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                      <Button
+                        variant="secondary"
+                        className="w-full justify-center whitespace-nowrap"
+                        onClick={handleContinueManualStep}
+                      >
+                        직접 입력으로 계속
+                      </Button>
+                      <p className="text-sm leading-6 text-[var(--foreground-muted)]">
+                        업종코드를 이미 알고 있을 때 바로 예비판정으로 넘어갑니다.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            <div className="hidden gap-4 xl:grid xl:h-full xl:grid-rows-[auto_minmax(0,1fr)]">
-              <Card className="h-full border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
-                <CardContent className="space-y-4 p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
-                        서비스 가치
-                      </div>
-                      <h2 className="mt-2 font-display text-[1.7rem] font-semibold leading-[1.08] text-[var(--foreground)]">
-                        이 서비스로
-                        <br />
-                        할 수 있는 일
-                      </h2>
-                    </div>
-                    <div className="inline-flex size-10 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
-                      <FileSearch className="size-5" />
-                    </div>
+            <div className="grid gap-3 sm:grid-cols-3 sm:auto-rows-fr">
+              {heroBenefitCards.map((item, index) => (
+                <div
+                  key={item.title}
+                  className={`flex h-full flex-col rounded-[14px] border px-4 py-4 ${
+                    item.tone === 'hero'
+                      ? 'border-[var(--border-accent-strong)] bg-[var(--surface-muted)] shadow-[var(--shadow-sm)]'
+                      : 'border-[var(--border-soft)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]'
+                  }`}
+                >
+                  <div className="inline-flex size-8 items-center justify-center rounded-[12px] bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+                    {index + 1}
                   </div>
-
-                  <p className="text-sm leading-7 text-[var(--foreground-muted)]">
-                    상담 전 방향을 잡을 때도, 입주 문의에 바로 답할 때도, 판정 근거를
-                    정리할 때도 한 화면 흐름으로 이어서 볼 수 있게 구성했습니다.
-                  </p>
-
-                  <div className="grid gap-3">
-                    {serviceCapabilityPoints.map((item) => (
-                      <div
-                        key={item}
-                        className="flex h-full items-center rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-4 text-sm font-semibold leading-6 text-[var(--foreground)]"
-                      >
-                        {item}
-                      </div>
-                    ))}
+                  <div className="mt-3 text-sm font-semibold leading-5 text-[var(--foreground)]">
+                    {item.title}
                   </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-4">
-                      <div className="text-xs text-[var(--foreground-subtle)]">전체 코드 탐색</div>
-                      <div className="mt-1 text-lg font-semibold text-[var(--foreground)]">
-                        {formatNumber(MAGOK_CODE_DIRECTORY_TOTAL_COUNT)}개
-                      </div>
-                    </div>
-                    <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-4">
-                      <div className="text-xs text-[var(--foreground-subtle)]">
-                        먼저 검토할 코드
-                      </div>
-                      <div className="mt-1 text-lg font-semibold text-[var(--foreground)]">
-                        {formatNumber(
-                          getReviewableCount(knowledgeCounts) +
-                            getReviewableCount(industrialCounts),
-                        )}
-                        개
-                      </div>
-                    </div>
+                  <div className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                    {item.description}
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="h-full border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
-                <CardContent className="space-y-4 p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-xs font-semibold tracking-[0.12em] text-[var(--foreground-subtle)]">
-                        판정 근거
-                      </div>
-                      <h2 className="mt-2 font-display text-[1.7rem] font-semibold leading-[1.08] text-[var(--foreground)]">
-                        판정 근거를
-                        <br />
-                        바로 추적
-                      </h2>
-                    </div>
-                    <div className="inline-flex size-10 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
-                      <BookOpenText className="size-5" />
-                    </div>
-                  </div>
-
-                  <p className="text-sm leading-7 text-[var(--foreground-muted)]">
-                    시행령과 마곡 고시문을 문서 단위로 정리해 두어, 결과 패널에서 본 판정이
-                    어디에서 나왔는지 바로 다시 설명할 수 있습니다.
-                  </p>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-4">
-                      <div className="text-xs text-[var(--foreground-subtle)]">시행령 기준일</div>
-                      <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                        {formatKoreanDate('2026-01-02')}
-                      </div>
-                    </div>
-                    <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-4">
-                      <div className="text-xs text-[var(--foreground-subtle)]">
-                        관리기본계획 고시일
-                      </div>
-                      <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                        {formatKoreanDate('2025-10-30')}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {evidenceTraceBadges.map((item) => (
-                      <Badge key={item} variant="muted">
-                        {item}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="rounded-[14px] border border-[var(--border-accent)] bg-[var(--surface-muted)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
-                    상담 전에 방향을 잡을 때도, 입주 문의에 답할 때도 `왜 이렇게 판정했는지`
-                    를 바로 이어서 설명하기 좋습니다.
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              ))}
             </div>
           </section>
         </>
@@ -751,22 +718,23 @@ function HomeSections({
         ) : (
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <Badge variant="muted" className="w-fit">쉬운 검색 홈</Badge>
+              <Badge variant="muted" className="w-fit">입주 예비판정 워크스페이스</Badge>
               <h2 className="mt-3 max-w-3xl font-display text-[1.8rem] font-semibold leading-[1.06] text-[var(--foreground)] sm:mt-4 sm:text-4xl">
-                업종코드는 몰라도 됩니다
+                검색 결과를 고르고
+                <br />
+                예비판정을 이어서 읽는 공간입니다
               </h2>
               <p className="mt-2 text-[13px] leading-5 text-[var(--foreground-subtle)] sm:hidden">
                 {currentWizardHint}
               </p>
               <p className="mt-3 hidden max-w-3xl text-sm leading-7 text-[var(--foreground-muted)] sm:block">
-                평소 쓰는 말 그대로 적어 주세요. 자유 문장, 사업자등록증 업태·종목,
-                실무 메모 모두 괜찮고, 가까운 업종코드를 추천받은 뒤 가능·조건부·심의
-                필요까지 바로 이어서 읽을 수 있습니다.
+                위 빠른 검색에서 고객 업태·종목을 먼저 정리한 뒤, 여기서 추천 결과 선택,
+                조건 보정, 판정 읽기를 한 번에 이어서 진행하면 상담 흐름이 가장 자연스럽습니다.
               </p>
             </div>
-            <div className="hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] lg:block lg:max-w-sm">
-              실무에서는 보통 이렇게 봅니다. `하는 일과 가까운 코드 찾기` 다음에
-              `가능 / 조건부 가능 / 심의 필요` 순서로 결과를 읽으면 가장 빠릅니다.
+              <div className="hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] lg:block lg:max-w-sm">
+                위에서 검색을 시작하고, 여기서는 '추천 결과 선택 → 예외 조건 확인 →
+                결과 설명' 순서로 이어가면 실무 설명이 가장 매끄럽습니다.
             </div>
           </div>
         )}
@@ -880,7 +848,35 @@ function HomeSections({
                     key={panelTransitionKey}
                     className="animate-fade-in space-y-5 sm:space-y-6"
                   >
-                    {safeCurrentStep === 'discover' ? (
+                    {safeCurrentStep === 'discover' && showSlimDiscoverOverview ? (
+                      <section className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:p-6">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="max-w-2xl">
+                            <Badge variant="muted" className="w-fit">1단계 준비</Badge>
+                            <h3 className="mt-3 font-display text-[1.6rem] font-semibold leading-[1.12] text-[var(--foreground)] sm:text-[1.9rem]">
+                              위 빠른 검색에서 시작하거나
+                              <br />
+                              직접 입력으로 바로 넘어가세요
+                            </h3>
+                            <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                              히어로의 빠른 검색은 통화 중 들은 표현 그대로 후보 코드를
+                              좁히는 용도입니다. 업종코드를 이미 알고 있다면 아래 흐름으로
+                              바로 예비판정을 이어갈 수 있습니다.
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
+                            <Button variant="secondary" onClick={handleFinderEntry}>
+                              빠른 검색으로 올라가기
+                            </Button>
+                            <Button onClick={handleContinueManualStep}>
+                              직접 입력으로 계속
+                            </Button>
+                          </div>
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {safeCurrentStep === 'discover' && !showSlimDiscoverOverview ? (
                       <IndustryDiscoveryPanel
                         input={input}
                         query={industryQuery}
@@ -1037,13 +1033,11 @@ function HomeSections({
           <CardContent className="flex h-full flex-col space-y-5 p-5 sm:p-6">
             <Badge variant="muted">전체 코드 사전</Badge>
             <h2 className="font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.2rem]">
-              업종코드를 넓게 보고 싶다면
-              <br />
-              전체 코드 사전에서 먼저 보면 됩니다
+              전체 코드 사전
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-[var(--foreground-muted)]">
-              추천 결과를 받기 전에 후보를 넓게 보고 싶을 때, 또는 상담 전에 전체 코드를
-              한 번 훑어보고 싶을 때 바로 활용할 수 있는 화면입니다.
+              추천 결과를 받기 전에 후보를 넓게 보고 싶을 때, 또는 상담 전에 마곡 허용
+              코드를 한 번 훑어보고 싶을 때 바로 쓰는 화면입니다.
             </p>
 
             <div className="grid gap-3 sm:grid-cols-3 sm:auto-rows-fr">
@@ -1075,13 +1069,16 @@ function HomeSections({
                 <LibraryBig className="size-4" />
               </Button>
               <Button variant="secondary" onClick={() => scrollToSection('criteria')}>
-                법령 참고 보기
+                마곡 기준 빠르게 보기
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="h-full border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
+        <Card
+          id="practical-guide"
+          className="h-full border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]"
+        >
           <CardContent className="flex h-full flex-col space-y-4 p-5 sm:p-6">
             <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
               <BookOpenText className="size-5" />
@@ -1091,8 +1088,9 @@ function HomeSections({
                 실무에서는 보통 이렇게 봅니다
               </h2>
               <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-                먼저 내 일과 가까운 코드를 찾고, 그다음 `가능 / 조건부 가능 / 심의 필요
-                / 추가 확인 / 불가` 순서로 읽으면 흐름이 가장 자연스럽습니다.
+                실무에서는 보통 이렇게 봅니다. ① 하는 일을 한 줄로 적고, ② 가까운
+                업종코드를 고른 뒤, ③ 가능 / 조건부 가능 / 심의 필요 / 추가 확인 /
+                불가 순서로 결과를 읽습니다.
               </p>
             </div>
 
@@ -1121,104 +1119,117 @@ function HomeSections({
         </Card>
       </section>
 
-      <section id="criteria" className="space-y-3">
-        <div className="max-w-3xl">
-          <Badge variant="muted">법령 참고</Badge>
+      <section className="space-y-4">
+        <div className="max-w-4xl">
+          <Badge variant="muted">설명 도구</Badge>
           <h2 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
-            판정 근거를 바로 설명할 수 있도록 정리했습니다
+            입주 판정을 설명할 수 있게 도와주는 도구들
           </h2>
           <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-            시행령과 마곡 고시문을 빠르게 다시 읽을 수 있게 묶어 두었습니다. 결과
-            패널에서 끝나지 않고, 어떤 판정이 어디에서 나왔는지 바로 이어서 추적할 수
-            있습니다.
+            상담 중 기준을 다시 확인하고, 판정 근거를 문서로 보여주고, 최근 반영 범위까지
+            한 흐름으로 설명할 수 있게 정리했습니다.
           </p>
         </div>
-        <RulebookTabs onOpenDirectory={onOpenDirectory} />
-      </section>
 
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
-        <Card className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
-          <CardContent className="space-y-5 p-5 sm:p-6">
-            <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
-              <BookOpenText className="size-5" />
+        <section id="criteria" className="space-y-3">
+          <div className="max-w-3xl">
+            <div className="text-sm font-semibold text-[var(--accent-strong)]">
+              마곡 기준을 빠르게 파악하는 법
             </div>
-            <div>
-              <Badge variant="muted">판정 근거 라이브러리</Badge>
-              <h2 className="mt-4 font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.2rem]">
-                판정 근거를 바로 설명할 수 있도록
-                <br />
-                문서 단위로 정리했습니다
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-                결과 패널의 각주에서 끝나지 않고, 시행령과 마곡 고시문을 문서별로
-                다시 읽을 수 있는 독립 화면입니다. 상담 전에 판정 근거를 설명하거나
-                내부 검토 자료를 정리할 때 바로 이어서 활용할 수 있습니다.
-              </p>
-            </div>
-            <div className="grid gap-3">
+            <Badge variant="muted" className="mt-3">법령 참고</Badge>
+            <h3 className="mt-4 font-display text-3xl font-semibold text-[var(--foreground)]">
+              판정 기준을 상담 중에도 바로 다시 확인할 수 있습니다
+            </h3>
+            <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+              상담 중에 바로 기준을 다시 확인할 수 있는 참고 화면입니다. 시행령과 마곡
+              고시문을 빠르게 다시 읽을 수 있게 묶어 두었습니다.
+            </p>
+          </div>
+          <RulebookTabs onOpenDirectory={onOpenDirectory} />
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
+          <Card className="border-[var(--border-accent)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
+            <CardContent className="space-y-5 p-5 sm:p-6">
+              <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
+                <BookOpenText className="size-5" />
+              </div>
+              <div>
+                <Badge variant="muted">판정 근거 라이브러리</Badge>
+                <h3 className="mt-4 font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.2rem]">
+                  시행령과 마곡 고시문을
+                  <br />
+                  문서별로 다시 읽을 수 있습니다
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                  결과 패널 각주에서 끝내지 않고, 시행령·마곡 고시문을 문서별로 다시 읽을
+                  수 있는 화면입니다. 내부 검토 자료 만들 때도 바로 씁니다.
+                </p>
+              </div>
+              <div className="grid gap-3">
                 <div className="rounded-[14px] border border-[var(--border-accent)] bg-[var(--surface-muted)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
-                `산업집적법 시행령`과 `마곡 관리기본계획`을 문서 단위로 나눠, 어떤
-                판정이 어디에서 왔는지 더 쉽게 추적할 수 있습니다.
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="muted">시행령</Badge>
-                <Badge variant="muted">마곡 고시문</Badge>
-                <Badge variant="muted">조문 / 페이지 힌트</Badge>
-              </div>
-            </div>
-            <div>
-              <Button onClick={onOpenLibrary}>
-                법령 라이브러리 열기
-                <ArrowRight className="size-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-[var(--border-neutral)] bg-[var(--surface-neutral)] shadow-[var(--shadow-sm)]">
-          <CardContent className="space-y-5 p-5 sm:p-6">
-            <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[var(--surface-strong)] text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
-              <FileSearch className="size-5" />
-            </div>
-            <div>
-              <Badge variant="muted">데이터 업데이트 로그</Badge>
-              <h2 className="mt-4 font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.2rem]">
-                최근 변경 이력도
-                <br />
-                빠르게 확인할 수 있습니다
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-                판정 기준과 화면 구조가 언제 어떻게 바뀌었는지 기록해 둔 이력
-                화면입니다. 상담 전 최신 반영 범위를 설명하거나 기존 화면과의 차이를
-                정리할 때 유용합니다.
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {recentUpdates.map((entry) => (
-                <div
-                  key={entry.id}
-                className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="muted">{formatKoreanDate(entry.date)}</Badge>
-                    <div className="text-sm font-semibold text-[var(--foreground)]">
-                      {entry.title}
-                    </div>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                    {entry.summary}
-                  </p>
+                  어떤 판정이 어디에서 나왔는지 조문과 문서 단위로 추적해, 상담 설명과
+                  내부 공유 자료에 바로 활용하기 좋게 정리했습니다.
                 </div>
-              ))}
-            </div>
-            <div>
-              <Button variant="secondary" onClick={onOpenUpdates}>
-                업데이트 로그 열기
-                <ArrowRight className="size-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="muted">시행령</Badge>
+                  <Badge variant="muted">마곡 고시문</Badge>
+                  <Badge variant="muted">조문 / 페이지 힌트</Badge>
+                </div>
+              </div>
+              <div>
+                <Button onClick={onOpenLibrary}>
+                  법령 라이브러리 열기
+                  <ArrowRight className="size-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[var(--border-neutral)] bg-[var(--surface-neutral)] shadow-[var(--shadow-sm)]">
+            <CardContent className="space-y-5 p-5 sm:p-6">
+              <div className="inline-flex size-11 items-center justify-center rounded-[14px] bg-[var(--surface-strong)] text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
+                <FileSearch className="size-5" />
+              </div>
+              <div>
+                <Badge variant="muted">데이터 업데이트 로그</Badge>
+                <h3 className="mt-4 font-display text-[1.9rem] font-semibold leading-[1.08] text-[var(--foreground)] sm:text-[2.2rem]">
+                  최근 반영 범위도
+                  <br />
+                  빠르게 확인할 수 있습니다
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+                  판정 기준과 화면 구조가 언제 어떻게 바뀌었는지 기록해둔 이력입니다.
+                  '최근 반영 범위' 설명할 때 유용합니다.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {recentUpdates.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4 shadow-[var(--shadow-sm)]"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="muted">{formatKoreanDate(entry.date)}</Badge>
+                      <div className="text-sm font-semibold text-[var(--foreground)]">
+                        {entry.title}
+                      </div>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                      {entry.summary}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <Button variant="secondary" onClick={onOpenUpdates}>
+                  업데이트 로그 열기
+                  <ArrowRight className="size-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
       </section>
 
       <section className="space-y-3">
@@ -1229,9 +1240,9 @@ function HomeSections({
             <br />
             문서형 가이드로 바로 읽을 수 있습니다
           </h2>
-          <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-            결과 화면에서 끝내지 않고, 코드별 설명과 자주 묻는 질문까지 읽을 수 있는
-            가이드 페이지를 준비했습니다.
+            <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
+              자주 상담 들어오는 업종은 코드별로 '마곡에서 어떻게 보는지'를 문서형
+              가이드로 정리했습니다. 고객 설명할 때 그대로 보여주셔도 됩니다.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -1279,8 +1290,9 @@ function HomeSections({
             </h2>
             <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
               이 영역은 입주 판단용 본문이 아니라 사무실 준비에 참고할 수 있는 외부
-              상품 링크입니다. 먼저 업종 분석 결과와 법령 참고를 확인한 뒤, 필요한 경우에만
-              펼쳐서 보도록 기본 노출 강도를 낮췄습니다.
+              상품 링크입니다. 업종 분석과 법령 확인을 마친 뒤, 고객 사무실 준비를
+              도와줄 때 참고할 수 있습니다. 필요한 경우에만 펼쳐서 보도록 기본 노출
+              강도를 낮췄습니다.
             </p>
           </div>
 
@@ -1574,6 +1586,13 @@ function App() {
                 전체 코드 사전
               </Button>
               <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => openHomeView('practical-guide')}
+              >
+                입주 예비판정 안내
+              </Button>
+              <Button
                 variant={view === 'library' ? 'secondary' : 'ghost'}
                 size="sm"
                 onClick={openLibraryView}
@@ -1587,11 +1606,6 @@ function App() {
               >
                 업데이트 로그
               </Button>
-              {view === 'home' ? (
-                <Button variant="ghost" size="sm" onClick={() => openHomeView('criteria')}>
-                  법령 참고
-                </Button>
-              ) : null}
             </nav>
 
             <div className="hidden flex-wrap items-center gap-2 md:flex">
@@ -1652,6 +1666,14 @@ function App() {
                 전체 코드 사전
               </Button>
               <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { openHomeView('practical-guide'); setIsMobileMenuOpen(false) }}
+                className="justify-start"
+              >
+                입주 예비판정 안내
+              </Button>
+              <Button
                 variant={view === 'library' ? 'secondary' : 'ghost'}
                 size="sm"
                 onClick={() => { openLibraryView(); setIsMobileMenuOpen(false) }}
@@ -1667,16 +1689,6 @@ function App() {
               >
                 업데이트 로그
               </Button>
-              {view === 'home' ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { openHomeView('criteria'); setIsMobileMenuOpen(false) }}
-                  className="justify-start"
-                >
-                  법령 참고
-                </Button>
-              ) : null}
             </nav>
           ) : null}
         </header>
@@ -1792,6 +1804,9 @@ function App() {
                 <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--foreground-muted)]">
                   마곡 일반산업단지 입주 검토를 더 빨리 시작할 수 있도록, 업종코드 추천,
                   전체 코드 사전, 예비판정을 한 화면 체계로 정리한 서비스입니다.
+                </p>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--foreground-muted)]">
+                  컨설턴트와 중개사가 마곡 입주 상담을 준비하고 설명할 때 쓰도록 설계했습니다.
                 </p>
               </div>
 
