@@ -1,9 +1,14 @@
 import type {
   ApplicantType,
+  EligibilityAdditionalCode,
+  EligibilityCodeEvaluation,
   CompanyScale,
+  ComparableZoneType,
+  EligibilityComparisonResults,
   EligibilityFlags,
   EligibilityInput,
   EligibilityResult,
+  LegalBasis,
   RegulatoryFit,
   ZoneType,
 } from '@/features/eligibility/types'
@@ -35,10 +40,27 @@ const regulatoryFits = [
   'managedTechnicalService',
 ] as const satisfies readonly RegulatoryFit[]
 
+const comparableZoneOrder: ComparableZoneType[] = [
+  'knowledgeIndustryCenter',
+  'industrialFacility',
+]
+
 const zoneTypeLabels: Record<ZoneType, string> = {
   industrialFacility: '산업시설구역',
   knowledgeIndustryCenter: '지식산업센터',
   supportFacility: '지원시설구역',
+}
+
+export interface SharedEligibilityState {
+  input: EligibilityInput
+  compareZones: boolean
+  additionalCodes: EligibilityAdditionalCode[]
+}
+
+export interface EligibilityResultDocumentOptions {
+  compareZones?: boolean
+  comparisonResults?: EligibilityComparisonResults | null
+  multiCodeResults?: EligibilityCodeEvaluation[] | null
 }
 
 export const defaultSharedEligibilityInput: EligibilityInput = {
@@ -64,10 +86,30 @@ export const defaultSharedEligibilityInput: EligibilityInput = {
   },
 }
 
-interface SharedEligibilityPayload {
+interface SharedEligibilityPayloadV1 {
   version: 1
   input: EligibilityInput
 }
+
+interface SharedEligibilityPayloadV2 {
+  version: 2
+  input: EligibilityInput
+  compareZones: boolean
+}
+
+interface SharedEligibilityPayloadV3 {
+  version: 3
+  input: EligibilityInput
+  compareZones: boolean
+  additionalCodes: EligibilityAdditionalCode[]
+}
+
+type SharedEligibilityPayload =
+  | SharedEligibilityPayloadV1
+  | SharedEligibilityPayloadV2
+  | SharedEligibilityPayloadV3
+
+const maxAdditionalCodes = 2
 
 function normalizeString(value: unknown) {
   return typeof value === 'string' ? value : ''
@@ -102,6 +144,25 @@ function normalizeFlags(value: unknown): EligibilityFlags {
     hasManufacturingFacility: normalizeBoolean(nextValue.hasManufacturingFacility),
     requiresCommitteeReview: normalizeBoolean(nextValue.requiresCommitteeReview),
   }
+}
+
+function normalizeAdditionalCodes(value: unknown): EligibilityAdditionalCode[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value.slice(0, maxAdditionalCodes).map((item, index) => {
+    const nextValue =
+      item && typeof item === 'object'
+        ? (item as Partial<Record<keyof EligibilityAdditionalCode, unknown>>)
+        : {}
+
+    return {
+      id: normalizeString(nextValue.id) || `shared-code-${index + 1}`,
+      ksicCode: normalizeString(nextValue.ksicCode),
+      ksicName: normalizeString(nextValue.ksicName),
+    }
+  })
 }
 
 export function normalizeSharedEligibilityInput(value: unknown): EligibilityInput {
@@ -162,36 +223,78 @@ function decodeBase64Url(value: string) {
   return new TextDecoder().decode(bytes)
 }
 
-export function encodeSharedEligibilityInput(input: EligibilityInput) {
-  const payload: SharedEligibilityPayload = {
-    version: 1,
-    input: normalizeSharedEligibilityInput(input),
+export function encodeSharedEligibilityState(state: SharedEligibilityState) {
+  const payload: SharedEligibilityPayloadV3 = {
+    version: 3,
+    input: normalizeSharedEligibilityInput(state.input),
+    compareZones: normalizeBoolean(state.compareZones),
+    additionalCodes: normalizeAdditionalCodes(state.additionalCodes),
   }
 
   return encodeBase64Url(JSON.stringify(payload))
 }
 
-export function decodeSharedEligibilityInput(value: string): EligibilityInput | null {
+export function encodeSharedEligibilityInput(input: EligibilityInput) {
+  return encodeSharedEligibilityState({
+    input,
+    compareZones: false,
+    additionalCodes: [],
+  })
+}
+
+export function decodeSharedEligibilityState(value: string): SharedEligibilityState | null {
   try {
     const decoded = JSON.parse(
       decodeBase64Url(value),
     ) as Partial<SharedEligibilityPayload> | null
 
-    if (!decoded || decoded.version !== 1) {
+    if (
+      !decoded ||
+      (decoded.version !== 1 && decoded.version !== 2 && decoded.version !== 3)
+    ) {
       return null
     }
 
-    return normalizeSharedEligibilityInput(decoded.input)
+    return {
+      input: normalizeSharedEligibilityInput(decoded.input),
+      compareZones:
+        decoded.version === 2 || decoded.version === 3
+          ? normalizeBoolean(decoded.compareZones)
+          : false,
+      additionalCodes:
+        decoded.version === 3 ? normalizeAdditionalCodes(decoded.additionalCodes) : [],
+    }
   } catch {
     return null
   }
 }
 
-export function createSharedFinderHash(input: EligibilityInput) {
-  return `#finder?share=${encodeSharedEligibilityInput(input)}`
+export function decodeSharedEligibilityInput(value: string): EligibilityInput | null {
+  return decodeSharedEligibilityState(value)?.input ?? null
 }
 
-export function buildEligibilityResultSummary(
+export function createSharedFinderHash(
+  input: EligibilityInput,
+  options?: {
+    compareZones?: boolean
+    additionalCodes?: EligibilityAdditionalCode[]
+  },
+) {
+  return `#finder?share=${encodeSharedEligibilityState({
+    input,
+    compareZones: options?.compareZones ?? false,
+    additionalCodes: options?.additionalCodes ?? [],
+  })}`
+}
+
+function getUniqueLegalBases(values: LegalBasis[]) {
+  return values.filter(
+    (basis, index, allValues) =>
+      allValues.findIndex((candidate) => candidate.id === basis.id) === index,
+  )
+}
+
+function buildSingleResultSummaryLines(
   input: EligibilityInput,
   result: EligibilityResult,
 ) {
@@ -225,6 +328,166 @@ export function buildEligibilityResultSummary(
     })
   }
 
+  return lines
+}
+
+function getCodeHeading(label: string, ksicCode: string, ksicName: string) {
+  const codeAndName = `${ksicCode.trim()} ${ksicName.trim()}`.trim()
+
+  return codeAndName ? `${label}: ${codeAndName}` : `${label}: 업종코드 미입력`
+}
+
+function buildComparisonSummaryLines(
+  input: EligibilityInput,
+  comparisonResults: EligibilityComparisonResults,
+) {
+  const lines = [
+    '마곡 입주 예비판정 비교 요약',
+    `${input.ksicCode.trim()} ${input.ksicName.trim()}`.trim() || '업종코드 미입력',
+    '지식산업센터와 산업시설구역을 같은 조건으로 나란히 비교했습니다.',
+  ]
+
+  comparableZoneOrder.forEach((zoneType) => {
+    const result = comparisonResults[zoneType]
+    lines.push(
+      '',
+      `${zoneTypeLabels[zoneType]}: ${formatVerdictLabel(result.verdict)}`,
+      result.title,
+      result.summary,
+    )
+
+    if (result.reasons.length > 0) {
+      lines.push('판정 이유')
+      result.reasons.forEach((reason) => {
+        lines.push(`- ${reason}`)
+      })
+    }
+
+    if (result.requiredActions.length > 0) {
+      lines.push('추가 확인')
+      result.requiredActions.forEach((action) => {
+        lines.push(`- ${action}`)
+      })
+    }
+  })
+
+  const legalBases = getUniqueLegalBases(
+    comparableZoneOrder.flatMap((zoneType) => comparisonResults[zoneType].legalBases),
+  )
+
+  if (legalBases.length > 0) {
+    lines.push('', '법적 근거')
+    legalBases.forEach((basis) => {
+      const suffix = basis.articlePath ? ` / ${basis.articlePath}` : ''
+      lines.push(`- ${basis.citation}${suffix}`)
+    })
+  }
+
+  return lines
+}
+
+function buildMultiCodeSummaryLines(
+  input: EligibilityInput,
+  multiCodeResults: EligibilityCodeEvaluation[],
+  options?: EligibilityResultDocumentOptions,
+) {
+  const isComparisonMode = Boolean(options?.compareZones)
+  const lines = [
+    isComparisonMode ? '마곡 입주 복수 업종코드 비교 요약' : '마곡 입주 복수 업종코드 판정 요약',
+    `총 ${multiCodeResults.length}개 업종코드를 함께 검토했습니다.`,
+  ]
+
+  multiCodeResults.forEach((entry) => {
+    lines.push('', getCodeHeading(entry.label, entry.ksicCode, entry.ksicName))
+
+    if (isComparisonMode && entry.comparisonResults) {
+      const comparisonResultsForEntry = entry.comparisonResults
+
+      comparableZoneOrder.forEach((zoneType) => {
+        const comparisonResult = comparisonResultsForEntry[zoneType]
+
+        lines.push(
+          `${zoneTypeLabels[zoneType]} 기준 ${formatVerdictLabel(comparisonResult.verdict)}`,
+          comparisonResult.title,
+          comparisonResult.summary,
+        )
+
+        if (comparisonResult.reasons.length > 0) {
+          lines.push('판정 이유')
+          comparisonResult.reasons.forEach((reason) => {
+            lines.push(`- ${reason}`)
+          })
+        }
+
+        if (comparisonResult.requiredActions.length > 0) {
+          lines.push('추가 확인')
+          comparisonResult.requiredActions.forEach((action) => {
+            lines.push(`- ${action}`)
+          })
+        }
+      })
+
+      return
+    }
+
+    lines.push(
+      `${zoneTypeLabels[input.zoneType]} 기준 ${formatVerdictLabel(entry.result.verdict)}`,
+      entry.result.title,
+      entry.result.summary,
+    )
+
+    if (entry.result.reasons.length > 0) {
+      lines.push('판정 이유')
+      entry.result.reasons.forEach((reason) => {
+        lines.push(`- ${reason}`)
+      })
+    }
+
+    if (entry.result.requiredActions.length > 0) {
+      lines.push('추가 확인')
+      entry.result.requiredActions.forEach((action) => {
+        lines.push(`- ${action}`)
+      })
+    }
+  })
+
+  const legalBases = getUniqueLegalBases(
+    multiCodeResults.flatMap((entry) => {
+      if (isComparisonMode && entry.comparisonResults) {
+        const comparisonResultsForEntry = entry.comparisonResults
+
+        return comparableZoneOrder.flatMap(
+          (zoneType) => comparisonResultsForEntry[zoneType].legalBases,
+        )
+      }
+
+      return entry.result.legalBases
+    }),
+  )
+
+  if (legalBases.length > 0) {
+    lines.push('', '법적 근거')
+    legalBases.forEach((basis) => {
+      const suffix = basis.articlePath ? ` / ${basis.articlePath}` : ''
+      lines.push(`- ${basis.citation}${suffix}`)
+    })
+  }
+
+  return lines
+}
+
+export function buildEligibilityResultSummary(
+  input: EligibilityInput,
+  result: EligibilityResult,
+  options?: EligibilityResultDocumentOptions,
+) {
+  const lines =
+    options?.multiCodeResults && options.multiCodeResults.length > 1
+      ? buildMultiCodeSummaryLines(input, options.multiCodeResults, options)
+      : options?.compareZones && options.comparisonResults
+        ? buildComparisonSummaryLines(input, options.comparisonResults)
+        : buildSingleResultSummaryLines(input, result)
+
   return lines.join('\n')
 }
 
@@ -237,11 +500,31 @@ function escapeHtml(value: string) {
     .replace(/'/g, '&#39;')
 }
 
+function getPrintMetaLine(
+  input: EligibilityInput,
+  options?: EligibilityResultDocumentOptions,
+) {
+  if (options?.multiCodeResults && options.multiCodeResults.length > 1) {
+    const targetLabel =
+      options.compareZones ? '지식산업센터 + 산업시설구역 비교' : zoneTypeLabels[input.zoneType]
+
+    return `복수 업종코드 ${options.multiCodeResults.length}건 · ${targetLabel}`
+  }
+
+  const targetLabel =
+    options?.compareZones && options.comparisonResults
+      ? '지식산업센터 + 산업시설구역 비교'
+      : zoneTypeLabels[input.zoneType]
+
+  return `${targetLabel} · ${input.ksicCode.trim()} ${input.ksicName.trim()}`.trim()
+}
+
 export function buildEligibilityPrintDocument(
   input: EligibilityInput,
   result: EligibilityResult,
+  options?: EligibilityResultDocumentOptions,
 ) {
-  const summary = buildEligibilityResultSummary(input, result)
+  const summary = buildEligibilityResultSummary(input, result, options)
   const htmlSummary = escapeHtml(summary).replace(/\n/g, '<br />')
 
   return `<!doctype html>
@@ -288,9 +571,7 @@ export function buildEligibilityPrintDocument(
   <body>
     <main class="page">
       <h1>마곡 입주 예비판정 결과</h1>
-      <div class="meta">${escapeHtml(
-        `${zoneTypeLabels[input.zoneType]} · ${input.ksicCode.trim()} ${input.ksicName.trim()}`.trim(),
-      )}</div>
+      <div class="meta">${escapeHtml(getPrintMetaLine(input, options))}</div>
       <section class="panel">
         <p class="summary">${htmlSummary}</p>
       </section>

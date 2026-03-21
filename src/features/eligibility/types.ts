@@ -4,6 +4,7 @@ export type ZoneType =
   | 'supportFacility'
 
 export type DirectoryZoneType = Exclude<ZoneType, 'supportFacility'>
+export type ComparableZoneType = Exclude<ZoneType, 'supportFacility'>
 export type CompanyScale = 'sme' | 'large'
 
 export type Verdict =
@@ -57,6 +58,12 @@ export interface EligibilityInput {
   flags: EligibilityFlags
 }
 
+export interface EligibilityAdditionalCode {
+  id: string
+  ksicCode: string
+  ksicName: string
+}
+
 export interface LegalBasis {
   id: string
   source: 'enforcementDecree' | 'magokPlan'
@@ -85,6 +92,19 @@ export interface EligibilityResult {
   requiredActions: string[]
   matchedRules: string[]
   legalBases: LegalBasis[]
+}
+
+export type EligibilityComparisonResults = Record<ComparableZoneType, EligibilityResult>
+
+export interface EligibilityCodeEvaluation {
+  id: string
+  label: string
+  order: number
+  isPrimary: boolean
+  ksicCode: string
+  ksicName: string
+  result: EligibilityResult
+  comparisonResults: EligibilityComparisonResults | null
 }
 
 export interface MagokDirectoryZoneVerdict {

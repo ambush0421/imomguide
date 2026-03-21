@@ -57,6 +57,8 @@ const MOBILE_DISCOVERY_EXAMPLES = [
   },
 ] as const
 
+const initialVisibleSuggestionCount = 3
+
 function getVerdictBadgeVariant(verdict: ReturnType<typeof evaluateEligibility>['verdict']) {
   if (verdict === 'eligible') {
     return 'success' as const
@@ -180,13 +182,34 @@ export function IndustryDiscoveryPanel({
 }: IndustryDiscoveryPanelProps) {
   const isLoading = status === 'loading'
   const [showAllMobileExamples, setShowAllMobileExamples] = useState(false)
+  const [expandedExactKey, setExpandedExactKey] = useState<string | null>(null)
+  const [expandedRelatedKey, setExpandedRelatedKey] = useState<string | null>(null)
   const exactSuggestions = suggestions.filter(
     (suggestion) => suggestion.matchKind === 'exact',
   )
   const relatedSuggestions = suggestions.filter(
     (suggestion) => suggestion.matchKind === 'related',
   )
+  const suggestionExpansionKey = `${screen}:${query.trim()}:${suggestions
+    .map((suggestion) => suggestion.id)
+    .join('|')}`
+  const showAllExactSuggestions = expandedExactKey === suggestionExpansionKey
+  const showAllRelatedSuggestions = expandedRelatedKey === suggestionExpansionKey
   const totalSuggestionCount = exactSuggestions.length + relatedSuggestions.length
+  const visibleExactSuggestions = showAllExactSuggestions
+    ? exactSuggestions
+    : exactSuggestions.slice(0, initialVisibleSuggestionCount)
+  const visibleRelatedSuggestions = showAllRelatedSuggestions
+    ? relatedSuggestions
+    : relatedSuggestions.slice(0, initialVisibleSuggestionCount)
+  const hiddenExactSuggestionCount = Math.max(
+    exactSuggestions.length - visibleExactSuggestions.length,
+    0,
+  )
+  const hiddenRelatedSuggestionCount = Math.max(
+    relatedSuggestions.length - visibleRelatedSuggestions.length,
+    0,
+  )
   const visibleMobileExamples = showAllMobileExamples
     ? MOBILE_DISCOVERY_EXAMPLES
     : MOBILE_DISCOVERY_EXAMPLES.slice(0, 2)
@@ -404,7 +427,9 @@ export function IndustryDiscoveryPanel({
               {status === 'loading'
                 ? '추천 코드를 찾는 중'
                 : status === 'ready'
-                  ? `${totalSuggestionCount}개 후보 정리`
+                  ? totalSuggestionCount > initialVisibleSuggestionCount
+                    ? `${totalSuggestionCount}개 후보 정리 · 3개 먼저 표시`
+                    : `${totalSuggestionCount}개 후보 정리`
                   : status === 'error'
                     ? '다시 확인 필요'
                     : '추천 준비'}
@@ -484,7 +509,8 @@ export function IndustryDiscoveryPanel({
           <div className="space-y-6">
             <div className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] px-4 py-3.5 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:py-4 sm:text-sm sm:leading-6">
               추천된 카드를 누르면 바로 다음 화면으로 넘어갑니다. 먼저 볼 코드가 있으면
-              그 코드부터 확인하는 편이 가장 빠릅니다.
+              그 코드부터 확인하는 편이 가장 빠릅니다. 후보가 더 있으면 아래 `더 보기`
+              버튼으로 이어서 펼쳐 볼 수 있습니다.
             </div>
 
             {exactSuggestions.length > 0 ? (
@@ -496,7 +522,7 @@ export function IndustryDiscoveryPanel({
                   <Badge variant="success">{exactSuggestions.length}개</Badge>
                 </div>
                 <div className="grid gap-3 xl:grid-cols-2">
-                  {exactSuggestions.map((suggestion) => (
+                  {visibleExactSuggestions.map((suggestion) => (
                     <SuggestionCard
                       key={suggestion.id}
                       input={input}
@@ -505,6 +531,23 @@ export function IndustryDiscoveryPanel({
                     />
                   ))}
                 </div>
+                {exactSuggestions.length > initialVisibleSuggestionCount ? (
+                  <div className="flex justify-center sm:justify-start">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() =>
+                        setExpandedExactKey((prev) =>
+                          prev === suggestionExpansionKey ? null : suggestionExpansionKey,
+                        )
+                      }
+                    >
+                      {showAllExactSuggestions
+                        ? '먼저 볼 코드 접기'
+                        : `더 보기 (${hiddenExactSuggestionCount}개 더)`}
+                    </Button>
+                  </div>
+                ) : null}
               </section>
             ) : null}
 
@@ -517,7 +560,7 @@ export function IndustryDiscoveryPanel({
                   <Badge variant="muted">{relatedSuggestions.length}개</Badge>
                 </div>
                 <div className="grid gap-3 xl:grid-cols-2">
-                  {relatedSuggestions.map((suggestion) => (
+                  {visibleRelatedSuggestions.map((suggestion) => (
                     <SuggestionCard
                       key={suggestion.id}
                       input={input}
@@ -526,6 +569,23 @@ export function IndustryDiscoveryPanel({
                     />
                   ))}
                 </div>
+                {relatedSuggestions.length > initialVisibleSuggestionCount ? (
+                  <div className="flex justify-center sm:justify-start">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() =>
+                        setExpandedRelatedKey((prev) =>
+                          prev === suggestionExpansionKey ? null : suggestionExpansionKey,
+                        )
+                      }
+                    >
+                      {showAllRelatedSuggestions
+                        ? '비슷한 코드 접기'
+                        : `더 보기 (${hiddenRelatedSuggestionCount}개 더)`}
+                    </Button>
+                  </div>
+                ) : null}
               </section>
             ) : null}
           </div>

@@ -33,7 +33,10 @@ const sharedResultInput: EligibilityInput = {
 describe('App', () => {
   beforeEach(() => {
     useEligibilityStore.getState().reset()
+    window.localStorage.clear()
     window.history.replaceState(null, '', '#top')
+    window.dataLayer = []
+    window.gtag = undefined
     window.scrollTo = vi.fn()
     Element.prototype.scrollIntoView = vi.fn()
     Object.defineProperty(window, 'matchMedia', {
@@ -188,6 +191,48 @@ describe('App', () => {
 
     expect(await within(finderSection).findByText('선택한 업종코드')).toBeInTheDocument()
     expect(within(finderSection).getByText('직접 입력 예정')).toBeInTheDocument()
+  })
+
+  it('넓은 검색어에서는 추천 결과 화면에서 더 보기로 후보를 확장할 수 있다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.type(
+      screen.getByPlaceholderText(
+        '예: 소프트웨어 개발 도급, 온라인 교육 플랫폼 운영, 프랜차이즈 카페 본사',
+      ),
+      '개발',
+    )
+    await user.click(screen.getAllByRole('button', { name: '추천 코드 찾기' })[0])
+
+    expect(
+      await within(finderSection).findByRole('button', { name: /더 보기 \(\d+개 더\)/ }),
+    ).toBeInTheDocument()
+
+    const suggestionButtonCountBefore = within(finderSection).getAllByRole('button', {
+      name: '이 코드로 확인하기',
+    }).length
+
+    await user.click(
+      within(finderSection).getByRole('button', { name: /더 보기 \(\d+개 더\)/ }),
+    )
+
+    await waitFor(() => {
+      expect(
+        within(finderSection).getByRole('button', {
+          name: /먼저 볼 코드 접기|비슷한 코드 접기/,
+        }),
+      ).toBeInTheDocument()
+    })
+
+    const suggestionButtonCountAfter = within(finderSection).getAllByRole('button', {
+      name: '이 코드로 확인하기',
+    }).length
+
+    expect(suggestionButtonCountAfter).toBeGreaterThan(suggestionButtonCountBefore)
   })
 
   it('모바일에서는 위저드 진입 후 현재 단계 화면만 집중해서 보여준다', async () => {
@@ -368,5 +413,284 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '인쇄 / PDF 저장' })).toBeInTheDocument()
     expect(screen.getAllByText('73905').length).toBeGreaterThan(0)
     expect(screen.getByText('법적 근거 각주')).toBeInTheDocument()
+  })
+
+  it('두 구역 동시 비교를 켜면 결과 화면에서 두 구역 판정을 함께 보여준다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '62010')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '컴퓨터 프로그래밍 서비스업',
+    )
+    await user.click(
+      within(finderSection).getByRole('switch', { name: '두 구역 동시 비교' }),
+    )
+    await user.click(
+      within(finderSection).getByRole('button', { name: '두 구역 비교 판정 보기' }),
+    )
+
+    await waitFor(() => {
+      expect(
+        within(finderSection).getByText('지식산업센터와 산업시설구역을 한 번에 비교했습니다.'),
+      ).toBeInTheDocument()
+    })
+
+    expect(within(finderSection).getByText('두 구역 동시 비교')).toBeInTheDocument()
+    expect(within(finderSection).getAllByText('지식산업센터').length).toBeGreaterThan(0)
+    expect(within(finderSection).getAllByText('산업시설구역').length).toBeGreaterThan(0)
+  })
+
+  it('부업종을 추가하면 결과 화면에서 복수 업종코드를 함께 보여준다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '62010')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '컴퓨터 프로그래밍 서비스업',
+    )
+
+    await user.click(within(finderSection).getByRole('button', { name: '업종코드 추가' }))
+
+    await user.type(within(finderSection).getByLabelText('부업종 1 KSIC 코드'), '63110')
+    await user.type(within(finderSection).getByLabelText('부업종 1 업종명'), '자료 처리업')
+
+    await user.click(within(finderSection).getByRole('button', { name: '결과 보기' }))
+
+    await waitFor(() => {
+      expect(
+        within(finderSection).getByText('주업종과 부업종 1개를 한 번에 판정했습니다.'),
+      ).toBeInTheDocument()
+    })
+
+    expect(within(finderSection).getByText('코드별 결과')).toBeInTheDocument()
+    expect(within(finderSection).getByText('주업종')).toBeInTheDocument()
+    expect(within(finderSection).getByText('부업종 1')).toBeInTheDocument()
+    expect(within(finderSection).getByText('63110 자료 처리업')).toBeInTheDocument()
+  })
+
+  it('2단계 예외 조건은 관련 조건만 먼저 보여주고 전체 조건 보기로 확장할 수 있다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '63112')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '호스팅 및 관련 서비스업',
+    )
+
+    expect(
+      within(finderSection).getByText('내 업종에 해당할 수 있는 조건 1개'),
+    ).toBeInTheDocument()
+    expect(
+      within(finderSection).getByText('호스팅 및 관련 서비스업(63112)'),
+    ).toBeInTheDocument()
+    expect(
+      within(finderSection).queryByText('포장 및 충전업'),
+    ).not.toBeInTheDocument()
+
+    await user.click(within(finderSection).getByRole('button', { name: '전체 조건 보기' }))
+
+    expect(within(finderSection).getByText('포장 및 충전업')).toBeInTheDocument()
+    expect(
+      within(finderSection).getByRole('button', { name: '추천 조건만 보기' }),
+    ).toBeInTheDocument()
+  })
+
+  it('전체 조건에서 켠 예외 조건은 추천 조건만 보기로 돌아가도 계속 보인다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '62010')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '컴퓨터 프로그래밍 서비스업',
+    )
+
+    expect(
+      within(finderSection).getByText(
+        '현재 입력 기준으로 꼭 먼저 볼 조건은 없습니다. 필요할 때 전체 조건을 열어 직접 확인해 주세요.',
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(within(finderSection).getByRole('button', { name: '전체 조건 보기' }))
+    await user.click(
+      within(finderSection).getByRole('switch', {
+        name: '제조시설 또는 사업화시설 운영 예정',
+      }),
+    )
+    await user.click(
+      within(finderSection).getByRole('button', { name: '추천 조건만 보기' }),
+    )
+
+    expect(
+      within(finderSection).getByText('내 업종에 해당할 수 있는 조건 1개'),
+    ).toBeInTheDocument()
+    expect(
+      within(finderSection).getByText('제조시설 또는 사업화시설 운영 예정'),
+    ).toBeInTheDocument()
+    expect(within(finderSection).getAllByText('1개 적용 중').length).toBeGreaterThan(0)
+  })
+
+  it('판정 결과를 본 뒤 최근 조회에서 같은 상태를 다시 복원할 수 있다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '62010')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '컴퓨터 프로그래밍 서비스업',
+    )
+    await user.click(within(finderSection).getByRole('button', { name: '결과 보기' }))
+
+    await waitFor(() => {
+      expect(within(finderSection).getByRole('button', { name: '공유 링크 복사' })).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: '최근 조회' }))
+
+    expect(
+      screen.getByRole('button', { name: /62010 컴퓨터 프로그래밍 서비스업/ }),
+    ).toBeInTheDocument()
+
+    await user.click(within(finderSection).getByRole('button', { name: '조건 다시 수정' }))
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '63110')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(within(finderSection).getByLabelText('업종명'), '자료 처리업')
+
+    expect(within(finderSection).getByDisplayValue('63110')).toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', { name: /62010 컴퓨터 프로그래밍 서비스업/ }),
+    )
+
+    await waitFor(() => {
+      expect(within(finderSection).getByRole('button', { name: '공유 링크 복사' })).toBeInTheDocument()
+    })
+
+    expect(screen.getAllByText('62010').length).toBeGreaterThan(0)
+    expect(screen.queryByText('최근 확인한 예비판정을 다시 열 수 있습니다')).not.toBeInTheDocument()
+  })
+
+  it('결과 각주에서 라이브러리 근거 보기로 바로 이동할 수 있다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '62010')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '컴퓨터 프로그래밍 서비스업',
+    )
+    await user.click(within(finderSection).getByRole('button', { name: '결과 보기' }))
+
+    await waitFor(() => {
+      expect(within(finderSection).getByText('법적 근거 각주')).toBeInTheDocument()
+    })
+
+    await user.click(
+      within(finderSection).getAllByRole('button', {
+        name: /법령 라이브러리에서 근거 보기:/,
+      })[0],
+    )
+
+    expect(
+      await screen.findByRole('heading', {
+        name: /판정에 쓰인 문서를\s*한 번에 볼 수 있습니다/,
+      }),
+    ).toBeInTheDocument()
+    expect(window.location.hash).toMatch(/^#library-basis-/)
+  })
+
+  it('핵심 퍼널 이벤트를 dataLayer에 기록한다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.type(
+      screen.getByPlaceholderText(
+        '예: 소프트웨어 개발 도급, 온라인 교육 플랫폼 운영, 프랜차이즈 카페 본사',
+      ),
+      '광고대행업',
+    )
+    await user.click(screen.getAllByRole('button', { name: '추천 코드 찾기' })[0])
+
+    await waitFor(() => {
+      expect(within(finderSection).getByText('추천 결과 확인하기')).toBeInTheDocument()
+    })
+
+    await user.click(
+      within(finderSection).getAllByRole('button', { name: '이 코드로 확인하기' })[0],
+    )
+    await user.click(within(finderSection).getByRole('button', { name: '결과 보기' }))
+
+    await waitFor(() => {
+      expect(within(finderSection).getByText('법적 근거 각주')).toBeInTheDocument()
+    })
+
+    await user.click(
+      within(finderSection).getAllByRole('button', {
+        name: /법령 라이브러리에서 근거 보기:/,
+      })[0],
+    )
+
+    const eventNames =
+      window.dataLayer?.map((entry) => String(entry.event)) ?? []
+
+    expect(eventNames).toEqual(
+      expect.arrayContaining([
+        'eligibility_search_submitted',
+        'eligibility_suggestion_selected',
+        'eligibility_evaluation_requested',
+        'eligibility_result_viewed',
+        'eligibility_library_basis_opened',
+      ]),
+    )
   })
 })

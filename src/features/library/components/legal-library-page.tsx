@@ -1,21 +1,42 @@
+import { useEffect } from 'react'
 import { ArrowRight, BookOpenText, ExternalLink, Scale } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { getLegalLibraryEntryDetails } from '@/features/library/data/legal-library'
+import {
+  getLegalLibraryBasisSectionId,
+  getLegalLibraryEntryDetails,
+  getLegalLibraryEntrySectionId,
+} from '@/features/library/data/legal-library'
 import { formatKoreanDate } from '@/utils/format'
 
 interface LegalLibraryPageProps {
   onBackHome: () => void
   onOpenUpdates: () => void
+  focusTargetId?: string | null
 }
 
 export function LegalLibraryPage({
   onBackHome,
   onOpenUpdates,
+  focusTargetId = null,
 }: LegalLibraryPageProps) {
   const entries = getLegalLibraryEntryDetails()
+
+  useEffect(() => {
+    if (!focusTargetId) {
+      return
+    }
+
+    window.requestAnimationFrame(() => {
+      const element = document.getElementById(focusTargetId)
+
+      if (element && typeof element.scrollIntoView === 'function') {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    })
+  }, [focusTargetId])
 
   return (
     <section
@@ -54,7 +75,12 @@ export function LegalLibraryPage({
         {entries.map((entry) => (
           <Card
             key={entry.id}
-            className="border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]"
+            id={getLegalLibraryEntrySectionId(entry.id)}
+            className={
+              focusTargetId === getLegalLibraryEntrySectionId(entry.id)
+                ? 'border-[var(--border-accent-strong)] bg-[rgba(241,247,255,0.96)] shadow-[0_18px_40px_rgba(24,32,43,0.1)]'
+                : 'border-[var(--border-accent)] bg-white/96 shadow-[0_18px_40px_rgba(24,32,43,0.06)]'
+            }
           >
             <CardContent className="space-y-5 p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
@@ -142,7 +168,12 @@ export function LegalLibraryPage({
                 {entry.bases.map((basis) => (
                   <article
                     key={basis.id}
-                    className="rounded-[14px] border border-[var(--border)] bg-[rgba(255,255,255,0.84)] p-4"
+                    id={getLegalLibraryBasisSectionId(basis.id)}
+                    className={
+                      focusTargetId === getLegalLibraryBasisSectionId(basis.id)
+                        ? 'rounded-[14px] border border-[var(--border-accent-strong)] bg-[rgba(239,245,255,0.96)] p-4 shadow-[var(--shadow-sm)]'
+                        : 'rounded-[14px] border border-[var(--border)] bg-[rgba(255,255,255,0.84)] p-4'
+                    }
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge>{basis.citation}</Badge>

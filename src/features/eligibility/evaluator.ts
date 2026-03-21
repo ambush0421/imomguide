@@ -12,6 +12,8 @@ import {
 } from '@/features/eligibility/data/rules'
 import type {
   ApplicantType,
+  ComparableZoneType,
+  EligibilityComparisonResults,
   EligibilityInput,
   EligibilityResult,
   RegulatoryFit,
@@ -94,6 +96,16 @@ function isPublicBody(applicantType: ApplicantType) {
 
 function formatExactCodeLabel(code: string, name: string) {
   return `${name}(${code})`
+}
+
+function buildComparisonInput(
+  input: EligibilityInput,
+  zoneType: ComparableZoneType,
+): EligibilityInput {
+  return {
+    ...input,
+    zoneType,
+  }
 }
 
 export function evaluateEligibility(input: EligibilityInput): EligibilityResult {
@@ -785,4 +797,17 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
     ],
     legalBasisIds: ['magokKnowledgeCenterExtra', 'decreeEligibility'],
   })
+}
+
+export function evaluateEligibilityComparison(
+  input: EligibilityInput,
+): EligibilityComparisonResults {
+  return {
+    knowledgeIndustryCenter: evaluateEligibility(
+      buildComparisonInput(input, 'knowledgeIndustryCenter'),
+    ),
+    industrialFacility: evaluateEligibility(
+      buildComparisonInput(input, 'industrialFacility'),
+    ),
+  }
 }

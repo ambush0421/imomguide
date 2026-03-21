@@ -4217,3 +4217,288 @@ npm run test
 
 - 컨설턴트는 이제 결과 화면에서 바로 공유 링크를 만들고, 고객 전달용 요약을 복사하고, PDF 저장용 인쇄 화면까지 한 번에 이어갈 수 있다.
 - 공유 해시로 진입하면 같은 입력과 판정 결과가 복원돼, `이 링크 그대로 열면 같은 화면이 나온다`는 전달 경험이 가능해졌다.
+
+---
+
+## 2026-03-21 두 구역 동시 비교 판정
+
+### 작업 배경
+
+- 사용자는 2번 우선순위 기능으로 `지식산업센터 ↔ 산업시설구역 동시 비교`를 바로 이어서 구현하라고 요청했다.
+- 컨설턴트 실무에서는 같은 업종이 두 구역 중 어디에 더 맞는지를 한 화면에서 설명하는 수요가 크기 때문에, 이번 루프는 2단계 토글부터 3단계 비교 결과, 공유/인쇄까지 한 세트로 묶어 완결하는 데 초점을 맞췄다.
+
+### 반영 내용
+
+- [types.ts](C:/projects/magok/src/features/eligibility/types.ts)
+  - 비교 가능한 구역 타입 `ComparableZoneType`과 결과 맵 타입 `EligibilityComparisonResults`를 추가했다.
+- [evaluator.ts](C:/projects/magok/src/features/eligibility/evaluator.ts)
+  - `evaluateEligibilityComparison(input)` 헬퍼를 추가해 `지식산업센터`, `산업시설구역` 결과를 한 번에 계산하도록 했다.
+- [share-result.ts](C:/projects/magok/src/features/eligibility/share-result.ts)
+  - 공유 payload를 `compareZones`까지 담는 v2 포맷으로 확장했다.
+  - 기존 v1 링크도 계속 열리도록 하위 호환을 유지했고, 비교 모드일 때 요약 텍스트와 인쇄 문서가 두 구역 결과를 함께 담도록 확장했다.
+- [eligibility-store.ts](C:/projects/magok/src/store/eligibility-store.ts)
+  - `compareZones`, `comparisonResults`, `setCompareZones` 상태를 추가했다.
+  - `evaluate()`와 `loadSharedResult()`가 비교 모드일 때 두 구역 결과를 같이 저장하도록 바꿨다.
+- [eligibility-form.tsx](C:/projects/magok/src/features/eligibility/components/eligibility-form.tsx)
+  - 2단계 상단에 `두 구역 동시 비교` 스위치를 추가했다.
+  - 비교 모드가 켜지면 단일 구역 선택 대신 비교 안내를 보여주고, primary CTA도 `두 구역 비교 판정 보기`로 바뀌게 했다.
+- [result-panel.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.tsx)
+  - 비교 모드에서는 상단 요약 카드와 `지식산업센터`, `산업시설구역` 결과 카드를 나란히 렌더링하도록 확장했다.
+  - 법적 근거 각주는 두 구역 결과를 합쳐 중복 없이 보여주도록 정리했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - compare state를 form, result, 공유 링크, 요약 복사, 인쇄까지 연결했다.
+  - 공유 해시 복원도 compare state를 함께 읽도록 갱신했다.
+- 테스트
+  - [share-result.test.ts](C:/projects/magok/src/features/eligibility/share-result.test.ts)에 비교 모드 공유 round-trip과 비교 요약 테스트를 추가했다.
+  - [result-panel.test.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.test.tsx)에 두 구역 비교 렌더링 테스트를 추가했다.
+  - [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 `직접 입력 → 두 구역 동시 비교 → 결과 보기` 흐름 테스트를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 9개 테스트 파일
+  - 86개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-A212aAwl.js`
+  - `dist/assets/index-BmKIi7La.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - `npm run build`의 prebuild 단계로 `public/` 아래 SEO 산출물이 다시 export됐다.
+
+### 결과 요약
+
+- 2단계에서 비교 모드를 켜면 이제 같은 업종코드를 기준으로 `지식산업센터`와 `산업시설구역` 결과를 한 화면에서 바로 비교할 수 있다.
+- 공유 링크, 요약 복사, 인쇄/PDF 저장도 비교 결과를 함께 담아, 상담 준비와 설명 흐름을 끊지 않고 이어갈 수 있게 됐다.
+
+---
+
+## 2026-03-21 복수 업종코드 동시 판정
+
+### 작업 배경
+
+- 사용자는 3번 우선순위 기능으로 `주업종 + 부업종 조합을 한 번에 보고 싶다`는 실무 니즈를 바로 이어서 구현하라고 요청했다.
+- 이번 루프의 목표는 단일 코드 기반 판정 흐름을 유지하면서도, 2단계에서 최대 3개 업종코드를 넣고 3단계 결과·공유·인쇄까지 같은 맥락으로 이어지게 만드는 것이었다.
+
+### 반영 내용
+
+- [types.ts](C:/projects/magok/src/features/eligibility/types.ts)
+  - `EligibilityAdditionalCode`, `EligibilityCodeEvaluation` 타입을 추가해 부업종 입력과 코드별 결과 구조를 명시했다.
+- [eligibility-store.ts](C:/projects/magok/src/store/eligibility-store.ts)
+  - `additionalCodes`, `multiCodeResults` 상태를 추가했다.
+  - `addAdditionalCode`, `removeAdditionalCode`, `setAdditionalCodeField` 액션을 만들고, `evaluate()`가 주업종 결과와 코드별 결과 배열을 함께 계산하도록 확장했다.
+  - 공유 해시 복원 시에도 추가 업종코드를 같이 불러오고 바로 결과를 재계산하도록 바꿨다.
+- [eligibility-form.tsx](C:/projects/magok/src/features/eligibility/components/eligibility-form.tsx)
+  - `함께 판정할 추가 업종코드` 섹션을 추가했다.
+  - 최대 2개 부업종 행을 추가/삭제할 수 있게 했고, 비워 둔 행은 결과에서 자동 제외된다는 안내를 넣었다.
+  - 상단 요약 카드도 `주업종 외 N개` 문맥으로 보이게 정리했다.
+- [result-panel.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.tsx)
+  - 복수 코드 결과가 있으면 상단 헤드라인을 `주업종과 부업종 동시 판정` 문맥으로 바꾸고, 코드별 결과 카드를 렌더링하게 확장했다.
+  - 두 구역 비교와 같이 켠 경우에도 각 코드 카드 안에서 `지식산업센터 / 산업시설구역` 결과를 함께 보여주도록 정리했다.
+  - 법적 근거 각주는 모든 코드 결과를 합쳐 중복 없이 보여주게 바꿨다.
+- [share-result.ts](C:/projects/magok/src/features/eligibility/share-result.ts)
+  - 공유 payload를 `additionalCodes`까지 담는 v3 포맷으로 확장했다.
+  - 기존 v1/v2 링크는 계속 복원되도록 하위 호환을 유지했다.
+  - 요약 복사와 인쇄 문서도 복수 코드 판정, 복수 코드 비교 요약을 지원하게 확장했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 새 스토어 상태와 액션을 2단계 입력 폼과 3단계 결과 패널에 연결했다.
+  - 공유 링크, 판정 요약 복사, 인쇄/PDF 저장이 추가 업종코드 상태를 함께 담도록 갱신했다.
+- 테스트
+  - [share-result.test.ts](C:/projects/magok/src/features/eligibility/share-result.test.ts)에 복수 코드 공유 round-trip과 복수 코드 요약 케이스를 추가했다.
+  - [result-panel.test.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.test.tsx)에 복수 코드 비교 결과 렌더링 테스트를 추가했다.
+  - [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 `직접 입력 → 부업종 추가 → 결과 보기` 흐름을 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 9개 테스트 파일
+  - 90개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-Yj7B4Xvf.js`
+  - `dist/assets/index-DU8qBKc_.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - `npm run build`의 prebuild 단계로 `public/` 아래 SEO 산출물이 다시 export됐다.
+
+### 결과 요약
+
+- 이제 2단계에서 주업종과 부업종을 최대 3개까지 함께 넣고, 같은 화면에서 코드별 예비판정을 바로 읽을 수 있다.
+- 두 구역 비교와 복수 코드를 같이 켜도 카드 단위로 결과를 설명할 수 있고, 공유 링크·요약 복사·인쇄/PDF 저장도 그 상태를 그대로 전달할 수 있게 됐다.
+
+---
+
+## 2026-03-21 최근 조회 히스토리
+
+### 작업 배경
+
+- 사용자는 4번 우선순위 기능으로 `최근 조회 기록`을 붙여, 여러 고객 건을 오갈 때 처음부터 다시 입력하지 않게 해 달라고 요청했다.
+- 이번 루프의 목표는 기존 공유 해시 복원 구조를 재사용해, 판정을 한 번 보면 자동 저장되고 헤더에서 바로 다시 열 수 있게 만드는 것이었다.
+
+### 반영 내용
+
+- [history-storage.ts](C:/projects/magok/src/features/eligibility/history-storage.ts)
+  - 로컬스토리지 기반 최근 조회 저장소를 추가했다.
+  - `loadRecentEligibilityHistory`, `saveRecentEligibilityHistory`, `clearRecentEligibilityHistory` 헬퍼를 만들고, 같은 판정은 같은 공유 해시 기준으로 덮어쓰게 정리했다.
+  - 헤더에서 바로 쓰는 코드 라벨/문맥 라벨 헬퍼도 함께 추가했다.
+- [eligibility-store.ts](C:/projects/magok/src/store/eligibility-store.ts)
+  - `evaluate()` 성공 시 최근 조회를 자동 저장하게 연결했다.
+  - 공유 해시로 결과를 복원할 때도 최근 조회에 반영되도록 `loadSharedResult()`에서 저장을 함께 처리했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 상단 헤더에 `최근 조회` 토글 버튼과 드롭다운형 패널을 추가했다.
+  - 최근 조회 리스트에서 항목을 누르면 같은 입력/조건/결과를 바로 복원하도록 연결했다.
+  - 빈 상태와 `전체 지우기` 액션도 함께 제공했다.
+- [format.ts](C:/projects/magok/src/utils/format.ts)
+  - 최근 조회 시각 표시에 쓰는 `formatKoreanDateTime` 포맷터를 추가했다.
+- 테스트
+  - [history-storage.test.ts](C:/projects/magok/src/features/eligibility/history-storage.test.ts)에 저장/중복 덮어쓰기/라벨 생성 테스트를 추가했다.
+  - [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 결과 저장 후 최근 조회 목록 노출과 클릭 복원 흐름을 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 10개 테스트 파일
+  - 93개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-je2RV9W7.js`
+  - `dist/assets/index-c_I8K-Ye.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - `npm run build`의 prebuild 단계로 `public/` 아래 SEO 산출물이 다시 export됐다.
+
+### 결과 요약
+
+- 이제 판정 결과를 한 번 보면 최근 조회에 자동 저장되고, 헤더의 `최근 조회`에서 같은 상태를 바로 다시 열 수 있다.
+- 여러 고객 건을 오갈 때 코드·조건·비교 모드까지 그대로 복원할 수 있어, 상담 재진입 비용이 줄어들었다.
+
+---
+
+## 2026-03-21 추천 결과 더 보기
+
+### 작업 배경
+
+- 사용자는 5번 우선순위 기능으로 `추천 결과를 3개로 잘라 보이지 말고, 더 보기로 넓게 확인할 수 있게` 만들어 달라고 요청했다.
+- 이번 루프의 목표는 추천 엔진이 더 많은 후보를 반환하게 하면서도, 첫 화면은 여전히 3개만 먼저 보여줘 밀도를 유지하는 것이었다.
+
+### 반영 내용
+
+- [industry-discovery.ts](C:/projects/magok/src/features/eligibility/data/industry-discovery.ts)
+  - exact / related 후보 상한을 모두 8개로 넓혀 더 많은 추천 결과를 반환하도록 조정했다.
+  - 기존 정렬과 우선순위 규칙은 그대로 두고 최종 slice 상한만 확장했다.
+- [industry-discovery-panel.tsx](C:/projects/magok/src/features/eligibility/components/industry-discovery-panel.tsx)
+  - `먼저 볼 코드`, `비슷한 코드` 섹션 각각에 `기본 3개 먼저 노출` 구조를 추가했다.
+  - 숨겨진 후보가 있으면 `더 보기 (N개 더)` 버튼을 보여주고, 펼친 뒤에는 `먼저 볼 코드 접기` 또는 `비슷한 코드 접기`로 다시 접을 수 있게 했다.
+  - 추천 상태 카드와 상단 안내 문구도 `3개 먼저 표시`와 `더 보기` 맥락이 드러나게 짧게 조정했다.
+- 테스트
+  - [industry-discovery.test.ts](C:/projects/magok/src/features/eligibility/industry-discovery.test.ts)에 넓은 검색어가 3개 초과 후보를 반환하는 케이스를 추가했다.
+  - [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 추천 결과 화면에서 `더 보기`로 후보 수를 확장하는 흐름 테스트를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 10개 테스트 파일
+  - 95개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-CTP2FFR5.js`
+  - `dist/assets/index-BgtAYC3O.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - `npm run build`의 prebuild 단계로 `public/` 아래 SEO 산출물이 다시 export됐다.
+
+### 결과 요약
+
+- 이제 추천 결과 화면은 후보를 3개로 고정해 보이지 않고, 기본 3개만 먼저 보여준 뒤 필요하면 `더 보기`로 이어서 넓게 확인할 수 있다.
+- 첫 화면의 간결함은 유지하면서도, 컨설턴트가 `더 있는 후보까지 다 봤다`는 확신을 가질 수 있게 됐다.
+
+---
+
+## 2026-03-21 예외 조건 스마트 필터
+
+### 작업 배경
+
+- 사용자는 6번 우선순위 기능으로 `2단계 예외 조건 토글이 너무 많아 처음 보는 사람이 부담스럽다`는 점을 줄이고, 현재 업종에 맞는 조건만 먼저 보여 달라고 요청했다.
+- 이번 루프의 목표는 `추천 조건만 먼저 노출 + 전체 조건 펼치기` 구조를 넣어 초기 진입 부담을 낮추면서도, 사용자가 모든 토글을 직접 조정할 수 있는 제어권은 유지하는 것이었다.
+
+### 반영 내용
+
+- [eligibility-form.tsx](C:/projects/magok/src/features/eligibility/components/eligibility-form.tsx)
+  - 조건 토글 메타데이터에 `recommendationHint`와 `matches()` 규칙을 추가했다.
+  - `KSIC 코드`, `업종명`, `보충 메모`, `구역`, `비교 모드`, `수동 법령 분류`를 바탕으로 현재 업종에서 먼저 볼 조건을 계산하도록 정리했다.
+  - `내 업종에 해당할 수 있는 조건 N개` 요약 카드와 `전체 조건 보기 / 추천 조건만 보기` 토글을 추가했다.
+  - 추천 조건이 없을 때는 빈 상태 안내를 보여주고, 사용자가 전체 조건을 직접 열 수 있게 했다.
+  - 이미 사용자가 켜 둔 조건은 추천 규칙에 안 걸려도 계속 visible 상태로 남게 처리했다.
+- [App.test.tsx](C:/projects/magok/src/App.test.tsx)
+  - `63112` 입력 시 호스팅 관련 조건만 먼저 보이고, `전체 조건 보기`를 누르면 숨겨진 조건이 펼쳐지는 흐름을 추가했다.
+  - 전체 조건에서 사용자가 직접 켠 토글이 `추천 조건만 보기`로 돌아가도 계속 보이는지 검증하는 테스트를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 10개 테스트 파일
+  - 97개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-Ci1uBOrm.js`
+  - `dist/assets/index-BgtAYC3O.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - `npm run build`의 prebuild 단계로 `public/` 아래 SEO 산출물이 다시 export됐다.
+
+### 결과 요약
+
+- 이제 2단계 예외 조건은 현재 업종과 관련 있어 보이는 토글만 먼저 보여 주고, 나머지는 `전체 조건 보기`로 펼칠 수 있다.
+- 처음 보는 사용자는 부담 없이 시작하고, 실무자는 필요할 때 전체 조건을 열어 세부 보정을 계속 진행할 수 있다.
+
+---
+
+## 2026-03-21 법적 근거 각주 직링크
+
+### 작업 배경
+
+- 사용자는 7번 우선순위 기능으로 `판정 결과 법적 근거 각주에서 법령 라이브러리 해당 문서로 바로 이동`하는 연결을 원했다.
+- 이번 루프의 목표는 결과 각주에서 끝나지 않고, 클릭 한 번으로 라이브러리의 해당 문서 카드나 근거 카드까지 바로 이어지게 만들어 설명 도구로서의 완성도를 높이는 것이었다.
+
+### 반영 내용
+
+- [legal-library.ts](C:/projects/magok/src/features/library/data/legal-library.ts)
+  - 문서 카드와 근거 카드가 공통으로 쓰는 section id 헬퍼를 추가했다.
+- [legal-footnotes.tsx](C:/projects/magok/src/features/eligibility/components/legal-footnotes.tsx)
+  - 출처 카드에 `라이브러리에서 보기` 액션을 추가했다.
+  - 각 근거 카드에 `라이브러리에서 근거 보기` 버튼을 추가해 해당 basis id로 바로 이동할 수 있게 했다.
+- [result-panel.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.tsx)
+  - `LegalFootnotes`에 라이브러리 이동 콜백을 연결할 수 있게 props를 확장했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - `#library` 해시에 `#library-entry-...`, `#library-basis-...` 타겟을 담을 수 있게 확장했다.
+  - 결과 화면에서 클릭하면 라이브러리 view와 해당 target id를 함께 여는 흐름으로 연결했다.
+- [legal-library-page.tsx](C:/projects/magok/src/features/library/components/legal-library-page.tsx)
+  - 문서 카드와 근거 카드에 DOM id를 추가했다.
+  - 전달된 target id가 있으면 해당 위치로 스크롤하고, 카드 border/background를 강조 상태로 바꿔 현재 보고 있는 근거를 더 쉽게 찾도록 했다.
+- 테스트
+  - [result-panel.test.tsx](C:/projects/magok/src/features/eligibility/components/result-panel.test.tsx)에 각주 직링크 버튼 콜백 테스트를 추가했다.
+  - [App.test.tsx](C:/projects/magok/src/App.test.tsx)에 결과 화면에서 각주 버튼을 눌러 라이브러리 화면으로 이동하는 통합 테스트를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 10개 테스트 파일
+  - 99개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-CIpZjSwu.js`
+  - `dist/assets/index-CjgF2DGt.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - `npm run build`의 prebuild 단계로 `public/` 아래 SEO 산출물이 다시 export됐다.
+
+### 결과 요약
+
+- 이제 결과 화면의 각주와 출처 카드에서 법령 라이브러리의 해당 문서·근거로 바로 이동할 수 있다.
+- 상담 중 `왜 이런 판정이 나왔는지` 설명할 때, 결과 카드에서 라이브러리 상세 근거까지 흐름이 끊기지 않게 됐다.

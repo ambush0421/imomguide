@@ -110,3 +110,11 @@ export function getLegalLibraryEntryById(id: string) {
 export function getLegalLibraryEntryBySourceKind(sourceKind: LegalBasis['source']) {
   return LEGAL_LIBRARY_ENTRIES.find((entry) => entry.sourceKind === sourceKind)
 }
+
+export function getLegalLibraryEntrySectionId(entryId: string) {
+  return `library-entry-${entryId}`
+}
+
+export function getLegalLibraryBasisSectionId(basisId: string) {
+  return `library-basis-${basisId}`
+}

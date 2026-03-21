@@ -868,6 +868,9 @@ function matchDirectoryEntry(
   }
 }
 
+const maxExactSuggestions = 8
+const maxRelatedSuggestions = 8
+
 export function discoverIndustrySuggestions(
   query: string,
   zoneType: DirectoryZoneType = 'knowledgeIndustryCenter',
@@ -1030,7 +1033,7 @@ export function discoverIndustrySuggestions(
 
   const exactMatches = orderedSuggestions
     .filter((suggestion) => suggestion.matchKind === 'exact')
-    .slice(0, 3)
+    .slice(0, maxExactSuggestions)
   const relatedSuggestionPool = orderedSuggestions
     .filter((suggestion) => suggestion.matchKind === 'related')
   const relatedMatches = (
@@ -1041,7 +1044,7 @@ export function discoverIndustrySuggestions(
           (suggestion) => suggestion.selectedZoneVerdict !== 'ineligible',
         )
       : relatedSuggestionPool
-  ).slice(0, 4)
+  ).slice(0, maxRelatedSuggestions)
 
   return [...exactMatches, ...relatedMatches]
 }

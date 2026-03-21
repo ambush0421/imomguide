@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react'
+import { ArrowRight, ExternalLink } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,9 +11,15 @@ import { formatKoreanDate } from '@/utils/format'
 
 interface LegalFootnotesProps {
   legalBases: LegalBasis[]
+  onOpenLibraryEntry?: (entryId: string) => void
+  onOpenLibraryBasis?: (basisId: string) => void
 }
 
-export function LegalFootnotes({ legalBases }: LegalFootnotesProps) {
+export function LegalFootnotes({
+  legalBases,
+  onOpenLibraryEntry,
+  onOpenLibraryBasis,
+}: LegalFootnotesProps) {
   const sourceEntries = legalBases.reduce<LegalLibraryEntry[]>((entries, basis) => {
     const entry = getLegalLibraryEntryBySourceKind(basis.source)
 
@@ -65,6 +71,17 @@ export function LegalFootnotes({ legalBases }: LegalFootnotesProps) {
                 경로를 함께 표시합니다.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
+                {onOpenLibraryEntry ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => onOpenLibraryEntry(entry.id)}
+                    aria-label={`${entry.title} 라이브러리에서 보기`}
+                  >
+                    라이브러리에서 보기
+                    <ArrowRight className="size-3.5" />
+                  </Button>
+                ) : null}
                 <Button asChild size="sm" variant="outline">
                   <a
                     href={entry.officialSource.url}
@@ -123,6 +140,20 @@ export function LegalFootnotes({ legalBases }: LegalFootnotesProps) {
             {basis.quote ? (
               <div className="mt-3 rounded-xl bg-white/80 px-3 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
                 실무 해석 포인트: {basis.quote}
+              </div>
+            ) : null}
+            {onOpenLibraryBasis ? (
+              <div className="mt-3">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="px-0"
+                  onClick={() => onOpenLibraryBasis(basis.id)}
+                  aria-label={`법령 라이브러리에서 근거 보기: ${basis.citation}`}
+                >
+                  라이브러리에서 근거 보기
+                  <ArrowRight className="size-3.5" />
+                </Button>
               </div>
             ) : null}
           </li>

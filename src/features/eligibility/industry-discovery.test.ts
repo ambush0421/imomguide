@@ -84,4 +84,10 @@ describe('discoverIndustrySuggestions', () => {
 
     expect(suggestions.some((suggestion) => suggestion.code === '63112')).toBe(true)
   })
+
+  it('넓은 검색어에서는 3개를 넘는 후보를 반환해 더 보기 확장이 가능하다', () => {
+    const suggestions = discoverIndustrySuggestions('개발')
+
+    expect(suggestions.length).toBeGreaterThan(3)
+  })
 })

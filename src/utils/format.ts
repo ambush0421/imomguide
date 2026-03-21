@@ -26,6 +26,22 @@ export function formatKoreanDate(value: string) {
   }).format(new Date(year, month - 1, day))
 }
 
+export function formatKoreanDateTime(value: string) {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date)
+}
+
 export function formatVerdictLabel(
   verdict:
     | 'eligible'

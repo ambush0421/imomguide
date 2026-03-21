@@ -2093,6 +2093,45 @@ src/
 
 ---
 
+## 2026-03-21 두 구역 동시 비교 판정 계획
+
+### 변경 목표
+
+- 2단계 보정 화면에서 `지식산업센터 ↔ 산업시설구역 동시 비교`를 켜면, 같은 업종코드 기준으로 두 구역 결과를 한 화면에서 나란히 보여준다.
+- 비교 모드는 단순 UI 토글이 아니라 결과 전달 기능까지 이어져야 하므로, 공유 해시/요약 복사/인쇄 문서도 비교 결과를 함께 담도록 확장한다.
+- 이번 루프는 2번 기능만 완결하고, 멀티 코드·히스토리·더 보기 같은 다음 기능은 건드리지 않는다.
+
+### 구현 메모
+
+1. 타입/평가 계층
+   - `src/features/eligibility/types.ts`에 비교 가능한 구역 타입과 비교 결과 맵 타입을 추가한다.
+   - `src/features/eligibility/evaluator.ts`에 `evaluateEligibilityComparison(input)` 헬퍼를 추가해 `지식산업센터`, `산업시설구역` 결과를 한 번에 계산한다.
+2. 공유/복원 계층
+   - `src/features/eligibility/share-result.ts`의 payload를 `compareZones`까지 담는 v2 포맷으로 확장한다.
+   - 기존 v1 공유 링크도 계속 열리도록 복원 함수는 하위 호환을 유지한다.
+   - 요약 텍스트와 인쇄 문서는 비교 모드일 때 두 구역 결과를 모두 담도록 확장한다.
+3. store
+   - `src/store/eligibility-store.ts`에 `compareZones`, `comparisonResults`, `setCompareZones`를 추가한다.
+   - `evaluate()`와 `loadSharedResult()`는 비교 모드일 때 두 구역 결과를 함께 세팅한다.
+4. UI
+   - `src/features/eligibility/components/eligibility-form.tsx`에 `두 구역 동시 비교` 스위치를 추가한다.
+   - 비교 모드에서는 단일 구역 선택 대신 비교 모드 안내를 보여주고, primary CTA도 비교 판정 맥락으로 바꾼다.
+   - `src/features/eligibility/components/result-panel.tsx`는 비교 모드일 때 상단 요약 카드와 두 개의 구역 결과 카드를 나란히 렌더링한다.
+5. App 연결
+   - `src/App.tsx`는 compare state를 form/result/share 액션까지 연결한다.
+6. 테스트
+   - `share-result.test.ts`에 비교 모드 공유 round-trip을 추가한다.
+   - `result-panel.test.tsx`에 비교 결과 렌더링 테스트를 추가한다.
+   - `App.test.tsx`에 비교 모드 진입 후 두 구역 결과가 같이 보이는 흐름을 추가한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
 ## 2026-03-21 홈 전환 카피·시각 위계 개선 계획
 
 ### 변경 목표
@@ -3149,6 +3188,204 @@ src/
    - 잠긴 step 버튼에는 숫자 대신 잠금 아이콘을 보여주고, `검색 후 활성화` 텍스트를 함께 붙인다.
 2. `src/App.test.tsx`
    - 초기 홈 렌더 시 `이렇게 시작하세요`와 `검색 후 활성화`가 보이는지 검증한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 복수 업종코드 동시 판정 계획
+
+### 변경 목표
+
+- 2단계에서 주업종과 부업종을 함께 입력해 최대 3개 업종코드를 한 번에 예비판정할 수 있게 만든다.
+- 기존 단일 코드 흐름과 2번 기능인 `두 구역 동시 비교`는 유지하고, 복수 코드 입력 시에도 결과 공유/복사/인쇄가 동일하게 동작하게 만든다.
+- 컨설턴트가 사업자등록증의 주업종 + 부업종 조합을 한 화면에서 설명할 수 있도록, 결과 화면을 `코드별 카드` 중심으로 확장한다.
+
+### 구현 메모
+
+1. `src/features/eligibility/types.ts`
+   - 추가 코드 입력 타입 `EligibilityAdditionalCode`와 코드별 계산 결과 타입 `EligibilityCodeEvaluation`을 추가한다.
+   - `주업종/부업종` 라벨을 결과와 공유 문서에서 함께 재사용할 수 있게 `label`, `order`, `isPrimary` 정보를 담는다.
+2. `src/store/eligibility-store.ts`
+   - `additionalCodes`, `multiCodeResults` 상태를 추가한다.
+   - `addAdditionalCode`, `removeAdditionalCode`, `setAdditionalCodeField` 액션을 만든다.
+   - `evaluate()`는 주업종 결과를 기존 `result`에 유지하면서, 추가 코드가 있으면 코드별 결과 배열도 함께 계산한다.
+   - `loadSharedResult()`와 `reset()`도 추가 코드 상태를 함께 다루도록 확장한다.
+3. `src/features/eligibility/share-result.ts`
+   - 공유 payload를 `additionalCodes`까지 담는 v3 포맷으로 확장하고, 기존 v1/v2 링크는 계속 열리게 유지한다.
+   - 요약 복사/인쇄용 문서 생성기에서 복수 코드 요약과 복수 코드 비교 요약을 모두 지원한다.
+4. `src/features/eligibility/components/eligibility-form.tsx`
+   - `입지와 업종 정보` 영역에 `함께 판정할 추가 업종코드` 섹션을 추가한다.
+   - 최대 2개 부업종 행을 추가/삭제할 수 있게 하고, 비워 둔 행은 결과 계산에서 자동 제외된다는 안내를 넣는다.
+   - 상단 요약 카드에도 현재 함께 보는 코드 개수를 보여준다.
+5. `src/features/eligibility/components/result-panel.tsx`
+   - 복수 코드 결과가 있으면 상단 헤드라인을 `주업종 + 부업종 동시 판정` 문맥으로 바꾸고, 코드별 결과 카드를 렌더링한다.
+   - 비교 모드와 함께 켠 경우에는 각 코드 카드 안에 `지식산업센터 / 산업시설구역` 결과를 같이 보여준다.
+   - 법적 근거 각주는 모든 코드와 비교 결과를 합쳐 중복 없이 정리한다.
+6. `src/App.tsx`
+   - 새 스토어 상태와 액션을 `EligibilityForm`, `ResultPanel`, 공유 링크 생성기로 연결한다.
+   - 요약 복사, 공유 링크, 인쇄/PDF 저장이 복수 업종코드 상태를 함께 담도록 갱신한다.
+7. 테스트
+   - `src/features/eligibility/share-result.test.ts`에 복수 코드 공유 round-trip과 복수 코드 요약 케이스를 추가한다.
+   - `src/features/eligibility/components/result-panel.test.tsx`에 복수 코드 카드 렌더링 케이스를 추가한다.
+   - `src/App.test.tsx`에 `직접 입력 → 부업종 추가 → 결과 보기` 흐름을 추가한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 최근 조회 히스토리 계획
+
+### 변경 목표
+
+- 판정 결과를 본 뒤 새로고침이나 다른 화면 이동이 있어도 최근 본 건을 다시 쉽게 열 수 있도록 `최근 조회` 히스토리를 추가한다.
+- 저장 포맷은 기존 공유 해시 복원 구조를 재사용해, 한 번 저장한 최근 건을 클릭하면 같은 입력/조건/결과를 바로 복원하도록 만든다.
+- 상단 헤더에서 바로 접근 가능한 드롭다운형 패널로 제공해, 컨설턴트가 여러 고객 건을 오갈 때 재입력 비용을 줄인다.
+
+### 구현 메모
+
+1. `src/features/eligibility/history-storage.ts`
+   - 로컬스토리지 키, 최대 저장 개수, entry 타입을 정의한다.
+   - `loadRecentEligibilityHistory`, `saveRecentEligibilityHistory`, `clearRecentEligibilityHistory` 헬퍼를 추가한다.
+   - 기존 `createSharedFinderHash`를 재사용해 중복 판정은 같은 해시 기준으로 덮어쓰게 한다.
+2. `src/App.tsx`
+   - 결과가 `ready`가 되면 최근 조회 엔트리를 자동 저장하는 effect를 추가한다.
+   - 헤더에 `최근 조회` 토글 버튼과 최근 조회 패널을 추가한다.
+   - 최근 조회 리스트 아이템을 누르면 `loadSharedResult()`와 해시 갱신을 통해 같은 상태를 바로 복원하게 한다.
+   - 빈 상태와 `전체 지우기` 액션도 함께 제공한다.
+3. `src/utils/format.ts`
+   - 헤더 패널에서 최근 조회 시각을 읽기 좋게 보여줄 `formatKoreanDateTime` 포맷터를 추가한다.
+4. 테스트
+   - `src/features/eligibility/history-storage.test.ts`에서 저장/중복 덮어쓰기/라벨 생성 규칙을 검증한다.
+   - `src/App.test.tsx`에서 결과 저장 후 최근 조회 목록 노출과 클릭 복원 흐름을 검증한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 추천 결과 더 보기 계획
+
+### 변경 목표
+
+- 1단계 추천 결과 화면에서 후보를 `3개로 고정해 잘라 보이는 느낌`을 줄이고, 사용자가 필요할 때 더 많은 후보를 직접 펼쳐 볼 수 있게 만든다.
+- 추천 엔진은 더 많은 후보를 반환하되, 결과 화면은 처음 3개만 먼저 보여줘 첫 화면 밀도를 유지한다.
+- `먼저 볼 코드`와 `비슷한 코드`를 각각 독립적으로 펼칠 수 있게 해, 컨설턴트가 상담 상황에 따라 필요한 범위만 넓혀 보도록 만든다.
+
+### 구현 메모
+
+1. `src/features/eligibility/data/industry-discovery.ts`
+   - exact / related 후보 상한을 늘려 더 많은 추천 결과를 반환하도록 조정한다.
+   - 기본 정렬 규칙은 유지하고, 단순히 최종 slice 상한만 넓혀 UI가 더 보여줄 수 있는 후보 풀을 확보한다.
+2. `src/features/eligibility/components/industry-discovery-panel.tsx`
+   - exact / related 섹션 각각에 `기본 3개만 노출`하는 접힌 상태를 추가한다.
+   - 숨겨진 후보가 있으면 `더 보기 (N개 더)` 버튼을 보여주고, 펼친 뒤에는 `접기`를 제공한다.
+   - 추천 상태와 안내 문구도 `전체 후보를 더 볼 수 있다`는 맥락으로 짧게 조정한다.
+3. 테스트
+   - `src/features/eligibility/industry-discovery.test.ts`에 넓은 검색어가 3개 초과 후보를 반환하는 케이스를 추가한다.
+   - `src/App.test.tsx` 또는 추천 패널 관련 테스트에 `더 보기` 버튼과 확장 결과 노출을 검증한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 예외 조건 스마트 필터 계획
+
+### 변경 목표
+
+- 2단계 `제한·예외 조건`에서 모든 토글을 한 번에 나열하지 않고, 현재 업종코드/업종명 기준으로 먼저 볼 조건만 우선 보여준다.
+- 추천 조건이 없는 경우에도 사용자가 전체 조건을 직접 열어 모두 확인할 수 있게 해, 첫 진입 부담은 줄이고 제어권은 유지한다.
+- 이미 사용자가 켜 둔 조건은 추천 대상이 아니어도 계속 보이게 해, 보정 중인 상태가 갑자기 숨지지 않도록 만든다.
+
+### 구현 메모
+
+1. `src/features/eligibility/components/eligibility-form.tsx`
+   - 조건 토글 메타데이터에 `추천 규칙`과 `추천 힌트`를 함께 담는다.
+   - 현재 `input.ksicCode`, `input.ksicName`, `input.notes`, `zoneType`, `compareZones`, `regulatoryFit`를 조합한 컨텍스트로 `추천 조건` 목록을 계산한다.
+   - 기본 상태는 `추천 조건만 보기`로 두고, 상단에 `내 업종에 해당할 수 있는 조건 N개` 요약 카드와 `전체 조건 보기` 토글 버튼을 추가한다.
+   - 추천 조건이 없을 때는 빈 상태 안내를 보여주고, 사용자가 `전체 조건 보기`를 눌러 모든 토글을 직접 펼칠 수 있게 만든다.
+   - 이미 켜 둔 조건은 추천 목록에 없더라도 계속 visible 상태로 유지한다.
+2. 테스트
+   - `src/App.test.tsx`에 특정 코드에서 관련 조건만 먼저 노출되는지 검증한다.
+   - `전체 조건 보기`를 누르면 숨겨졌던 조건이 드러나는 흐름도 함께 검증한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 법적 근거 각주 직링크 계획
+
+### 변경 목표
+
+- 결과 화면의 `법적 근거 각주`에서 끝내지 않고, 클릭 한 번으로 법령 라이브러리의 해당 문서 또는 근거 카드까지 바로 이동하게 만든다.
+- 단순히 라이브러리 첫 화면만 여는 것이 아니라, 사용자가 방금 본 근거를 같은 문장 흐름으로 이어서 읽을 수 있게 스크롤 위치와 강조 상태를 함께 맞춘다.
+- 외부 원문 링크는 유지하고, 내부 라이브러리 직링크를 별도 보조 액션으로 추가해 `설명 도구`로서의 완성도를 높인다.
+
+### 구현 메모
+
+1. `src/App.tsx`
+   - `#library` 해시에 `#library-entry-...`, `#library-basis-...` 형태의 내부 타겟을 함께 담을 수 있게 확장한다.
+   - `openLibraryView(targetId?)` 형태로 문서 카드 또는 근거 카드까지 직접 여는 헬퍼를 만든다.
+   - 결과 패널에 `onOpenLibraryEntry`, `onOpenLibraryBasis` 콜백을 넘기고, 라이브러리 페이지에는 현재 타겟 id를 전달한다.
+2. `src/features/eligibility/components/legal-footnotes.tsx`
+   - 출처 카드에는 `라이브러리에서 보기` 액션을 추가한다.
+   - 각 근거 카드의 제목 줄 또는 보조 버튼에서 `법령 라이브러리에서 근거 보기` 액션을 제공한다.
+3. `src/features/library/components/legal-library-page.tsx`
+   - 문서 카드와 근거 카드에 안정적인 DOM id를 추가한다.
+   - 전달된 target id가 있으면 해당 위치로 스크롤하고, 카드 스타일도 강조 상태로 보여준다.
+4. `src/features/eligibility/components/result-panel.tsx`
+   - `LegalFootnotes`에 새 콜백 props를 연결한다.
+5. 테스트
+   - `src/features/eligibility/components/result-panel.test.tsx`에 각주 직링크 버튼 콜백 테스트를 추가한다.
+   - `src/App.test.tsx`에 결과 화면에서 `라이브러리에서 보기` 클릭 시 라이브러리 화면으로 이동하는 흐름을 추가한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 퍼널 이벤트 계측 계획
+
+### 변경 목표
+
+- 현재 추가한 주요 기능들이 실제로 얼마나 쓰이는지 확인할 수 있도록 `검색 → 추천 선택 → 결과 보기 → 공유/라이브러리 이동` 핵심 퍼널 이벤트를 심는다.
+- 특정 분석 벤더가 아직 정해지지 않았으므로, `window.gtag` 또는 `window.dataLayer`가 있으면 자동으로 전달되고 없으면 조용히 no-op 되는 얇은 공통 유틸을 만든다.
+- 개인 식별성이 강한 자유 입력 문장은 보내지 않고, 코드·구역·비교 모드·부업종 개수·결과 verdict 같은 구조화된 값만 보낸다.
+
+### 구현 메모
+
+1. `src/utils/analytics.ts`
+   - 공통 `trackEvent()` 유틸과 전송 가능한 primitive payload 타입을 추가한다.
+   - `gtag('event', ...)`와 `dataLayer.push(...)`를 모두 지원하고, 둘 다 없으면 그냥 종료한다.
+2. `src/App.tsx`
+   - `handleDiscoverSearch`, `runQuickSearch`, `handleSuggestionSelect`, `handleContinueManualStep`, `handleEvaluateStep`에 검색/추천/평가 요청 이벤트를 넣는다.
+   - 결과가 `ready`가 되었을 때 한 번만 `result_viewed` 이벤트를 보내도록 dedupe key를 둔다.
+   - 공유 링크 복사, 요약 복사, 인쇄, 최근 조회 복원, 법령 라이브러리 이동에도 이벤트를 추가한다.
+3. 테스트
+   - `src/utils/analytics.test.ts`에서 `dataLayer`/`gtag` 브리지 동작을 검증한다.
+   - `src/App.test.tsx`에 기본 퍼널 동작 후 핵심 이벤트가 기록되는지 확인하는 케이스를 추가한다.
 
 ### 검증 메모
 

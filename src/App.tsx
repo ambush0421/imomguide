@@ -4,12 +4,14 @@ import {
   BookOpenText,
   CheckCircle2,
   ChevronDown,
+  Clock3,
   ExternalLink,
   FileSearch,
   LibraryBig,
   Lock,
   Menu,
   SearchCheck,
+  Trash2,
   X,
 } from 'lucide-react'
 
@@ -44,29 +46,46 @@ import { IndustryDiscoveryPanel } from '@/features/eligibility/components/indust
 import { ResultPanel } from '@/features/eligibility/components/result-panel'
 import { RulebookTabs } from '@/features/eligibility/components/rulebook-tabs'
 import {
+  clearRecentEligibilityHistory,
+  getRecentHistoryCodeLabel,
+  getRecentHistoryContext,
+  loadRecentEligibilityHistory,
+  type RecentEligibilityHistoryEntry,
+} from '@/features/eligibility/history-storage'
+import {
   buildEligibilityPrintDocument,
   buildEligibilityResultSummary,
   createSharedFinderHash,
-  decodeSharedEligibilityInput,
+  decodeSharedEligibilityState,
+  type SharedEligibilityState,
 } from '@/features/eligibility/share-result'
 import {
   getFeaturedGuideEntries,
   getGuideEntryByCode,
 } from '@/features/guides/data/guide-catalog'
+import {
+  getLegalLibraryBasisSectionId,
+  getLegalLibraryEntrySectionId,
+} from '@/features/library/data/legal-library'
 import { getRecentUpdateLogEntries } from '@/features/updates/data/update-log'
 import {
   getZoneVerdictCounts,
 } from '@/features/eligibility/data/magok-code-directory'
 import type {
   DirectoryZoneType,
-  EligibilityInput,
   MagokCodeDirectoryEntry,
 } from '@/features/eligibility/types'
 import {
   type EligibilityStep,
   useEligibilityStore,
 } from '@/store/eligibility-store'
-import { formatKoreanDate, formatNumber } from '@/utils/format'
+import {
+  formatKoreanDate,
+  formatKoreanDateTime,
+  formatNumber,
+  formatVerdictLabel,
+} from '@/utils/format'
+import { trackEvent } from '@/utils/analytics'
 
 type AppView = 'home' | 'directory' | 'library' | 'updates' | 'guide'
 type DiscoverScreen = 'compose' | 'results'
@@ -205,7 +224,7 @@ interface HashState {
   view: AppView
   guideCode: string | null
   sectionId: string
-  sharedInput: EligibilityInput | null
+  sharedState: SharedEligibilityState | null
 }
 
 function getHashState(hash: string): HashState {
@@ -216,20 +235,25 @@ function getHashState(hash: string): HashState {
       view: 'guide',
       guideCode: guideCode || null,
       sectionId: 'top',
-      sharedInput: null,
+      sharedState: null,
     }
   }
 
   if (hash.startsWith('#directory')) {
-    return { view: 'directory', guideCode: null, sectionId: 'top', sharedInput: null }
+    return { view: 'directory', guideCode: null, sectionId: 'top', sharedState: null }
   }
 
   if (hash.startsWith('#library')) {
-    return { view: 'library', guideCode: null, sectionId: 'top', sharedInput: null }
+    return {
+      view: 'library',
+      guideCode: null,
+      sectionId: hash.slice(1) || 'library',
+      sharedState: null,
+    }
   }
 
   if (hash.startsWith('#updates')) {
-    return { view: 'updates', guideCode: null, sectionId: 'top', sharedInput: null }
+    return { view: 'updates', guideCode: null, sectionId: 'top', sharedState: null }
   }
 
   const normalizedHash = hash.startsWith('#') ? hash.slice(1) : hash
@@ -241,7 +265,7 @@ function getHashState(hash: string): HashState {
     view: 'home',
     guideCode: null,
     sectionId: sectionId || 'top',
-    sharedInput: shareValue ? decodeSharedEligibilityInput(shareValue) : null,
+    sharedState: shareValue ? decodeSharedEligibilityState(shareValue) : null,
   }
 }
 
@@ -269,6 +293,29 @@ function getReviewableCount(counts: ReturnType<typeof getZoneVerdictCounts>) {
 
 function getZoneLabel(zoneType: DirectoryZoneType) {
   return zoneType === 'industrialFacility' ? '산업시설구역' : '지식산업센터'
+}
+
+function getHistoryBadgeVariant(entry: RecentEligibilityHistoryEntry) {
+  if (entry.compareZones) {
+    return 'muted' as const
+  }
+
+  if (entry.primaryVerdict === 'eligible') {
+    return 'success' as const
+  }
+
+  if (
+    entry.primaryVerdict === 'conditional' ||
+    entry.primaryVerdict === 'reviewRequired'
+  ) {
+    return 'warning' as const
+  }
+
+  if (entry.primaryVerdict === 'ineligible') {
+    return 'danger' as const
+  }
+
+  return 'muted' as const
 }
 
 async function copyTextToClipboard(text: string) {
@@ -303,6 +350,10 @@ function HomeSections({
   input,
   status,
   result,
+  additionalCodes,
+  multiCodeResults,
+  compareZones,
+  comparisonResults,
   error,
   industryQuery,
   industrySuggestions,
@@ -311,6 +362,10 @@ function HomeSections({
   currentStep,
   setField,
   setFlag,
+  setCompareZones,
+  setAdditionalCodeField,
+  addAdditionalCode,
+  removeAdditionalCode,
   setCurrentStep,
   setIndustryQuery,
   discoverIndustry,
@@ -328,6 +383,10 @@ function HomeSections({
   input: ReturnType<typeof useEligibilityStore.getState>['input']
   status: ReturnType<typeof useEligibilityStore.getState>['status']
   result: ReturnType<typeof useEligibilityStore.getState>['result']
+  additionalCodes: ReturnType<typeof useEligibilityStore.getState>['additionalCodes']
+  multiCodeResults: ReturnType<typeof useEligibilityStore.getState>['multiCodeResults']
+  compareZones: ReturnType<typeof useEligibilityStore.getState>['compareZones']
+  comparisonResults: ReturnType<typeof useEligibilityStore.getState>['comparisonResults']
   error: ReturnType<typeof useEligibilityStore.getState>['error']
   industryQuery: ReturnType<typeof useEligibilityStore.getState>['industryQuery']
   industrySuggestions: ReturnType<typeof useEligibilityStore.getState>['industrySuggestions']
@@ -336,6 +395,10 @@ function HomeSections({
   currentStep: ReturnType<typeof useEligibilityStore.getState>['currentStep']
   setField: ReturnType<typeof useEligibilityStore.getState>['setField']
   setFlag: ReturnType<typeof useEligibilityStore.getState>['setFlag']
+  setCompareZones: ReturnType<typeof useEligibilityStore.getState>['setCompareZones']
+  setAdditionalCodeField: ReturnType<typeof useEligibilityStore.getState>['setAdditionalCodeField']
+  addAdditionalCode: ReturnType<typeof useEligibilityStore.getState>['addAdditionalCode']
+  removeAdditionalCode: ReturnType<typeof useEligibilityStore.getState>['removeAdditionalCode']
   setCurrentStep: ReturnType<typeof useEligibilityStore.getState>['setCurrentStep']
   setIndustryQuery: ReturnType<typeof useEligibilityStore.getState>['setIndustryQuery']
   discoverIndustry: ReturnType<typeof useEligibilityStore.getState>['discoverIndustry']
@@ -343,7 +406,7 @@ function HomeSections({
   evaluate: ReturnType<typeof useEligibilityStore.getState>['evaluate']
   reset: ReturnType<typeof useEligibilityStore.getState>['reset']
   onOpenDirectory: () => void
-  onOpenLibrary: () => void
+  onOpenLibrary: (targetId?: string) => void
   onOpenUpdates: () => void
   onOpenGuide: (code: string) => void
   onCopyShareLink: () => Promise<void>
@@ -435,6 +498,10 @@ function HomeSections({
       : safeCurrentStep === 'adjust'
         ? '꼭 필요한 조건만 확인한 뒤 결과 보기 버튼으로 넘어가면 됩니다.'
         : '결과 제목, 판정 근거, 다음에 확인할 것 순서로 읽으면 가장 빠릅니다.'
+  const filledAdditionalCodeCount = additionalCodes.filter(
+    (item) => item.ksicCode.trim() || item.ksicName.trim(),
+  ).length
+  const activeFlagCount = Object.values(input.flags).filter(Boolean).length
 
   const dictionaryPreviewCards = [
     {
@@ -513,6 +580,11 @@ function HomeSections({
   }
 
   function handleDiscoverSearch() {
+    trackEvent('eligibility_search_submitted', {
+      zone_type: input.zoneType,
+      query_length: industryQuery.trim().length,
+      compare_zones: compareZones,
+    })
     enterWizardFocus()
     setDiscoverScreen('results')
     void discoverIndustry()
@@ -547,6 +619,10 @@ function HomeSections({
   }
 
   function runQuickSearch(value: string) {
+    trackEvent('eligibility_quick_search_selected', {
+      zone_type: input.zoneType,
+      query_length: value.trim().length,
+    })
     enterWizardFocus()
     setIndustryQuery(value)
     setDiscoverScreen('results')
@@ -556,16 +632,33 @@ function HomeSections({
   function handleSuggestionSelect(
     suggestion: ReturnType<typeof useEligibilityStore.getState>['industrySuggestions'][number],
   ) {
+    trackEvent('eligibility_suggestion_selected', {
+      zone_type: input.zoneType,
+      code: suggestion.code,
+      match_kind: suggestion.matchKind,
+      source: suggestion.source,
+    })
     enterWizardFocus()
     void applyIndustrySuggestion(suggestion)
   }
 
   function handleEvaluateStep() {
+    trackEvent('eligibility_evaluation_requested', {
+      zone_type: input.zoneType,
+      compare_zones: compareZones,
+      additional_code_count: filledAdditionalCodeCount,
+      active_flag_count: activeFlagCount,
+      regulatory_fit_manual: input.regulatoryFit !== 'auto',
+    })
     enterWizardFocus()
     void evaluate()
   }
 
   function handleContinueManualStep() {
+    trackEvent('eligibility_manual_entry_started', {
+      zone_type: input.zoneType,
+      compare_zones: compareZones,
+    })
     enterWizardFocus()
     setCurrentStep('adjust')
   }
@@ -988,13 +1081,21 @@ function HomeSections({
                     {safeCurrentStep === 'adjust' ? (
                       <EligibilityForm
                         input={input}
+                        additionalCodes={additionalCodes}
+                        compareZones={compareZones}
                         status={status}
                         onFieldChange={setField}
                         onFlagChange={setFlag}
+                        onCompareZonesChange={setCompareZones}
+                        onAddAdditionalCode={addAdditionalCode}
+                        onRemoveAdditionalCode={removeAdditionalCode}
+                        onAdditionalCodeFieldChange={setAdditionalCodeField}
                         onEvaluate={handleEvaluateStep}
                         onReset={reset}
                         onPrevious={() => setCurrentStep('discover')}
-                        primaryActionLabel="결과 보기"
+                        primaryActionLabel={
+                          compareZones ? '두 구역 비교 판정 보기' : '결과 보기'
+                        }
                         secondaryActionLabel="이전 단계"
                         defaultExpanded
                         embedded
@@ -1005,6 +1106,9 @@ function HomeSections({
                 <ResultPanel
                   input={input}
                   result={result}
+                  multiCodeResults={multiCodeResults}
+                  compareZones={compareZones}
+                  comparisonResults={comparisonResults}
                   status={status}
                   error={error}
                   onEvaluate={evaluate}
@@ -1013,6 +1117,12 @@ function HomeSections({
                   onCopyShareLink={onCopyShareLink}
                   onCopyResultSummary={onCopyResultSummary}
                   onPrintResult={onPrintResult}
+                  onOpenLibraryEntry={(entryId) =>
+                    onOpenLibrary(getLegalLibraryEntrySectionId(entryId))
+                  }
+                  onOpenLibraryBasis={(basisId) =>
+                    onOpenLibrary(getLegalLibraryBasisSectionId(basisId))
+                  }
                   sticky={false}
                   stepLabel="3단계"
                   embedded
@@ -1272,7 +1382,7 @@ function HomeSections({
                 </div>
               </div>
               <div>
-                <Button onClick={onOpenLibrary}>
+                <Button onClick={() => onOpenLibrary()}>
                   법령 라이브러리 열기
                   <ArrowRight className="size-4" />
                 </Button>
@@ -1530,6 +1640,10 @@ function App() {
   const {
     input,
     result,
+    additionalCodes,
+    multiCodeResults,
+    compareZones,
+    comparisonResults,
     status,
     error,
     industryQuery,
@@ -1539,6 +1653,10 @@ function App() {
     currentStep,
     setField,
     setFlag,
+    setCompareZones,
+    setAdditionalCodeField,
+    addAdditionalCode,
+    removeAdditionalCode,
     setCurrentStep,
     setIndustryQuery,
     discoverIndustry,
@@ -1551,16 +1669,27 @@ function App() {
   const initialHashState = getHashState(window.location.hash)
   const [view, setView] = useState<AppView>(() => initialHashState.view)
   const [guideCode, setGuideCode] = useState<string | null>(() => initialHashState.guideCode)
+  const [libraryFocusTargetId, setLibraryFocusTargetId] = useState<string | null>(() =>
+    initialHashState.view === 'library' ? initialHashState.sectionId : null,
+  )
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const [recentHistory, setRecentHistory] = useState<RecentEligibilityHistoryEntry[]>(
+    () => loadRecentEligibilityHistory(),
+  )
+  const [lastTrackedResultKey, setLastTrackedResultKey] = useState<string | null>(null)
 
   useEffect(() => {
     function syncFromHash() {
       const nextHashState = getHashState(window.location.hash)
       setView(nextHashState.view)
       setGuideCode(nextHashState.guideCode)
+      setLibraryFocusTargetId(
+        nextHashState.view === 'library' ? nextHashState.sectionId : null,
+      )
 
-      if (nextHashState.sharedInput) {
-        loadSharedResult(nextHashState.sharedInput)
+      if (nextHashState.sharedState) {
+        loadSharedResult(nextHashState.sharedState)
       }
 
       if (nextHashState.view === 'home') {
@@ -1576,9 +1705,70 @@ function App() {
     }
   }, [loadSharedResult])
 
+  useEffect(() => {
+    if (status === 'loading') {
+      setLastTrackedResultKey(null)
+    }
+  }, [status])
+
+  useEffect(() => {
+    if (status !== 'ready' || !result) {
+      return
+    }
+
+    const filledAdditionalCodeCount = additionalCodes.filter(
+      (item) => item.ksicCode.trim() || item.ksicName.trim(),
+    ).length
+    const nextKey = [
+      input.zoneType,
+      input.ksicCode.trim(),
+      input.ksicName.trim(),
+      compareZones ? 'compare' : 'single',
+      filledAdditionalCodeCount,
+      multiCodeResults?.length ?? 1,
+      result.verdict,
+    ].join('|')
+
+    if (lastTrackedResultKey === nextKey) {
+      return
+    }
+
+    setLastTrackedResultKey(nextKey)
+    trackEvent('eligibility_result_viewed', {
+      zone_type: input.zoneType,
+      verdict: result.verdict,
+      compare_zones: compareZones,
+      additional_code_count: filledAdditionalCodeCount,
+      multi_code_count: multiCodeResults?.length ?? 1,
+    })
+  }, [
+    additionalCodes,
+    compareZones,
+    input.ksicCode,
+    input.ksicName,
+    input.zoneType,
+    lastTrackedResultKey,
+    multiCodeResults,
+    result,
+    status,
+  ])
+
   async function handleCopyShareLink() {
-    const shareUrl = `${window.location.origin}${window.location.pathname}${createSharedFinderHash(input)}`
+    const shareUrl = `${window.location.origin}${window.location.pathname}${createSharedFinderHash(
+      input,
+      {
+        compareZones,
+        additionalCodes,
+      },
+    )}`
     await copyTextToClipboard(shareUrl)
+    trackEvent('eligibility_share_link_copied', {
+      zone_type: input.zoneType,
+      compare_zones: compareZones,
+      additional_code_count: additionalCodes.filter(
+        (item) => item.ksicCode.trim() || item.ksicName.trim(),
+      ).length,
+    })
   }
 
   async function handleCopyResultSummary() {
@@ -1586,13 +1776,34 @@ function App() {
       return
     }
 
-    await copyTextToClipboard(buildEligibilityResultSummary(input, result))
+    await copyTextToClipboard(
+      buildEligibilityResultSummary(input, result, {
+        compareZones,
+        comparisonResults,
+        multiCodeResults,
+      }),
+    )
+    trackEvent('eligibility_result_summary_copied', {
+      zone_type: input.zoneType,
+      compare_zones: compareZones,
+      additional_code_count: additionalCodes.filter(
+        (item) => item.ksicCode.trim() || item.ksicName.trim(),
+      ).length,
+    })
   }
 
   function handlePrintResult() {
     if (!result) {
       return
     }
+
+    trackEvent('eligibility_result_print_requested', {
+      zone_type: input.zoneType,
+      compare_zones: compareZones,
+      additional_code_count: additionalCodes.filter(
+        (item) => item.ksicCode.trim() || item.ksicName.trim(),
+      ).length,
+    })
 
     const printWindow = window.open('', '_blank', 'noopener,noreferrer')
 
@@ -1602,27 +1813,81 @@ function App() {
     }
 
     printWindow.document.open()
-    printWindow.document.write(buildEligibilityPrintDocument(input, result))
+    printWindow.document.write(
+      buildEligibilityPrintDocument(input, result, {
+        compareZones,
+        comparisonResults,
+        multiCodeResults,
+      }),
+    )
     printWindow.document.close()
+  }
+
+  function handleToggleHistory() {
+    setRecentHistory(loadRecentEligibilityHistory())
+    setIsHistoryOpen((prev) => !prev)
+  }
+
+  function handleClearRecentHistory() {
+    clearRecentEligibilityHistory()
+    setRecentHistory([])
+  }
+
+  function handleOpenRecentHistory(entry: RecentEligibilityHistoryEntry) {
+    trackEvent('eligibility_recent_history_opened', {
+      compare_zones: entry.compareZones,
+      additional_code_count: entry.additionalCodes.length,
+      primary_verdict: entry.primaryVerdict,
+    })
+    setView('home')
+    setGuideCode(null)
+    setIsMobileMenuOpen(false)
+    setIsHistoryOpen(false)
+    window.history.replaceState(null, '', entry.shareHash)
+    loadSharedResult({
+      input: entry.input,
+      compareZones: entry.compareZones,
+      additionalCodes: entry.additionalCodes,
+    })
+    scrollToSection('finder')
   }
 
   function openDirectoryView() {
     setView('directory')
     setGuideCode(null)
+    setIsHistoryOpen(false)
     window.history.replaceState(null, '', '#directory')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  function openLibraryView() {
+  function openLibraryView(targetId = 'library') {
+    const normalizedTargetId = typeof targetId === 'string' ? targetId : 'library'
+
+    trackEvent(
+      normalizedTargetId.startsWith('library-basis-')
+        ? 'eligibility_library_basis_opened'
+        : normalizedTargetId.startsWith('library-entry-')
+          ? 'eligibility_library_entry_opened'
+          : 'eligibility_library_opened',
+      {
+        target_id: normalizedTargetId,
+      },
+    )
     setView('library')
     setGuideCode(null)
-    window.history.replaceState(null, '', '#library')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setLibraryFocusTargetId(normalizedTargetId)
+    setIsHistoryOpen(false)
+    window.history.replaceState(null, '', `#${normalizedTargetId}`)
+
+    if (normalizedTargetId === 'library') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   function openUpdatesView() {
     setView('updates')
     setGuideCode(null)
+    setIsHistoryOpen(false)
     window.history.replaceState(null, '', '#updates')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -1630,6 +1895,7 @@ function App() {
   function openHomeView(sectionId = 'top') {
     setView('home')
     setGuideCode(null)
+    setIsHistoryOpen(false)
     window.history.replaceState(null, '', `#${sectionId}`)
     scrollToSection(sectionId)
   }
@@ -1643,6 +1909,7 @@ function App() {
 
     setView('guide')
     setGuideCode(normalizedCode)
+    setIsHistoryOpen(false)
     window.history.replaceState(null, '', `#guides/${encodeURIComponent(normalizedCode)}`)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -1732,7 +1999,7 @@ function App() {
               <Button
                 variant={view === 'library' ? 'secondary' : 'ghost'}
                 size="sm"
-                onClick={openLibraryView}
+                onClick={() => openLibraryView()}
                 className="whitespace-nowrap"
               >
                 법령 참고
@@ -1748,6 +2015,15 @@ function App() {
             </nav>
 
             <div className="hidden flex-wrap items-center gap-2 md:flex">
+              <Button
+                variant={isHistoryOpen ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={handleToggleHistory}
+                className="whitespace-nowrap"
+              >
+                <Clock3 className="size-4" />
+                최근 조회
+              </Button>
               <Badge variant="muted" className="hidden sm:inline-flex">{activeZoneLabel} 기본</Badge>
               <Button
                 size="sm"
@@ -1761,6 +2037,16 @@ function App() {
 
             <div className="flex shrink-0 items-center gap-1.5 md:hidden">
               <Button
+                variant={isHistoryOpen ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={handleToggleHistory}
+                aria-label="최근 조회 목록 열기"
+                className="h-10 min-h-10 shrink-0 px-3"
+              >
+                <Clock3 className="size-4" />
+                <span>최근</span>
+              </Button>
+              <Button
                 size="sm"
                 onClick={() => (view === 'home' ? openDirectoryView() : openHomeView('finder'))}
                 aria-label={view === 'home' ? '코드 사전 보기' : '검색 홈으로'}
@@ -1772,7 +2058,10 @@ function App() {
               <button
                 type="button"
                 className="inline-flex size-10 items-center justify-center rounded-[14px] text-[var(--foreground-muted)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
-                onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                onClick={() => {
+                  setIsHistoryOpen(false)
+                  setIsMobileMenuOpen((prev) => !prev)
+                }}
                 aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-nav-panel"
@@ -1830,6 +2119,73 @@ function App() {
               </Button>
             </nav>
           ) : null}
+
+          {isHistoryOpen ? (
+            <div className="mt-2 border-t border-[var(--border)] pt-3">
+              <Card className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-lg)]">
+                <CardContent className="space-y-4 p-4 sm:p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <Badge variant="muted" className="w-fit">최근 조회</Badge>
+                      <h3 className="mt-3 font-display text-[1.35rem] font-semibold leading-[1.12] text-[var(--foreground)]">
+                        최근 확인한 예비판정을 다시 열 수 있습니다
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                        상담 중 봤던 코드와 조건을 그대로 다시 불러옵니다.
+                      </p>
+                    </div>
+                    {recentHistory.length > 0 ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleClearRecentHistory}
+                        className="whitespace-nowrap"
+                      >
+                        <Trash2 className="size-4" />
+                        전체 지우기
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  {recentHistory.length > 0 ? (
+                    <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
+                        {recentHistory.map((entry) => (
+                          <button
+                            type="button"
+                            key={entry.shareHash}
+                            onClick={() => handleOpenRecentHistory(entry)}
+                            className="w-full rounded-[16px] border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-4 text-left transition hover:border-[var(--border-accent-strong)] hover:bg-[var(--surface-strong)]"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant={getHistoryBadgeVariant(entry)}>
+                                {entry.compareZones
+                                  ? '두 구역 비교'
+                                  : formatVerdictLabel(entry.primaryVerdict)}
+                              </Badge>
+                              <Badge variant="muted">{getRecentHistoryContext(entry)}</Badge>
+                            </div>
+                            <div className="mt-3 text-sm font-semibold leading-6 text-[var(--foreground)]">
+                              {getRecentHistoryCodeLabel(entry)}
+                            </div>
+                            <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
+                              {entry.primaryTitle}
+                            </p>
+                            <p className="mt-2 text-xs leading-5 text-[var(--foreground-subtle)]">
+                              {formatKoreanDateTime(entry.createdAt)}
+                            </p>
+                          </button>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-[16px] border border-dashed border-[var(--border)] bg-[var(--surface-soft)] px-4 py-4 text-sm leading-6 text-[var(--foreground-muted)]">
+                      최근에 확인한 판정이 아직 없습니다. 결과를 한 번 보면 자동으로 이
+                      목록에 저장됩니다.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : null}
         </header>
 
         <main id="main-content" className="animate-fade-in space-y-5 pb-12 pt-4 sm:space-y-6 sm:pt-5 lg:space-y-8 lg:pt-7">
@@ -1878,6 +2234,7 @@ function App() {
             <LegalLibraryPage
               onBackHome={() => openHomeView('finder')}
               onOpenUpdates={openUpdatesView}
+              focusTargetId={libraryFocusTargetId}
             />
           ) : view === 'updates' ? (
             <UpdateLogPage
@@ -1889,6 +2246,10 @@ function App() {
               input={input}
               status={status}
               result={result}
+              additionalCodes={additionalCodes}
+              multiCodeResults={multiCodeResults}
+              compareZones={compareZones}
+              comparisonResults={comparisonResults}
               error={error}
               industryQuery={industryQuery}
               industrySuggestions={industrySuggestions}
@@ -1897,6 +2258,10 @@ function App() {
               currentStep={currentStep}
               setField={setField}
               setFlag={setFlag}
+              setCompareZones={setCompareZones}
+              setAdditionalCodeField={setAdditionalCodeField}
+              addAdditionalCode={addAdditionalCode}
+              removeAdditionalCode={removeAdditionalCode}
               setCurrentStep={setCurrentStep}
               setIndustryQuery={setIndustryQuery}
               discoverIndustry={discoverIndustry}

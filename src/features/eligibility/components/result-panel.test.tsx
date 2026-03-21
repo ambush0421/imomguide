@@ -3,8 +3,14 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ResultPanel } from '@/features/eligibility/components/result-panel'
-import { evaluateEligibility } from '@/features/eligibility/evaluator'
-import type { EligibilityInput } from '@/features/eligibility/types'
+import {
+  evaluateEligibility,
+  evaluateEligibilityComparison,
+} from '@/features/eligibility/evaluator'
+import type {
+  EligibilityCodeEvaluation,
+  EligibilityInput,
+} from '@/features/eligibility/types'
 
 const baseInput: EligibilityInput = {
   companyName: '테스트 기업',
@@ -27,6 +33,37 @@ const baseInput: EligibilityInput = {
     hasManufacturingFacility: false,
     requiresCommitteeReview: false,
   },
+}
+
+function buildComparisonMultiCodeResults(): EligibilityCodeEvaluation[] {
+  const secondaryInput: EligibilityInput = {
+    ...baseInput,
+    ksicCode: '62010',
+    ksicName: '컴퓨터 프로그래밍 서비스업',
+  }
+
+  return [
+    {
+      id: 'primary-code',
+      label: '주업종',
+      order: 0,
+      isPrimary: true,
+      ksicCode: baseInput.ksicCode,
+      ksicName: baseInput.ksicName,
+      result: evaluateEligibility(baseInput),
+      comparisonResults: evaluateEligibilityComparison(baseInput),
+    },
+    {
+      id: 'secondary-1',
+      label: '부업종 1',
+      order: 1,
+      isPrimary: false,
+      ksicCode: secondaryInput.ksicCode,
+      ksicName: secondaryInput.ksicName,
+      result: evaluateEligibility(secondaryInput),
+      comparisonResults: evaluateEligibilityComparison(secondaryInput),
+    },
+  ]
 }
 
 describe('ResultPanel', () => {
@@ -149,5 +186,89 @@ describe('ResultPanel', () => {
 
     await user.click(screen.getByRole('button', { name: '인쇄 / PDF 저장' }))
     expect(onPrintResult).toHaveBeenCalledTimes(1)
+  })
+
+  it('법적 근거 각주에서 라이브러리 이동 콜백을 호출할 수 있다', async () => {
+    const user = userEvent.setup()
+    const result = evaluateEligibility(baseInput)
+    const onOpenLibraryEntry = vi.fn()
+    const onOpenLibraryBasis = vi.fn()
+
+    render(
+      <ResultPanel
+        input={baseInput}
+        result={result}
+        status="ready"
+        error={null}
+        onEvaluate={() => {}}
+        onOpenLibraryEntry={onOpenLibraryEntry}
+        onOpenLibraryBasis={onOpenLibraryBasis}
+      />,
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /산업집적활성화 및 공장설립에 관한 법률 시행령 라이브러리에서 보기/,
+      }),
+    )
+    expect(onOpenLibraryEntry).toHaveBeenCalledTimes(1)
+
+    await user.click(
+      screen.getAllByRole('button', {
+        name: /법령 라이브러리에서 근거 보기:/,
+      })[0],
+    )
+    expect(onOpenLibraryBasis).toHaveBeenCalledTimes(1)
+  })
+
+  it('비교 모드에서는 두 구역 결과를 나란히 보여준다', () => {
+    const result = evaluateEligibility(baseInput)
+    const comparisonResults = evaluateEligibilityComparison(baseInput)
+
+    render(
+      <ResultPanel
+        input={baseInput}
+        result={result}
+        compareZones
+        comparisonResults={comparisonResults}
+        status="ready"
+        error={null}
+        onEvaluate={() => {}}
+      />,
+    )
+
+    expect(
+      screen.getByText('지식산업센터와 산업시설구역을 한 번에 비교했습니다.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('두 구역 동시 비교')).toBeInTheDocument()
+    expect(screen.getAllByText('지식산업센터').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('산업시설구역').length).toBeGreaterThan(0)
+    expect(screen.getByText('비교 해설')).toBeInTheDocument()
+  })
+
+  it('복수 코드 비교 모드에서는 주업종과 부업종 결과를 코드별로 묶어 보여준다', () => {
+    const result = evaluateEligibility(baseInput)
+    const comparisonResults = evaluateEligibilityComparison(baseInput)
+
+    render(
+      <ResultPanel
+        input={baseInput}
+        result={result}
+        multiCodeResults={buildComparisonMultiCodeResults()}
+        compareZones
+        comparisonResults={comparisonResults}
+        status="ready"
+        error={null}
+        onEvaluate={() => {}}
+      />,
+    )
+
+    expect(
+      screen.getByText('주업종과 부업종 1개를 두 구역 기준으로 함께 비교했습니다.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('코드별 결과')).toBeInTheDocument()
+    expect(screen.getByText('부업종 1')).toBeInTheDocument()
+    expect(screen.getByText('62010 컴퓨터 프로그래밍 서비스업')).toBeInTheDocument()
+    expect(screen.getAllByText('두 구역 비교').length).toBeGreaterThan(0)
   })
 })
