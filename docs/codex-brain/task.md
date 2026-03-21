@@ -1178,3 +1178,20 @@
 - [x] 오래된 미완료 task 폐기 상태 반영
 - [x] lint/test/build 재검증
 - [x] walkthrough.md 갱신
+
+## 2026-03-21 파비콘 파생 아이콘 정리
+
+- [x] SVG favicon 기준 PNG/ICO/apple-touch 파생본 생성
+- [x] `implementation_plan.md`에 이번 루프 구현 계획 추가
+- [x] `index.html`에 favicon/apple-touch 링크 정리
+- [x] 파생본 생성 결과와 경로 재확인
+- [x] lint/test/build 재검증
+- [x] walkthrough.md 갱신
+
+## 2026-03-21 데스크톱 히어로 헤드라인 줄바꿈 보정
+
+- [x] 데스크톱 히어로 H1 잘림 원인 재확인
+- [x] `implementation_plan.md`에 이번 루프 구현 계획 추가
+- [x] 문제 클래스 제거 및 줄바꿈 보정
+- [x] lint/test/build 재검증
+- [x] walkthrough.md 갱신

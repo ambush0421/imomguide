@@ -3480,3 +3480,53 @@ src/
 - `npm run lint`
 - `npm run test -- --run`
 - `npm run build`
+
+---
+
+## 2026-03-21 파비콘 파생 아이콘 정리 계획
+
+### 변경 목표
+
+- 새 `L + 돋보기` SVG 심볼을 기준으로 16/32/48 PNG, ICO, apple-touch-icon까지 한 세트로 정리해 브라우저/기기별 아이콘을 통일한다.
+- 현재는 [index.html](C:/projects/magok/index.html)이 SVG favicon만 직접 참조하므로, PNG와 apple-touch-icon 링크도 함께 명시해 호환성을 높인다.
+
+### 구현 메모
+
+1. 생성
+   - `public/favicon.svg`를 기준으로 `public/brand/favicon-16.png`, `favicon-32.png`, `favicon-48.png`, `apple-touch-icon.png`를 생성한다.
+   - 생성된 PNG들로 `public/brand/favicon.ico`를 다시 만든다.
+2. 연결
+   - `index.html`에 `apple-touch-icon`, PNG favicon, ICO fallback 링크를 추가한다.
+3. 검증
+   - 생성된 파일이 실제 `public/brand`에 들어갔는지 확인한다.
+   - `npm run lint`, `npm run test -- --run`, `npm run build`를 다시 실행한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`
+
+---
+
+## 2026-03-21 데스크톱 히어로 헤드라인 줄바꿈 보정 계획
+
+### 변경 목표
+
+- 데스크톱 웹에서 왼쪽 히어로 H1이 카드 폭을 넘어서 잘리는 문제를 해소한다.
+- 구조를 크게 바꾸지 않고, 현재 레이아웃에서 텍스트가 자연스럽게 2~3줄로 접히도록 최소 수정으로 마감한다.
+
+### 구현 메모
+
+1. `src/App.tsx`
+   - 히어로 H1의 두 번째 줄에 들어간 `sm:whitespace-nowrap`를 제거한다.
+   - 필요 시 max-width는 유지하고, 브라우저가 자연스럽게 줄바꿈할 수 있게 둔다.
+2. 검증
+   - 자동화 테스트는 기존 회귀 테스트를 그대로 돌려 전체 기능 회귀가 없는지만 확인한다.
+   - 실제 문제는 레이아웃 이슈이므로 build까지 포함해 마감한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- --run`
+- `npm run build`

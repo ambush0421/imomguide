@@ -702,7 +702,7 @@ function HomeSections({
                   <h1 className="mt-4 max-w-[18ch] font-display text-[2.05rem] font-semibold leading-[1.08] tracking-[-0.045em] text-[var(--foreground)] sm:max-w-[22ch] sm:text-[2.9rem] lg:max-w-[23ch] lg:text-[3.45rem]">
                     마곡 입주 상담,
                     <br />
-                    <span className="sm:whitespace-nowrap">업종코드부터 예비판정까지 한 번에</span>
+                    <span>업종코드부터 예비판정까지 한 번에</span>
                   </h1>
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--foreground-muted)] sm:text-[15px] sm:leading-7">
                     사업자 업태·종목이나 하는 일을 적으면 마곡에서 먼저 볼 업종코드를

@@ -4667,3 +4667,78 @@ npm run test
 
 - 이제 헤더 로고와 브라우저 파비콘이 모두 `L + 돋보기` 심볼로 통일돼, 검색 도구라는 인상이 더 직접적으로 전달된다.
 - 오래 남아 있던 미완료 task도 폐기 처리까지 정리돼서, 현재 PDCA 아티팩트 기준으로 남은 애매한 체크 항목이 없어졌다.
+
+---
+
+## 2026-03-21 파비콘 파생 아이콘 정리
+
+### 작업 배경
+
+- SVG favicon과 브랜드 심볼은 새 `L + 돋보기` 방향으로 교체됐지만, PNG/ICO/apple-touch-icon 파생본은 아직 예전 자산이 남아 있었다.
+- 이번 루프의 목표는 브라우저 fallback과 모바일 홈 화면 아이콘까지 같은 심볼로 통일하고, 실제 HTML 링크도 함께 정리하는 것이었다.
+
+### 반영 내용
+
+- [public/brand/favicon-16.png](C:/projects/magok/public/brand/favicon-16.png)
+- [public/brand/favicon-32.png](C:/projects/magok/public/brand/favicon-32.png)
+- [public/brand/favicon-48.png](C:/projects/magok/public/brand/favicon-48.png)
+- [public/brand/apple-touch-icon.png](C:/projects/magok/public/brand/apple-touch-icon.png)
+  - 모두 [public/favicon.svg](C:/projects/magok/public/favicon.svg) 기준으로 다시 생성했다.
+- [public/brand/favicon.ico](C:/projects/magok/public/brand/favicon.ico)
+  - 새 48px PNG를 기준으로 16/32/48 사이즈가 들어간 ICO로 다시 만들었다.
+- [index.html](C:/projects/magok/index.html)
+  - SVG favicon 외에 32px/16px PNG, ICO fallback, apple-touch-icon 링크를 함께 명시했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 11개 테스트 파일
+  - 102개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/index.html` 크기 2.79 kB
+  - `dist/assets/index-D0fg4-_b.js`
+  - `dist/assets/index-Czny_nW7.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - 이번 루프는 정적 자산과 HTML 메타 링크 정리 중심이라 앱 로직에는 영향이 없었다.
+
+### 결과 요약
+
+- 이제 브라우저 탭, PNG fallback, iOS 홈 화면 아이콘까지 모두 같은 `L + 돋보기` 심볼 계열로 맞춰졌다.
+- SVG만 바뀌고 나머지 파생본은 예전 아이콘이 남아 있던 상태가 해소돼, 브랜드 일관성이 한 단계 더 정리됐다.
+
+---
+
+## 2026-03-21 데스크톱 히어로 헤드라인 줄바꿈 보정
+
+### 작업 배경
+
+- 데스크톱 홈 첫 화면에서 왼쪽 히어로 H1 두 번째 줄이 카드 폭을 넘어서, 문장 끝부분이 잘린 채 보이는 문제가 확인됐다.
+- 원인은 [src/App.tsx](C:/projects/magok/src/App.tsx) 히어로 타이틀 안에 들어 있던 `sm:whitespace-nowrap`였고, 이 클래스가 데스크톱 이상에서 두 번째 줄 전체를 강제로 한 줄로 유지하고 있었다.
+
+### 반영 내용
+
+- [src/App.tsx](C:/projects/magok/src/App.tsx)
+  - 히어로 H1의 두 번째 줄 `<span>`에서 `sm:whitespace-nowrap`를 제거했다.
+  - 기존 `max-width`와 타이포 스케일은 유지하고, 브라우저가 카드 폭에 맞춰 자연스럽게 줄바꿈하도록 정리했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- --run` 통과
+  - 11개 테스트 파일
+  - 102개 테스트 케이스 통과
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/assets/index-BnNt9Ghl.js`
+  - `dist/assets/index-Czny_nW7.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - 이번 변경은 표시 클래스 1개를 제거한 수준이라 기능 로직과 데이터 흐름에는 영향이 없었다.
+
+### 결과 요약
+
+- 데스크톱에서 히어로 문장이 카드 폭에 맞춰 자연스럽게 접히도록 복원돼, 문장 끝이 잘려 보이던 문제가 해소됐다.
+- 카피나 레이아웃 구조를 다시 흔들지 않고, 최소 수정으로 첫 화면 가독성을 바로 회복했다.
