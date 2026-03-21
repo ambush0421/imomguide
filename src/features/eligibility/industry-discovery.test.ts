@@ -43,7 +43,7 @@ describe('discoverIndustrySuggestions', () => {
     ['특허중개와 기술이전중개를 합니다', '73903'],
     ['상품감정과 견본추출 서비스를 합니다', '73904'],
     ['특허라이선스와 상표권라이선스를 임대합니다', '76400'],
-  ])('%s 입력을 해당 exact 코드로 추천한다', (query, code) => {
+  ])('%s 입력을 해당 5자리 코드로 추천한다', (query, code) => {
     const suggestions = discoverIndustrySuggestions(query)
 
     expect(suggestions.some((suggestion) => suggestion.code === code)).toBe(true)

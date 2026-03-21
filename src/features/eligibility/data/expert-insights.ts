@@ -90,22 +90,22 @@ export function getExpertInsights(
 
   if (input.zoneType === 'knowledgeIndustryCenter' && exactMatch) {
     const exactLabels = {
-      allowed: 'exact 5자리 허용 코드',
-      reviewRequired: 'exact 5자리 심의 코드',
-      conditional: 'exact 5자리 조건부 코드',
-      additionalCheck: 'exact 5자리 추가 확인 코드',
-      blocked: 'exact 5자리 불가 코드',
+      allowed: '5자리 코드 일치',
+      reviewRequired: '5자리 코드 심의 대상',
+      conditional: '5자리 코드 조건부 허용',
+      additionalCheck: '5자리 코드 추가 확인 필요',
+      blocked: '5자리 코드 불가',
     } as const
 
     insights.push({
       id: 'exact-match',
-      title: `${exactLabels[exactMatch.kind]}로 직접 대조된 결과입니다.`,
+      title: `${exactLabels[exactMatch.kind]} 기준으로 확인한 결과입니다.`,
       summary:
         exactMatch.kind === 'allowed'
-          ? '지식산업센터에서는 broad prefix보다 exact 5자리 정리표의 설득력이 더 큽니다. 실제 상담에서도 이 exact 코드 기준 설명이 유리합니다.'
+          ? '지식산업센터에서는 넓은 업종군 분류보다 5자리 코드 일치가 더 설득력 있습니다. 실제 상담에서도 이 기준을 함께 설명하면 이해를 돕기 좋습니다.'
           : exactMatch.kind === 'blocked'
             ? '불가 코드라도 왜 제외되는지 명확히 설명할 수 있어야 다른 호실, 다른 구역, 융복합 심의 경로 제안으로 대화가 이어집니다.'
-            : 'exact 5자리 기준은 입주 가능 여부뿐 아니라 어떤 추가 설명이 필요한지도 함께 알려주는 실무용 기준선입니다.',
+            : '5자리 코드 기준은 입주 가능 여부뿐 아니라 어떤 추가 설명이 필요한지도 함께 알려주는 실무 기준입니다.',
       actionItems: unique([
         '상담 화면이나 공유 메모에는 5자리 코드를 그대로 표기해 업종 오해를 줄이세요.',
         exactMatch.entry.note,

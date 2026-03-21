@@ -252,7 +252,7 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
     return buildResult({
       verdict: 'ineligible',
       title: '지식산업센터 입주는 어렵습니다.',
-      summary: `${blockedLabel}은 마곡 지식산업센터 exact 5자리 불가 코드입니다.`,
+      summary: `${blockedLabel}은 마곡 지식산업센터 5자리 코드 기준에서 제한 업종입니다.`,
       matchedRules: [blockedLabel, '지식산업센터 불가 코드'],
       reasons: [knowledgeCenterExactMatch.entry.note],
       requiredActions: [
@@ -699,7 +699,7 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
     const legalBasisIds = ['magokKnowledgeCenterExtra', 'decreeEligibility']
     const reasons = [
       exactKnowledgeMatchLabel
-        ? `${exactKnowledgeMatchLabel}은 정리된 exact 5자리 코드표와 직접 일치합니다.`
+        ? `${exactKnowledgeMatchLabel}은 정리된 5자리 코드표와 일치합니다.`
         : knowledgeMatchLabel
           ? `${knowledgeMatchLabel} 기준으로 지식산업센터 예외 허용 범위와 매칭됩니다.`
           : '예외 시설 운영 주체로 표시되어 지식산업센터 검토가 가능합니다.',
@@ -709,7 +709,7 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
     let title = '지식산업센터 예비판정상 입주 가능성이 있습니다.'
     let summary =
       exactKnowledgeMatchLabel
-        ? `${exactKnowledgeMatchLabel}은 마곡 지식산업센터 exact 5자리 허용 코드와 직접 일치합니다.`
+        ? `${exactKnowledgeMatchLabel}은 마곡 지식산업센터 5자리 코드 기준과 일치합니다.`
         : '지식산업센터는 관리기본계획 기본 업종 외에도 시행령 제6조 제2항부터 제5항의 업종까지 확장 허용합니다.'
 
     if (

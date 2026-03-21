@@ -1,3 +1,43 @@
+## 2026-03-21 지식산업센터 5자리 코드 문구 쉬운 표현으로 정리
+
+### 목표
+
+- 결과 화면에 남아 있는 `exact 5자리` 혼합 표현을 사용자가 바로 이해할 수 있는 한국어 문구로 바꾼다.
+- 카드 제목, `판정 기준`, 결과 요약, 인사이트 설명에서 같은 의미를 일관된 용어로 전달한다.
+
+### 현재 구조 진단
+
+1. [`src/features/eligibility/data/screen-insights.ts`](C:\projects\magok\src\features\eligibility\data\screen-insights.ts)에서 결과 카드 제목과 `판정 기준` 값을 조합하는데, 현재 `exact 5자리 허용 코드`, `선택한 업종은 exact 5자리 기준으로 바로 대조됩니다.` 같은 표현이 그대로 노출된다.
+2. [`src/features/eligibility/data/expert-insights.ts`](C:\projects\magok\src\features\eligibility\data\expert-insights.ts), [`src/features/eligibility/evaluator.ts`](C:\projects\magok\src\features\eligibility\evaluator.ts), [`src/features/eligibility/data/magok-code-directory.ts`](C:\projects\magok\src\features\eligibility\data\magok-code-directory.ts)도 같은 문구를 재사용하거나 요약에 섞어 써서, 한 곳만 고치면 다른 화면이나 설명에 다시 영어 표현이 남을 수 있다.
+3. [`src/features/eligibility/evaluator.test.ts`](C:\projects\magok\src\features\eligibility\evaluator.test.ts)는 현재 문자열을 직접 기대하고 있어, 문구 교체 시 테스트도 함께 맞춰야 한다.
+4. 작업 안내에 있던 `Codex_System_Prompt.md`, `GEMINI.md`는 저장소 안에서는 찾지 못했고, 현재 요청과 직접 맞닿은 기존 기록은 [`docs/pdca/README.md`](C:\projects\magok\docs\pdca\README.md)와 최근 PDCA 문서만 확인한 상태다.
+
+### 구현 방향
+
+1. 사용자 용어 사전 정리
+   - `exact 5자리 허용 코드` 같은 표현은 `5자리 코드 직접 일치`, `5자리 코드 심의 대상`, `5자리 코드 조건부 허용`, `5자리 코드 추가 확인 필요`, `5자리 코드 불가`처럼 한국어 중심으로 바꾼다.
+   - `exact`라는 내부 표현은 화면에서 제거하고, 필요하면 `5자리 업종코드`, `직접 일치`, `추가 확인` 같은 설명형 단어로 바꾼다.
+2. 결과 카드 문구 정리
+   - 결과 카드 제목은 `선택한 업종은 5자리 업종코드와 바로 일치합니다.`처럼 바로 이해되는 문장으로 교체한다.
+   - `판정 기준` 값도 한눈에 의미가 들어오는 짧은 라벨로 맞춘다.
+3. 요약/인사이트 문구 정리
+   - 결과 요약과 전문가 인사이트에 남아 있는 `exact 5자리` 문구를 같은 용어 체계로 통일해, 상담 메모나 공유 화면에서도 어색한 영어 표현이 다시 보이지 않게 한다.
+4. 검증
+   - `npm run lint`
+   - `npm run test`
+   - `npm run build`
+
+### 예상 영향 범위
+
+- [`src/features/eligibility/data/screen-insights.ts`](C:\projects\magok\src\features\eligibility\data\screen-insights.ts)
+- [`src/features/eligibility/data/expert-insights.ts`](C:\projects\magok\src\features\eligibility\data\expert-insights.ts)
+- [`src/features/eligibility/evaluator.ts`](C:\projects\magok\src\features\eligibility\evaluator.ts)
+- [`src/features/eligibility/data/magok-code-directory.ts`](C:\projects\magok\src\features\eligibility\data\magok-code-directory.ts)
+- [`src/features/eligibility/evaluator.test.ts`](C:\projects\magok\src\features\eligibility\evaluator.test.ts)
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
 ## 2026-03-21 파비콘 루트 fallback 및 캐시 버스트 보강
 
 ### 목표

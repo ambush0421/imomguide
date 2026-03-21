@@ -253,7 +253,7 @@ function buildKnowledgeZoneVerdict(
     if (exactMatch.kind === 'allowed') {
       return {
         verdict: 'eligible',
-        reason: '지식산업센터 exact 5자리 허용 코드로 정리된 업종입니다.',
+        reason: '지식산업센터 5자리 코드 기준에서 바로 허용되는 업종입니다.',
         legalBasisIds: ['magokKnowledgeCenterExtra', 'decreeKnowledgeIndustry'],
         notes: [exactMatch.entry.note],
       }

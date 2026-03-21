@@ -1,3 +1,16 @@
+## 2026-03-21 지식산업센터 5자리 코드 문구 쉬운 표현으로 정리
+
+- [x] 사용자 화면에 노출되는 `exact 5자리` 문구와 생성 경로 확인
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] `screen-insights`, `expert-insights`, `evaluator`, `magok-code-directory`의 사용자 노출 문구를 쉬운 한국어로 통일
+- [x] 관련 테스트 기대 문자열 업데이트
+- [x] 로딩/에러/빈 상태 영향 없는지 결과 화면 문구 재확인
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+- [x] 사용자 승인 대기
+
 ## 2026-03-21 파비콘 루트 fallback 및 캐시 버스트 보강
 
 - [x] 브라우저 탭에서 예전 파비콘이 남는 원인 재확인

@@ -228,7 +228,7 @@ export const KNOWLEDGE_INDUSTRY_REVIEW_ROWS: KnowledgeIndustryReviewRow[] = [
     label: '콜센터 및 텔레마케팅 서비스업',
     ksic: '75991',
     verdict: '가능',
-    note: '콜센터 운영과 텔레마케팅 서비스가 함께 묶인 exact 코드입니다.',
+    note: '콜센터 운영과 텔레마케팅 서비스가 함께 묶인 5자리 코드입니다.',
   },
   {
     clause: '26호',

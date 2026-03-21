@@ -68,7 +68,7 @@ describe('evaluateEligibility', () => {
     })
 
     expect(result.verdict).toBe('eligible')
-    expect(result.summary).toContain('exact 5자리 허용 코드')
+    expect(result.summary).toContain('5자리 코드 기준과 일치합니다')
   })
 
   it('71531 경영 컨설팅업은 지식산업센터 자동 허용 코드로 판정한다', () => {
@@ -80,7 +80,7 @@ describe('evaluateEligibility', () => {
     })
 
     expect(result.verdict).toBe('eligible')
-    expect(result.summary).toContain('exact 5자리 허용 코드')
+    expect(result.summary).toContain('5자리 코드 기준과 일치합니다')
   })
 
   it('63112 호스팅 및 관련 서비스업은 심의 필요로 판정한다', () => {
@@ -95,7 +95,7 @@ describe('evaluateEligibility', () => {
     expect(result.summary).toContain('위원회')
   })
 
-  it('49102 철도 화물 운송업은 지식산업센터 exact 허용 코드로 판정한다', () => {
+  it('49102 철도 화물 운송업은 지식산업센터 5자리 허용 코드로 판정한다', () => {
     const result = evaluateEligibility({
       ...baseInput,
       zoneType: 'knowledgeIndustryCenter',

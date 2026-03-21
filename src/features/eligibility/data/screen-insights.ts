@@ -203,18 +203,18 @@ export function getEligibilityScreenInsight(
 
     if (exactMatch) {
       const kindLabelMap = {
-        allowed: 'exact 5자리 허용 코드',
-        reviewRequired: 'exact 5자리 심의 코드',
-        conditional: 'exact 5자리 조건부 코드',
-        additionalCheck: 'exact 5자리 추가 확인 코드',
-        blocked: 'exact 5자리 불가 코드',
+        allowed: '5자리 코드 일치',
+        reviewRequired: '5자리 코드 심의 대상',
+        conditional: '5자리 코드 조건부 허용',
+        additionalCheck: '5자리 코드 추가 확인 필요',
+        blocked: '5자리 코드 불가',
       } as const
 
       fields.push({ label: '판정 기준', value: kindLabelMap[exactMatch.kind] })
       bullets.push(exactMatch.entry.note)
 
       if (exactMatch.kind === 'allowed') {
-        title = '선택한 업종은 exact 5자리 기준으로 바로 대조됩니다.'
+        title = '선택한 업종은 5자리 업종코드와 일치합니다.'
       }
 
       if (exactMatch.kind === 'reviewRequired') {

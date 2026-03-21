@@ -463,7 +463,7 @@ const DISCOVERY_PRESETS: IndustryDiscoveryPreset[] = [
     name: '물품 감정, 계량 및 견본 추출업',
     aliases: ['물품감정', '상품감정', '계량서비스', '견본추출', '샘플추출'],
     reason:
-      '물품 감정, 계량, 견본 추출 중심 설명은 해당 exact 코드로 바로 검토하는 편이 좋습니다.',
+      '물품 감정, 계량, 견본 추출 중심 설명은 해당 5자리 코드로 바로 검토하는 편이 좋습니다.',
     suggestedRegulatoryFit: 'knowledgeIndustry',
   },
   {

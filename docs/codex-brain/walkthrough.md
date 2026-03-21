@@ -1,5 +1,69 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-21 지식산업센터 5자리 코드 문구 쉬운 표현으로 정리
+
+### 작업 배경
+
+- 사용자는 결과 카드에 보이는 `exact 5자리 허용 코드`, `선택한 업종은 exact 5자리 기준으로 바로 대조됩니다.` 같은 표현이 어렵고 어색하다고 피드백했다.
+- 확인 결과 해당 표현은 한 화면에만 있는 것이 아니라 결과 카드, 평가 요약, 전문가 인사이트, 코드 사전 설명, 일부 추천 안내 문구에 함께 퍼져 있어 한 곳만 바꾸면 다른 화면에 다시 남을 수 있었다.
+- 추가 피드백으로 `직접 일치`보다 더 짧은 `일치` 표현을 선호한다는 방향도 반영했다.
+
+### 반영 내용
+
+- 사용자 노출 문구 통일
+  - [`src/features/eligibility/data/screen-insights.ts`](C:\projects\magok\src\features\eligibility\data\screen-insights.ts)에서 `판정 기준` 라벨을 `5자리 코드 일치`, `5자리 코드 심의 대상`, `5자리 코드 조건부 허용`, `5자리 코드 추가 확인 필요`, `5자리 코드 불가`로 정리했다.
+  - 허용 카드 제목은 `선택한 업종은 5자리 업종코드와 일치합니다.`로 교체했다.
+- 결과 요약과 인사이트 문장 정리
+  - [`src/features/eligibility/evaluator.ts`](C:\projects\magok\src\features\eligibility\evaluator.ts)의 허용/불가 요약에서 `exact 5자리`, `직접 일치` 표현을 제거하고 `5자리 코드 기준과 일치합니다`, `5자리 코드 기준에서 제한 업종입니다`처럼 바로 읽히는 문장으로 바꿨다.
+  - [`src/features/eligibility/data/expert-insights.ts`](C:\projects\magok\src\features\eligibility\data\expert-insights.ts)에서도 `broad prefix`, `exact 코드` 같은 영어 표현을 없애고 한국어 설명으로 통일했다.
+- 부가 안내 문구 정리
+  - [`src/features/eligibility/data/magok-code-directory.ts`](C:\projects\magok\src\features\eligibility\data\magok-code-directory.ts)의 코드 사전 설명을 `지식산업센터 5자리 코드 기준에서 바로 허용되는 업종입니다.`로 바꿨다.
+  - [`src/features/eligibility/data/industry-discovery.ts`](C:\projects\magok\src\features\eligibility\data\industry-discovery.ts), [`src/features/eligibility/data/knowledge-industry-review-table.ts`](C:\projects\magok\src\features\eligibility\data\knowledge-industry-review-table.ts)의 남아 있던 `exact 코드` 안내도 `5자리 코드`로 정리했다.
+  - 관련 테스트 문구도 새 표현 기준으로 갱신했다.
+- 정적 산출물 재생성
+  - `npm run build`의 `prebuild` 단계에서 `public/faq/**/index.html`, `public/guides/**/index.html` 정적 SEO 페이지가 현재 소스 기준으로 다시 생성됐다.
+
+### 구현 파일
+
+- `src/features/eligibility/data/screen-insights.ts`
+- `src/features/eligibility/data/expert-insights.ts`
+- `src/features/eligibility/evaluator.ts`
+- `src/features/eligibility/data/magok-code-directory.ts`
+- `src/features/eligibility/data/industry-discovery.ts`
+- `src/features/eligibility/data/knowledge-industry-review-table.ts`
+- `src/features/eligibility/evaluator.test.ts`
+- `src/features/eligibility/industry-discovery.test.ts`
+- `public/faq/**/index.html`
+- `public/guides/**/index.html`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 11 passed`
+  - `Tests 102 passed`
+- `npm run build` 통과
+  - `exported 467 guide pages, 1401 faq pages, 2 library pages, 4 update pages to public/`
+  - `chunk size` / `plugin timing` 경고는 기존과 같은 성격으로 유지됐다.
+
+### 결과 요약
+
+- 결과 카드와 요약 영역에서 보이던 `exact 5자리` 혼합 표현을 한국어 중심 문구로 바꿔, 의미를 훨씬 빠르게 이해할 수 있게 됐다.
+- 사용자가 선호한 방향에 맞춰 `직접 일치`도 `일치`로 줄여 전체 톤을 더 간결하게 맞췄다.
+- 로딩/에러/빈 상태 처리 로직은 건드리지 않았고, 문자열만 바뀌도록 유지한 상태에서 lint/test/build까지 모두 통과했다.
+
 ## 2026-03-21 파비콘 루트 fallback 및 캐시 버스트 보강
 
 ### 작업 배경
