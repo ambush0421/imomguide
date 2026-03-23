@@ -1,3 +1,77 @@
+## 2026-03-23 네이버 사이트 인증 메타 태그 추가
+
+- [x] `index.html` head 메타 구조와 기존 인증 태그 여부 확인
+- [x] `docs/codex-brain/implementation_plan.md` 변경 계획 기록
+- [x] 사용자 요청으로 바로 실행 승인 확인
+- [x] `index.html`에 `naver-site-verification` 메타 태그 추가
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-23 추천 카드 중복 정보 1회 제공으로 정리
+
+- [x] `industry-discovery-panel`, `eligibility-strategy`, 관련 테스트 경로 분석
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] 사용자 승인 대기
+- [x] 추천 카드 하단 정보 구조를 역할이 겹치지 않게 재정의
+- [x] `requiredProofs` / `riskNotes` / `nextActions`의 중복 문구 제거 및 우선순위 재배치
+- [x] 중복 제거 후 비어 있는 섹션은 숨기고, 짧은 행동 안내는 컴팩트한 형태로 정리
+- [x] 관련 테스트 갱신
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-23 파비콘 일관성 점검 및 단일 소스 정리
+
+- [x] 현재 favicon 참조 경로(`index.html`)와 정적 자산(`public`, `public/brand`) 조사
+- [x] 루트 파비콘 세트와 `public/brand` 파비콘 세트 해시 비교
+- [x] 앱 헤더 브랜드 자산과 favicon 심볼 일치 여부 확인
+- [x] Electron/desktop 아이콘 설정 여부 확인
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [ ] 사용자 승인 대기
+- [ ] favicon 단일 원본/생성 흐름 정리
+- [ ] 웹 favicon 캐시 버스트 또는 파일명 갱신 전략 반영
+- [ ] Electron 앱 아이콘까지 같은 소스로 정렬
+- [ ] `npm run lint`
+- [ ] `npm run test`
+- [ ] `npm run build`
+- [ ] 필요 시 `npm run desktop:build`
+- [ ] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-23 Google Search Central 기준 SEO 전면 최적화
+
+- [x] Google Search Central 공식 문서(`SEO 기본 가이드`, `웹 개발자를 위한 검색엔진 최적화 가이드`, `메타 설명 작성 방법`, `JavaScript 검색엔진 최적화의 기본사항`, `사이트맵 제작 및 제출하기`) 검토
+- [x] 현재 SEO 구현 경로(`index.html`, `src/App.tsx`, `src/features/guides/seo/seo-page-builder.ts`, `public/robots.txt`, `public/sitemap.xml`) 분석
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [ ] 사용자 승인 대기
+- [ ] 홈/주요 탐색 CTA를 크롤링 가능한 `<a href>` 링크 중심으로 재구성
+- [ ] 해시(fragment) 의존 탐색을 SEO 친화적인 실제 URL 링크 흐름으로 보강
+- [ ] 홈 메타데이터와 구조화데이터(`title`, `description`, canonical, OG/Twitter, JSON-LD) 강화
+- [ ] 가이드/FAQ/법령/업데이트 공개 페이지의 메타데이터·구조화데이터·내부 링크 강화
+- [ ] OG 공유 이미지 자산 추가 및 전역 연결
+- [ ] 사이트맵 `lastmod`와 생성 규칙 정교화
+- [ ] 관련 테스트 및 정적 SEO 산출물 재생성
+- [ ] `npm run lint`
+- [ ] `npm run test`
+- [ ] `npm run build`
+- [ ] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-23 제휴 영역 사용자 문구 정리 + 광고 노출 원인 보정
+
+- [x] 제휴 영역 상태값, 렌더링 조건, 외부 위젯 로딩 경로 분석
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] 사용자 승인 대기
+- [x] `src/App.tsx` 제휴 섹션의 운영자/심사용 안내 문구를 사용자용 문구로 교체
+- [x] `src/App.tsx` 접힘 패널 헤더/보조 설명을 이용자 관점으로 단순화
+- [x] `src/App.tsx` 외부 iframe 위젯이 비어 보일 때를 대비한 fallback 상태 추가
+- [x] `src/App.test.tsx` 초기 노출/문구/fallback 기준 테스트 갱신
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
 ## 2026-03-23 업종코드 추천을 입주 전략 컨설턴트형으로 전환
 
 - [x] 업종 추천/판정/결과 화면 관련 코드 경로 분석
@@ -1432,4 +1506,12 @@
 - [x] `implementation_plan.md`에 설치 계획 추가
 - [x] `index.html`에 GA4 태그 삽입
 - [x] 관련 동작 검증
+- [x] walkthrough.md 갱신
+
+## 2026-03-23 Cloudflare Pages 운영 배포
+
+- [x] 현재 배포 경로와 사용 가능한 CLI 상태 확인
+- [x] `implementation_plan.md`에 배포 계획 추가
+- [x] 운영 배포 실행
+- [x] 배포 URL 확인
 - [x] walkthrough.md 갱신

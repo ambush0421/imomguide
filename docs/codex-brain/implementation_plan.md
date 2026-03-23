@@ -1,3 +1,277 @@
+## 2026-03-23 네이버 사이트 인증 메타 태그 추가
+
+### 목표
+
+- 사용자가 제공한 네이버 사이트 인증 메타 태그를 [`index.html`](C:\projects\magok\index.html)에 추가해 네이버 서치어드바이저 인증에 필요한 head 메타를 반영한다.
+- 기존 OG, Twitter, AdSense, GA4 메타/스크립트 구조를 건드리지 않고 최소 수정으로 끝낸다.
+
+### 현재 구조 진단
+
+1. [`index.html`](C:\projects\magok\index.html#L1)~[`index.html`](C:\projects\magok\index.html#L66) head에는 favicon, viewport, canonical, AdSense, OG/Twitter 메타는 있으나 `naver-site-verification` 메타는 없다.
+2. 현재 검색 인증 관련 메타는 별도로 없어서, 사용자가 제공한 값만 그대로 추가하면 된다.
+3. 이번 작업은 정적 head 변경이라 애플리케이션 로직이나 테스트 코드 수정 범위는 없다.
+
+### 구현 방향
+
+1. [`index.html`](C:\projects\magok\index.html)에 아래 메타를 head 안에 추가한다.
+   - `<meta name="naver-site-verification" content="54658682b3b8cd96d8c6988add548776178cb036" />`
+2. 기존 canonical, description, OG/Twitter 메타와 충돌하지 않는 위치에 배치한다.
+3. 변경 후 `npm run lint`, `npm run test`, `npm run build`로 기본 검증을 진행한다.
+
+### 예상 영향 범위
+
+- [`index.html`](C:\projects\magok\index.html)
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+## 2026-03-23 추천 카드 중복 정보 1회 제공으로 정리
+
+### 목표
+
+- 1단계 추천 결과 카드 하단에서 같은 뜻의 안내가 여러 카드에 반복되지 않게 정리한다.
+- 모바일 기준으로 한 번에 읽어야 하는 정보를 줄이고, 각 카드가 맡는 역할을 더 분명하게 만든다.
+- 사용자가 “새 정보”와 “반복 안내”를 바로 구분할 수 있도록 정보 구조를 다시 나눈다.
+
+### 현재 구조 진단
+
+1. [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L356)~[`src/features\eligibility\components\industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L364)은 `requiredProofs`, `riskNotes`, `nextActions`를 각각 같은 무게의 체크리스트 카드로 곧바로 렌더링한다.
+2. [`src/features/eligibility/data/eligibility-strategy.ts`](C:\projects\magok\src\features\eligibility\data\eligibility-strategy.ts#L174)~[`src/features\eligibility\data\eligibility-strategy.ts`](C:\projects\magok\src\features\eligibility\data\eligibility-strategy.ts#L243)에서 세 배열을 독립적으로 생성하는데, “실제 수행 업무를 기준으로 정리해야 한다”, “주업종/부업종을 비교해야 한다” 같은 맥락이 여러 버킷에 나뉘어 반복될 수 있다.
+3. 현재 구조에는 버킷 간 중복 제거 규칙이 없어서, 문장 표현이 조금만 달라도 사용자는 같은 메시지를 세 번 읽는 느낌을 받을 수 있다.
+4. 특히 모바일에서는 카드 수가 늘어날수록 “계속 같은 말이 나온다”는 인상이 강해지므로, 정보량보다 역할 분리가 더 중요하다.
+5. 비슷한 3단 구조가 결과 화면 [`src/features/eligibility/components/result-panel.tsx`](C:\projects\magok\src\features\eligibility\components\result-panel.tsx#L756)~[`src/features\eligibility\components\result-panel.tsx`](C:\projects\magok\src\features\eligibility\components\result-panel.tsx#L795)에도 있지만, 이번 사용자 피드백은 추천 카드 화면에 직접 연결돼 있으므로 우선 범위를 1단계 추천 카드로 제한하는 편이 안전하다.
+6. 작업 지시에서 먼저 읽으라고 한 `Codex_System_Prompt.md`, `GEMINI.md`는 현재 저장소에서 찾지 못했다. 이번 계획은 실제 확인 가능한 소스와 `docs/pdca/*`, `docs/codex-brain/*` 기록을 기준으로 세운다.
+
+### 구현 방향
+
+1. 데이터 역할 재정의
+   - `requiredProofs`는 “준비 자료”만 남기고, 증빙 종류 외의 설명 문장은 넣지 않는다.
+   - `riskNotes`는 “꼭 확인할 점 / 과장하면 안 되는 점 / 심의 리스크”만 남긴다.
+   - `nextActions`는 “다음 단계에서 실제로 할 행동”만 남기고, 이미 `riskNotes`에서 설명한 사업 정합성 메시지는 되풀이하지 않는다.
+2. 중복 제거 규칙 추가
+   - 같은 핵심 의도를 반복하는 문장은 한 버킷에만 남기도록 생성 문구를 정리한다.
+   - 특히 `actual work`, `주업종·부업종 비교`, `면적/인력/제조시설 확인`처럼 반복되기 쉬운 메시지는 어느 섹션에 둘지 우선순위를 정해 한 번만 보이게 한다.
+3. UI 노출 방식 조정
+   - 추천 카드 하단 섹션 제목도 역할 중심으로 더 분명하게 다듬는다.
+   - 중복 제거 후 항목이 없는 섹션은 렌더링하지 않는다.
+   - `nextActions`가 1개 짧은 행동 안내만 남는 경우에는 별도 큰 카드 대신 더 컴팩트한 안내 블록으로 줄이는 방향을 우선 검토한다.
+4. 테스트 보강
+   - 추천 데이터 테스트에 `requiredProofs`, `riskNotes`, `nextActions`가 최소 샘플에서 역할별로 채워지고, 동일 문장이 버킷 간 중복되지 않는지 검증을 추가한다.
+   - 화면 테스트는 변경된 섹션 제목과 노출 조건에 맞춰 갱신한다.
+
+### 예상 영향 범위
+
+- [`src/features/eligibility/data/eligibility-strategy.ts`](C:\projects\magok\src\features\eligibility\data\eligibility-strategy.ts)
+- [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)
+- [`src\App.test.tsx`](C:\projects\magok\src\App.test.tsx)
+- [`src/features/eligibility/data/industry-discovery.test.ts`](C:\projects\magok\src\features\eligibility\data\industry-discovery.test.ts)
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 승인 후 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+### 메모
+
+1. 이번 루프는 추천 카드의 중복 정보 정리에 집중하고, 결과 화면(`result-panel`)의 3단 구조는 별도 피드백이 생기면 다음 루프로 분리한다.
+2. 구현 시 숫자 포맷팅 변경이 필요하면 프로젝트 규칙대로 [`src/utils/format.ts`](C:\projects\magok\src\utils\format.ts)를 사용한다.
+
+## 2026-03-23 파비콘 일관성 점검 및 단일 소스 정리
+
+### 목표
+
+- 브라우저 탭 favicon, 루트 fallback 파일, `public/brand` 보관 세트, Electron 데스크톱 아이콘이 같은 브랜드 원본을 기준으로 움직이도록 정리한다.
+- 사용자가 보고 있는 "예전에 만든 것과 다른 아이콘"이 실제 자산 불일치인지, 캐시 문제인지, 데스크톱 앱 아이콘 미설정인지 먼저 분리해서 확인한다.
+
+### 현재 구조 진단
+
+1. [`index.html`](C:\projects\magok\index.html#L16)~[`index.html`](C:\projects\magok\index.html#L21)은 루트 [`public/favicon.svg`](C:\projects\magok\public\favicon.svg), [`public/favicon-32x32.png`](C:\projects\magok\public\favicon-32x32.png), [`public/favicon-16x16.png`](C:\projects\magok\public\favicon-16x16.png), [`public/favicon.ico`](C:\projects\magok\public\favicon.ico), [`public/apple-touch-icon.png`](C:\projects\magok\public\apple-touch-icon.png)을 직접 참조하며, 이미 `?v=20260321b` 캐시 버전 쿼리도 붙어 있다.
+2. 루트 파비콘 세트와 [`public/brand`](C:\projects\magok\public\brand) 파비콘 세트의 해시를 비교해 보니 `favicon.ico`, `favicon-16`, `favicon-32`, `apple-touch-icon`은 서로 동일 파일이다. 즉 현재 웹에서 쓰는 루트 파비콘과 브랜드 폴더 보관본이 서로 다른 그림을 가리키는 상태는 아니다.
+3. [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)의 도형 구조는 [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)와 사실상 동일하고, 앱 헤더도 [`src/App.tsx`](C:\projects\magok\src\App.tsx#L231)~[`src/App.tsx`](C:\projects\magok\src\App.tsx#L232)에서 같은 `magok-codefinder` 심볼/워드마크를 사용한다. 브라우저 favicon과 현재 앱 헤더 브랜드는 코드 기준으로는 맞춰져 있다.
+4. 저장소 안에는 `manifest.webmanifest` 같은 추가 PWA 아이콘 선언이 없고, favicon 관련 참조도 사실상 [`index.html`](C:\projects\magok\index.html) 한 곳에 모여 있다. 웹 쪽에서 "다른 파일을 몰래 참조하는 두 번째 경로"는 현재 보이지 않는다.
+5. 반면 Electron 쪽은 [`electron/main.mjs`](C:\projects\magok\electron\main.mjs)에 `BrowserWindow` 아이콘 설정이 없고, [`package.json`](C:\projects\magok\package.json) `build` 설정에도 앱 아이콘 경로가 없다. 기존 [`docs/codex-brain/walkthrough.md`](C:\projects\magok\docs\codex-brain\walkthrough.md) 기록에도 데스크톱 빌드가 "기본 Electron 아이콘 사용" 상태라고 남아 있다.
+6. 따라서 현재 저장소에서 확인되는 확실한 불일치 지점은 "웹 favicon 세트"보다 "Electron/desktop 아이콘 미설정"이다. 만약 브라우저 탭에서 예전 아이콘이 계속 보인다면, 자산 불일치보다는 브라우저 캐시나 운영체제 icon cache가 남아 있을 가능성이 더 크다.
+
+### 구현 방향
+
+1. 단일 원본 확정
+   - [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)를 기준 원본으로 삼고, 루트 favicon 파생본과 Electron 아이콘도 같은 원본에서 생성되도록 정리한다.
+   - 필요하면 생성 스크립트를 추가해 SVG -> PNG/ICO 파생 과정을 문서화한다.
+2. 웹 favicon 갱신 안정화
+   - 브라우저 캐시를 더 강하게 갱신할 수 있도록 `index.html` 버전 쿼리를 올리거나, 필요 시 파일명 자체를 새 버전으로 바꾸는 방식을 적용한다.
+   - 작은 16px/32px 렌더가 기대와 다르게 보인다면 이 단계에서 별도 소형용 파생본도 함께 검토한다.
+3. Electron 아이콘 정렬
+   - Windows용 `.ico` 자산을 명시적으로 두고, `package.json` `build.icon` 또는 플랫폼별 아이콘 설정을 추가한다.
+   - 개발/패키징 실행에서 창 아이콘도 같은 파일을 쓰도록 [`electron/main.mjs`](C:\projects\magok\electron\main.mjs) `BrowserWindow` 옵션까지 함께 맞춘다.
+4. 검증
+   - `npm run lint`
+   - `npm run test`
+   - `npm run build`
+   - 필요 시 `npm run desktop:build`
+
+### 예상 영향 범위
+
+- [`index.html`](C:\projects\magok\index.html)
+- [`public/favicon.svg`](C:\projects\magok\public\favicon.svg)
+- [`public/favicon.ico`](C:\projects\magok\public\favicon.ico)
+- [`public/favicon-32x32.png`](C:\projects\magok\public\favicon-32x32.png)
+- [`public/favicon-16x16.png`](C:\projects\magok\public\favicon-16x16.png)
+- [`public/apple-touch-icon.png`](C:\projects\magok\public\apple-touch-icon.png)
+- [`public/brand/magok-codefinder-symbol.svg`](C:\projects\magok\public\brand\magok-codefinder-symbol.svg)
+- [`electron/main.mjs`](C:\projects\magok\electron\main.mjs)
+- [`package.json`](C:\projects\magok\package.json)
+- 필요 시 신규 아이콘 생성 스크립트 또는 Electron 아이콘 자산
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 메모
+
+1. 작업 지시에서 먼저 읽으라고 한 `Codex_System_Prompt.md`, `GEMINI.md`는 현재 저장소에서 찾지 못했다. 이번 진단은 실제 확인 가능한 소스와 기존 `docs/pdca/*`, `docs/codex-brain/*` 기록을 기준으로 작성했다.
+2. 승인 전 단계에서는 코드 수정 대신 진단과 계획만 정리한다.
+
+## 2026-03-23 Google Search Central 기준 SEO 전면 최적화
+
+### 목표
+
+- Google Search Central 공식 문서 기준으로 현재 서비스의 크롤링 가능성, 메타데이터 품질, 구조화데이터, 사이트맵 정확도를 한 번에 끌어올린다.
+- 특히 해시 기반 탐색 때문에 검색엔진이 링크와 화면을 안정적으로 발견하지 못할 수 있는 구간을 줄이고, 공개 SEO 페이지와 홈 사이의 내부 링크 구조를 더 강하게 연결한다.
+- 기존 사용자 경험은 크게 깨지지 않도록 유지하되, 검색엔진용 URL과 링크 계약은 더 명확하게 만든다.
+
+### 공식 문서 기준
+
+1. Google Search Central의 [`SEO 기본 가이드`](https://developers.google.com/search/docs/fundamentals/seo-starter-guide?hl=ko)는 사이트맵, robots, title, meta description, 내부 링크, canonical, Search Console 점검을 기본 개선 항목으로 정리한다.
+2. [`웹 개발자를 위한 검색엔진 최적화 가이드`](https://developers.google.com/search/docs/fundamentals/get-started-developers?hl=ko)는 크롤링 가능한 `<a>` 요소 사용, 사이트맵 제출, 각 화면의 고유 URL 보장, 구체적인 제목과 메타 설명, 의미론적 HTML 사용을 권장한다.
+3. 같은 문서에서 Google은 “HTML 페이지가 하나만 있는 자바스크립트 앱의 경우 각 화면 또는 개별 콘텐츠마다 URL이 있어야 한다”고 안내한다.
+4. [`JavaScript 검색엔진 최적화의 기본사항`](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics?hl=ko)은 Google이 `href`가 있는 `<a>` 요소를 기준으로 링크를 발견하며, 프래그먼트(`#`) 대신 History API와 실제 URL을 사용하라고 권장한다.
+5. [`메타 설명 작성 방법`](https://developers.google.com/search/docs/appearance/snippet?hl=ko)은 페이지마다 고유한 설명을 작성하고, 특히 홈페이지와 인기 URL에는 우선적으로 정확한 메타 설명을 제공하라고 권장한다.
+6. [`사이트맵 제작 및 제출하기`](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap?hl=ko)는 절대 URL과 canonical URL 사용, 정확한 최신성 정보 유지, Search Console 제출을 강조한다.
+
+### 현재 구조 진단
+
+1. [`index.html`](C:\projects\magok\index.html#L30)~[`index.html`](C:\projects\magok\index.html#L64)에는 canonical, title, description, OG/Twitter 기본 태그가 있으나 `og:image`, `twitter:image`, `robots` 메타, 구조화데이터(JSON-LD)는 없다. 홈은 검색엔진 관점에서 최소 메타만 있는 상태다.
+2. 앱 라우팅은 [`src/App.tsx`](C:\projects\magok\src\App.tsx#L1872)~[`src/App.tsx`](C:\projects\magok\src\App.tsx#L2024)에서 `window.location.hash`, `hashchange`, `pushState`/`replaceState`를 이용해 `#directory`, `#library`, `#updates`, `#guides/...` 형태로 움직인다. Google 공식 JS SEO 문서가 피하라고 한 fragment 중심 탐색과 직접 맞닿아 있다.
+3. 상단 탐색의 주요 버튼은 [`src/App.tsx`](C:\projects\magok\src\App.tsx#L2442)~[`src/App.tsx`](C:\projects\magok\src\App.tsx#L2465)처럼 `Button + onClick` 위주라서, 크롤러가 따라갈 수 있는 `<a href>` 링크가 부족하다.
+4. 정적 공개 페이지는 이미 존재하고 메타 기본형도 갖춰져 있다. 예를 들어 [`public/guides/index.html`](C:\projects\magok\public\guides\index.html#L1), [`public/faq/index.html`](C:\projects\magok\public\faq\index.html#L1)은 canonical, title, description, robots, OG/Twitter, BreadcrumbList를 포함한다.
+5. 다만 가이드/FAQ 인덱스는 [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts#L523)~[`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts#L606) 기준으로 BreadcrumbList만 넣고 있어, `CollectionPage`/`WebPage`/`ItemList` 같은 페이지 성격 전달이 약하다.
+6. 정적 공개 페이지 공통 OG 이미지는 [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts#L11)~[`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts#L13)에서 `favicon.svg`를 사용한다. 소셜 공유용 비주얼 품질이 낮고, 홈의 `index.html`에는 OG/Twitter 이미지가 아예 없다.
+7. 사이트맵 생성기는 [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts#L77)~[`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts#L174)에서 동작하지만 `lastmod`가 전부 고정 문자열(`2026-03-20`)이라 실제 수정일과 쉽게 어긋날 수 있다.
+8. 공개 인덱스 페이지의 CTA 중 일부는 여전히 해시 기반 앱 진입을 가리킨다. 예를 들어 [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts#L555), [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts#L775), [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts#L836)~[`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts#L853)은 `/#finder`, `/#library`, `/#updates` 링크를 사용한다.
+9. 작업 지시에서 먼저 읽으라고 한 `Codex_System_Prompt.md`, `GEMINI.md`는 현재 저장소에서 찾지 못했다. 이번 계획은 실제 확인 가능한 `README.md`, `docs/pdca/*`, 기존 `docs/codex-brain/*`, 그리고 Google 공식 문서를 기준으로 세운다.
+
+### 구현 방향
+
+1. 크롤링 가능한 링크 구조 보강
+   - 홈 헤더와 주요 CTA를 `Button asChild + <a href>` 패턴으로 바꿔 `/guides/`, `/faq/`, `/library/`, `/updates/` 같은 실제 공개 URL로 연결한다.
+   - 인터랙티브 앱 내부 이동이 필요한 경우에도 기본 링크 목적지는 실제 URL로 두고, 필요 시 사용자 클릭에서만 현재 UX를 유지하는 방향을 검토한다.
+   - 홈과 각 공개 페이지에 “관련 공개 페이지” 링크 묶음을 추가해 내부 링크 그래프를 더 촘촘하게 만든다.
+2. fragment 의존 완화
+   - SEO가 중요한 공개 진입 경로는 `#...` 대신 실제 path URL을 우선 사용한다.
+   - 완전한 라우터 전환까지는 범위가 커질 수 있으므로, 이번 루프에서는 “검색엔진이 발견해야 하는 페이지는 실제 URL로 노출”하는 것을 1차 목표로 잡는다.
+   - 필요하다면 `noscript` 또는 정적 링크 블록을 추가해 JS 의존도를 더 낮춘다.
+3. 홈 메타데이터 강화
+   - [`index.html`](C:\projects\magok\index.html)에 `robots`, `og:image`, `og:image:alt`, `twitter:image`, `twitter:image:alt`를 추가한다.
+   - 홈용 JSON-LD로 `Organization`, `WebSite`, 서비스 성격을 설명하는 `WebApplication` 또는 `Service` 중 실제 구조에 맞는 타입을 검토해 넣는다.
+   - 홈페이지 설명 문구는 현재 제품 가치와 검색 의도를 더 선명하게 담도록 다듬는다.
+4. 공개 SEO 페이지 메타/구조화데이터 강화
+   - 공통 빌더에 `WebPage` 계열 기본 스키마를 보강하고, 가이드/FAQ/라이브러리/업데이트 인덱스에 `CollectionPage` 또는 `ItemList` 성격을 추가한다.
+   - 상세 페이지는 현재의 `Service`, `FAQPage`, `BreadcrumbList`, `WebPage` 구성을 유지하되, 소셜 공유 메타와 보조 속성(이미지 alt 등)을 강화한다.
+   - 가이드/FAQ/라이브러리/업데이트 사이의 관련 링크를 더 직접적으로 연결해 크롤링 경로를 개선한다.
+5. OG 공유 이미지 체계 정리
+   - 기본 공유 이미지 자산을 `1200x630` 기준으로 새로 두고, 홈과 정적 공개 페이지가 공통으로 사용하도록 연결한다.
+   - 가능하면 브랜드 자산을 재활용해 검색/공유 시 식별성이 높은 이미지를 만든다.
+6. 사이트맵 정확도 보강
+   - 가이드는 `updatedAt`, 라이브러리는 `effectiveDate`, 업데이트는 `date`를 기반으로 `lastmod`를 계산한다.
+   - 인덱스 사이트맵은 실제 하위 콘텐츠 중 가장 최근 날짜 또는 빌드 날짜를 반영하도록 바꾼다.
+   - 변경 후 `public/`과 `dist/` 산출물 모두에서 `robots.txt`, `sitemap.xml`, `sitemaps/*`를 재검증한다.
+7. 테스트와 검증
+   - 메타 태그/구조화데이터/내부 링크/사이트맵 문자열에 대한 테스트를 보강한다.
+   - `npm run lint`, `npm run test`, `npm run build`로 최종 검증한다.
+
+### 예상 영향 범위
+
+- [`index.html`](C:\projects\magok\index.html)
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx)
+- [`src/features/guides/components/guide-page.tsx`](C:\projects\magok\src\features\guides\components\guide-page.tsx)
+- [`src/features/library/components/legal-library-page.tsx`](C:\projects\magok\src\features\library\components\legal-library-page.tsx)
+- [`src/features/updates/components/update-log-page.tsx`](C:\projects\magok\src\features\updates\components\update-log-page.tsx)
+- [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)
+- [`src/features/guides/seo/seo-page-builder.test.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.test.ts)
+- [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts)
+- 신규 공유 이미지 자산: `public/` 하위
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 확인이 필요한 판단
+
+1. 이번 루프는 “Google에 발견되는 공개 URL과 메타 체계 강화”를 우선하고, 해시 기반 앱 전체를 path router로 전면 교체하지는 않는 방향으로 잡는다.
+2. 만약 사용자가 원하면 다음 루프에서 React 라우팅 자체를 실제 경로 기반으로 옮기는 작업을 별도 범위로 확장할 수 있다.
+
+### 승인 후 검증 계획
+
+- `npm run export:seo-pages`
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- `curl https://loopincode.com/sitemap.xml` 수준의 산출물 점검
+- Search Console에서 `sitemap.xml` 재제출 및 대표 URL 검사
+
+## 2026-03-23 제휴 영역 사용자 문구 정리 + 광고 노출 원인 보정
+
+### 목표
+
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx)의 제휴 영역이 현재 `운영자 승인용 설명`을 사용자에게 그대로 노출하고 있어, 이용자 관점의 간결한 안내로 바꾼다.
+- 홈에서 광고가 바로 안 보이는 직접 원인인 `기본 접힘 상태`를 코드 기준으로 명확히 정리하고, 필요하면 펼침 구조는 유지하되 설명 톤을 사용자 친화적으로 바꾼다.
+- 외부 쿠팡 위젯이 브라우저 환경이나 차단 확장 프로그램 영향으로 비어 보일 수 있으므로, iframe만 남고 내용이 안 보일 때도 최소한 링크 CTA와 안내가 남는 fallback을 준비한다.
+
+### 현재 구조 진단
+
+1. [`src/App.tsx`](C:\projects\magok\src\App.tsx)에서 제휴 패널 상태값 [`isAffiliateExpanded`](C:\projects\magok\src\App.tsx#L522)은 `useState(false)`로 시작하므로, 홈 첫 진입 시 광고/제휴 위젯은 의도적으로 접힌 상태다.
+2. 같은 파일의 제휴 헤더 문구([`src/App.tsx`](C:\projects\magok\src\App.tsx#L1644), [`src/App.tsx`](C:\projects\magok\src\App.tsx#L1649), [`src/App.tsx`](C:\projects\magok\src\App.tsx#L1657))는 “광고보다 본문이 먼저”, “입주 판단용 본문이 아니다”, “기본 노출 강도를 낮췄다”처럼 내부 운영 의사결정을 사용자에게 직접 설명하는 톤이다.
+3. 접힘 버튼 설명([`src/App.tsx`](C:\projects\magok\src\App.tsx#L1673))도 “접어두었습니다”, “기본 숨김” 같은 정책 문구 중심이라, 실제 사용자 입장에서는 왜 이런 설명을 읽어야 하는지 납득하기 어렵다.
+4. 기존 계획 문서에도 [`docs/codex-brain/implementation_plan.md`](C:\projects\magok\docs\codex-brain\implementation_plan.md#L2237) 기준으로 “광고보다 본문이 먼저” 정책과 기본 접힘 전략이 명시돼 있어, 지금 화면은 우발적 결과가 아니라 이전 승인/정책 대응 작업의 연장선이다.
+5. 테스트 역시 [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx#L129)~[`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx#L144)에서 초기 진입 시 제휴 안내와 위젯이 보이지 않는 흐름을 정상 동작으로 고정하고 있다.
+6. 현재 위젯 `src`는 `coupa.ng` 단축 URL을 통해 `ads-partners.coupang.com`과 `partners.coupangcdn.com`의 외부 HTML/JS로 리다이렉트되며, 최종 응답은 `new PartnersCoupang.ProductBanner("#container")`로 렌더링되는 스크립트 부트스트랩 HTML이다. 따라서 확장 프로그램, 브라우저 보안 정책, 서드파티 스크립트 차단이 있으면 iframe 내부가 비어 보일 가능성이 있다. 이 부분은 로컬 JSX 누락이라기보다 외부 렌더링 의존성 문제로 보는 편이 맞다.
+
+### 구현 방향
+
+1. 사용자 노출 문구 정리
+   - 제휴 섹션의 배지, 제목, 본문 설명을 “사무실 준비 참고 링크”, “필요할 때 보는 준비물 추천”처럼 이용자 관점의 짧은 설명으로 교체한다.
+   - 내부 운영 판단을 직접 드러내는 “광고보다 본문이 먼저”, “노출 강도” 같은 문장은 제거한다.
+2. 접힘 패널 헤더 단순화
+   - 버튼 라벨은 `참고 상품 보기` / `참고 상품 숨기기`처럼 사용자 행동 중심으로 바꾼다.
+   - `기본 숨김` 배지와 “접어두었습니다” 문구는 제거하거나 훨씬 중립적인 한 줄 안내로 축소한다.
+3. 제휴 안내 문구 위치 재정리
+   - 법적/제휴 고지인 `쿠팡 파트너스 활동` 문구는 유지하되, 운영자 메모처럼 보이지 않도록 실제 링크/위젯 근처의 보조 안내 카드 정도로 정리한다.
+   - 본문 상단 소개 문단에는 심사용 의도 대신 “외부 링크”라는 사실만 짧게 남긴다.
+4. iframe fallback 추가
+   - 위젯 카드마다 로딩 중 상태와 일정 시간 내 렌더링되지 않을 때 보여줄 fallback 문구를 둔다.
+   - 최소한 `쿠팡에서 보기` 같은 외부 이동 CTA가 남도록 구성해, iframe이 비어도 카드 전체가 고장 난 것처럼 보이지 않게 만든다.
+   - 실제 destination URL은 현재 사용 중인 제휴 링크 자산을 재활용하거나, 위젯용 링크 정의를 CTA까지 함께 쓸 수 있도록 데이터 구조를 정리한다.
+5. 테스트 갱신
+   - 초기 화면에서 새 사용자용 문구가 보이는지 확인한다.
+   - 펼침 후 제휴 고지와 위젯/대체 CTA가 함께 보이는지 검증한다.
+   - 기존 접힘 기본값을 유지할지, 기본 펼침으로 바꿀지는 사용자 승인 방향에 맞춰 테스트 기대값을 확정한다.
+
+### 예상 영향 범위
+
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx)
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)
+- 필요 시 공용 버튼/상태 표현 확인: `src/components/ui/*`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 승인 후 검증 계획
+
+- 홈 초기 진입 시 제휴 섹션 문구가 이용자 친화적으로 바뀌었는지 확인
+- 펼침 전/후 상태에서 불필요한 운영자 설명이 남지 않는지 확인
+- iframe 차단 또는 미로딩 상황에서도 fallback CTA가 보여 빈 카드처럼 보이지 않는지 확인
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
 ## 2026-03-23 업종코드 추천을 입주 전략 컨설턴트형으로 전환
 
 ### 목표
@@ -4328,3 +4602,32 @@ src/
 
 - `Get-Content index.html`
 - `npm run build`
+
+---
+
+## 2026-03-23 Cloudflare Pages 운영 배포 계획
+
+### 변경 목표
+
+- 현재 저장소 상태를 실제 운영 도메인 `loopincode.com`에서 확인할 수 있도록 Cloudflare Pages 운영 배포를 수행한다.
+- 이 환경에서는 `vercel` CLI 인증이 없어 운영 반영이 어렵고, 대신 저장소에 이미 연결된 Cloudflare Pages 프로젝트 `imomguide`와 유효한 Wrangler 인증이 있으므로 그 경로를 사용한다.
+
+### 구현 메모
+
+1. 배포 경로 확인
+   - 저장소 README와 `wrangler.toml` 기준 현재 운영 배포 대상이 Cloudflare Pages 프로젝트 `imomguide`인지 재확인한다.
+   - `npx wrangler whoami`로 인증이 살아 있는지 먼저 확인한다.
+2. 배포
+   - `npm run build`로 생성된 `dist`를 대상으로 `npx wrangler pages deploy dist --project-name imomguide --commit-dirty=true`를 실행한다.
+   - Wrangler가 반환한 deployment URL을 기록한다.
+3. 검증
+   - `https://loopincode.com/` 응답 HTML에 `G-N0XP5S6KXM`와 `googletagmanager.com/gtag/js`가 포함되는지 확인한다.
+   - 배포 URL도 동일하게 확인한다.
+4. 문서화
+   - 배포 URL과 관찰 사항을 `walkthrough.md`에 남긴다.
+
+### 검증 메모
+
+- `npx wrangler whoami`
+- `npx wrangler pages deploy dist --project-name imomguide --commit-dirty=true`
+- `Invoke-WebRequest https://loopincode.com/`

@@ -12,9 +12,16 @@ describe('discoverIndustrySuggestions', () => {
     expect(softwareSuggestion?.recommendedBusinessAngle).toContain('개발 산출물')
     expect(softwareSuggestion?.requiredProofs?.length).toBeGreaterThan(0)
     expect(softwareSuggestion?.nextActions?.length).toBeGreaterThan(0)
+    expect(softwareSuggestion?.nextActions?.length).toBeLessThanOrEqual(2)
     expect(softwareSuggestion?.relatedCodes?.some((code) => code.code === '58222')).toBe(true)
     expect(softwareSuggestion?.riskNotes).toContain(
       '실제 하지 않는 업무를 혜택 때문에 추가하면 심사나 사후 확인 단계에서 불리할 수 있습니다.',
     )
+    expect(
+      softwareSuggestion?.nextActions?.some((item) => item.includes('예비판정')),
+    ).toBe(true)
+    expect(
+      softwareSuggestion?.nextActions?.some((item) => item.includes('주업종과 부업종')),
+    ).toBe(false)
   })
 })

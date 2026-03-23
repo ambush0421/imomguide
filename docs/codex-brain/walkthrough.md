@@ -1,5 +1,114 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-23 네이버 사이트 인증 메타 태그 추가
+
+### 반영 내용
+
+- [`index.html`](C:\projects\magok\index.html)에 사용자가 전달한 네이버 사이트 인증 메타 태그를 추가했다.
+- 기존 GA4, AdSense, canonical, OG/Twitter 메타 구조는 그대로 유지하고 `viewport` 바로 아래에 배치해 head 메타 체계를 건드리지 않도록 정리했다.
+
+### 구현 파일
+
+- `index.html`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`14 passed`, `123 passed`)
+- `build` 통과
+- 빌드 시 plugin timing 경고와 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+---
+
+## 2026-03-23 추천 카드 중복 정보 1회 제공으로 정리
+
+### 반영 내용
+
+- [`src/features/eligibility/data/eligibility-strategy.ts`](C:\projects\magok\src\features\eligibility\data\eligibility-strategy.ts)에 추천 카드 전용 중복 제거 규칙을 추가해, `riskNotes`와 `nextActions`가 같은 맥락을 반복하지 않도록 정리했다.
+- 같은 파일에서 1단계 추천 카드용 `nextActions`를 “실제 다음 단계에서 할 행동” 중심 문구로 다시 작성하고, 기존의 `주업종/부업종 비교` 반복 문구는 제거했다.
+- [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)에 그룹 단위 `공통 체크포인트` 패널을 추가해, 같은 후보 묶음에서 반복되는 `준비 자료 / 주의사항 / 다음 행동`은 상단에 한 번만 보여주도록 바꿨다.
+- 같은 컴포넌트에서 각 카드의 `requiredProofs`, `riskNotes`, `nextActions`는 공통 패널에 이미 노출된 항목을 제외하고, 해당 코드에서만 다른 내용이 남을 때만 렌더링하도록 정리했다.
+- 섹션 제목은 `먼저 준비할 자료`, `꼭 확인할 점`, `다음 단계에서 할 일`로 통일했고, `nextActions`가 1개만 남는 경우에는 리스트 대신 짧은 문단 형태로 압축해 모바일에서 불필요하게 큰 카드가 생기지 않도록 했다.
+- [`src/features/eligibility/data/industry-discovery.test.ts`](C:\projects\magok\src\features\eligibility\data\industry-discovery.test.ts)에는 다음 행동이 2개 이하로 정리되고 `예비판정` 흐름 중심으로 남는지 검증을 추가했다.
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)는 추천 결과 화면에서 `공통 체크포인트`가 보이고, 같은 주의 문구가 한 번만 노출되는지까지 확인하도록 갱신했다.
+
+### 구현 파일
+
+- `src/features/eligibility/data/eligibility-strategy.ts`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/data/industry-discovery.test.ts`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`14 passed`, `123 passed`)
+- `build` 통과
+- 빌드 시 plugin timing 경고와 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+---
+
+## 2026-03-23 제휴 영역 사용자 문구 정리 + 광고 노출 원인 보정
+
+### 반영 내용
+
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx)의 제휴 섹션을 기본 펼침 상태로 바꿔, 홈 첫 진입에서도 참고 상품 위젯이 바로 보이도록 조정했다.
+- 사용자 화면에 직접 노출되던 운영자/심사용 문구를 제거하고, 상단 배지/제목/본문/토글 라벨을 모두 이용자 관점의 짧은 안내 문구로 정리했다.
+- 각 제휴 위젯 데이터에 실제 쿠팡 이동 링크를 추가하고, 카드 하단에 `새 창에서 보기` CTA를 항상 노출해 iframe이 비어 보여도 바로 확인할 수 있게 했다.
+- 위젯 래퍼에는 로딩 placeholder를 넣고, `onLoad` 전까지는 “상품 위젯을 불러오는 중입니다” 안내가 보이도록 구성했다.
+- 테스트 환경(jsdom)에서는 외부 iframe 네트워크를 직접 불러오지 않도록 `src`를 비워, 실제 브라우저 동작은 유지하면서 테스트가 멈추지 않게 정리했다.
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)는 새 기본 노출 흐름에 맞춰 초기 렌더 시 제휴 섹션/고지/위젯/새 창 CTA가 보이는지, 숨기기/다시 보기 토글이 정상인지 검증하도록 갱신했다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`14 passed`, `123 passed`)
+- `build` 통과
+- 빌드 시 plugin timing 경고와 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+---
+
 ## 2026-03-23 업종코드 추천을 입주 전략 컨설턴트형으로 전환
 
 ### 작업 배경
@@ -5776,3 +5885,38 @@ npm run test
 
 - GA4 기본 페이지 추적용 Google tag가 사이트에 설치됐다.
 - 기존 `trackEvent` 호출들은 브라우저에서 `window.gtag`가 잡히는 환경에서 그대로 GA4 이벤트 전송까지 이어질 수 있는 상태다.
+
+---
+
+## 2026-03-23 Cloudflare Pages 운영 배포
+
+### 작업 배경
+
+- GA4 태그를 [index.html](C:/projects/magok/index.html)에 설치한 뒤, 운영 사이트 검사 화면에서 `loopincode.com`에서 아직 Google 태그가 감지되지 않는 상태가 확인됐다.
+- 배포 경로를 점검한 결과, 이 환경에는 `vercel` CLI 인증이 없었고 대신 Cloudflare Pages용 Wrangler 인증은 살아 있었다.
+- 저장소의 [README.md](C:/projects/magok/README.md)와 [wrangler.toml](C:/projects/magok/wrangler.toml) 기준 현재 연결 프로젝트는 `imomguide`였다.
+
+### 반영 내용
+
+- Cloudflare 인증 확인
+  - `npx wrangler whoami` 결과 `sandman87@naver.com` 계정으로 로그인된 상태를 확인했다.
+- 운영 배포 실행
+  - `npx wrangler pages deploy dist --project-name imomguide --commit-dirty=true`
+  - 배포 URL: [https://722d7171.imomguide.pages.dev](https://722d7171.imomguide.pages.dev)
+- 운영 도메인 검증
+  - `https://loopincode.com/` 응답 HTML에 `googletagmanager.com/gtag/js`와 `G-N0XP5S6KXM`가 포함됨을 확인했다.
+  - 배포 URL에서도 동일하게 GA4 태그가 포함됨을 확인했다.
+
+### 검증
+
+- `npx wrangler whoami` 통과
+- `npx wrangler pages deploy dist --project-name imomguide --commit-dirty=true` 성공
+- `Invoke-WebRequest https://loopincode.com/` 확인
+  - 결과: `GA4 tag detected on loopincode.com`
+- `Invoke-WebRequest https://722d7171.imomguide.pages.dev` 확인
+  - 결과: `GA4 tag detected on deployment URL`
+
+### 결과 요약
+
+- 운영 사이트 `loopincode.com`까지 새 배포가 반영됐다.
+- 현재는 코드 기준 설치뿐 아니라, 실제 운영 HTML 응답에서도 GA4 측정 ID `G-N0XP5S6KXM`가 확인되는 상태다.

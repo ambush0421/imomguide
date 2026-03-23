@@ -5,6 +5,7 @@ import { app, BrowserWindow } from 'electron'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+const windowIconPath = path.join(__dirname, 'assets', 'app-icon.ico')
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
@@ -14,6 +15,7 @@ function createMainWindow() {
     minHeight: 780,
     autoHideMenuBar: true,
     title: '마곡 코드찾기',
+    icon: windowIconPath,
     backgroundColor: '#0B1020',
     webPreferences: {
       contextIsolation: true,

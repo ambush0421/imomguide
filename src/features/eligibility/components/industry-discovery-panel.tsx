@@ -78,6 +78,12 @@ interface SuggestionFilterDefinition {
   description: string
 }
 
+interface SuggestionSharedGuidance {
+  requiredProofs: string[]
+  riskNotes: string[]
+  nextActions: string[]
+}
+
 const SUGGESTION_GROUPS: SuggestionGroupDefinition[] = [
   {
     key: 'priority',
@@ -211,14 +217,46 @@ function matchesSuggestionFilter(
   return true
 }
 
+function getSharedItems(valuesList: string[][]) {
+  if (valuesList.length < 2) {
+    return []
+  }
+
+  const [firstValues, ...otherValues] = valuesList
+
+  return firstValues.filter(
+    (value, index) =>
+      firstValues.indexOf(value) === index &&
+      otherValues.every((values) => values.includes(value)),
+  )
+}
+
+function getSuggestionSharedGuidance(suggestions: IndustrySuggestion[]): SuggestionSharedGuidance {
+  return {
+    requiredProofs: getSharedItems(suggestions.map((suggestion) => suggestion.requiredProofs ?? [])),
+    riskNotes: getSharedItems(suggestions.map((suggestion) => suggestion.riskNotes ?? [])),
+    nextActions: getSharedItems(suggestions.map((suggestion) => suggestion.nextActions ?? [])),
+  }
+}
+
+function removeSharedItems(items: string[], sharedItems: string[]) {
+  if (!sharedItems.length) {
+    return items
+  }
+
+  return items.filter((item) => !sharedItems.includes(item))
+}
+
 function SuggestionChecklist({
   title,
   items,
   tone = 'neutral',
+  compact = false,
 }: {
   title: string
   items: string[]
   tone?: 'neutral' | 'warning'
+  compact?: boolean
 }) {
   if (!items.length) {
     return null
@@ -233,12 +271,50 @@ function SuggestionChecklist({
       }
     >
       <div className="text-sm font-semibold text-[var(--foreground)]">{title}</div>
-      <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--foreground-muted)]">
-        {items.map((item) => (
-          <li key={`${title}-${item}`}>{item}</li>
-        ))}
-      </ul>
+      {compact ? (
+        <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">{items[0]}</p>
+      ) : (
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--foreground-muted)]">
+          {items.map((item) => (
+            <li key={`${title}-${item}`}>{item}</li>
+          ))}
+        </ul>
+      )}
     </div>
+  )
+}
+
+function SuggestionSharedGuidancePanel({
+  guidance,
+}: {
+  guidance: SuggestionSharedGuidance
+}) {
+  if (
+    guidance.requiredProofs.length === 0 &&
+    guidance.riskNotes.length === 0 &&
+    guidance.nextActions.length === 0
+  ) {
+    return null
+  }
+
+  return (
+    <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)] sm:p-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="muted">공통 체크포인트</Badge>
+      </div>
+      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+        이 후보 묶음은 아래 준비 포인트가 거의 같습니다. 카드에서는 코드별 차이만 보시면 됩니다.
+      </p>
+      <div className="mt-4 grid gap-3 xl:grid-cols-3">
+        <SuggestionChecklist title="먼저 준비할 자료" items={guidance.requiredProofs} />
+        <SuggestionChecklist title="꼭 확인할 점" items={guidance.riskNotes} tone="warning" />
+        <SuggestionChecklist
+          title="다음 단계에서 할 일"
+          items={guidance.nextActions}
+          compact={guidance.nextActions.length === 1}
+        />
+      </div>
+    </section>
   )
 }
 
@@ -247,19 +323,24 @@ function SuggestionCard({
   group,
   suggestion,
   zoneVerdict,
+  sharedGuidance,
   onSelect,
 }: {
   input: EligibilityInput
   group: SuggestionGroupDefinition
   suggestion: IndustrySuggestion
   zoneVerdict: Verdict
+  sharedGuidance: SuggestionSharedGuidance
   onSelect: (suggestion: IndustrySuggestion) => void
 }) {
   const headlineReason = suggestion.recommendationReason ?? suggestion.reason
   const relatedCodes = suggestion.relatedCodes ?? []
-  const requiredProofs = suggestion.requiredProofs ?? []
-  const riskNotes = suggestion.riskNotes ?? []
-  const nextActions = suggestion.nextActions ?? []
+  const requiredProofs = removeSharedItems(
+    suggestion.requiredProofs ?? [],
+    sharedGuidance.requiredProofs,
+  )
+  const riskNotes = removeSharedItems(suggestion.riskNotes ?? [], sharedGuidance.riskNotes)
+  const nextActions = removeSharedItems(suggestion.nextActions ?? [], sharedGuidance.nextActions)
 
   return (
     <article
@@ -355,13 +436,17 @@ function SuggestionCard({
 
       {requiredProofs.length > 0 || riskNotes.length > 0 ? (
         <div className="mt-4 grid gap-3 xl:grid-cols-2">
-          <SuggestionChecklist title="이렇게 준비하면 좋습니다" items={requiredProofs} />
-          <SuggestionChecklist title="주의사항" items={riskNotes} tone="warning" />
+          <SuggestionChecklist title="먼저 준비할 자료" items={requiredProofs} />
+          <SuggestionChecklist title="꼭 확인할 점" items={riskNotes} tone="warning" />
         </div>
       ) : null}
 
       {nextActions.length > 0 ? (
-        <SuggestionChecklist title="추천 다음 행동" items={nextActions} />
+        <SuggestionChecklist
+          title="다음 단계에서 할 일"
+          items={nextActions}
+          compact={nextActions.length === 1}
+        />
       ) : null}
 
       <div className="mt-5">
@@ -438,12 +523,16 @@ export function IndustryDiscoveryPanel({
       ? items
       : items.slice(0, initialVisibleSuggestionCount)
     const hiddenItemCount = Math.max(items.length - visibleItems.length, 0)
+    const sharedGuidance = getSuggestionSharedGuidance(
+      visibleItems.map((item) => item.suggestion),
+    )
 
     return {
       ...group,
       expansionKey,
       hiddenItemCount,
       isExpanded,
+      sharedGuidance,
       items,
       visibleItems,
     }
@@ -822,6 +911,7 @@ export function IndustryDiscoveryPanel({
                       </p>
                     </div>
                   </div>
+                  <SuggestionSharedGuidancePanel guidance={group.sharedGuidance} />
                   <div className="grid gap-3 xl:grid-cols-2">
                     {group.visibleItems.map(({ suggestion, zoneVerdict }) => (
                       <SuggestionCard
@@ -830,6 +920,7 @@ export function IndustryDiscoveryPanel({
                         group={group}
                         suggestion={suggestion}
                         zoneVerdict={zoneVerdict}
+                        sharedGuidance={group.sharedGuidance}
                         onSelect={onSuggestionSelect}
                       />
                     ))}

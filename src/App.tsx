@@ -193,29 +193,33 @@ const affiliateActions = [
 const affiliateWidgets = [
   {
     src: 'https://coupa.ng/clX5tE',
+    href: 'https://link.coupang.com/a/d7p5U5',
     title: '쿠팡 파트너스 추천 위젯 모바일기기',
     badge: '모바일 기기',
     headline: '핸드폰과 태블릿',
   },
   {
     src: 'https://coupa.ng/clX3qg',
+    href: 'https://link.coupang.com/a/d7nWcq',
     title: '쿠팡 파트너스 추천 위젯 생수',
     badge: '탕비실 추천',
     headline: '생수와 비품',
   },
   {
     src: 'https://coupa.ng/clX5vK',
+    href: 'https://link.coupang.com/a/d7p79Q',
     title: '쿠팡 파트너스 추천 위젯 업무기기',
     badge: '업무 기기',
     headline: '디지털 업무 기기',
   },
   {
     src: 'https://coupa.ng/clX5EI',
+    href: 'https://link.coupang.com/a/d7qiaA',
     title: '쿠팡 파트너스 추천 위젯 소모품',
     badge: '사무 소모품',
     headline: '복사용지와 소모품',
   },
-]
+] as const
 
 const footerFacts = [
   '운영: Loopin Lab',
@@ -519,7 +523,10 @@ function HomeSections({
     status === 'loading' || status === 'error' || canShowResult
   const safeCurrentStep =
     currentStep === 'result' && !canStayOnResultStep ? 'adjust' : currentStep
-  const [isAffiliateExpanded, setIsAffiliateExpanded] = useState(false)
+  const [isAffiliateExpanded, setIsAffiliateExpanded] = useState(true)
+  const [affiliateWidgetLoadedMap, setAffiliateWidgetLoadedMap] = useState<
+    Record<string, boolean>
+  >({})
   const [viewportTier, setViewportTier] = useState<ViewportTier>('desktop')
   const activeDiscoverScreen =
     discoveryStatus === 'idle' &&
@@ -569,6 +576,8 @@ function HomeSections({
       : input.zoneType === 'knowledgeIndustryCenter'
         ? '지식산업센터'
         : '지원시설구역'
+  const canLoadAffiliateEmbeds =
+    typeof navigator === 'undefined' || !navigator.userAgent.includes('jsdom')
   const isDesktopViewport = viewportTier === 'desktop'
   const isCompactWizardFocused = isWizardFocused && !isDesktopViewport
   const isDesktopWizardFocused = isWizardFocused && isDesktopViewport
@@ -696,6 +705,27 @@ function HomeSections({
       discoverScreen: 'compose',
       historyMode: 'push',
     })
+  }
+
+  function handleAffiliateWidgetLoad(title: string) {
+    setAffiliateWidgetLoadedMap((current) => {
+      if (current[title]) {
+        return current
+      }
+
+      return {
+        ...current,
+        [title]: true,
+      }
+    })
+  }
+
+  function handleAffiliateToggle() {
+    if (isAffiliateExpanded) {
+      setAffiliateWidgetLoadedMap({})
+    }
+
+    setIsAffiliateExpanded((current) => !current)
   }
 
   function handleWizardStepSelect(step: EligibilityStep) {
@@ -1637,55 +1667,42 @@ function HomeSections({
 
       <section
         id="affiliate"
-              className="rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6"
+        className="rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6"
       >
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div className="flex flex-col gap-4">
           <div className="max-w-3xl">
-            <Badge variant="muted">참고용 제휴 링크</Badge>
+            <Badge variant="muted">사무실 준비 참고 링크</Badge>
             <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)] sm:text-[2rem]">
-              업종 분석과 법령 확인이 끝난 뒤 필요할 때만 참고할 수 있습니다
+              사무실 준비에 자주 찾는 상품을 한 번에 확인할 수 있습니다
             </h2>
             <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-              이 영역은 입주 판단용 본문이 아니라 사무실 준비에 참고할 수 있는 외부
-              상품 링크입니다. 업종 분석과 법령 확인을 마친 뒤, 고객 사무실 준비를
-              도와줄 때 참고할 수 있습니다. 필요한 경우에만 펼쳐서 보도록 기본 노출
-              강도를 낮췄습니다.
+              사무기기, 탕비용품, 소모품처럼 상담 뒤에 자주 찾게 되는 품목을 모아둔
+              외부 링크입니다. 위젯이 보이지 않더라도 새 창으로 바로 확인할 수 있습니다.
             </p>
-          </div>
-
-                    <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-3 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)]">
-            광고보다 본문이 먼저 보이도록
-            <br />
-            제휴 영역은 기본 접힘 상태로 제공합니다.
           </div>
         </div>
 
-                  <div className="mt-4 rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
+        <div className="mt-4 rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
           <button
             type="button"
-            onClick={() => setIsAffiliateExpanded((current) => !current)}
+            onClick={handleAffiliateToggle}
             className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
             aria-expanded={isAffiliateExpanded}
             aria-controls="affiliate-links-panel"
           >
             <div>
               <div className="text-sm font-semibold text-[var(--foreground)]">
-                사무환경 참고 상품 {isAffiliateExpanded ? '접기' : '펼치기'}
+                참고 상품 {isAffiliateExpanded ? '숨기기' : '보기'}
               </div>
               <p className="mt-1 text-xs leading-5 text-[var(--foreground-muted)]">
-                외부 상품은 필요한 경우에만 확인할 수 있도록 접어두었습니다.
+                사무실 준비에 자주 찾는 품목을 빠르게 확인할 수 있습니다.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="muted" className="whitespace-nowrap">
-                기본 숨김
-              </Badge>
-              <ChevronDown
-                className={`size-4 text-[var(--foreground-subtle)] transition-transform ${
-                  isAffiliateExpanded ? 'rotate-180' : ''
-                }`}
-              />
-            </div>
+            <ChevronDown
+              className={`size-4 text-[var(--foreground-subtle)] transition-transform ${
+                isAffiliateExpanded ? 'rotate-180' : ''
+              }`}
+            />
           </button>
 
           {isAffiliateExpanded ? (
@@ -1694,16 +1711,15 @@ function HomeSections({
               className="border-t border-[var(--border)] px-4 py-4 sm:px-5 sm:py-5"
             >
               <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:items-start">
-            <Card className="border-[var(--border)] bg-[var(--surface-soft)] shadow-[var(--shadow-sm)]">
+                <Card className="border-[var(--border)] bg-[var(--surface-soft)] shadow-[var(--shadow-sm)]">
                   <CardContent className="space-y-4 p-5">
                     <div>
                       <div className="text-sm font-semibold text-[var(--foreground)]">
                         사무실 준비 참고
                       </div>
                       <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                        사무 가구, 전자기기, 탕비용품처럼 자주 찾는 항목만 참고용으로
-                        정리한 링크입니다. 입주 가능 여부를 대신하지 않으며, 본문보다
-                        앞세우지 않도록 축소된 카드로 배치합니다.
+                        상담이 끝난 뒤 바로 찾는 품목만 모아뒀습니다. 자세한 상품 정보는
+                        각 카드 아래 버튼이나 쿠팡 페이지에서 확인할 수 있습니다.
                       </p>
                     </div>
 
@@ -1714,7 +1730,7 @@ function HomeSections({
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-[var(--foreground)]">
-                            광고·제휴 안내
+                            제휴 링크 안내
                           </div>
                           <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
                             {coupangDisclosureText}
@@ -1744,7 +1760,7 @@ function HomeSections({
                   {affiliateWidgets.map((widget) => (
                     <Card
                       key={widget.src}
-              className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]"
+                      className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]"
                     >
                       <CardContent className="flex flex-col p-4 sm:p-5">
                         <div className="flex items-start justify-between gap-2">
@@ -1761,9 +1777,22 @@ function HomeSections({
                         <div className="mt-3 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--foreground)] sm:text-base">
                           {widget.headline}
                         </div>
-              <div className="mt-3 flex items-start justify-center rounded-[14px] border border-[var(--border)] bg-[var(--surface-soft)] px-2 py-3">
+                        <div className="relative mt-3 flex min-h-[264px] items-center justify-center rounded-[14px] border border-[var(--border)] bg-[var(--surface-soft)] px-2 py-3">
+                          <div
+                            className={`pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] border border-dashed border-[var(--border)] bg-[var(--surface-strong)] px-4 text-center transition-opacity ${
+                              affiliateWidgetLoadedMap[widget.title] ? 'opacity-0' : 'opacity-100'
+                            }`}
+                            aria-hidden={affiliateWidgetLoadedMap[widget.title]}
+                          >
+                            <div className="space-y-2 text-xs leading-5 text-[var(--foreground-muted)]">
+                              <div className="font-semibold text-[var(--foreground)]">
+                                상품 위젯을 불러오는 중입니다.
+                              </div>
+                              <p>보이지 않으면 아래 버튼으로 새 창에서 확인하세요.</p>
+                            </div>
+                          </div>
                           <iframe
-                            src={widget.src}
+                            src={canLoadAffiliateEmbeds ? widget.src : undefined}
                             title={widget.title}
                             width="120"
                             height="240"
@@ -1771,8 +1800,28 @@ function HomeSections({
                             scrolling="no"
                             referrerPolicy="unsafe-url"
                             loading="lazy"
-            className="overflow-hidden rounded-[12px] bg-[var(--surface-strong)]"
+                            onLoad={() => handleAffiliateWidgetLoad(widget.title)}
+                            className={`relative z-10 overflow-hidden rounded-[12px] bg-[var(--surface-strong)] transition-opacity ${
+                              affiliateWidgetLoadedMap[widget.title] ? 'opacity-100' : 'opacity-0'
+                            }`}
                           />
+                        </div>
+                        <div className="mt-3 space-y-2">
+                          <Button asChild variant="outline" size="sm" className="w-full">
+                            <a
+                              href={widget.href}
+                              target="_blank"
+                              rel="nofollow sponsored noopener"
+                              referrerPolicy="unsafe-url"
+                              aria-label={`${widget.headline} 새 창에서 보기`}
+                            >
+                              {widget.headline} 새 창에서 보기
+                              <ExternalLink className="size-4" />
+                            </a>
+                          </Button>
+                          <p className="text-xs leading-5 text-[var(--foreground-muted)]">
+                            위젯이 비어 보이면 새 창으로 바로 확인할 수 있습니다.
+                          </p>
                         </div>
                       </CardContent>
                     </Card>

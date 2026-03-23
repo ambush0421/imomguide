@@ -258,6 +258,134 @@ function getVerdictSpecificRiskNotes(verdict: Verdict) {
   return []
 }
 
+function normalizeGuidanceText(value: string) {
+  return value.toLowerCase().replace(/\s+/g, '').replace(/[.,:()]/g, '')
+}
+
+function getGuidanceTopicKey(value: string) {
+  const normalized = normalizeGuidanceText(value)
+
+  if (
+    normalized.includes('실제하지않는업무') ||
+    normalized.includes('실제영위') ||
+    normalized.includes('실제수행업무') ||
+    normalized.includes('핵심업무')
+  ) {
+    return 'business-scope'
+  }
+
+  if (normalized.includes('주업종') && normalized.includes('부업종')) {
+    return 'primary-secondary'
+  }
+
+  if (
+    normalized.includes('면적') ||
+    normalized.includes('인력') ||
+    normalized.includes('제조시설') ||
+    normalized.includes('예비판정')
+  ) {
+    return 'adjust-inputs'
+  }
+
+  return normalized
+}
+
+function markGuidanceKeys(seen: Set<string>, value: string) {
+  const normalized = normalizeGuidanceText(value)
+  const topic = getGuidanceTopicKey(value)
+
+  if (normalized) {
+    seen.add(normalized)
+  }
+
+  if (topic) {
+    seen.add(topic)
+  }
+}
+
+function collectDistinctGuidance(
+  values: string[],
+  limit: number,
+  seen: Set<string> = new Set(),
+) {
+  const items: string[] = []
+
+  for (const value of unique(values)) {
+    const normalized = normalizeGuidanceText(value)
+    const topic = getGuidanceTopicKey(value)
+
+    if (!normalized || seen.has(normalized) || seen.has(topic)) {
+      continue
+    }
+
+    items.push(value)
+    seen.add(normalized)
+    seen.add(topic)
+
+    if (items.length >= limit) {
+      break
+    }
+  }
+
+  return items
+}
+
+function buildDiscoveryRiskNotes(verdict: Verdict, catalogNote?: string) {
+  return collectDistinctGuidance(
+    [...getVerdictSpecificRiskNotes(verdict), catalogNote ?? '', complianceRiskNote],
+    2,
+  )
+}
+
+function getDiscoveryNextActionCandidates(
+  suggestionOrCodeLabel: string,
+  zoneType: ZoneType | DirectoryZoneType,
+  verdict: Verdict,
+) {
+  if (verdict === 'reviewRequired') {
+    return [
+      `${suggestionOrCodeLabel} 기준으로 예비판정을 진행하면서 심의 필요 사유를 같이 확인해 보세요.`,
+      `${getZoneLabel(zoneType)} 기준으로 면적, 인력, 제조시설 여부와 설명 메모를 함께 맞춰 보세요.`,
+    ]
+  }
+
+  if (verdict === 'conditional') {
+    return [
+      `${suggestionOrCodeLabel}이 주업종인지 부업종인지 정한 뒤 예비판정으로 넘어가 보세요.`,
+      `${getZoneLabel(zoneType)} 기준으로 면적, 인력, 제조시설 여부를 넣어 조건부 사유가 해소되는지 확인해 보세요.`,
+    ]
+  }
+
+  if (verdict === 'ineligible') {
+    return [
+      '이 코드를 바로 확정하지 말고 현재 검색에서 나온 다른 후보와 먼저 비교해 보세요.',
+      `${getZoneLabel(zoneType)} 외 다른 구역 기준이 더 맞는지도 함께 확인해 보세요.`,
+    ]
+  }
+
+  return [
+    `${suggestionOrCodeLabel} 기준으로 바로 예비판정을 이어가 보세요.`,
+    `${getZoneLabel(zoneType)} 기준으로 면적, 인력, 제조시설 여부를 함께 맞춰 보세요.`,
+  ]
+}
+
+function buildDiscoveryNextActions(
+  suggestionOrCodeLabel: string,
+  zoneType: ZoneType | DirectoryZoneType,
+  verdict: Verdict,
+  riskNotes: string[],
+) {
+  const seen = new Set<string>()
+
+  riskNotes.forEach((item) => markGuidanceKeys(seen, item))
+
+  return collectDistinctGuidance(
+    getDiscoveryNextActionCandidates(suggestionOrCodeLabel, zoneType, verdict),
+    2,
+    seen,
+  )
+}
+
 function getRelatedCodeReason(
   suggestion: IndustrySuggestion,
   candidate: IndustrySuggestion,
@@ -349,6 +477,12 @@ export function enrichIndustrySuggestions(
     const verdict = suggestion.selectedZoneVerdict ?? 'insufficient'
     const track = getTrack(suggestion.code, suggestion.suggestedRegulatoryFit)
     const codeLabel = `${suggestion.name}(${suggestion.code})`
+    const requiredProofs = unique([
+      ...getEvidenceChecklist(track),
+      ...getVerdictSpecificProofs(verdict),
+    ]).slice(0, 3)
+    const riskNotes = buildDiscoveryRiskNotes(verdict, suggestion.catalogNote)
+    const nextActions = buildDiscoveryNextActions(codeLabel, zoneType, verdict, riskNotes)
 
     return {
       ...suggestion,
@@ -357,19 +491,9 @@ export function enrichIndustrySuggestions(
         `${codeLabel}은 입력한 설명과 가장 가깝게 읽힌 후보입니다.`,
       benefitSummary: getBenefitPath(track, zoneType, verdict),
       recommendedBusinessAngle: getBusinessAngle(track),
-      requiredProofs: unique([
-        ...getEvidenceChecklist(track),
-        ...getVerdictSpecificProofs(verdict),
-      ]).slice(0, 3),
-      riskNotes: unique([
-        ...getVerdictSpecificRiskNotes(verdict),
-        suggestion.catalogNote ?? '',
-        complianceRiskNote,
-      ]).slice(0, 3),
-      nextActions: unique([
-        ...getVerdictSpecificNextActions(codeLabel, zoneType, verdict),
-        '주업종과 부업종 중 무엇으로 설명하는 게 더 실제 사업에 가까운지 비교해 보세요.',
-      ]).slice(0, 3),
+      requiredProofs,
+      riskNotes,
+      nextActions,
       relatedCodes: buildRelatedCodes(suggestions, suggestion),
     }
   })

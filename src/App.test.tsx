@@ -126,18 +126,27 @@ describe('App', () => {
     expect(within(finderSection).getByText('이렇게 시작하세요')).toBeInTheDocument()
     expect(within(finderSection).getAllByText('검색 후 활성화').length).toBeGreaterThan(0)
     expect(screen.getByText('마곡 입주 가능성을 근거와 함께 확인합니다.')).toBeInTheDocument()
-    expect(screen.getByText('참고용 제휴 링크')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /사무환경 참고 상품 펼치기/i })).toBeInTheDocument()
-    expect(screen.queryByText('광고·제휴 안내')).not.toBeInTheDocument()
+    expect(screen.getByText('사무실 준비 참고 링크')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /참고 상품 숨기기/i })).toBeInTheDocument()
+    expect(screen.getByText('제휴 링크 안내')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 모바일기기')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 생수')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 업무기기')).toBeInTheDocument()
+    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 소모품')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '핸드폰과 태블릿 새 창에서 보기' })).toBeInTheDocument()
+    expect(screen.queryAllByText(/쿠팡 파트너스 사이드 배너/i)).toHaveLength(0)
+
+    await user.click(screen.getByRole('button', { name: /참고 상품 숨기기/i }))
+
+    expect(screen.queryByText('제휴 링크 안내')).not.toBeInTheDocument()
     expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 모바일기기')).not.toBeInTheDocument()
     expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 생수')).not.toBeInTheDocument()
     expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 업무기기')).not.toBeInTheDocument()
     expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 소모품')).not.toBeInTheDocument()
-    expect(screen.queryAllByText(/쿠팡 파트너스 사이드 배너/i)).toHaveLength(0)
 
-    await user.click(screen.getByRole('button', { name: /사무환경 참고 상품 펼치기/i }))
+    await user.click(screen.getByRole('button', { name: /참고 상품 보기/i }))
 
-    expect(screen.getByText('광고·제휴 안내')).toBeInTheDocument()
+    expect(screen.getByText('제휴 링크 안내')).toBeInTheDocument()
     expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 모바일기기')).toBeInTheDocument()
     expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 생수')).toBeInTheDocument()
     expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 업무기기')).toBeInTheDocument()
@@ -181,6 +190,14 @@ describe('App', () => {
     expect(
       await within(finderSection).findByText('먼저 볼 코드'),
     ).toBeInTheDocument()
+    expect(within(finderSection).getAllByText('먼저 준비할 자료').length).toBeGreaterThan(0)
+    expect(within(finderSection).getAllByText('꼭 확인할 점').length).toBeGreaterThan(0)
+    expect(within(finderSection).getAllByText('다음 단계에서 할 일').length).toBeGreaterThan(0)
+    expect(
+      within(finderSection).queryByText(
+        '주업종과 부업종 중 무엇으로 설명하는 게 더 실제 사업에 가까운지 비교해 보세요.',
+      ),
+    ).not.toBeInTheDocument()
 
     await user.click(
       within(finderSection).getAllByRole('button', { name: '이 코드로 확인하기' })[0],
@@ -350,6 +367,12 @@ describe('App', () => {
     expect(
       await within(finderSection).findByRole('button', { name: /더 보기 \(\d+개 더\)/ }),
     ).toBeInTheDocument()
+    expect(await within(finderSection).findByText('공통 체크포인트')).toBeInTheDocument()
+    expect(
+      within(finderSection).getAllByText(
+        '실제 하지 않는 업무를 혜택 때문에 추가하면 심사나 사후 확인 단계에서 불리할 수 있습니다.',
+      ).length,
+    ).toBe(1)
     expect(
       within(finderSection).getByText(/관련도 높은 순서로 먼저 표시/),
     ).toBeInTheDocument()
@@ -424,7 +447,7 @@ describe('App', () => {
         name: /마곡 입주 상담,\s*업종코드부터 예비판정까지 한 번에/,
       }),
     ).not.toBeInTheDocument()
-    expect(screen.queryByText('참고용 제휴 링크')).not.toBeInTheDocument()
+    expect(screen.queryByText('사무실 준비 참고 링크')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '전체 보기' })).toBeInTheDocument()
     expect(await screen.findByText('먼저 볼 코드')).toBeInTheDocument()
 
