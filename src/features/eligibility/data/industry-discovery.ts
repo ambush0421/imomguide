@@ -3,6 +3,7 @@ import {
   getDirectoryVerdictWeight,
   getMagokCodeDirectoryEntry,
 } from '@/features/eligibility/data/magok-code-directory'
+import { enrichIndustrySuggestions } from '@/features/eligibility/data/eligibility-strategy'
 import { KNOWLEDGE_CENTER_DISCOVERY_ENTRIES } from '@/features/eligibility/data/knowledge-center-exact-codes'
 import { normalizeKsicCode } from '@/features/eligibility/data/rules'
 import type {
@@ -1046,5 +1047,5 @@ export function discoverIndustrySuggestions(
       : relatedSuggestionPool
   ).slice(0, maxRelatedSuggestions)
 
-  return [...exactMatches, ...relatedMatches]
+  return enrichIndustrySuggestions([...exactMatches, ...relatedMatches], zoneType)
 }

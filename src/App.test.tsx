@@ -34,6 +34,7 @@ describe('App', () => {
   beforeEach(() => {
     useEligibilityStore.getState().reset()
     window.localStorage.clear()
+    window.sessionStorage.clear()
     window.history.replaceState(null, '', '#top')
     window.dataLayer = []
     window.gtag = undefined
@@ -52,6 +53,24 @@ describe('App', () => {
         dispatchEvent: vi.fn(),
       })),
     })
+  })
+
+  it('`#finder?mode=overview`로 진입하면 홈 개요 화면을 유지한다', () => {
+    window.history.replaceState(null, '', '#finder?mode=overview')
+
+    render(<App />)
+
+    expect(
+      screen.getByRole('heading', {
+        name: /마곡 입주 상담,\s*업종코드부터 예비판정까지 한 번에/,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', {
+        name: '추천 결과 확인하기',
+      }),
+    ).not.toBeInTheDocument()
+    expect(window.location.hash).toBe('#finder?mode=overview')
   })
 
   it('초기에는 컨설턴트용 히어로 검색과 주요 안내 섹션이 함께 보인다', async () => {
@@ -146,6 +165,8 @@ describe('App', () => {
       screen.getAllByRole('button', { name: '추천 코드 찾기' })[0],
     )
 
+    expect(window.location.hash).toBe('#finder?mode=focus&step=discover&screen=results')
+
     expect(
       await within(finderSection).findByRole('heading', {
         name: '추천 결과 확인하기',
@@ -165,6 +186,10 @@ describe('App', () => {
       within(finderSection).getAllByRole('button', { name: '이 코드로 확인하기' })[0],
     )
 
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#finder?mode=focus&step=adjust')
+    })
+
     expect(await within(finderSection).findByText('선택한 업종코드')).toBeInTheDocument()
     expect(within(finderSection).getByDisplayValue('71310')).toBeInTheDocument()
     expect(within(finderSection).getByDisplayValue('광고 대행업')).toBeInTheDocument()
@@ -174,6 +199,8 @@ describe('App', () => {
     await waitFor(() => {
       expect(within(finderSection).getByText('업종코드 상세 해설')).toBeInTheDocument()
     })
+
+    expect(window.location.hash).toBe('#finder?mode=focus&step=result')
 
     expect(
       within(finderSection).getByRole('button', { name: '조건 다시 수정' }),
@@ -189,8 +216,120 @@ describe('App', () => {
 
     await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
 
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#finder?mode=focus&step=adjust')
+    })
+
     expect(await within(finderSection).findByText('선택한 업종코드')).toBeInTheDocument()
     expect(within(finderSection).getByText('직접 입력 예정')).toBeInTheDocument()
+  })
+
+  it('결과에서 조건 다시 수정 후 값을 바꾸면 adjust 해시로 되돌아간다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '62010')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '컴퓨터 프로그래밍 서비스업',
+    )
+    await user.click(within(finderSection).getByRole('button', { name: '결과 보기' }))
+
+    await waitFor(() => {
+      expect(within(finderSection).getByRole('button', { name: '공유 링크 복사' })).toBeInTheDocument()
+    })
+    expect(window.location.hash).toBe('#finder?mode=focus&step=result')
+
+    await user.click(within(finderSection).getByRole('button', { name: '조건 다시 수정' }))
+
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#finder?mode=focus&step=adjust')
+    })
+
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '63110')
+
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#finder?mode=focus&step=adjust')
+    })
+    expect(
+      within(finderSection).queryByRole('button', { name: '공유 링크 복사' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('코드 사전으로 나갔다가 검색 홈으로 돌아오면 adjust 초안을 복원한다', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '62010')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '컴퓨터 프로그래밍 서비스업',
+    )
+
+    await user.click(screen.getAllByRole('button', { name: '전체 코드 사전 보기' })[0])
+
+    expect(
+      await screen.findByPlaceholderText('예: 광고대행업 / 앱 개발 / 72121 / 63112'),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '검색 홈으로 돌아가기' }))
+
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#finder?mode=focus&step=adjust')
+    })
+    const restoredFinderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    expect(within(restoredFinderSection).getByDisplayValue('62010')).toBeInTheDocument()
+    expect(
+      within(restoredFinderSection).getByDisplayValue('컴퓨터 프로그래밍 서비스업'),
+    ).toBeInTheDocument()
+  })
+
+  it('plain `#finder`로 다시 열면 session draft를 복원한다', async () => {
+    const firstRender = render(<App />)
+    const user = userEvent.setup()
+    const finderSection = screen.getByRole('region', {
+      name: '업종코드 분석 위저드',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: '직접 입력으로 계속' })[0])
+    await user.clear(within(finderSection).getByLabelText('KSIC 코드'))
+    await user.type(within(finderSection).getByLabelText('KSIC 코드'), '62010')
+    await user.clear(within(finderSection).getByLabelText('업종명'))
+    await user.type(
+      within(finderSection).getByLabelText('업종명'),
+      '컴퓨터 프로그래밍 서비스업',
+    )
+
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#finder?mode=focus&step=adjust')
+    })
+
+    firstRender.unmount()
+    window.history.replaceState(null, '', '#finder')
+
+    render(<App />)
+
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#finder?mode=focus&step=adjust')
+    })
+    expect(screen.getByDisplayValue('62010')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('컴퓨터 프로그래밍 서비스업')).toBeInTheDocument()
   })
 
   it('넓은 검색어에서는 추천 결과 화면에서 더 보기로 후보를 확장할 수 있다', async () => {

@@ -82,17 +82,79 @@ describe('ResultPanel', () => {
 
     expect(screen.getByText('업종코드 상세 해설')).toBeInTheDocument()
     expect(
-      screen.getByText('27호 · 관리기관 인정 기타 전문·과학·기술 서비스업'),
+      screen.getByText('제6조제2항제27호 · 관리기관 인정 기타 전문·과학·기술 서비스업'),
     ).toBeInTheDocument()
-    expect(screen.getByText('7390 중 미열거 영역')).toBeInTheDocument()
+    expect(screen.getAllByText(/73905 고고유산 조사연구 서비스업/).length).toBeGreaterThan(0)
     expect(
       screen.getAllByText('관리기관 인정 산업으로 별도 인정받는지 확인 필요').length,
+    ).toBeGreaterThan(0)
+    expect(screen.getByText('입주 전략 메모')).toBeInTheDocument()
+    expect(screen.getByText('필요 증빙')).toBeInTheDocument()
+    expect(screen.getByText('추천 다음 행동')).toBeInTheDocument()
+    expect(
+      screen.getAllByText(
+        '실제 하지 않는 업무를 혜택 때문에 추가하면 심사나 사후 확인 단계에서 불리할 수 있습니다.',
+      ).length,
     ).toBeGreaterThan(0)
     expect(screen.getAllByText('전문가 인사이트').length).toBeGreaterThan(0)
     expect(screen.getByText('법적 근거 각주')).toBeInTheDocument()
     expect(screen.getByText(/근거 1/)).toBeInTheDocument()
     expect(screen.getByText('국가법령정보센터 본문')).toBeInTheDocument()
     expect(screen.getAllByText('법제처 국가법령정보센터').length).toBeGreaterThan(0)
+  })
+
+  it('58211은 결과 카드에서 제6조제3항제2호와 KSIC 계층으로 보여준다', () => {
+    const softwareInput: EligibilityInput = {
+      ...baseInput,
+      ksicCode: '58211',
+      ksicName: '유선 온라인 게임 소프트웨어 개발 및 공급업',
+    }
+    const result = evaluateEligibility(softwareInput)
+
+    render(
+      <ResultPanel
+        input={softwareInput}
+        result={result}
+        status="ready"
+        error={null}
+        onEvaluate={() => {}}
+      />,
+    )
+
+    expect(
+      screen.getByText('제6조제3항제2호 · 소프트웨어 개발 및 공급업'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'J 정보통신업 > 58 출판업 > 582 소프트웨어 개발 및 공급업 > 5821 게임 소프트웨어 개발 및 공급업 > 58211 유선 온라인 게임 소프트웨어 개발 및 공급업',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('58111은 계속 제6조제2항제7호 출판업으로 보여준다', () => {
+    const publishingInput: EligibilityInput = {
+      ...baseInput,
+      ksicCode: '58111',
+      ksicName: '교과서 및 학습 서적 출판업',
+    }
+    const result = evaluateEligibility(publishingInput)
+
+    render(
+      <ResultPanel
+        input={publishingInput}
+        result={result}
+        status="ready"
+        error={null}
+        onEvaluate={() => {}}
+      />,
+    )
+
+    expect(screen.getByText('제6조제2항제7호 · 출판업')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'J 정보통신업 > 58 출판업 > 581 서적, 잡지 및 기타 인쇄물 출판업 > 5811 서적 출판업 > 58111 교과서 및 학습 서적 출판업',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('융복합 심의 경로가 필요한 경우 결과 화면에 준비 포인트를 보여준다', () => {

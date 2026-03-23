@@ -1,5 +1,488 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-23 업종코드 추천을 입주 전략 컨설턴트형으로 전환
+
+### 작업 배경
+
+- 사용자가 실제로 원하는 것은 KSIC 코드 문자열 자체보다, “내 사업을 어떤 코드로 설명하면 입주 검토가 가능한지”, “무엇을 준비해야 혜택 경로가 열리는지”에 가까웠다.
+- 기존 추천 화면은 후보 코드를 잘 뽑아 주지만 전략 설명이 부족했고, 결과 화면은 판정은 잘 보여주지만 추천 단계와 이어지는 행동 가이드가 다소 끊겨 있었다.
+- 이번 루프의 목표는 추천 결과와 판정 결과를 모두 “입주 전략 컨설턴트”처럼 읽히게 바꾸고, 실제 하지 않는 업종을 억지로 추가하도록 유도하지 않는 안전한 문구 기준을 함께 세우는 것이었다.
+
+### 반영 내용
+
+- 추천 데이터 모델 확장
+  - [`src/features/eligibility/types.ts`](C:\projects\magok\src\features\eligibility\types.ts)에 `fitSummary`, `benefitSummary`, `recommendedBusinessAngle`, `requiredProofs`, `riskNotes`, `nextActions`, `relatedCodes`, `EligibilityStrategyPlan`을 추가했다.
+  - 새 [`src/features/eligibility/data/eligibility-strategy.ts`](C:\projects\magok\src\features\eligibility\data\eligibility-strategy.ts)에서 업종 코드 계열별 설명 포인트, 증빙 체크리스트, 리스크, 다음 행동, 연관 코드 추천을 공통으로 조립하도록 만들었다.
+- 추천 화면을 전략형 카드로 확장
+  - [`src/features/eligibility/data/industry-discovery.ts`](C:\projects\magok\src\features\eligibility\data\industry-discovery.ts)는 추천 결과 반환 직전에 새 전략 필드를 자동으로 붙이도록 바꿨다.
+  - [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx) 각 후보 카드에 `이 코드가 유력한 이유`, `입주 전략 포인트`, `함께 검토할 연관 코드`, `이렇게 준비하면 좋습니다`, `주의사항`, `추천 다음 행동`을 추가했다.
+  - 추천 화면 상단 안내문도 “후보 코드 이름”이 아니라 “왜 이 코드인지, 무엇을 준비할지”까지 같이 읽으라는 메시지로 바꿨다.
+- 결과 화면을 입주 전략 중심으로 보강
+  - [`src/features/eligibility/components/result-panel.tsx`](C:\projects\magok\src\features\eligibility\components\result-panel.tsx)에 `입주 전략 메모` 섹션을 새로 추가했다.
+  - 이 섹션은 `이렇게 설명하면 좋습니다`, `기대할 수 있는 입주 경로`, `필요 증빙`, `주의사항`, `추천 다음 행동`을 묶어 보여주며, 추천 단계와 판정 단계 사이의 끊김을 줄였다.
+  - 기존 `다음에 확인할 것`은 `판정 근거 기준 다음에 확인할 것`으로 조금 더 역할이 분명해지도록 정리했다.
+- 인사이트 문구를 실무 전략 쪽으로 보강
+  - [`src/features/eligibility/data/screen-insights.ts`](C:\projects\magok\src\features\eligibility\data\screen-insights.ts)에 5자리 코드 일치, 심의 대상, 조건부, 산업시설구역 기본 허용표 매칭 여부별로 실제 상담에서 어떻게 설명해야 하는지에 대한 bullet을 추가했다.
+  - [`src/features/eligibility/data/expert-insights.ts`](C:\projects\magok\src\features\eligibility\data\expert-insights.ts)에는 공통 컴플라이언스 경고 문구를 넣고, 5자리 코드 일치 시 실제 매출이 나는 핵심 업무를 같은 표현으로 정리하라는 실무 액션을 보강했다.
+  - 핵심 안전장치로 “실제 하지 않는 업무를 혜택 때문에 추가하면 심사나 사후 확인 단계에서 불리할 수 있다”는 리스크 문구를 추천/결과 인사이트 전반에 반영했다.
+- 테스트 보강
+  - 새 [`src/features/eligibility/data/industry-discovery.test.ts`](C:\projects\magok\src\features\eligibility\data\industry-discovery.test.ts)에서 추천 결과가 전략 필드와 연관 코드를 함께 반환하는지 검증했다.
+  - [`src/features/eligibility/components/result-panel.test.tsx`](C:\projects\magok\src\features\eligibility\components\result-panel.test.tsx)에 `입주 전략 메모`, `필요 증빙`, `추천 다음 행동`, 컴플라이언스 경고 문구 노출 검증을 추가했다.
+
+### 구현 파일
+
+- `src/features/eligibility/types.ts`
+- `src/features/eligibility/data/eligibility-strategy.ts`
+- `src/features/eligibility/data/industry-discovery.ts`
+- `src/features/eligibility/data/industry-discovery.test.ts`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/features/eligibility/components/result-panel.tsx`
+- `src/features/eligibility/components/result-panel.test.tsx`
+- `src/features/eligibility/data/screen-insights.ts`
+- `src/features/eligibility/data/expert-insights.ts`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 14 passed`
+  - `Tests 123 passed`
+- `npm run build` 통과
+  - `prebuild` 단계에서 SEO 페이지 export 후 전체 빌드 성공
+  - 기존과 동일하게 번들 크기 경고만 남음
+
+### 남은 메모
+
+- 이번 루프는 추천/판정 메시지 구조를 전략형으로 바꾸는 데 초점을 뒀고, 실제 추천 정확도 자체를 더 끌어올릴 도메인 사전 확장은 별도 루프로 이어갈 수 있다.
+- `npm run build`는 저장소 기본 스크립트상 SEO 정적 산출물 재생성을 포함하므로, 이번 루프와 직접 무관한 생성 파일들이 함께 touched 될 수 있다.
+
+### 결과 요약
+
+- 추천 화면이 이제 “코드 후보 목록”이 아니라 “입주 전략이 붙은 후보 카드”로 읽히게 됐다.
+- 결과 화면도 판정만 보여주지 않고, 실제 사업 설명 포인트, 기대 경로, 증빙, 리스크, 다음 행동까지 한 흐름으로 정리한다.
+- 서비스 메시지가 `업종코드 검색기`에서 `입주 가능성 컨설턴트` 쪽으로 한 단계 더 이동했다.
+
+## 2026-03-23 공용 UI 하이엔드 재설계 3차(Button/App 장식 레이어)
+
+### 작업 배경
+
+- 1차와 2차를 거치며 카드, 필드, 탭, 토글은 하이엔드 톤으로 올라왔지만, 정작 CTA를 담당하는 `Button`과 앱 전체 껍데기인 [`src/App.tsx`](C:\projects\magok\src\App.tsx)에는 직접 색상 레이어가 남아 있었다.
+- 특히 버튼은 기본 accent 면과 직접 `rgba(...)` hover shadow 중심이었고, `App`에는 히어로 광원, 단계 인디케이터 비활성 pill, sticky 헤더, skip-link 포커스 표면처럼 즉석 색상 표현이 남아 있어 전체 마감감이 한 단계 덜 정리된 상태였다.
+- 이번 루프의 목표는 버튼 자체의 질감을 끌어올리고, 페이지 레벨 장식도 시맨틱 토큰으로 치환해 화면 전체를 같은 글래스 문법으로 묶는 것이었다.
+
+### 반영 내용
+
+- 버튼 글래스 시스템 재설계
+  - [`src/components/ui/button.tsx`](C:\projects\magok\src\components\ui\button.tsx)의 공통 레시피를 `overflow-hidden`, 상단 highlight, 내부 border 레이어, `motion-snappy` 전환을 갖는 구조로 재작성했다.
+  - `default` 버튼은 `--accent-elevated`와 `--accent-deep` gradient, `--shadow-button-primary` 계열 그림자를 사용하도록 바꿔 더 입체적인 CTA로 만들었다.
+  - `secondary`, `outline`, `ghost`도 각각 글래스 면과 hover lift를 공유하게 해 버튼끼리 시대가 다르게 보이지 않도록 정리했다.
+  - 로딩 spinner와 텍스트는 `z-index`를 분리해 표면 highlight와 겹쳐도 읽힘이 유지되도록 조정했다.
+- 페이지 레벨 장식 토큰 보강
+  - [`src/index.css`](C:\projects\magok\src\index.css)에 `--surface-header`, `--surface-capsule-muted`, `--accent-elevated`, `--accent-deep`, `--shadow-button-primary`, `--shadow-button-primary-hover`, `--shadow-button-secondary`, `--shadow-header`, `--hero-glow`를 추가했다.
+  - 이 토큰들로 버튼과 앱 장식 레이어가 같은 색/빛/깊이 체계를 참조하게 만들었다.
+- `App` 장식 레이어 시맨틱화
+  - [`src/App.tsx`](C:\projects\magok\src\App.tsx)의 히어로 광원은 직접 `radial-gradient(...rgba(...))` 대신 `--hero-glow` 토큰을 쓰도록 바꿨다.
+  - 위저드 단계 인디케이터의 비활성 pill 배경은 `bg-[rgba(124,136,155,0.18)]`에서 `--surface-capsule-muted`로 치환했다.
+  - skip-link는 `focus:text-white`를 제거하고 `focus:text-[var(--accent-foreground)]`, `focus:shadow-[var(--shadow-button-primary)]`로 바꿔 버튼 시스템과 같은 문법으로 맞췄다.
+  - sticky 헤더는 `bg-[rgba(255,255,255,0.92)]` 대신 `--surface-header`, `--shadow-header`, `backdrop-blur-xl` 기반 유리 헤더로 정리했다.
+
+### 구현 파일
+
+- `src/components/ui/button.tsx`
+- `src/index.css`
+- `src/App.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 13 passed`
+  - `Tests 122 passed`
+- `npm run build` 통과
+  - `prebuild` 단계에서 SEO 페이지 export 후 전체 빌드 성공
+  - 기존과 동일하게 번들 크기 경고만 남음
+- 추가 확인
+  - [`src/components/ui/button.tsx`](C:\projects\magok\src\components\ui\button.tsx)와 [`src/App.tsx`](C:\projects\magok\src\App.tsx) 범위에서 `rgba(...)`, `bg-[rgba(...)]`, `bg-white`, `white/70`, `text-white` 직접 하드코딩 검색 결과 없음
+
+### 남은 메모
+
+- 이번 루프는 `Button`과 `App` 장식 레이어 중심이라, 다른 페이지 컴포넌트 내부의 세부 카드 밀도 조정은 별도 루프로 남겨 두었다.
+- `npm run build`는 저장소 기본 스크립트상 SEO 정적 산출물 재생성을 포함하므로, 이번 루프와 직접 무관한 생성 파일들이 함께 touched 될 수 있다.
+
+### 결과 요약
+
+- CTA 버튼과 페이지 껍데기가 이제 카드/필드/탭과 같은 글래스 톤과 같은 깊이 언어를 공유한다.
+- `App`에 남아 있던 즉석 `rgba`/`white` 표현을 토큰으로 걷어내면서, 화면 전체가 한 번 더 정리된 인상을 갖게 됐다.
+- 다음 루프에서는 페이지별 보조 카드, 배지, 헤더 내부 세부 밀도까지 정리하면 완성도가 더 높아질 수 있다.
+
+## 2026-03-23 공용 UI 하이엔드 재설계 2차(Tabs/Switch/Skeleton/Textarea)
+
+### 작업 배경
+
+- 1차에서 `Card`/`Input`/`Select`를 고급형 글래스 문법으로 끌어올렸지만, 실제 화면에서는 `Tabs`, `Switch`, `Skeleton`, `Textarea`가 여전히 이전 톤에 남아 있어 전체 인상이 완전히 통일되지는 않았다.
+- 특히 `Tabs`는 `bg-white/70` 기반 기본 세그먼트, `Switch`는 단순 `rgba + shadow-md`, `Skeleton`은 shimmer, `Textarea`는 예전 흰색 필드 형태를 쓰고 있어 같은 페이지 안에서도 시대가 다른 컴포넌트가 섞인 느낌이 있었다.
+- 이번 루프의 목표는 이 네 가지를 1차 토큰 체계에 연결해, 카드 안의 상호작용과 로딩 상태까지 한 문법으로 읽히게 만드는 것이었다.
+
+### 반영 내용
+
+- 토큰과 애니메이션 보강
+  - [`src/index.css`](C:\projects\magok\src\index.css)에 `--surface-accent-glass`, `--shadow-embedded`, `--shadow-pill`, `--shadow-toggle-track`, `--shadow-toggle-thumb`를 추가했다.
+  - shimmer 대체용 `pulse-organic` keyframes와 `--animate-pulse-organic` 토큰을 추가해, 로딩 상태도 같은 표면 언어로 움직이게 만들었다.
+- `Tabs` 고급형 세그먼트 재설계
+  - [`src/components/ui/tabs.tsx`](C:\projects\magok\src\components\ui\tabs.tsx)의 리스트를 글래스 트랙 + 내부 하이라이트 + 중첩 곡률 구조로 재작성했다.
+  - 활성 트리거는 떠 있는 pill처럼 보이도록 배경, 테두리, 그림자, 미세한 `translate`를 분리했고, 전환은 `cubic-bezier(0.4, 0, 0.2, 1)` 기반으로 맞췄다.
+- `Switch` 마이크로 인터랙션 강화
+  - [`src/components/ui/switch.tsx`](C:\projects\magok\src\components\ui\switch.tsx)의 레일은 반투명 레이어 + 내부 하이라이트 + accent glow 구조로 바꿨다.
+  - thumb는 단순 흰 원이 아니라 유리 노브처럼 보이도록 gradient와 복합 그림자를 적용했고, 체크 전환 시 스냅 있는 이동과 미세한 scale이 같이 들어가게 했다.
+- `Skeleton` pulse 언어 전환
+  - [`src/components/ui/skeleton.tsx`](C:\projects\magok\src\components\ui\skeleton.tsx)의 shimmer를 제거하고, opacity + scale 중심의 organic pulse로 교체했다.
+  - `SkeletonCard`도 1차 카드 표면과 같은 글래스 톤으로 맞추고, 버튼 자리 placeholder 반경도 공용 필드 반경에 맞췄다.
+- `Textarea`를 1차 필드 시스템에 통합
+  - [`src/components/ui/textarea.tsx`](C:\projects\magok\src\components\ui\textarea.tsx)가 [`src/components/ui/field-control.ts`](C:\projects\magok\src\components\ui\field-control.ts)의 공용 필드 레시피를 공유하도록 바꿨다.
+  - 카드 내부 반경 상속, 상단 하이라이트, 인셋 깊이, 포커스 링은 `Input`과 같게 두고, `Textarea`만 `min-height`와 `resize-y`를 유지하도록 조정했다.
+- 대표 사용처 정리
+  - [`src/features/eligibility/components/rulebook-tabs.tsx`](C:\projects\magok\src\features\eligibility\components\rulebook-tabs.tsx)에서 루트 카드와 요약/조문 카드가 새 `Tabs`와 어울리도록 오래된 흰색 면을 시맨틱 표면으로 치환했다.
+  - [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)와 [`src/App.tsx`](C:\projects\magok\src\App.tsx)에서는 `Textarea`가 예전 `bg/shadow` override에 막히지 않도록 정리했다.
+  - embedded 카드 예외는 계속 유지해야 해서, 해당 모드에서는 카드의 장식 레이어만 숨기도록 남겨 두었다.
+
+### 구현 파일
+
+- `src/index.css`
+- `src/components/ui/tabs.tsx`
+- `src/components/ui/switch.tsx`
+- `src/components/ui/skeleton.tsx`
+- `src/components/ui/textarea.tsx`
+- `src/features/eligibility/components/rulebook-tabs.tsx`
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/App.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 13 passed`
+  - `Tests 122 passed`
+- `npm run build` 통과
+  - `prebuild` 단계에서 SEO 페이지 export 후 전체 빌드 성공
+  - 기존과 동일하게 번들 크기 경고만 남음
+- 추가 확인
+  - [`src/components/ui/tabs.tsx`](C:\projects\magok\src\components\ui\tabs.tsx), [`src/components/ui/switch.tsx`](C:\projects\magok\src\components\ui\switch.tsx), [`src/components/ui\skeleton.tsx`](C:\projects\magok\src\components\ui\skeleton.tsx), [`src/components/ui\textarea.tsx`](C:\projects\magok\src\components\ui\textarea.tsx), [`src/features/eligibility/components/rulebook-tabs.tsx`](C:\projects\magok\src\features\eligibility\components\rulebook-tabs.tsx), [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx) 범위에서 `bg-white`, `white/70`, `via-white`, 직접 `rgba(...)` 하드코딩 제거 확인
+
+### 남은 메모
+
+- 브라우저 캡처 기반의 픽셀 검수는 이번 환경에서 별도 수행하지 못했다.
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx)에는 이번 루프 범위 밖의 장식용 `rgba(...)`와 기존 헤더 색상 클래스가 여전히 남아 있다. 전체 페이지 하드코딩 색상 정리는 별도 루프로 다루는 편이 안전하다.
+- `npm run build`는 저장소 기본 스크립트상 SEO 정적 산출물 재생성을 포함하므로, 이번 루프와 직접 무관한 생성 파일들이 함께 touched 될 수 있다.
+
+### 결과 요약
+
+- `Tabs`, `Switch`, `Skeleton`, `Textarea`가 이제 1차 카드/필드 시스템과 같은 곡률, 같은 표면, 같은 모션 문법을 공유한다.
+- 폼 입력, 토글, 탭 전환, 로딩 상태가 따로 놀지 않고 하나의 디자인 시스템처럼 읽히게 됐다.
+- 다음 루프에서는 버튼과 페이지 레벨 장식 레이어까지 같은 토큰으로 밀어붙이면, 화면 전체가 더 일관된 하이엔드 톤으로 잠길 수 있다.
+
+## 2026-03-22 공용 UI 하이엔드 재설계 1차(Card/Input/Select)
+
+### 작업 배경
+
+- 공용 `Card`, `Input`, `Select`가 기능적으로는 충분했지만, 현재 형태는 `rounded-2xl`, `bg-white`, 단일 그림자 수준에 머물러 있어 하이엔드 폼 경험과는 거리가 있었다.
+- 특히 카드 바깥 곡률과 내부 필드 곡률이 서로 독립적으로 고정돼 있어, 시각적으로는 “바깥은 둥글고 안쪽은 뜬금없이 더 둥근” 느낌이 남아 있었다.
+- 이번 루프의 목표는 `Card`를 기준 표면으로 삼고, 그 안에 들어가는 `Input`, `Select`가 같은 반경 수학과 같은 빛/그림자 레이어를 공유하도록 공용 토큰을 재설계하는 것이었다.
+
+### 반영 내용
+
+- 전역 토큰과 중첩 곡률 계약 추가
+  - [`src/index.css`](C:\projects\magok\src\index.css)에 `--surface-elevated`, `--surface-glass`, `--surface-popover`, `--border-subtle`, `--border-strong`, `--highlight-soft`, `--shadow-floating`, `--shadow-field` 등 시맨틱 표면/그림자 토큰을 추가했다.
+  - 카드 반경과 내부 필드 반경이 연결되도록 `--card-radius`, `--card-padding`, `--card-inner-radius`, `--field-height`, `--motion-snappy`를 도입했다.
+  - 내부 필드 반경은 `max(calc(var(--card-radius) - var(--card-padding)), var(--radius-field))`로 계산해, 카드가 기준이 되는 중첩 곡률 시스템을 만들었다.
+- `Card` 글래스 패널 재설계
+  - [`src/components/ui/card.tsx`](C:\projects\magok\src\components\ui\card.tsx)를 `backdrop-blur`, 3중 그림자, 상단 하이라이트, 미세한 내부 테두리 레이어를 가진 글래스 패널 구조로 재작성했다.
+  - `CardHeader`, `CardContent`는 고정 `p-6` 대신 카드가 내려주는 `--card-content-padding`을 사용하게 바꿔, 내부 컨트롤과의 반경 계산 기준을 하나로 통일했다.
+- `Input` / `Select` 필드 레시피 통합
+  - 새 [`src/components/ui/field-control.ts`](C:\projects\magok\src\components\ui\field-control.ts)에 공용 필드 레시피를 추가해, `Input`과 `SelectTrigger`가 동일한 표면, 상단 하이라이트, 포커스 링, 깊이 그림자를 공유하게 만들었다.
+  - [`src/components/ui/input.tsx`](C:\projects\magok\src\components\ui\input.tsx)는 `bg-white`와 단일 인셋 섀도를 제거하고, 카드 내부 반경을 자동 상속하는 깊이형 필드로 변경했다.
+  - [`src/components/ui/select.tsx`](C:\projects\magok\src\components\ui\select.tsx)는 트리거를 입력 필드와 같은 레시피로 맞췄고, 드롭다운 패널은 별도 `sideOffset`, 다층 그림자, 유리 패널 배경, 내부 highlight 레이어를 갖도록 다시 구성했다.
+  - `SelectItem` highlight 색도 직접 `rgba(...)`를 쓰지 않고 시맨틱 토큰 기반으로 교체했다.
+- 대표 사용처 정리
+  - [`src/features/eligibility/components/eligibility-form.tsx`](C:\projects\magok\src\features\eligibility\components\eligibility-form.tsx)에서 루트 `Card`가 예전 `bg/shadow` override로 새 디자인을 덮어쓰지 않도록 정리했다.
+  - embedded 모드에서는 기존처럼 투명 카드가 필요하므로 `before/after` 레이어를 숨겨 기능적 예외를 유지했다.
+
+### 구현 파일
+
+- `src/index.css`
+- `src/components/ui/field-control.ts`
+- `src/components/ui/card.tsx`
+- `src/components/ui/input.tsx`
+- `src/components/ui/select.tsx`
+- `src/features/eligibility/components/eligibility-form.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 13 passed`
+  - `Tests 122 passed`
+- `npm run build` 통과
+  - `prebuild` 단계에서 SEO 페이지 export 후 전체 빌드 성공
+  - 기존과 동일하게 번들 크기 경고만 남음
+- 추가 확인
+  - [`src/components/ui/card.tsx`](C:\projects\magok\src\components\ui\card.tsx), [`src/components/ui/input.tsx`](C:\projects\magok\src\components\ui\input.tsx), [`src/components/ui/select.tsx`](C:\projects\magok\src\components\ui\select.tsx), [`src/components/ui/field-control.ts`](C:\projects\magok\src\components\ui\field-control.ts)에서 `white`, `rgba(...)` 하드코딩 문자열 검색 결과 없음
+
+### 남은 메모
+
+- 브라우저 스냅샷 기반의 픽셀 단위 시각 검수는 이번 환경에서 별도로 수행하지 못했다.
+- `npm run build`는 저장소 기본 스크립트상 SEO 정적 산출물 재생성을 포함하므로, 이번 루프와 직접 무관한 생성 파일들이 함께 touched 될 수 있다.
+
+### 결과 요약
+
+- `Card`는 이제 단순 흰 박스가 아니라, 반경 변수와 다층 그림자를 가진 글래스 패널 역할을 한다.
+- `Input`과 `Select`는 카드가 내려주는 반경 규칙을 따라 같은 깊이감과 같은 인터랙션 언어를 공유하게 됐다.
+- 즉석 색상 하드코딩을 컴포넌트 수준에서 걷어내고 토큰 중심 구조로 바꿔, 다음 루프에서 `Tabs`, `Switch`, `Skeleton`, `Textarea`까지 같은 문법으로 확장할 발판을 마련했다.
+
+## 2026-03-21 모바일 헤더 브랜드 텍스트 잘림 해소
+
+### 작업 배경
+
+- 모바일 상단 헤더에서 서비스명 `마곡 코드찾기`가 `마곡 코...`처럼 잘려, 브랜드명과 현재 위치를 한눈에 읽기 어려웠다.
+- 원인은 [`src/App.tsx`](C:\projects\magok\src\App.tsx) 헤더에서 서비스명에 `truncate`가 직접 적용돼 있었고, 같은 줄의 모바일 액션 버튼 3개가 `shrink-0`로 폭을 먼저 점유하던 구조였다.
+- 이번 루프의 목표는 위저드 모드 상단 조작은 유지하면서도, 작은 폭에서 글자가 잘리지 않는 모바일 헤더를 만드는 것이었다.
+
+### 반영 내용
+
+- 모바일 헤더를 한 줄 강제 배치에서 `브랜드 + 메뉴`, `최근/사전 보기 액션`의 2단 구조로 재배치했다.
+- 브랜드 버튼은 `flex-1` 기반으로 남는 폭을 우선 사용하게 바꾸고, 서비스명 `마곡 코드찾기`는 모바일에서 `truncate`를 제거해 줄바꿈이 가능하도록 정리했다.
+- 모바일 액션 버튼은 각각 `flex-1`로 동일 폭을 쓰게 바꿔, 제목을 압박하지 않으면서도 터치 타깃을 유지하도록 조정했다.
+- 메뉴 버튼은 모바일에서 브랜드 줄 오른쪽으로 분리해, 좁은 화면에서도 제목과 액션 버튼이 서로 폭을 빼앗지 않게 했다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 13 passed`
+  - `Tests 122 passed`
+- `npm run build` 통과
+  - `prebuild` SEO export 포함 전체 빌드 성공
+  - 기존과 동일하게 번들 크기 경고만 남음
+- 헤드리스 Chrome 390px 폭 캡처 확인
+  - 스냅샷: [`mobile-header-check.png`](C:\projects\magok\.snapshots\mobile-header-check.png)
+  - 브랜드명 `마곡 코드찾기`가 말줄임 없이 노출되는 것을 확인
+
+### 결과 요약
+
+- 모바일 헤더에서 서비스명이 더 이상 말줄임표로 잘리지 않고, 브랜드명과 주요 액션을 동시에 읽을 수 있게 됐다.
+- 액션 버튼은 같은 줄에서 제목 공간을 잠식하지 않도록 분리됐고, 위저드/검색 홈 전환 동작은 그대로 유지된다.
+
+## 2026-03-21 finder 하이브리드 위저드 단계 복원 강화
+
+### 작업 배경
+
+- 현재 `finder`는 이미 `홈 개요 + 집중형 위저드` 하이브리드였지만, 단계 상태가 메모리 안에만 남아 `#finder` 재진입, 코드 사전/법령 참고 왕복, 새로고침 뒤에는 맥락이 끊겼다.
+- 공유 링크는 `#finder?share=...`로 결과 복원이 잘 됐지만, 일반 단계 이동은 URL 계약이 없어서 브라우저 뒤로 가기와 복원 흐름이 일관되지 않았다.
+- 목표는 전면 라우팅 분리가 아니라 현재 구조를 유지한 채 `mode/step/screen` 해시와 세션 초안을 추가해 복원성과 예측 가능성을 높이는 것이었다.
+
+### 반영 내용
+
+- 해시 계약과 우선순위 정리
+  - [`src/App.tsx`](C:\projects\magok\src\App.tsx)의 `HashState`를 확장해 홈 해시에서 `mode=overview|focus`, `step=discover|adjust|result`, `screen=compose|results`, `share`를 함께 읽도록 바꿨다.
+  - `share`가 있으면 기존처럼 결과 복원을 최우선으로 적용하고, 일반 `finder` 상태는 `share 해시 > 명시적 step 해시 > session draft > 기본 홈` 순서로 복원하게 정리했다.
+  - 내부 단계 전환은 `pushState`, 자동 보정이나 세부 입력 변화에 따른 상태 보정은 `replaceState` 중심으로 동작하게 해 브라우저 뒤로 가기가 단계 단위로 읽히도록 맞췄다.
+- 세션 초안 저장 추가
+  - 새 [`src/features/eligibility/finder-wizard-storage.ts`](C:\projects\magok\src\features\eligibility\finder-wizard-storage.ts)를 추가해 `input`, `compareZones`, `additionalCodes`, `industryQuery`, `currentStep`, `discoverScreen`, `isWizardFocused`를 세션에 저장/복원하게 했다.
+  - [`src/store/eligibility-store.ts`](C:\projects\magok\src\store\eligibility-store.ts)에 `loadFinderDraft()`를 추가해 세션 초안을 한 번에 로드하고, `result` 단계 초안은 최근 조회를 오염시키지 않고 내부 계산만 다시 수행하게 만들었다.
+- 위저드 왕복과 회귀 보강
+  - [`src/App.tsx`](C:\projects\magok\src\App.tsx)에서 `HomeSections`에 `discoverScreen`, `isWizardFocused`, `onFinderStateChange`, `onExitWizardFocus`, `onResetFinder`를 넘겨 위저드 제어 책임을 홈 상위로 끌어올렸다.
+  - `openHomeView('finder')`는 plain `#finder` 진입 후 세션 초안을 복원하도록 바뀌었고, 코드 사전/최근 조회에서 다시 돌아올 때도 같은 초안을 이어서 보게 했다.
+  - [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)에 `#finder?mode=overview`, focus 해시 전이, 결과 수정 후 `adjust` 복귀, 코드 사전 왕복, plain `#finder` 세션 복원 시나리오를 추가했다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `src/store/eligibility-store.ts`
+- `src/features/eligibility/finder-wizard-storage.ts`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/walkthrough.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test -- src/App.test.tsx
+npm run test
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test -- src/App.test.tsx` 통과
+  - `Test Files 1 passed`
+  - `Tests 22 passed`
+- `npm run test` 통과
+  - `Test Files 13 passed`
+  - `Tests 122 passed`
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size` 경고는 기존과 같은 성격으로 유지
+
+### 결과 요약
+
+- 이제 `finder`는 공유 링크 복원과 별개로, 일반 작업 흐름도 `mode/step/screen` 해시와 세션 초안으로 복원된다.
+- 코드 사전이나 법령 참고 화면으로 빠졌다가 돌아와도 `#finder`에서 바로 방금 보던 `adjust/result` 문맥을 이어갈 수 있다.
+- 기존 `#finder?share=...` 결과 공유 포맷은 그대로 유지하면서, 일반 단계 이동의 예측 가능성만 높여 현재 하이브리드 구조를 더 안정적으로 만들었다.
+
+## 2026-03-21 582xx 소프트웨어 계열 법령 연결 전면 정정
+
+### 작업 배경
+
+- 사용자는 `58211 유선 온라인 게임 소프트웨어 개발 및 공급업`이 결과 화면에서 `7호 · 출판업`으로만 연결되는 현재 표기가 정확성 기준에 맞지 않는다고 지적했다.
+- 확인 결과 KSIC 체계상 `582xx`는 대분류 `J 정보통신업`, 중분류 `58 출판업`, 소분류 `582 소프트웨어 개발 및 공급업`에 속하므로, 사용자 대표 조문은 `산업집적법 시행령 제6조제3항제2호`로 연결하는 편이 더 정확했다.
+- 기존 구현은 `58` 전체를 `제6조제2항제7호 · 출판업`으로 단일 처리하고 있어 결과 카드, 코드 사전, 법령 탭, 가이드/FAQ 정적 산출물에 같은 오차가 연쇄 반영되고 있었다.
+
+### 반영 내용
+
+- 법령 매핑 구조 정리
+  - [`src/features/eligibility/data/knowledge-industry-review-table.ts`](C:\projects\magok\src\features\eligibility\data\knowledge-industry-review-table.ts)에서 `7호 출판업`의 KSIC 대응 범위를 `581xx` 중심으로 축소하고, 각 행에 `articlePath`, `legalBasisId`를 추가했다.
+  - [`src/features/eligibility/data/information-industry-review-table.ts`](C:\projects\magok\src\features\eligibility\data\information-industry-review-table.ts)를 새로 만들어 `시행령 제6조제3항 1~5호` 대응표를 데이터화했다.
+  - [`src/features/eligibility/data/regulatory-clause-resolver.ts`](C:\projects\magok\src\features\eligibility\data\regulatory-clause-resolver.ts)에 공통 resolver를 추가해 `581xx -> 제2항제7호`, `582xx -> 제3항제2호`, `62/6311/6312/6399/612 -> 제3항 1~5호` 연결을 코드 기준으로 처리하게 했다.
+- 사용자 화면과 코드 사전 반영
+  - [`src/features/eligibility/data/screen-insights.ts`](C:\projects\magok\src\features\eligibility\data\screen-insights.ts)에서 `연결 조문`이 새 resolver를 사용하도록 바꾸고, `현재 KSIC 대응`은 `J 정보통신업 > 58 출판업 > 582 ...` 형태의 계층 문자열을 보여주도록 정리했다.
+  - [`src/features/eligibility/data/magok-code-directory.ts`](C:\projects\magok\src\features\eligibility\data\magok-code-directory.ts)에서 `582xx`의 지식산업센터 근거를 `제6조제3항제2호 · 소프트웨어 개발 및 공급업` 기준으로 바꾸고, 산업시설구역 설명에는 `KSIC상 58 출판업 하위의 582 소프트웨어 개발 및 공급업` 문구를 추가했다.
+  - [`src/features/eligibility/components/rulebook-tabs.tsx`](C:\projects\magok\src\features\eligibility\components\rulebook-tabs.tsx)는 지식산업센터 탭 안에서 `시행령 제6조제2항 1~27호 대응표`와 `시행령 제6조제3항 1~5호 대응표`를 각각 보여주도록 재구성했다.
+- 테스트와 정적 산출물 갱신
+  - [`src/features/eligibility/data/screen-insights.test.ts`](C:\projects\magok\src\features\eligibility\data\screen-insights.test.ts), [`src/features/eligibility/components/result-panel.test.tsx`](C:\projects\magok\src\features\eligibility\components\result-panel.test.tsx), [`src/features/eligibility/components/rulebook-tabs.test.tsx`](C:\projects\magok\src\features\eligibility\components\rulebook-tabs.test.tsx), [`src/features/eligibility/magok-code-directory.test.ts`](C:\projects\magok\src\features\eligibility\magok-code-directory.test.ts), [`src/features/guides/seo/seo-page-builder.test.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.test.ts)로 회귀 범위를 보강했다.
+  - `npm run export:guides`, `npm run export:directory`, `npm run build`를 통해 `docs/codex-brain/magok_guides_index.json`, `docs/codex-brain/magok_ksic11_full_directory.*`, `public/guides/**`, `public/faq/**`, `public/sitemaps/**`를 현재 기준으로 다시 생성했다.
+
+### 구현 파일
+
+- `src/features/eligibility/data/knowledge-industry-review-table.ts`
+- `src/features/eligibility/data/information-industry-review-table.ts`
+- `src/features/eligibility/data/regulatory-clause-resolver.ts`
+- `src/features/eligibility/data/magok-code-directory.ts`
+- `src/features/eligibility/data/screen-insights.ts`
+- `src/features/eligibility/components/rulebook-tabs.tsx`
+- `src/features/eligibility/data/screen-insights.test.ts`
+- `src/features/eligibility/components/result-panel.test.tsx`
+- `src/features/eligibility/components/rulebook-tabs.test.tsx`
+- `src/features/eligibility/magok-code-directory.test.ts`
+- `src/features/guides/seo/seo-page-builder.test.ts`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+- `docs/codex-brain/magok_guides_index.json`
+- `docs/codex-brain/magok_faq_index.json`
+- `docs/codex-brain/magok_ksic11_full_directory.csv`
+- `docs/codex-brain/magok_ksic11_full_directory.json`
+- `docs/codex-brain/magok_ksic11_full_directory.xlsx`
+- `docs/codex-brain/magok_ksic11_full_directory_summary.md`
+- `public/guides/**`
+- `public/faq/**`
+- `public/sitemaps/**`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run export:guides
+npm run export:directory
+npm run build
+```
+
+결과:
+
+- `npm run lint` 통과
+- `npm run test` 통과
+  - `Test Files 13 passed`
+  - `Tests 118 passed`
+- `npm run export:guides` 통과
+  - `467`개 가이드와 `1401`개 FAQ 인덱스 재생성
+- `npm run export:directory` 통과
+  - `docs/codex-brain/magok_ksic11_full_directory.csv`에 `1204`개 행 재생성
+- `npm run build` 통과
+  - SEO export 포함 전체 빌드 성공
+  - `chunk size` 경고와 플러그인 타이밍 경고는 기존과 같은 성격으로 유지
+- 추가 확인
+  - `docs/codex-brain/magok_guides_index.json`과 `public/guides/58211/index.html`에 `산업집적법 시행령 제6조 제3항`, `제6조제3항제2호`, `소프트웨어 개발 및 공급업` 문구 반영 확인
+
+### 결과 요약
+
+- `582xx`는 더 이상 `7호 · 출판업`으로 뭉뚱그려 표시되지 않고, 사용자 대표 조문이 `제6조제3항제2호 · 소프트웨어 개발 및 공급업`으로 정정됐다.
+- KSIC는 공식 계층을 유지한 채 `정보통신업 > 58 출판업 > 582 소프트웨어 개발 및 공급업 > 5자리 코드` 흐름으로 보여주도록 바뀌어 정확성과 설명력이 함께 올라갔다.
+- 동일 기준이 결과 카드, 법령 탭, 코드 사전, 가이드/FAQ 정적 산출물까지 한 번에 맞춰져 이후 재생성 시에도 같은 규칙이 유지된다.
+
 ## 2026-03-21 지식산업센터 5자리 코드 문구 쉬운 표현으로 정리
 
 ### 작업 배경

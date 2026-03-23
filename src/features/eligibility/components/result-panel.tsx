@@ -18,6 +18,7 @@ import { LayoutSimulator } from '@/features/eligibility/components/layout-simula
 import { getConvergenceReviewPlaybook } from '@/features/eligibility/data/convergence-review-playbook'
 import { getExpertInsights } from '@/features/eligibility/data/expert-insights'
 import { getEligibilityScreenInsight } from '@/features/eligibility/data/screen-insights'
+import { getEligibilityStrategyPlan } from '@/features/eligibility/data/eligibility-strategy'
 import { getGuideEntryByCode } from '@/features/guides/data/guide-catalog'
 import type {
   ComparableZoneType,
@@ -251,6 +252,10 @@ export function ResultPanel({
   const isMultiCodeMode = Boolean(multiCodeResults && multiCodeResults.length > 1)
   const screenInsight =
     !isComparisonMode && !isMultiCodeMode ? getEligibilityScreenInsight(input, result) : null
+  const strategyPlan =
+    !isComparisonMode && !isMultiCodeMode && result
+      ? getEligibilityStrategyPlan(input, result)
+      : null
   const expertInsights =
     !isComparisonMode && !isMultiCodeMode ? getExpertInsights(input, result) : []
   const convergencePlaybook =
@@ -332,7 +337,7 @@ export function ResultPanel({
             </Badge>
             <CardTitle>결과 확인</CardTitle>
             <CardDescription>
-              선택한 업종과 현재 설정 기준으로 입주 가능성을 바로 보여드립니다.
+              선택한 업종과 현재 설정 기준으로 입주 가능성과 준비 포인트를 함께 보여드립니다.
             </CardDescription>
           </div>
           {input.address.trim() ? (
@@ -725,6 +730,71 @@ export function ResultPanel({
               </>
             ) : (
               <>
+                {strategyPlan ? (
+                  <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:p-6">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={getBadgeVariant(result.verdict)}>입주 전략 메모</Badge>
+                      <Badge variant="muted">실제 영위 기준</Badge>
+                    </div>
+                    <h4 className="mt-4 max-w-3xl font-display text-lg font-semibold leading-[1.24] text-[var(--foreground)]">
+                      {strategyPlan.headline}
+                    </h4>
+                    <div className="mt-4 grid gap-4 xl:grid-cols-2">
+                      <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
+                        <div className="text-sm font-semibold text-[var(--foreground)]">
+                          이렇게 설명하면 좋습니다
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                          {strategyPlan.recommendedBusinessAngle}
+                        </p>
+                      </div>
+                      <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]">
+                        <div className="text-sm font-semibold text-[var(--foreground)]">
+                          기대할 수 있는 입주 경로
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                          {strategyPlan.benefitPath}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-4 xl:grid-cols-3">
+                      <section className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
+                        <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                          <FileStack className="size-4 text-[var(--accent)]" />
+                          필요 증빙
+                        </div>
+                        <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                          {strategyPlan.requiredProofs.map((item) => (
+                            <li key={`proof-${item}`}>{item}</li>
+                          ))}
+                        </ul>
+                      </section>
+                      <section className="rounded-[20px] border border-[var(--warning-border)] bg-[var(--warning-bg)] p-4 shadow-[var(--shadow-sm)]">
+                        <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                          <ArrowRight className="size-4 text-[var(--accent)]" />
+                          주의사항
+                        </div>
+                        <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                          {strategyPlan.riskNotes.map((item) => (
+                            <li key={`risk-${item}`}>{item}</li>
+                          ))}
+                        </ul>
+                      </section>
+                      <section className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]">
+                        <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                          <ArrowRight className="size-4 text-[var(--accent)]" />
+                          추천 다음 행동
+                        </div>
+                        <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                          {strategyPlan.nextActions.map((item) => (
+                            <li key={`next-${item}`}>{item}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    </div>
+                  </section>
+                ) : null}
+
                 {screenInsight ? (
                   <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:p-6">
                     <div className="flex flex-wrap items-center gap-2">
@@ -803,7 +873,7 @@ export function ResultPanel({
                   <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:p-6">
                     <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
                       <FileStack className="size-4 text-[var(--accent)]" />
-                      다음에 확인할 것
+                      판정 근거 기준 다음에 확인할 것
                     </div>
                     <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--foreground-muted)]">
                       {result.requiredActions.map((action) => (

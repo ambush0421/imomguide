@@ -6,22 +6,29 @@ import { LoaderCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-[14px] text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] disabled:pointer-events-none disabled:opacity-50',
+  [
+    'relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-[16px] border px-5 py-3 text-sm font-semibold',
+    'transition-[transform,box-shadow,background-color,border-color,color] duration-300 ease-[var(--motion-snappy)]',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]',
+    'disabled:pointer-events-none disabled:opacity-55',
+    'before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-[var(--highlight-soft)] before:to-transparent before:opacity-80 before:content-[""]',
+    'after:pointer-events-none after:absolute after:inset-px after:rounded-[calc(16px-1px)] after:border after:border-transparent after:content-[""]',
+  ].join(' '),
   {
     variants: {
       variant: {
         default:
-          'bg-[var(--accent)] px-5 py-3 text-[var(--accent-foreground)] shadow-[var(--shadow-accent)] hover:-translate-y-0.5 hover:brightness-[0.97] hover:shadow-[0_20px_34px_rgba(31,94,255,0.18)]',
+          'border-[var(--border-accent-strong)] bg-[linear-gradient(180deg,var(--accent-elevated),var(--accent-deep))] text-[var(--accent-foreground)] shadow-[var(--shadow-button-primary)] after:border-[var(--highlight-accent)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-button-primary-hover)]',
         secondary:
-          'bg-[var(--surface-strong)] px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border-soft)] shadow-[var(--shadow-sm)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)] hover:ring-[var(--border-accent-strong)]',
+          'border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-elevated))] text-[var(--foreground)] shadow-[var(--shadow-button-secondary)] after:border-[var(--border-highlight)] hover:-translate-y-0.5 hover:border-[var(--border-accent-strong)] hover:bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-overlay))]',
         ghost:
-          'px-4 py-3 text-[var(--foreground)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]',
+          'border-transparent bg-transparent text-[var(--foreground)] shadow-none before:opacity-0 after:hidden hover:border-[var(--border-subtle)] hover:bg-[linear-gradient(180deg,var(--surface-elevated),var(--surface-overlay))] hover:text-[var(--accent-strong)] hover:shadow-[var(--shadow-embedded)]',
         outline:
-          'bg-[var(--surface-strong)] px-5 py-3 text-[var(--foreground)] ring-1 ring-[var(--border-soft)] hover:bg-[var(--surface-muted)] hover:ring-[var(--border-accent-strong)]',
+          'border-[var(--border-soft)] bg-[linear-gradient(180deg,var(--surface-glass),var(--surface-elevated))] text-[var(--foreground)] shadow-[var(--shadow-embedded)] after:border-[var(--border-highlight)] hover:-translate-y-0.5 hover:border-[var(--border-accent-strong)] hover:bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-elevated))]',
       },
       size: {
-        default: 'h-11',
-        sm: 'h-9 min-h-[44px] px-3 text-xs',
+        default: 'h-[var(--field-height)]',
+        sm: 'h-10 min-h-[44px] px-3.5 text-xs',
         lg: 'h-12 px-6 text-sm',
       },
     },
@@ -67,8 +74,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         aria-busy={isLoading || undefined}
       >
-        {isLoading ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : null}
-        {children}
+        {isLoading ? <LoaderCircle className="relative z-10 size-4 animate-spin" aria-hidden="true" /> : null}
+        <span className="relative z-10 inline-flex items-center gap-2">{children}</span>
       </button>
     )
   },

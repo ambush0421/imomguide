@@ -1,3 +1,119 @@
+## 2026-03-23 업종코드 추천을 입주 전략 컨설턴트형으로 전환
+
+- [x] 업종 추천/판정/결과 화면 관련 코드 경로 분석
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] 사용자 승인 대기
+- [x] `IndustrySuggestion`와 추천 결과 데이터 구조를 행동 중심 필드로 확장
+- [x] `industry-discovery-panel`에 후보 코드 + 검토 이유 + 혜택/증빙/주의사항/다음 행동 구조 반영
+- [x] `result-panel`과 인사이트 레이어를 코드 판정 중심에서 입주 전략 중심 설명으로 보강
+- [x] 실제 하지 않는 업종 추가 유도 없이 연관 코드/증빙/입주 전략을 안내하는 문구 기준 정리
+- [x] 관련 테스트 업데이트
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-23 공용 UI 하이엔드 재설계 4차(페이지 조합 밀도 정리)
+
+- [x] `App`/`eligibility-form`/`industry-discovery-panel`/`rulebook-tabs`/`badge` 현재 구조와 밀도 이슈 분석
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [ ] 사용자 승인 대기
+- [ ] `src/components/ui/badge.tsx`와 반복 배지/아이콘 박스 문법 정리
+- [ ] `src/App.tsx` 히어로/스텝/포커스 rail의 보조 카드와 요약 박스 밀도 조정
+- [ ] `industry-discovery-panel`/`eligibility-form`/`rulebook-tabs`의 요약 카드·배지·헤더 내부 간격 정리
+- [ ] 주요 조합 화면에서 반응형 밀도와 계층 균형 확인
+- [ ] `npm run lint`
+- [ ] `npm run test`
+- [ ] `npm run build`
+- [ ] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-23 공용 UI 하이엔드 재설계 3차(Button/App 장식 레이어)
+
+- [x] `Button`과 `App` 페이지 레벨 장식 레이어 현재 구조 분석
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] 사용자 승인 대기
+- [x] `src/components/ui/button.tsx`를 글래스 버튼 시스템으로 재작성
+- [x] `src/App.tsx`의 직접 `rgba`/`white` 기반 장식 레이어를 시맨틱 토큰으로 치환
+- [x] 히어로/스텝 인디케이터/헤더에서 버튼과 배경 장식의 톤 정렬 확인
+- [x] 이번 범위 파일에서 하드코딩 색상(`white`, `white/70`, 임의 rgba`) 제거 확인
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-23 공용 UI 하이엔드 재설계 2차(Tabs/Switch/Skeleton/Textarea)
+
+- [x] `Tabs`/`Switch`/`Skeleton`/`Textarea` 현재 구조와 대표 사용처 분석
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] 사용자 승인 대기
+- [x] `src/components/ui/tabs.tsx`를 글래스 트랙 + 정교한 활성 상태 전환 구조로 재작성
+- [x] `src/components/ui/switch.tsx`를 다층 레일/썸 + 스냅 있는 전환으로 재작성
+- [x] `src/components/ui/skeleton.tsx`를 shimmer 대신 pulse 중심 로딩 언어로 재작성
+- [x] `src/components/ui/textarea.tsx`를 `Input`과 같은 깊이형 필드 레시피로 통일
+- [x] 대표 사용처(`rulebook-tabs`, `eligibility-form`, `industry-discovery-panel`, `App`)에서 시각 균형 확인
+- [x] 이번 범위 파일에서 하드코딩 색상(`white`, `white/70`, 임의 rgba`) 제거 확인
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-22 공용 UI 하이엔드 재설계 1차(Card/Input/Select)
+
+- [x] 공용 UI 토큰과 `Card`/`Input`/`Select`/`Tabs`/`Switch`/`Skeleton` 현재 구조 분석
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] 사용자 승인 대기
+- [x] `src/index.css`에 논리적 곡률·시맨틱 표면·다층 그림자 토큰 추가
+- [x] `src/components/ui/card.tsx`를 중첩 곡률 + 글래스 레이어 구조로 재작성
+- [x] `src/components/ui/input.tsx`를 카드 내부 반경과 맞는 깊이형 필드로 재작성
+- [x] `src/components/ui/select.tsx`를 입력 필드와 같은 반경 계약 + 안전한 드롭다운 그림자로 재작성
+- [x] 대표 사용처(`eligibility-form`)에서 카드/입력/셀렉트 조합 시각 균형 재확인
+- [x] 하드코딩 색상(`white`, `white/70`, 임의 rgba`)이 이번 범위 파일에서 제거됐는지 확인
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-21 모바일 헤더 브랜드 텍스트 잘림 해소
+
+- [x] 현재 모바일 헤더에서 제목이 잘리는 재현 지점 확인
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] 사용자 승인 대기
+- [x] `src/App.tsx` 모바일 헤더 레이아웃 조정
+- [x] 매우 좁은 폭에서도 제목/액션 버튼이 함께 보이는지 확인
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-21 582xx 소프트웨어 계열 법령 연결 전면 정정
+
+- [x] `582xx` 법령 연결과 KSIC 계층 표시의 현재 노출 경로 재확인
+- [x] `docs/codex-brain/implementation_plan.md` 실행 기준 계획 반영
+- [x] `제6조제3항 1~5호` 데이터 테이블 및 코드별 대표 조문 resolver 추가
+- [x] `screen-insights`, `magok-code-directory`, `rulebook-tabs`에 새 매핑 적용
+- [x] `guide-catalog`와 정적 SEO 산출물이 `제6조 제3항` 기준을 반영하도록 정리
+- [x] 관련 테스트 업데이트
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run export:guides`
+- [x] `npm run export:directory`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-21 finder 하이브리드 위저드 단계 복원 강화
+
+- [x] 현재 `finder` 해시/집중 모드/스토어 전이 구조 재확인
+- [x] `docs/codex-brain/implementation_plan.md`에 이번 루프 계획 추가
+- [x] 위저드 해시 계약(`mode/step/screen/share`) 확장
+- [x] 세션 초안 저장/복원 헬퍼 추가 및 `#finder` 복귀 흐름 연결
+- [x] `App.tsx` 위저드 셸 책임 분리 및 단계 이동 `pushState` 반영
+- [x] `directory/library/updates` 왕복 후 `finder` 초안 복원 유지
+- [x] `App.test.tsx` 해시/세션 복원 회귀 테스트 추가
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
 ## 2026-03-21 지식산업센터 5자리 코드 문구 쉬운 표현으로 정리
 
 - [x] 사용자 화면에 노출되는 `exact 5자리` 문구와 생성 경로 확인

@@ -27,6 +27,9 @@ function unique(values: string[]) {
   return [...new Set(values.filter(Boolean))]
 }
 
+const complianceRiskNote =
+  '실제 하지 않는 업무를 혜택 때문에 추가하면 심사나 사후 확인 단계에서 불리할 수 있습니다.'
+
 function getTone(verdict: EligibilityResult['verdict']): InsightTone {
   if (verdict === 'eligible') {
     return 'success'
@@ -83,6 +86,7 @@ export function getExpertInsights(
         input.flags.requiresCommitteeReview
           ? '경계 업종으로 설명될 가능성이 있으면 위원회 질의에 대비한 융복합 서술이 필요합니다.'
           : '',
+        complianceRiskNote,
       ]),
       tone,
     })
@@ -109,6 +113,9 @@ export function getExpertInsights(
       actionItems: unique([
         '상담 화면이나 공유 메모에는 5자리 코드를 그대로 표기해 업종 오해를 줄이세요.',
         exactMatch.entry.note,
+        exactMatch.kind === 'allowed'
+          ? '실제 매출이 나는 핵심 업무를 이 5자리 코드 표현으로 다시 한 문장 정리해 두세요.'
+          : '',
       ]),
       riskNotes: unique([
         exactMatch.kind === 'blocked'
@@ -117,6 +124,7 @@ export function getExpertInsights(
         exactMatch.kind === 'conditional' || exactMatch.kind === 'reviewRequired'
           ? '조건부/심의 코드는 단독 등록 여부와 실제 운영 구조를 함께 확인해야 합니다.'
           : '',
+        complianceRiskNote,
       ]),
       tone,
     })
@@ -132,6 +140,7 @@ export function getExpertInsights(
       ],
       riskNotes: [
         '지식산업센터 특례 업종은 서류에서 설치·운영 목적이 흐리면 보수적으로 해석될 수 있습니다.',
+        complianceRiskNote,
       ],
       tone,
     })
@@ -149,6 +158,7 @@ export function getExpertInsights(
       ],
       riskNotes: [
         '기관 성격이 모호하면 일반 기업보다 더 엄격하게 추가 증빙을 요구받을 수 있습니다.',
+        complianceRiskNote,
       ],
       tone: 'warning',
     })
@@ -166,6 +176,7 @@ export function getExpertInsights(
       ],
       riskNotes: [
         '입주 상담 단계에서는 한 줄 업종명보다 구체적인 운영 시나리오가 더 큰 영향을 줄 수 있습니다.',
+        complianceRiskNote,
       ],
       tone,
     })

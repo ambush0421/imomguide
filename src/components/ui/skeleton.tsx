@@ -4,9 +4,11 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl bg-[rgba(43,109,255,0.06)]',
-        'after:absolute after:inset-0 after:-translate-x-full after:animate-[shimmer_2s_infinite]',
-        'after:bg-gradient-to-r after:from-transparent after:via-white/40 after:to-transparent',
+        'relative origin-center overflow-hidden rounded-[var(--skeleton-radius,var(--radius-field))]',
+        'border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-elevated),var(--surface-overlay))]',
+        'shadow-[var(--shadow-embedded)] backdrop-blur-xl animate-[pulse-organic_1.9s_ease-in-out_infinite]',
+        'before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_left,var(--surface-tint),transparent_60%)] before:content-[""]',
+        'after:pointer-events-none after:absolute after:inset-x-0 after:top-0 after:h-1/2 after:bg-gradient-to-b after:from-[var(--highlight-soft)] after:to-transparent after:opacity-80 after:content-[""]',
         className,
       )}
       {...props}
@@ -18,7 +20,7 @@ export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'rounded-[28px] border border-[var(--border)] bg-[rgba(255,255,255,0.92)] p-6',
+        'rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-glass))] p-6 shadow-[var(--shadow-floating)] backdrop-blur-2xl',
         className,
       )}
     >
@@ -28,8 +30,8 @@ export function SkeletonCard({ className }: { className?: string }) {
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-2/3" />
         <div className="flex gap-3 pt-2">
-          <Skeleton className="h-11 w-32 rounded-full" />
-          <Skeleton className="h-11 w-28 rounded-full" />
+          <Skeleton className="h-11 w-32 rounded-[var(--radius-field)]" />
+          <Skeleton className="h-11 w-28 rounded-[var(--radius-field)]" />
         </div>
       </div>
     </div>

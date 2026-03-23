@@ -36,6 +36,8 @@ describe('MAGOK_CODE_DIRECTORY', () => {
     ['71310', 'eligible', 'eligible'],
     ['74100', 'ineligible', 'eligible'],
     ['75320', 'ineligible', 'eligible'],
+    ['58111', 'eligible', 'eligible'],
+    ['58211', 'eligible', 'eligible'],
   ])(
     '%s 코드는 대표 판정이 유지된다',
     (code, industrialVerdict, knowledgeVerdict) => {
@@ -46,4 +48,19 @@ describe('MAGOK_CODE_DIRECTORY', () => {
       expect(entry?.zoneVerdicts.knowledgeIndustryCenter.verdict).toBe(knowledgeVerdict)
     },
   )
+
+  it('58211 지식산업센터 근거는 제6조 제3항 기준으로 정리된다', () => {
+    const entry = getMagokCodeDirectoryEntry('58211')
+
+    expect(entry).not.toBeNull()
+    expect(entry?.zoneVerdicts.knowledgeIndustryCenter.legalBasisIds).toContain(
+      'decreeInformationIndustry',
+    )
+    expect(entry?.zoneVerdicts.knowledgeIndustryCenter.reason).toContain(
+      '제6조제3항제2호',
+    )
+    expect(entry?.zoneVerdicts.industrialFacility.reason).toContain(
+      'KSIC상 58 출판업 하위의 582 소프트웨어 개발 및 공급업',
+    )
+  })
 })

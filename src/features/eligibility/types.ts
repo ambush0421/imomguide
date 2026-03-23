@@ -134,6 +134,12 @@ export type IndustrySuggestionMatchKind = 'exact' | 'related'
 
 export type IndustrySuggestionSource = 'directCode' | 'preset' | 'catalog' | 'directory'
 
+export interface IndustrySuggestionRelatedCode {
+  code: string
+  name: string
+  reason: string
+}
+
 export interface IndustrySuggestion {
   id: string
   code: string
@@ -147,4 +153,20 @@ export interface IndustrySuggestion {
   catalogNote?: string
   selectedZoneVerdict?: Verdict
   recommendationReason?: string
+  fitSummary?: string
+  benefitSummary?: string
+  recommendedBusinessAngle?: string
+  requiredProofs?: string[]
+  riskNotes?: string[]
+  nextActions?: string[]
+  relatedCodes?: IndustrySuggestionRelatedCode[]
+}
+
+export interface EligibilityStrategyPlan {
+  headline: string
+  recommendedBusinessAngle: string
+  benefitPath: string
+  requiredProofs: string[]
+  riskNotes: string[]
+  nextActions: string[]
 }

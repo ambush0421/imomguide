@@ -11,6 +11,7 @@ import {
   MAGOK_INDUSTRIAL_RULES,
   matchIndustryRule,
 } from '@/features/eligibility/data/rules'
+import { getInformationIndustryClauseByCode } from '@/features/eligibility/data/regulatory-clause-resolver'
 import type {
   DirectoryZoneType,
   MagokCodeDirectoryEntry,
@@ -228,6 +229,15 @@ function buildIndustrialZoneVerdict(code: string): MagokDirectoryZoneVerdict {
   }
 
   const notes = [matchedRule.summary]
+  let reason = `${matchedRule.label} 허용 그룹에 포함되는 코드입니다.`
+
+  if (code.startsWith('582')) {
+    reason =
+      'KSIC상 58 출판업 하위의 582 소프트웨어 개발 및 공급업으로, 마곡 산업시설구역 IT 허용군에 포함되는 코드입니다.'
+    notes.unshift(
+      '게임·시스템·응용 소프트웨어 계열은 KSIC 체계상 58 출판업 아래에 놓이지만, 실질 업종은 582 소프트웨어 개발 및 공급업으로 보는 편이 정확합니다.',
+    )
+  }
 
   if (code.startsWith('70')) {
     notes.push(
@@ -237,7 +247,7 @@ function buildIndustrialZoneVerdict(code: string): MagokDirectoryZoneVerdict {
 
   return {
     verdict: 'eligible',
-    reason: `${matchedRule.label} 허용 그룹에 포함되는 코드입니다.`,
+    reason,
     legalBasisIds: matchedRule.legalBasisIds,
     notes,
   }
@@ -248,9 +258,22 @@ function buildKnowledgeZoneVerdict(
   categoryEntry: KnowledgeCenterCatalogEntry | undefined,
 ): MagokDirectoryZoneVerdict {
   const exactMatch = getKnowledgeCenterExactCodeMatch(code)
+  const informationClause = getInformationIndustryClauseByCode(code)
 
   if (exactMatch) {
     if (exactMatch.kind === 'allowed') {
+      if (informationClause) {
+        return {
+          verdict: 'eligible',
+          reason: `${informationClause.label}으로서 ${informationClause.articlePath}와 연결되는 5자리 코드입니다.`,
+          legalBasisIds: ['magokKnowledgeCenterExtra', informationClause.legalBasisId],
+          notes: [
+            exactMatch.entry.note ||
+              'KSIC 체계상 58 출판업 하위에 놓이더라도, 대표 법령 연결은 소프트웨어 개발 및 공급업 기준으로 보는 편이 정확합니다.',
+          ],
+        }
+      }
+
       return {
         verdict: 'eligible',
         reason: '지식산업센터 5자리 코드 기준에서 바로 허용되는 업종입니다.',
@@ -260,6 +283,19 @@ function buildKnowledgeZoneVerdict(
     }
 
     if (exactMatch.kind === 'reviewRequired') {
+      if (informationClause) {
+        return {
+          verdict: 'reviewRequired',
+          reason: `${informationClause.label} 범위이지만 지식산업센터에서 위원회 심의가 필요한 코드입니다.`,
+          legalBasisIds: [
+            'magokKnowledgeCenterExtra',
+            informationClause.legalBasisId,
+            'magokConvergenceReview',
+          ],
+          notes: [exactMatch.entry.note],
+        }
+      }
+
       return {
         verdict: 'reviewRequired',
         reason: '지식산업센터에서 위원회 심의가 필요한 코드입니다.',
@@ -398,6 +434,34 @@ export const MAGOK_CODE_DIRECTORY_CATEGORY_OPTIONS = [
 
 export function getMagokCodeDirectoryEntry(code: string) {
   return MAGOK_CODE_DIRECTORY_BY_CODE.get(code) ?? null
+}
+
+export function formatKsicHierarchyLabel(entry: Pick<
+  MagokCodeDirectoryEntry,
+  | 'sectionCode'
+  | 'sectionName'
+  | 'divisionCode'
+  | 'divisionName'
+  | 'groupCode'
+  | 'groupName'
+  | 'categoryCode'
+  | 'categoryName'
+  | 'code'
+  | 'name'
+>) {
+  return [
+    `${entry.sectionCode} ${entry.sectionName}`,
+    `${entry.divisionCode} ${entry.divisionName}`,
+    `${entry.groupCode} ${entry.groupName}`,
+    `${entry.categoryCode} ${entry.categoryName}`,
+    `${entry.code} ${entry.name}`,
+  ].join(' > ')
+}
+
+export function getKsicHierarchyLabelByCode(code: string) {
+  const entry = getMagokCodeDirectoryEntry(code)
+
+  return entry ? formatKsicHierarchyLabel(entry) : null
 }
 
 export function getDirectoryVerdictWeight(verdict: Verdict) {

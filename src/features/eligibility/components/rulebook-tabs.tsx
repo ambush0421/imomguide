@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { INFORMATION_INDUSTRY_REVIEW_ROWS } from '@/features/eligibility/data/information-industry-review-table'
 import { KNOWLEDGE_INDUSTRY_REVIEW_ROWS } from '@/features/eligibility/data/knowledge-industry-review-table'
 import {
   BLOCKING_SCENARIOS,
@@ -90,13 +91,52 @@ function Summary({
   countLabel: string
 }) {
   return (
-    <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(241,247,255,0.92)] p-4">
+    <div className="rounded-[24px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-elevated),var(--surface-overlay))] p-4 shadow-[var(--shadow-embedded)]">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="muted">{countLabel}</Badge>
         <div className="text-sm font-semibold text-[var(--foreground)]">{title}</div>
       </div>
       <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">{description}</p>
     </div>
+  )
+}
+
+function ClauseSection({
+  rows,
+  title,
+}: {
+  rows: typeof KNOWLEDGE_INDUSTRY_REVIEW_ROWS
+  title: string
+}) {
+  if (rows.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center gap-2">
+        <BookOpenText className="size-4 text-[var(--foreground-subtle)]" />
+        <h3 className="text-base font-semibold text-[var(--foreground)]">{title}</h3>
+      </div>
+      <div className="space-y-3">
+        {rows.map((row) => (
+          <article
+            key={row.articlePath}
+            className="rounded-[24px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-overlay))] p-5 shadow-[var(--shadow-embedded)]"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="muted">{row.clause}</Badge>
+              <Badge variant={getVerdictBadgeVariant(row.verdict)}>{row.verdict}</Badge>
+              <h4 className="text-lg font-semibold text-[var(--foreground)]">{row.label}</h4>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">{row.note}</p>
+            <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
+              현재 KSIC 대응: {row.ksic}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -124,7 +164,29 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
 
   const knowledgeRows = KNOWLEDGE_INDUSTRY_REVIEW_ROWS.filter((row) =>
     matchesText(
-      [row.clause, row.label, row.ksic, row.verdict, row.note, ...(row.searchTerms ?? [])],
+      [
+        row.clause,
+        row.articlePath,
+        row.label,
+        row.ksic,
+        row.verdict,
+        row.note,
+        ...(row.searchTerms ?? []),
+      ],
+      queries.knowledge,
+    ),
+  )
+  const informationRows = INFORMATION_INDUSTRY_REVIEW_ROWS.filter((row) =>
+    matchesText(
+      [
+        row.clause,
+        row.articlePath,
+        row.label,
+        row.ksic,
+        row.verdict,
+        row.note,
+        ...(row.searchTerms ?? []),
+      ],
       queries.knowledge,
     ),
   )
@@ -144,7 +206,7 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
   )
 
   return (
-    <Card className="bg-white/96">
+    <Card className="overflow-hidden">
       <CardHeader>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -200,7 +262,7 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
                 {industrialRules.map((rule) => (
                   <article
                     key={rule.id}
-                    className="rounded-[24px] border border-[var(--border)] bg-[rgba(249,251,255,0.96)] p-5"
+                    className="rounded-[24px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-overlay))] p-5 shadow-[var(--shadow-embedded)]"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge>{rule.group}</Badge>
@@ -227,11 +289,16 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
               onChange={(value) => setQuery('knowledge', value)}
             />
 
-            <div className="grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+            <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.82fr)]">
               <Summary
                 title="시행령 제6조제2항 1~27호 대응표"
                 description="지식산업센터에서 바로 가능한지, 더 확인이 필요한지 다시 볼 수 있습니다."
                 countLabel={`${formatRuleCount(KNOWLEDGE_INDUSTRY_REVIEW_ROWS.length)} 조문`}
+              />
+              <Summary
+                title="시행령 제6조제3항 1~5호 대응표"
+                description="소프트웨어, 호스팅, 데이터베이스, 전기통신업 같은 정보통신산업 조문을 따로 확인할 수 있습니다."
+                countLabel={`${formatRuleCount(INFORMATION_INDUSTRY_REVIEW_ROWS.length)} 조문`}
               />
               <Summary
                 title="지식산업센터 특례와 예외"
@@ -240,7 +307,9 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
               />
             </div>
 
-            {knowledgeRows.length === 0 && knowledgeExtraRules.length === 0 ? (
+            {knowledgeRows.length === 0 &&
+            informationRows.length === 0 &&
+            knowledgeExtraRules.length === 0 ? (
               <AsyncState
                 variant="empty"
                 title="일치하는 지식산업센터 기준을 찾지 못했습니다."
@@ -249,37 +318,21 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
               />
             ) : (
               <div className="space-y-4">
-                {knowledgeRows.length > 0 ? (
-                  <div className="space-y-3">
-                    {knowledgeRows.map((row) => (
-                      <article
-                        key={row.clause}
-                        className="rounded-[24px] border border-[var(--border)] bg-[rgba(249,251,255,0.96)] p-5"
-                      >
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="muted">{row.clause}</Badge>
-                          <Badge variant={getVerdictBadgeVariant(row.verdict)}>{row.verdict}</Badge>
-                          <h3 className="text-lg font-semibold text-[var(--foreground)]">
-                            {row.label}
-                          </h3>
-                        </div>
-                        <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                          {row.note}
-                        </p>
-                        <p className="mt-3 text-xs leading-5 text-[var(--foreground-subtle)]">
-                          현재 KSIC 대응: {row.ksic}
-                        </p>
-                      </article>
-                    ))}
-                  </div>
-                ) : null}
+                <ClauseSection
+                  rows={knowledgeRows}
+                  title="시행령 제6조제2항 1~27호 연결"
+                />
+                <ClauseSection
+                  rows={informationRows}
+                  title="시행령 제6조제3항 1~5호 연결"
+                />
 
                 {knowledgeExtraRules.length > 0 ? (
                   <div className="grid gap-3 lg:grid-cols-3">
                     {knowledgeExtraRules.map((rule) => (
                       <article
                         key={rule.id}
-                        className="rounded-[24px] border border-[var(--border)] bg-white p-5"
+                        className="rounded-[24px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-overlay))] p-5 shadow-[var(--shadow-embedded)]"
                       >
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge>{rule.group}</Badge>
@@ -338,7 +391,7 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
                   {reviewRules.map((scenario) => (
                     <article
                       key={scenario.id}
-                      className="rounded-[24px] border border-[var(--border)] bg-white p-5"
+                      className="rounded-[24px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-overlay))] p-5 shadow-[var(--shadow-embedded)]"
                     >
                       <h3 className="text-base font-semibold text-[var(--foreground)]">
                         {scenario.label}
@@ -374,19 +427,19 @@ export function RulebookTabs({ onOpenDirectory }: RulebookTabsProps) {
           </TabsContent>
         </Tabs>
 
-        <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(241,247,255,0.92)] p-5">
+        <div className="rounded-[24px] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-elevated),var(--surface-overlay))] p-5 shadow-[var(--shadow-embedded)]">
           <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
             <BookOpenText className="size-4 text-[var(--accent)]" />
             쉽게 보는 기준
           </div>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-overlay))] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-embedded)]">
               `산업시설구역`은 마곡 고시문에 적힌 허용 prefix 중심으로 먼저 봅니다.
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-overlay))] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-embedded)]">
               `지식산업센터`는 기본 허용 업종 + 시행령 연결 업종 + 마곡 예외를 함께 봅니다.
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)]">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--surface-strong),var(--surface-overlay))] px-4 py-3 text-sm leading-6 text-[var(--foreground-muted)] shadow-[var(--shadow-embedded)]">
               모든 코드를 전체로 찾고 싶다면 위 버튼으로 코드 사전을 여는 편이 가장 쉽습니다.
             </div>
           </div>

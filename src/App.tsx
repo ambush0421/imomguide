@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   BookOpenText,
@@ -44,6 +44,13 @@ const UpdateLogPage = lazy(() =>
 import { EligibilityForm } from '@/features/eligibility/components/eligibility-form'
 import { IndustryDiscoveryPanel } from '@/features/eligibility/components/industry-discovery-panel'
 import { ResultPanel } from '@/features/eligibility/components/result-panel'
+import {
+  clearFinderWizardDraft,
+  loadFinderWizardDraft,
+  saveFinderWizardDraft,
+  type FinderDiscoverScreen,
+  type FinderWizardMode,
+} from '@/features/eligibility/finder-wizard-storage'
 import { RulebookTabs } from '@/features/eligibility/components/rulebook-tabs'
 import {
   clearRecentEligibilityHistory,
@@ -88,8 +95,9 @@ import {
 import { trackEvent } from '@/utils/analytics'
 
 type AppView = 'home' | 'directory' | 'library' | 'updates' | 'guide'
-type DiscoverScreen = 'compose' | 'results'
+type DiscoverScreen = FinderDiscoverScreen
 type ViewportTier = 'mobile' | 'tablet' | 'desktop'
+type HistoryMode = 'push' | 'replace'
 
 const introSteps = [
   {
@@ -225,6 +233,10 @@ interface HashState {
   guideCode: string | null
   sectionId: string
   sharedState: SharedEligibilityState | null
+  mode: FinderWizardMode | null
+  step: EligibilityStep | null
+  discoverScreen: DiscoverScreen | null
+  hasExplicitFinderState: boolean
 }
 
 function getHashState(hash: string): HashState {
@@ -236,11 +248,24 @@ function getHashState(hash: string): HashState {
       guideCode: guideCode || null,
       sectionId: 'top',
       sharedState: null,
+      mode: null,
+      step: null,
+      discoverScreen: null,
+      hasExplicitFinderState: false,
     }
   }
 
   if (hash.startsWith('#directory')) {
-    return { view: 'directory', guideCode: null, sectionId: 'top', sharedState: null }
+    return {
+      view: 'directory',
+      guideCode: null,
+      sectionId: 'top',
+      sharedState: null,
+      mode: null,
+      step: null,
+      discoverScreen: null,
+      hasExplicitFinderState: false,
+    }
   }
 
   if (hash.startsWith('#library')) {
@@ -249,24 +274,89 @@ function getHashState(hash: string): HashState {
       guideCode: null,
       sectionId: hash.slice(1) || 'library',
       sharedState: null,
+      mode: null,
+      step: null,
+      discoverScreen: null,
+      hasExplicitFinderState: false,
     }
   }
 
   if (hash.startsWith('#updates')) {
-    return { view: 'updates', guideCode: null, sectionId: 'top', sharedState: null }
+    return {
+      view: 'updates',
+      guideCode: null,
+      sectionId: 'top',
+      sharedState: null,
+      mode: null,
+      step: null,
+      discoverScreen: null,
+      hasExplicitFinderState: false,
+    }
   }
 
   const normalizedHash = hash.startsWith('#') ? hash.slice(1) : hash
   const [sectionId = 'top', search = ''] = normalizedHash.split('?')
   const params = new URLSearchParams(search)
   const shareValue = params.get('share')
+  const modeValue = params.get('mode')
+  const stepValue = params.get('step')
+  const screenValue = params.get('screen')
+  const mode =
+    modeValue === 'overview' || modeValue === 'focus' ? modeValue : null
+  const step =
+    stepValue === 'discover' || stepValue === 'adjust' || stepValue === 'result'
+      ? stepValue
+      : null
+  const discoverScreen =
+    screenValue === 'compose' || screenValue === 'results' ? screenValue : null
 
   return {
     view: 'home',
     guideCode: null,
     sectionId: sectionId || 'top',
     sharedState: shareValue ? decodeSharedEligibilityState(shareValue) : null,
+    mode,
+    step,
+    discoverScreen,
+    hasExplicitFinderState:
+      modeValue !== null || stepValue !== null || screenValue !== null,
   }
+}
+
+function buildHomeHash({
+  sectionId,
+  mode,
+  step,
+  discoverScreen,
+}: {
+  sectionId: string
+  mode?: FinderWizardMode | null
+  step?: EligibilityStep | null
+  discoverScreen?: DiscoverScreen | null
+}) {
+  const normalizedSectionId = sectionId || 'top'
+
+  if (normalizedSectionId !== 'finder') {
+    return `#${normalizedSectionId}`
+  }
+
+  const params = new URLSearchParams()
+
+  if (mode) {
+    params.set('mode', mode)
+  }
+
+  if (mode === 'focus' && step) {
+    params.set('step', step)
+
+    if (step === 'discover' && discoverScreen) {
+      params.set('screen', discoverScreen)
+    }
+  }
+
+  const search = params.toString()
+
+  return search ? `#finder?${search}` : '#finder'
 }
 
 function scrollToSection(id: string) {
@@ -360,22 +450,25 @@ function HomeSections({
   discoveryStatus,
   discoveryError,
   currentStep,
+  discoverScreen,
+  isWizardFocused,
   setField,
   setFlag,
   setCompareZones,
   setAdditionalCodeField,
   addAdditionalCode,
   removeAdditionalCode,
-  setCurrentStep,
   setIndustryQuery,
   discoverIndustry,
   applyIndustrySuggestion,
   evaluate,
-  reset,
   onOpenDirectory,
   onOpenLibrary,
   onOpenUpdates,
   onOpenGuide,
+  onFinderStateChange,
+  onExitWizardFocus,
+  onResetFinder,
   onCopyShareLink,
   onCopyResultSummary,
   onPrintResult,
@@ -393,22 +486,30 @@ function HomeSections({
   discoveryStatus: ReturnType<typeof useEligibilityStore.getState>['discoveryStatus']
   discoveryError: ReturnType<typeof useEligibilityStore.getState>['discoveryError']
   currentStep: ReturnType<typeof useEligibilityStore.getState>['currentStep']
+  discoverScreen: DiscoverScreen
+  isWizardFocused: boolean
   setField: ReturnType<typeof useEligibilityStore.getState>['setField']
   setFlag: ReturnType<typeof useEligibilityStore.getState>['setFlag']
   setCompareZones: ReturnType<typeof useEligibilityStore.getState>['setCompareZones']
   setAdditionalCodeField: ReturnType<typeof useEligibilityStore.getState>['setAdditionalCodeField']
   addAdditionalCode: ReturnType<typeof useEligibilityStore.getState>['addAdditionalCode']
   removeAdditionalCode: ReturnType<typeof useEligibilityStore.getState>['removeAdditionalCode']
-  setCurrentStep: ReturnType<typeof useEligibilityStore.getState>['setCurrentStep']
   setIndustryQuery: ReturnType<typeof useEligibilityStore.getState>['setIndustryQuery']
   discoverIndustry: ReturnType<typeof useEligibilityStore.getState>['discoverIndustry']
   applyIndustrySuggestion: ReturnType<typeof useEligibilityStore.getState>['applyIndustrySuggestion']
   evaluate: ReturnType<typeof useEligibilityStore.getState>['evaluate']
-  reset: ReturnType<typeof useEligibilityStore.getState>['reset']
   onOpenDirectory: () => void
   onOpenLibrary: (targetId?: string) => void
   onOpenUpdates: () => void
   onOpenGuide: (code: string) => void
+  onFinderStateChange: (state: {
+    focus?: boolean
+    step?: EligibilityStep
+    discoverScreen?: DiscoverScreen
+    historyMode?: HistoryMode
+  }) => void
+  onExitWizardFocus: () => void
+  onResetFinder: () => void
   onCopyShareLink: () => Promise<void>
   onCopyResultSummary: () => Promise<void>
   onPrintResult: () => void
@@ -419,9 +520,7 @@ function HomeSections({
   const safeCurrentStep =
     currentStep === 'result' && !canStayOnResultStep ? 'adjust' : currentStep
   const [isAffiliateExpanded, setIsAffiliateExpanded] = useState(false)
-  const [discoverScreen, setDiscoverScreen] = useState<DiscoverScreen>('compose')
   const [viewportTier, setViewportTier] = useState<ViewportTier>('desktop')
-  const [isWizardFocused, setIsWizardFocused] = useState(false)
   const activeDiscoverScreen =
     discoveryStatus === 'idle' &&
     industrySuggestions.length === 0 &&
@@ -575,30 +674,38 @@ function HomeSections({
     scrollToSection('finder')
   }, [activeDiscoverScreen, isWizardFocused, safeCurrentStep])
 
-  function enterWizardFocus() {
-    setIsWizardFocused(true)
-  }
-
   function handleDiscoverSearch() {
     trackEvent('eligibility_search_submitted', {
       zone_type: input.zoneType,
       query_length: industryQuery.trim().length,
       compare_zones: compareZones,
     })
-    enterWizardFocus()
-    setDiscoverScreen('results')
+    onFinderStateChange({
+      focus: true,
+      step: 'discover',
+      discoverScreen: 'results',
+      historyMode: 'push',
+    })
     void discoverIndustry()
   }
 
   function handleBackToDiscoverSearch() {
-    setDiscoverScreen('compose')
+    onFinderStateChange({
+      focus: true,
+      step: 'discover',
+      discoverScreen: 'compose',
+      historyMode: 'push',
+    })
   }
 
   function handleWizardStepSelect(step: EligibilityStep) {
-    enterWizardFocus()
-
     if (step === 'discover') {
-      setCurrentStep('discover')
+      onFinderStateChange({
+        focus: true,
+        step: 'discover',
+        discoverScreen: 'compose',
+        historyMode: 'push',
+      })
       return
     }
 
@@ -607,7 +714,11 @@ function HomeSections({
         return
       }
 
-      setCurrentStep('adjust')
+      onFinderStateChange({
+        focus: true,
+        step: 'adjust',
+        historyMode: 'push',
+      })
       return
     }
 
@@ -615,7 +726,11 @@ function HomeSections({
       return
     }
 
-    setCurrentStep('result')
+    onFinderStateChange({
+      focus: true,
+      step: 'result',
+      historyMode: 'push',
+    })
   }
 
   function runQuickSearch(value: string) {
@@ -623,9 +738,13 @@ function HomeSections({
       zone_type: input.zoneType,
       query_length: value.trim().length,
     })
-    enterWizardFocus()
+    onFinderStateChange({
+      focus: true,
+      step: 'discover',
+      discoverScreen: 'results',
+      historyMode: 'push',
+    })
     setIndustryQuery(value)
-    setDiscoverScreen('results')
     void discoverIndustry()
   }
 
@@ -638,7 +757,11 @@ function HomeSections({
       match_kind: suggestion.matchKind,
       source: suggestion.source,
     })
-    enterWizardFocus()
+    onFinderStateChange({
+      focus: true,
+      step: 'adjust',
+      historyMode: 'push',
+    })
     void applyIndustrySuggestion(suggestion)
   }
 
@@ -650,7 +773,10 @@ function HomeSections({
       active_flag_count: activeFlagCount,
       regulatory_fit_manual: input.regulatoryFit !== 'auto',
     })
-    enterWizardFocus()
+    onFinderStateChange({
+      focus: true,
+      historyMode: 'push',
+    })
     void evaluate()
   }
 
@@ -659,13 +785,20 @@ function HomeSections({
       zone_type: input.zoneType,
       compare_zones: compareZones,
     })
-    enterWizardFocus()
-    setCurrentStep('adjust')
+    onFinderStateChange({
+      focus: true,
+      step: 'adjust',
+      historyMode: 'push',
+    })
   }
 
   function handleFinderEntry() {
-    setCurrentStep('discover')
-    setDiscoverScreen('compose')
+    onFinderStateChange({
+      focus: false,
+      step: 'discover',
+      discoverScreen: 'compose',
+      historyMode: 'replace',
+    })
     scrollToSection('hero-search')
     window.requestAnimationFrame(() => {
       const textarea = document.getElementById('hero-discovery-query')
@@ -677,8 +810,7 @@ function HomeSections({
   }
 
   function handleExitWizardFocus() {
-    setIsWizardFocused(false)
-    scrollToSection('top')
+    onExitWizardFocus()
   }
 
   return (
@@ -688,7 +820,7 @@ function HomeSections({
           <section className="space-y-4">
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1.03fr)_minmax(0,0.97fr)] xl:items-stretch">
               <div className="relative overflow-hidden rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] shadow-[var(--shadow-xl)] sm:rounded-[24px]">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top_left,rgba(31,94,255,0.15),transparent_72%)]" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[var(--hero-glow)]" />
                 <div className="relative flex h-full flex-col px-5 py-5 sm:px-7 sm:py-6 lg:px-8 lg:py-7">
                   <Badge className="w-fit">마곡 일반산업단지 전용</Badge>
                   <div className="mt-3 hidden flex-wrap gap-2 sm:flex">
@@ -767,7 +899,7 @@ function HomeSections({
                   <div className="space-y-3">
                     <Textarea
                       id="hero-discovery-query"
-                      className="min-h-24 bg-[var(--surface-strong)] text-base leading-7 shadow-[var(--shadow-sm)]"
+                      className="min-h-24 text-base leading-7"
                       value={industryQuery}
                       placeholder="예: 소프트웨어 개발 도급, 온라인 교육 플랫폼 운영, 프랜차이즈 카페 본사"
                       onChange={(event) => setIndustryQuery(event.target.value)}
@@ -962,7 +1094,7 @@ function HomeSections({
                           className={`inline-flex size-7 items-center justify-center rounded-[10px] text-[11px] font-semibold sm:size-9 sm:text-sm ${
                             isActive || isComplete
                               ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
-                              : 'bg-[rgba(124,136,155,0.18)] text-[var(--foreground-subtle)]'
+                              : 'bg-[var(--surface-capsule-muted)] text-[var(--foreground-subtle)]'
                           }`}
                         >
                           {isComplete ? (
@@ -1014,7 +1146,14 @@ function HomeSections({
                           <Button
                             variant="secondary"
                             size="sm"
-                            onClick={() => setCurrentStep('discover')}
+                            onClick={() =>
+                              onFinderStateChange({
+                                focus: true,
+                                step: 'discover',
+                                discoverScreen: 'compose',
+                                historyMode: 'push',
+                              })
+                            }
                             className="w-full whitespace-nowrap sm:w-auto sm:flex-none"
                           >
                             <span className="sm:hidden">처음으로</span>
@@ -1092,8 +1231,15 @@ function HomeSections({
                         onRemoveAdditionalCode={removeAdditionalCode}
                         onAdditionalCodeFieldChange={setAdditionalCodeField}
                         onEvaluate={handleEvaluateStep}
-                        onReset={reset}
-                        onPrevious={() => setCurrentStep('discover')}
+                        onReset={onResetFinder}
+                        onPrevious={() =>
+                          onFinderStateChange({
+                            focus: true,
+                            step: 'discover',
+                            discoverScreen: 'compose',
+                            historyMode: 'push',
+                          })
+                        }
                         primaryActionLabel={
                           compareZones ? '두 구역 비교 판정 보기' : '결과 보기'
                         }
@@ -1113,7 +1259,13 @@ function HomeSections({
                   status={status}
                   error={error}
                   onEvaluate={evaluate}
-                  onAdjust={() => setCurrentStep('adjust')}
+                  onAdjust={() =>
+                    onFinderStateChange({
+                      focus: true,
+                      step: 'adjust',
+                      historyMode: 'push',
+                    })
+                  }
                   onOpenGuide={onOpenGuide}
                   onCopyShareLink={onCopyShareLink}
                   onCopyResultSummary={onCopyResultSummary}
@@ -1170,7 +1322,7 @@ function HomeSections({
                           className={`inline-flex size-8 items-center justify-center rounded-[10px] text-sm font-semibold ${
                                     isActive || isComplete
                                       ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
-                                      : 'bg-[rgba(124,136,155,0.18)] text-[var(--foreground-subtle)]'
+                                      : 'bg-[var(--surface-capsule-muted)] text-[var(--foreground-subtle)]'
                                   }`}
                                 >
                                   {index + 1}
@@ -1664,14 +1816,24 @@ function App() {
     applyIndustrySuggestion,
     evaluate,
     loadSharedResult,
+    loadFinderDraft,
     reset,
   } = useEligibilityStore()
 
   const initialHashState = getHashState(window.location.hash)
   const [view, setView] = useState<AppView>(() => initialHashState.view)
   const [guideCode, setGuideCode] = useState<string | null>(() => initialHashState.guideCode)
+  const [homeSectionId, setHomeSectionId] = useState<string>(() =>
+    initialHashState.view === 'home' ? initialHashState.sectionId : 'top',
+  )
   const [libraryFocusTargetId, setLibraryFocusTargetId] = useState<string | null>(() =>
     initialHashState.view === 'library' ? initialHashState.sectionId : null,
+  )
+  const [discoverScreen, setDiscoverScreen] = useState<DiscoverScreen>('compose')
+  const [isWizardFocused, setIsWizardFocused] = useState(false)
+  const [isHashInitialized, setIsHashInitialized] = useState(false)
+  const [activeSharedFinderHash, setActiveSharedFinderHash] = useState<string | null>(
+    null,
   )
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -1679,32 +1841,192 @@ function App() {
     () => loadRecentEligibilityHistory(),
   )
   const lastTrackedResultKeyRef = useRef<string | null>(null)
+  const pendingFinderHistoryModeRef = useRef<HistoryMode>('replace')
+
+  const syncFromHash = useCallback(() => {
+    const nextHashState = getHashState(window.location.hash)
+
+    setView(nextHashState.view)
+    setGuideCode(nextHashState.guideCode)
+    setHomeSectionId(nextHashState.view === 'home' ? nextHashState.sectionId : 'top')
+    setLibraryFocusTargetId(
+      nextHashState.view === 'library' ? nextHashState.sectionId : null,
+    )
+
+    if (nextHashState.sharedState) {
+      loadSharedResult(nextHashState.sharedState)
+      setDiscoverScreen('results')
+      setIsWizardFocused(true)
+      setActiveSharedFinderHash(window.location.hash)
+    } else {
+      setActiveSharedFinderHash(null)
+
+      if (nextHashState.view === 'home' && nextHashState.sectionId === 'finder') {
+        const storedDraft =
+          nextHashState.mode === 'overview' ? null : loadFinderWizardDraft()
+
+        if (storedDraft) {
+          const nextStep = nextHashState.step ?? storedDraft.currentStep
+          const nextDiscoverScreen =
+            nextHashState.discoverScreen ??
+            (nextStep === 'discover' ? storedDraft.discoverScreen : 'results')
+          const nextFocus =
+            nextHashState.mode === 'focus' || nextHashState.hasExplicitFinderState
+              ? true
+              : storedDraft.isWizardFocused
+
+          loadFinderDraft({
+            input: storedDraft.input,
+            compareZones: storedDraft.compareZones,
+            additionalCodes: storedDraft.additionalCodes,
+            currentStep: nextStep,
+            industryQuery: storedDraft.industryQuery,
+          })
+          setDiscoverScreen(nextDiscoverScreen)
+          setIsWizardFocused(nextFocus)
+
+          if (
+            nextStep === 'discover' &&
+            nextDiscoverScreen === 'results' &&
+            storedDraft.industryQuery.trim()
+          ) {
+            void discoverIndustry()
+          }
+        } else if (nextHashState.mode === 'overview') {
+          setIsWizardFocused(false)
+          setDiscoverScreen('compose')
+          setCurrentStep('discover')
+        } else if (nextHashState.mode === 'focus' || nextHashState.hasExplicitFinderState) {
+          const nextStep = nextHashState.step ?? 'discover'
+          const nextDiscoverScreen =
+            nextHashState.discoverScreen ??
+            (nextStep === 'discover' ? 'compose' : 'results')
+
+          setIsWizardFocused(true)
+          setDiscoverScreen(nextStep === 'result' ? 'compose' : nextDiscoverScreen)
+          setCurrentStep(nextStep === 'result' ? 'discover' : nextStep)
+        } else {
+          setIsWizardFocused(false)
+          setDiscoverScreen('compose')
+          setCurrentStep('discover')
+        }
+      } else if (nextHashState.view === 'home') {
+        setIsWizardFocused(false)
+        setDiscoverScreen('compose')
+        setCurrentStep('discover')
+      }
+    }
+
+    if (nextHashState.view === 'home') {
+      scrollToSection(nextHashState.sectionId)
+    }
+
+    setIsHashInitialized(true)
+  }, [discoverIndustry, loadFinderDraft, loadSharedResult, setCurrentStep])
 
   useEffect(() => {
-    function syncFromHash() {
-      const nextHashState = getHashState(window.location.hash)
-      setView(nextHashState.view)
-      setGuideCode(nextHashState.guideCode)
-      setLibraryFocusTargetId(
-        nextHashState.view === 'library' ? nextHashState.sectionId : null,
-      )
-
-      if (nextHashState.sharedState) {
-        loadSharedResult(nextHashState.sharedState)
-      }
-
-      if (nextHashState.view === 'home') {
-        scrollToSection(nextHashState.sectionId)
-      }
-    }
-
-    syncFromHash()
+    const frameId = window.requestAnimationFrame(() => {
+      syncFromHash()
+    })
     window.addEventListener('hashchange', syncFromHash)
+    window.addEventListener('popstate', syncFromHash)
 
     return () => {
+      window.cancelAnimationFrame(frameId)
       window.removeEventListener('hashchange', syncFromHash)
+      window.removeEventListener('popstate', syncFromHash)
     }
-  }, [loadSharedResult])
+  }, [syncFromHash])
+
+  useEffect(() => {
+    if (!isHashInitialized || view !== 'home' || homeSectionId !== 'finder') {
+      pendingFinderHistoryModeRef.current = 'replace'
+      return
+    }
+
+    if (
+      activeSharedFinderHash &&
+      window.location.hash === activeSharedFinderHash &&
+      isWizardFocused &&
+      currentStep === 'result'
+    ) {
+      return
+    }
+
+    const nextHash = buildHomeHash({
+      sectionId: 'finder',
+      mode: isWizardFocused ? 'focus' : 'overview',
+      step: isWizardFocused ? currentStep : null,
+      discoverScreen:
+        isWizardFocused && currentStep === 'discover' ? discoverScreen : null,
+    })
+
+    if (window.location.hash === nextHash) {
+      pendingFinderHistoryModeRef.current = 'replace'
+      return
+    }
+
+    const historyMode = pendingFinderHistoryModeRef.current
+
+    if (historyMode === 'push') {
+      window.history.pushState(null, '', nextHash)
+    } else {
+      window.history.replaceState(null, '', nextHash)
+    }
+    pendingFinderHistoryModeRef.current = 'replace'
+  }, [
+    activeSharedFinderHash,
+    currentStep,
+    discoverScreen,
+    homeSectionId,
+    isHashInitialized,
+    isWizardFocused,
+    view,
+  ])
+
+  useEffect(() => {
+    if (!isHashInitialized) {
+      return
+    }
+
+    if (view !== 'home' || homeSectionId !== 'finder' || !isWizardFocused) {
+      return
+    }
+
+    const hasDraftContent =
+      Boolean(industryQuery.trim()) ||
+      Boolean(input.ksicCode.trim()) ||
+      Boolean(input.ksicName.trim()) ||
+      additionalCodes.some((item) => item.ksicCode.trim() || item.ksicName.trim()) ||
+      currentStep !== 'discover' ||
+      discoverScreen === 'results'
+
+    if (!hasDraftContent) {
+      clearFinderWizardDraft()
+      return
+    }
+
+    saveFinderWizardDraft({
+      input,
+      compareZones,
+      additionalCodes,
+      industryQuery,
+      currentStep,
+      discoverScreen,
+      isWizardFocused,
+    })
+  }, [
+    additionalCodes,
+    compareZones,
+    currentStep,
+    discoverScreen,
+    homeSectionId,
+    industryQuery,
+    input,
+    isHashInitialized,
+    isWizardFocused,
+    view,
+  ])
 
   useEffect(() => {
     if (status === 'loading') {
@@ -1752,6 +2074,64 @@ function App() {
     result,
     status,
   ])
+
+  function handleFinderStateChange({
+    focus,
+    step,
+    discoverScreen: nextDiscoverScreen,
+    historyMode = 'replace',
+  }: {
+    focus?: boolean
+    step?: EligibilityStep
+    discoverScreen?: DiscoverScreen
+    historyMode?: HistoryMode
+  }) {
+    pendingFinderHistoryModeRef.current = historyMode
+    setActiveSharedFinderHash(null)
+    setView('home')
+    setGuideCode(null)
+    setHomeSectionId('finder')
+
+    if (typeof focus === 'boolean') {
+      setIsWizardFocused(focus)
+    }
+
+    if (nextDiscoverScreen) {
+      setDiscoverScreen(nextDiscoverScreen)
+    }
+
+    if (step && step !== 'result') {
+      setCurrentStep(step)
+    }
+  }
+
+  function handleExitWizardFocus() {
+    clearFinderWizardDraft()
+    pendingFinderHistoryModeRef.current = 'replace'
+    setActiveSharedFinderHash(null)
+    setView('home')
+    setGuideCode(null)
+    setHomeSectionId('finder')
+    setIsHistoryOpen(false)
+    setIsWizardFocused(false)
+    setDiscoverScreen('compose')
+    setCurrentStep('discover')
+    scrollToSection('finder')
+  }
+
+  function handleResetFinder() {
+    clearFinderWizardDraft()
+    pendingFinderHistoryModeRef.current = 'replace'
+    setActiveSharedFinderHash(null)
+    setView('home')
+    setGuideCode(null)
+    setHomeSectionId('finder')
+    setIsHistoryOpen(false)
+    setIsWizardFocused(false)
+    setDiscoverScreen('compose')
+    reset()
+    scrollToSection('finder')
+  }
 
   async function handleCopyShareLink() {
     const shareUrl = `${window.location.origin}${window.location.pathname}${createSharedFinderHash(
@@ -1839,17 +2219,10 @@ function App() {
       additional_code_count: entry.additionalCodes.length,
       primary_verdict: entry.primaryVerdict,
     })
-    setView('home')
-    setGuideCode(null)
     setIsMobileMenuOpen(false)
     setIsHistoryOpen(false)
     window.history.replaceState(null, '', entry.shareHash)
-    loadSharedResult({
-      input: entry.input,
-      compareZones: entry.compareZones,
-      additionalCodes: entry.additionalCodes,
-    })
-    scrollToSection('finder')
+    syncFromHash()
   }
 
   function openDirectoryView() {
@@ -1896,6 +2269,17 @@ function App() {
     setView('home')
     setGuideCode(null)
     setIsHistoryOpen(false)
+    setHomeSectionId(sectionId)
+
+    if (sectionId === 'finder') {
+      window.history.replaceState(null, '', '#finder')
+      syncFromHash()
+      return
+    }
+
+    setIsWizardFocused(false)
+    setDiscoverScreen('compose')
+    setCurrentStep('discover')
     window.history.replaceState(null, '', `#${sectionId}`)
     scrollToSection(sectionId)
   }
@@ -1923,8 +2307,11 @@ function App() {
     setField('ksicName', entry.name)
     setField('regulatoryFit', 'auto')
     setFlag('isHosting63112', entry.code === '63112')
-    setCurrentStep('adjust')
-    openHomeView('finder')
+    handleFinderStateChange({
+      focus: true,
+      step: 'adjust',
+      historyMode: 'replace',
+    })
   }
 
   const activeZoneLabel = getZoneLabel(
@@ -1938,38 +2325,53 @@ function App() {
     <div className="min-h-screen overflow-x-hidden">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-[14px] focus:bg-[var(--accent)] focus:px-6 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-[14px] focus:bg-[var(--accent)] focus:px-6 focus:py-3 focus:text-sm focus:font-semibold focus:text-[var(--accent-foreground)] focus:shadow-[var(--shadow-button-primary)]"
       >
         본문으로 바로가기
       </a>
       <div className="mx-auto max-w-[1180px] px-3 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-6">
-        <header className="sticky top-3 z-20 rounded-[16px] border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-2.5 py-2.5 shadow-[var(--shadow-md)] sm:top-4 sm:rounded-[18px] sm:px-4 sm:py-3 sm:shadow-[var(--shadow-lg)] sm:backdrop-blur">
-          <div className="flex items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={() => openHomeView('top')}
-              className="min-w-0 flex items-center gap-3 text-left"
-              aria-label="마곡 코드찾기 홈으로"
-            >
-              <div className="inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px] ring-1 ring-[var(--border-accent)] shadow-[var(--shadow-accent)] sm:size-11">
-                <img
-                  src={brandAssets.symbol}
-                  alt=""
-                  aria-hidden="true"
-                  width="44"
-                  height="44"
-                  className="size-full object-cover"
-                />
-              </div>
-              <div className="min-w-0">
-                <div className="hidden truncate text-[11px] font-semibold tracking-[0.16em] text-[var(--foreground-subtle)] sm:block sm:text-xs">
-                  입주 업종코드 서비스
+        <header className="sticky top-3 z-20 rounded-[16px] border border-[var(--border-subtle)] bg-[var(--surface-header)] px-2.5 py-2.5 shadow-[var(--shadow-header)] backdrop-blur-xl sm:top-4 sm:rounded-[18px] sm:px-4 sm:py-3">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start justify-between gap-2 md:min-w-0 md:flex-1 md:items-center">
+              <button
+                type="button"
+                onClick={() => openHomeView('top')}
+                className="min-w-0 flex flex-1 items-center gap-3 pr-2 text-left md:flex-none md:pr-0"
+                aria-label="마곡 코드찾기 홈으로"
+              >
+                <div className="inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px] ring-1 ring-[var(--border-accent)] shadow-[var(--shadow-accent)] sm:size-11">
+                  <img
+                    src={brandAssets.symbol}
+                    alt=""
+                    aria-hidden="true"
+                    width="44"
+                    height="44"
+                    className="size-full object-cover"
+                  />
                 </div>
-                <div className="truncate text-base font-semibold text-[var(--foreground)] sm:text-base">
-                  마곡 코드찾기
+                <div className="min-w-0 flex-1">
+                  <div className="hidden truncate text-[11px] font-semibold tracking-[0.16em] text-[var(--foreground-subtle)] sm:block sm:text-xs">
+                    입주 업종코드 서비스
+                  </div>
+                  <div className="break-keep text-[15px] font-semibold leading-[1.15] text-[var(--foreground)] sm:truncate sm:text-base sm:leading-normal">
+                    마곡 코드찾기
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+              <button
+                type="button"
+                className="inline-flex size-10 shrink-0 items-center justify-center rounded-[14px] text-[var(--foreground-muted)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)] md:hidden"
+                onClick={() => {
+                  setIsHistoryOpen(false)
+                  setIsMobileMenuOpen((prev) => !prev)
+                }}
+                aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-nav-panel"
+              >
+                {isMobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              </button>
+            </div>
 
             <nav className="hidden items-center gap-1 md:flex">
               <Button
@@ -2035,39 +2437,26 @@ function App() {
               </Button>
             </div>
 
-            <div className="flex shrink-0 items-center gap-1.5 md:hidden">
+            <div className="flex items-center gap-1.5 md:hidden">
               <Button
                 variant={isHistoryOpen ? 'secondary' : 'ghost'}
                 size="sm"
                 onClick={handleToggleHistory}
                 aria-label="최근 조회 목록 열기"
-                className="h-10 min-h-10 shrink-0 px-3"
+                className="h-10 min-h-10 min-w-0 flex-1 justify-center px-2.5"
               >
                 <Clock3 className="size-4" />
-                <span>최근</span>
+                <span className="whitespace-nowrap">최근</span>
               </Button>
               <Button
                 size="sm"
                 onClick={() => (view === 'home' ? openDirectoryView() : openHomeView('finder'))}
                 aria-label={view === 'home' ? '코드 사전 보기' : '검색 홈으로'}
-                className="h-10 min-h-10 shrink-0 px-3"
+                className="h-10 min-h-10 min-w-0 flex-1 justify-center px-2.5"
               >
-                <span>{view === 'home' ? '사전 보기' : '검색'}</span>
-                <ArrowRight className="size-4" />
+                <span className="whitespace-nowrap">{view === 'home' ? '사전 보기' : '검색'}</span>
+                <ArrowRight className="size-4 shrink-0" />
               </Button>
-              <button
-                type="button"
-                className="inline-flex size-10 items-center justify-center rounded-[14px] text-[var(--foreground-muted)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]"
-                onClick={() => {
-                  setIsHistoryOpen(false)
-                  setIsMobileMenuOpen((prev) => !prev)
-                }}
-                aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
-                aria-expanded={isMobileMenuOpen}
-                aria-controls="mobile-nav-panel"
-              >
-                {isMobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-              </button>
             </div>
           </div>
 
@@ -2256,22 +2645,25 @@ function App() {
               discoveryStatus={discoveryStatus}
               discoveryError={discoveryError}
               currentStep={currentStep}
+              discoverScreen={discoverScreen}
+              isWizardFocused={isWizardFocused}
               setField={setField}
               setFlag={setFlag}
               setCompareZones={setCompareZones}
               setAdditionalCodeField={setAdditionalCodeField}
               addAdditionalCode={addAdditionalCode}
               removeAdditionalCode={removeAdditionalCode}
-              setCurrentStep={setCurrentStep}
               setIndustryQuery={setIndustryQuery}
               discoverIndustry={discoverIndustry}
               applyIndustrySuggestion={applyIndustrySuggestion}
               evaluate={evaluate}
-              reset={reset}
               onOpenDirectory={openDirectoryView}
               onOpenLibrary={openLibraryView}
               onOpenUpdates={openUpdatesView}
               onOpenGuide={openGuideView}
+              onFinderStateChange={handleFinderStateChange}
+              onExitWizardFocus={handleExitWizardFocus}
+              onResetFinder={handleResetFinder}
               onCopyShareLink={handleCopyShareLink}
               onCopyResultSummary={handleCopyResultSummary}
               onPrintResult={handlePrintResult}

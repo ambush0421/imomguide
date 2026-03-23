@@ -3,6 +3,8 @@ import {
   getKnowledgeCenterExactCodeMatch,
 } from '@/features/eligibility/data/knowledge-center-exact-codes'
 import { KNOWLEDGE_INDUSTRY_REVIEW_ROWS } from '@/features/eligibility/data/knowledge-industry-review-table'
+import { getKsicHierarchyLabelByCode } from '@/features/eligibility/data/magok-code-directory'
+import { getPrimaryRegulatoryClauseByCode } from '@/features/eligibility/data/regulatory-clause-resolver'
 import {
   KNOWLEDGE_CENTER_EXTRA_RULES,
   MAGOK_INDUSTRIAL_RULES,
@@ -67,110 +69,6 @@ function getManualClause(regulatoryFit: RegulatoryFit) {
   return null
 }
 
-function getClauseByCode(normalizedCode: string) {
-  if (!normalizedCode) {
-    return null
-  }
-
-  if (normalizedCode.startsWith('70')) {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[0]
-  }
-
-  if (normalizedCode.startsWith('72')) {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[3]
-  }
-
-  if (normalizedCode === '71392') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[4]
-  }
-
-  if (normalizedCode.startsWith('5911')) {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[5]
-  }
-
-  if (normalizedCode.startsWith('58')) {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[6]
-  }
-
-  if (normalizedCode.startsWith('7320')) {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[7]
-  }
-
-  if (normalizedCode === '75994') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[8]
-  }
-
-  if (normalizedCode.startsWith('85')) {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[9]
-  }
-
-  if (normalizedCode === '71531') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[10]
-  }
-
-  if (normalizedCode === '73902') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[11]
-  }
-
-  if (normalizedCode === '75992') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[12]
-  }
-
-  if (normalizedCode.startsWith('3900')) {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[13]
-  }
-
-  if (normalizedCode === '59120') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[14]
-  }
-
-  if (normalizedCode === '59201') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[15]
-  }
-
-  if (normalizedCode === '71400') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[16]
-  }
-
-  if (normalizedCode === '73903') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[17]
-  }
-
-  if (normalizedCode === '73904') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[18]
-  }
-
-  if (normalizedCode === '76400') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[19]
-  }
-
-  if (normalizedCode === '71310') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[20]
-  }
-
-  if (normalizedCode === '71391') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[21]
-  }
-
-  if (normalizedCode === '74100') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[22]
-  }
-
-  if (normalizedCode === '75320') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[23]
-  }
-
-  if (normalizedCode === '75991') {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[24]
-  }
-
-  if (['73901', '73905', '73909'].includes(normalizedCode)) {
-    return KNOWLEDGE_INDUSTRY_REVIEW_ROWS[26]
-  }
-
-  return null
-}
-
 function unique(values: string[]) {
   return [...new Set(values.filter(Boolean))]
 }
@@ -185,7 +83,8 @@ export function getEligibilityScreenInsight(
   if (input.zoneType === 'knowledgeIndustryCenter') {
     const exactMatch = getKnowledgeCenterExactCodeMatch(normalizedCode)
     const uncertainMatch = getKnowledgeCenterCodeOnlyUncertainMatch(normalizedCode)
-    const clause = getManualClause(input.regulatoryFit) ?? getClauseByCode(normalizedCode)
+    const clause =
+      getManualClause(input.regulatoryFit) ?? getPrimaryRegulatoryClauseByCode(normalizedCode)
     const knowledgeRule = matchIndustryRule(KNOWLEDGE_CENTER_EXTRA_RULES, normalizedCode)
     const industrialRule = matchIndustryRule(MAGOK_INDUSTRIAL_RULES, normalizedCode)
 
@@ -215,22 +114,27 @@ export function getEligibilityScreenInsight(
 
       if (exactMatch.kind === 'allowed') {
         title = '선택한 업종은 5자리 업종코드와 일치합니다.'
+        bullets.push('상담에서는 실제 서비스와 산출물을 이 5자리 코드 표현에 맞춰 구체적으로 설명하는 편이 좋습니다.')
       }
 
       if (exactMatch.kind === 'reviewRequired') {
         title = '선택한 업종은 위원회 심의 여부를 함께 봐야 합니다.'
+        bullets.push('심의 대상이면 운영 구조, 인력, 공간 사용 계획까지 같이 설명해야 판단이 빨라집니다.')
       }
 
       if (exactMatch.kind === 'conditional') {
         title = '선택한 업종은 단독 등록 여부까지 같이 봐야 합니다.'
+        bullets.push('조건부 업종은 단독 등록인지, 다른 허용 업종과 함께 영위하는지 분리해 설명하는 편이 안전합니다.')
       }
 
       if (exactMatch.kind === 'additionalCheck') {
         title = '선택한 업종은 코드만으로 확정하지 않고 추가 확인이 필요합니다.'
+        bullets.push('코드가 비슷해 보여도 실제 영위 업무와 증빙이 맞지 않으면 다른 세분류로 해석될 수 있습니다.')
       }
 
       if (exactMatch.kind === 'blocked') {
         title = '선택한 업종은 마곡 지식산업센터 기준에서 바로 제한됩니다.'
+        bullets.push('실제 영위 중인 다른 허용 업종이 있다면 그 코드와 증빙을 다시 확인하는 쪽이 더 현실적입니다.')
       }
     } else if (uncertainMatch) {
       fields.push({ label: '판정 기준', value: '코드만으로 확정 불가' })
@@ -242,15 +146,20 @@ export function getEligibilityScreenInsight(
     } else if (knowledgeRule) {
       fields.push({ label: '판정 기준', value: '지식산업센터 특례 코드' })
       bullets.push(knowledgeRule.summary)
+      bullets.push('특례 업종은 코드명보다 실제 사업 구조와 입주 목적을 함께 설명해야 설득력이 생깁니다.')
       title = '선택한 업종은 지식산업센터 특례 업종으로 화면에 반영됩니다.'
     } else if (industrialRule) {
       fields.push({ label: '판정 기준', value: '산업시설구역 기본업종 연동' })
       bullets.push(industrialRule.summary)
+      bullets.push('산업시설구역에서는 연구개발, 설계, 기술사업화 포인트를 함께 보여주는 편이 유리합니다.')
     }
 
     if (clause) {
-      fields.push({ label: '연결 조문', value: `${clause.clause} · ${clause.label}` })
-      fields.push({ label: '현재 KSIC 대응', value: clause.ksic })
+      fields.push({ label: '연결 조문', value: `${clause.articlePath} · ${clause.label}` })
+      fields.push({
+        label: '현재 KSIC 대응',
+        value: getKsicHierarchyLabelByCode(normalizedCode) ?? clause.ksic,
+      })
       bullets.push(clause.note)
     }
 
@@ -306,9 +215,11 @@ export function getEligibilityScreenInsight(
       fields.push({ label: '매칭 그룹', value: `${industrialRule.group} · ${industrialRule.label}` })
       fields.push({ label: '적용 prefix', value: industrialRule.prefixes.join(', ') })
       bullets.push(industrialRule.summary)
+      bullets.push('사업계획서에서는 업종명보다 연구개발 목적과 산업단지 기여도를 먼저 설명하는 편이 좋습니다.')
     } else {
       fields.push({ label: '매칭 상태', value: '기본 허용표 미매칭' })
       bullets.push('현재 입력 코드가 산업시설구역 기본 허용 prefix와 직접 매칭되지는 않았습니다.')
+      bullets.push('실제 수행 업무가 더 잘 드러나는 세분류 코드나 대체 구역 검토가 필요한지 같이 보세요.')
       title = '선택한 업종은 산업시설구역 기본 허용표와 바로 맞지 않습니다.'
     }
 

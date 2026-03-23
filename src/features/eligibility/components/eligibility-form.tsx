@@ -299,8 +299,8 @@ export function EligibilityForm({
     <Card
       className={
         embedded
-          ? 'overflow-visible rounded-none border-0 bg-transparent shadow-none'
-          : 'overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-md)]'
+          ? 'overflow-visible rounded-none border-0 bg-transparent shadow-none before:hidden after:hidden'
+          : 'overflow-hidden'
       }
     >
       <CardHeader className={embedded ? 'hidden' : 'relative'}>

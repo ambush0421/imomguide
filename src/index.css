@@ -45,13 +45,25 @@
   --surface-muted: #f3f5f8;
   --surface-soft: #fafbfc;
   --surface-neutral: #f7f9fc;
+  --surface-elevated: rgba(255, 255, 255, 0.78);
+  --surface-glass: rgba(255, 255, 255, 0.68);
+  --surface-overlay: rgba(247, 249, 252, 0.92);
+  --surface-popover: rgba(250, 252, 255, 0.86);
+  --surface-header: rgba(255, 255, 255, 0.9);
+  --surface-tint: rgba(31, 94, 255, 0.08);
+  --surface-accent-glass: rgba(31, 94, 255, 0.16);
+  --surface-capsule-muted: rgba(124, 136, 155, 0.18);
   --foreground: #141c2b;
   --foreground-muted: #4a5568;
   --foreground-subtle: #788396;
   --border: rgba(20, 28, 43, 0.12);
   --border-neutral: #d8e1ed;
+  --border-subtle: rgba(20, 28, 43, 0.08);
+  --border-strong: rgba(20, 28, 43, 0.16);
   --ring: rgba(31, 94, 255, 0.24);
   --accent: #1f5eff;
+  --accent-elevated: #4b80ff;
+  --accent-deep: #1847c7;
   --accent-strong: #1f5eff;
   --accent-soft: rgba(31, 94, 255, 0.07);
   --accent-foreground: #ffffff;
@@ -75,6 +87,9 @@
   --border-accent: rgba(31, 94, 255, 0.18);
   --border-accent-strong: rgba(31, 94, 255, 0.28);
   --border-soft: rgba(20, 28, 43, 0.09);
+  --border-highlight: rgba(255, 255, 255, 0.68);
+  --highlight-soft: rgba(255, 255, 255, 0.82);
+  --highlight-accent: rgba(255, 255, 255, 0.38);
 
   /* Status dot colors */
   --dot-success: #059669;
@@ -90,6 +105,9 @@
   --radius-2xl: 32px;
   --radius-3xl: 38px;
   --radius-full: 9999px;
+  --radius-card: 30px;
+  --radius-panel: 26px;
+  --radius-field: 18px;
 
   /* Shadow scale */
   --shadow-sm: 0 10px 20px rgba(15, 23, 42, 0.04);
@@ -97,6 +115,67 @@
   --shadow-lg: 0 24px 48px rgba(15, 23, 42, 0.08);
   --shadow-xl: 0 30px 60px rgba(15, 23, 42, 0.1);
   --shadow-accent: 0 20px 36px rgba(24, 63, 199, 0.18);
+  --shadow-floating:
+    0 1px 0 rgba(255, 255, 255, 0.76),
+    0 18px 34px rgba(15, 23, 42, 0.06),
+    0 34px 90px rgba(15, 23, 42, 0.12);
+  --shadow-floating-strong:
+    0 1px 0 rgba(255, 255, 255, 0.82),
+    0 24px 44px rgba(15, 23, 42, 0.1),
+    0 42px 110px rgba(15, 23, 42, 0.16);
+  --shadow-embedded:
+    inset 0 1px 0 var(--highlight-soft),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.14),
+    0 10px 22px rgba(15, 23, 42, 0.08);
+  --shadow-pill:
+    0 1px 0 rgba(255, 255, 255, 0.82),
+    0 10px 22px rgba(15, 23, 42, 0.08),
+    0 18px 38px rgba(15, 23, 42, 0.12);
+  --shadow-field:
+    inset 0 1px 0 var(--highlight-soft),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.42),
+    0 14px 26px rgba(15, 23, 42, 0.08);
+  --shadow-field-focus:
+    inset 0 1px 0 var(--highlight-soft),
+    0 0 0 1px var(--border-accent-strong),
+    0 0 0 4px var(--ring),
+    0 20px 36px rgba(24, 63, 199, 0.14);
+  --shadow-field-danger:
+    inset 0 1px 0 var(--highlight-soft),
+    0 0 0 1px var(--danger-border),
+    0 0 0 4px rgba(225, 29, 72, 0.12),
+    0 20px 36px rgba(139, 54, 80, 0.14);
+  --shadow-toggle-track:
+    inset 0 1px 0 var(--highlight-soft),
+    0 10px 24px rgba(24, 63, 199, 0.18);
+  --shadow-toggle-thumb:
+    0 1px 0 rgba(255, 255, 255, 0.9),
+    0 8px 18px rgba(15, 23, 42, 0.14),
+    0 18px 34px rgba(15, 23, 42, 0.12);
+  --shadow-button-primary:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 16px 30px rgba(24, 63, 199, 0.26),
+    0 28px 56px rgba(24, 63, 199, 0.18);
+  --shadow-button-primary-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    0 20px 34px rgba(24, 63, 199, 0.3),
+    0 36px 64px rgba(24, 63, 199, 0.2);
+  --shadow-button-secondary:
+    inset 0 1px 0 var(--highlight-soft),
+    0 12px 24px rgba(15, 23, 42, 0.08),
+    0 24px 48px rgba(15, 23, 42, 0.08);
+  --shadow-header:
+    0 1px 0 rgba(255, 255, 255, 0.8),
+    0 16px 34px rgba(15, 23, 42, 0.08),
+    0 30px 68px rgba(15, 23, 42, 0.12);
+  --hero-glow: radial-gradient(
+    circle at top left,
+    rgba(31, 94, 255, 0.15),
+    transparent 72%
+  );
+  --field-height: 52px;
+  --motion-snappy: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @layer base {
@@ -160,6 +239,7 @@
   --font-display: var(--font-heading);
   --animate-shimmer: shimmer 2s infinite;
   --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-pulse-organic: pulse-organic 1.9s ease-in-out infinite;
   --animate-slide-down: slide-down 0.2s ease-out;
 }
 
@@ -177,6 +257,27 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes pulse-organic {
+  0%,
+  100% {
+    opacity: 0.56;
+    transform: scale(1);
+    filter: saturate(0.94);
+  }
+
+  40% {
+    opacity: 0.9;
+    transform: scale(0.985);
+    filter: saturate(1.04);
+  }
+
+  72% {
+    opacity: 0.74;
+    transform: scale(0.995);
+    filter: saturate(0.98);
   }
 }
 

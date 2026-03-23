@@ -11,6 +11,7 @@ import {
 } from '@/features/eligibility/history-storage'
 import {
   defaultSharedEligibilityInput,
+  normalizeSharedEligibilityInput,
   type SharedEligibilityState,
 } from '@/features/eligibility/share-result'
 import type {
@@ -63,6 +64,13 @@ interface EligibilityStore {
   applyIndustrySuggestion: (suggestion: IndustrySuggestion) => Promise<void>
   evaluate: () => Promise<void>
   loadSharedResult: (state: SharedEligibilityState) => void
+  loadFinderDraft: (draft: {
+    input: EligibilityInput
+    compareZones: boolean
+    additionalCodes: EligibilityAdditionalCode[]
+    currentStep: EligibilityStep
+    industryQuery: string
+  }) => void
   reset: () => void
 }
 
@@ -528,6 +536,72 @@ export const useEligibilityStore = create<EligibilityStore>((set, get) => ({
         result,
       }),
     )
+  },
+  loadFinderDraft: ({
+    input,
+    compareZones,
+    additionalCodes,
+    currentStep,
+    industryQuery,
+  }) => {
+    const normalizedInput = normalizeSharedEligibilityInput(input)
+    const nextInput: EligibilityInput = {
+      ...defaultInput,
+      ...normalizedInput,
+      zoneType:
+        compareZones && normalizedInput.zoneType === 'supportFacility'
+          ? 'knowledgeIndustryCenter'
+          : normalizedInput.zoneType,
+      flags: {
+        ...defaultInput.flags,
+        ...normalizedInput.flags,
+      },
+    }
+    const nextAdditionalCodes = normalizeAdditionalCodes(additionalCodes)
+
+    if (
+      currentStep === 'result' &&
+      (nextInput.ksicCode.trim() || nextInput.ksicName.trim())
+    ) {
+      const { result, comparisonResults, multiCodeResults } = buildCodeEvaluations(
+        nextInput,
+        nextAdditionalCodes,
+        compareZones,
+      )
+
+      set({
+        input: nextInput,
+        result,
+        additionalCodes: nextAdditionalCodes,
+        multiCodeResults,
+        compareZones,
+        comparisonResults,
+        status: 'ready',
+        error: null,
+        industryQuery,
+        industrySuggestions: [],
+        discoveryStatus: 'idle',
+        discoveryError: null,
+        currentStep: 'result',
+      })
+      return
+    }
+
+    set({
+      input: nextInput,
+      result: null,
+      additionalCodes: nextAdditionalCodes,
+      multiCodeResults: null,
+      compareZones,
+      comparisonResults: null,
+      status: 'idle',
+      error: null,
+      industryQuery,
+      industrySuggestions: [],
+      discoveryStatus: 'idle',
+      discoveryError: null,
+      currentStep: currentStep === 'result' ? 'adjust' : currentStep,
+    })
   },
   reset: () =>
     set({

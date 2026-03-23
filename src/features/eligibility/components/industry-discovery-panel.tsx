@@ -211,6 +211,37 @@ function matchesSuggestionFilter(
   return true
 }
 
+function SuggestionChecklist({
+  title,
+  items,
+  tone = 'neutral',
+}: {
+  title: string
+  items: string[]
+  tone?: 'neutral' | 'warning'
+}) {
+  if (!items.length) {
+    return null
+  }
+
+  return (
+    <div
+      className={
+        tone === 'warning'
+          ? 'rounded-[20px] border border-[var(--warning-border)] bg-[var(--warning-bg)] p-4 shadow-[var(--shadow-sm)]'
+          : 'rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]'
+      }
+    >
+      <div className="text-sm font-semibold text-[var(--foreground)]">{title}</div>
+      <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--foreground-muted)]">
+        {items.map((item) => (
+          <li key={`${title}-${item}`}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function SuggestionCard({
   input,
   group,
@@ -225,6 +256,10 @@ function SuggestionCard({
   onSelect: (suggestion: IndustrySuggestion) => void
 }) {
   const headlineReason = suggestion.recommendationReason ?? suggestion.reason
+  const relatedCodes = suggestion.relatedCodes ?? []
+  const requiredProofs = suggestion.requiredProofs ?? []
+  const riskNotes = suggestion.riskNotes ?? []
+  const nextActions = suggestion.nextActions ?? []
 
   return (
     <article
@@ -248,6 +283,38 @@ function SuggestionCard({
         {headlineReason}
       </p>
 
+      {suggestion.fitSummary || suggestion.recommendedBusinessAngle ? (
+        <div className="mt-4 grid gap-3 xl:grid-cols-2">
+          {suggestion.fitSummary ? (
+            <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
+              <div className="text-sm font-semibold text-[var(--foreground)]">
+                이 코드가 유력한 이유
+              </div>
+              <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                {suggestion.fitSummary}
+              </p>
+            </div>
+          ) : null}
+          {suggestion.benefitSummary || suggestion.recommendedBusinessAngle ? (
+            <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]">
+              <div className="text-sm font-semibold text-[var(--foreground)]">
+                입주 전략 포인트
+              </div>
+              {suggestion.benefitSummary ? (
+                <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                  {suggestion.benefitSummary}
+                </p>
+              ) : null}
+              {suggestion.recommendedBusinessAngle ? (
+                <p className="mt-2 text-sm leading-6 text-[var(--foreground-subtle)]">
+                  설명 포인트: {suggestion.recommendedBusinessAngle}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {suggestion.reason !== headlineReason ? (
         <p className="mt-3 hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3.5 py-3 text-xs leading-6 text-[var(--foreground-subtle)] sm:block">
           추천 근거: {suggestion.reason}
@@ -258,6 +325,43 @@ function SuggestionCard({
         <p className="mt-2 hidden text-xs leading-5 text-[var(--foreground-subtle)] sm:block">
           참고: {suggestion.catalogNote}
         </p>
+      ) : null}
+
+      {relatedCodes.length > 0 ? (
+        <section className="mt-4 rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="muted">함께 검토할 연관 코드</Badge>
+          </div>
+          <div className="mt-3 grid gap-3">
+            {relatedCodes.map((relatedCode) => (
+              <div
+                key={`${suggestion.code}-${relatedCode.code}`}
+                className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-3.5"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="muted">{relatedCode.code}</Badge>
+                  <div className="text-sm font-semibold text-[var(--foreground)]">
+                    {relatedCode.name}
+                  </div>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                  {relatedCode.reason}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {requiredProofs.length > 0 || riskNotes.length > 0 ? (
+        <div className="mt-4 grid gap-3 xl:grid-cols-2">
+          <SuggestionChecklist title="이렇게 준비하면 좋습니다" items={requiredProofs} />
+          <SuggestionChecklist title="주의사항" items={riskNotes} tone="warning" />
+        </div>
+      ) : null}
+
+      {nextActions.length > 0 ? (
+        <SuggestionChecklist title="추천 다음 행동" items={nextActions} />
       ) : null}
 
       <div className="mt-5">
@@ -354,8 +458,8 @@ export function IndustryDiscoveryPanel({
       <Card
         className={
           embedded
-            ? 'overflow-visible rounded-none border-0 bg-transparent shadow-none'
-            : 'overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-md)]'
+            ? 'overflow-visible rounded-none border-0 bg-transparent shadow-none before:hidden after:hidden'
+            : 'overflow-hidden'
         }
       >
         <CardHeader className={embedded ? 'hidden' : undefined}>
@@ -395,7 +499,7 @@ export function IndustryDiscoveryPanel({
                 </div>
 
                 <Textarea
-                  className="mt-5 min-h-24 bg-[var(--surface-strong)] text-base leading-7 shadow-[var(--shadow-sm)] sm:min-h-28 sm:text-[15px] sm:leading-7"
+                  className="mt-5 min-h-24 text-base leading-7 sm:min-h-28 sm:text-[15px] sm:leading-7"
                   value={query}
                   placeholder="예: 소프트웨어 개발 도급, 온라인 교육 플랫폼 운영, 프랜차이즈 카페 본사"
                   onChange={(event) => onQueryChange(event.target.value)}
@@ -509,8 +613,8 @@ export function IndustryDiscoveryPanel({
     <Card
       className={
         embedded
-          ? 'overflow-visible rounded-none border-0 bg-transparent shadow-none'
-          : 'overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-md)]'
+          ? 'overflow-visible rounded-none border-0 bg-transparent shadow-none before:hidden after:hidden'
+          : 'overflow-hidden'
       }
     >
       <CardHeader className={embedded ? 'space-y-4 px-0 pt-0 pb-0 sm:space-y-5' : 'space-y-5'}>
@@ -643,10 +747,10 @@ export function IndustryDiscoveryPanel({
         {status === 'ready' && suggestions.length > 0 ? (
           <div className="space-y-6">
             <div className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] px-4 py-3.5 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:py-4 sm:text-sm sm:leading-6">
-              추천 결과를 현재 구역 기준으로 다시 묶었습니다. 먼저 볼 코드부터 확인하고,
-              애매한 후보는 함께 확인할 코드와 주의해서 볼 코드에서 이유를 비교해 보세요.
-              빠르게 좁혀보고 싶으면 아래 필터에서 현재 구역 기준 가능한 후보만 먼저 볼
-              수도 있습니다.
+              추천 결과를 현재 구역 기준으로 다시 묶었습니다. 이제는 코드 이름만 보지 말고
+              왜 이 코드가 유력한지, 함께 검토할 연관 코드는 무엇인지, 어떤 증빙을 준비해야
+              하는지까지 한 카드에서 같이 읽어 보세요. 빠르게 좁혀보고 싶으면 아래 필터에서
+              현재 구역 기준 가능한 후보만 먼저 볼 수도 있습니다.
             </div>
 
             <section className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3.5 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:px-5 sm:py-4">

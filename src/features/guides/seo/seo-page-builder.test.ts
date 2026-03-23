@@ -42,6 +42,15 @@ describe('seo-page-builder', () => {
     expect(document.html).toContain('"@type":"FAQPage"')
   })
 
+  it('58211 가이드 공개 페이지는 제6조 제3항 근거를 포함한다', () => {
+    const guide = MAGOK_GUIDE_CATALOG.find((entry) => entry.code === '58211')!
+    const document = buildGuideSeoDocument(guide)
+
+    expect(document.filePath).toBe('guides/58211/index.html')
+    expect(document.html).toContain('산업집적법 시행령 제6조 제3항')
+    expect(document.html).toContain('유선 온라인 게임 소프트웨어 개발 및 공급업')
+  })
+
   it('가이드 색인과 사이트맵 XML을 만들 수 있다', () => {
     const guideIndex = buildGuideIndexSeoDocument(MAGOK_GUIDE_CATALOG.slice(0, 2))
     const sitemap = buildSitemapXml([
