@@ -5706,3 +5706,73 @@ npm run test
 
 - 데스크톱에서 히어로 문장이 카드 폭에 맞춰 자연스럽게 접히도록 복원돼, 문장 끝이 잘려 보이던 문제가 해소됐다.
 - 카피나 레이아웃 구조를 다시 흔들지 않고, 최소 수정으로 첫 화면 가독성을 바로 회복했다.
+
+---
+
+## 2026-03-23 App.tsx 파싱 복구 및 Header 빌드 정리
+
+### 작업 배경
+
+- 사용 중이던 [src/App.tsx](C:/projects/magok/src/App.tsx)가 열리지 않는 증상이 있어 확인해 보니, dev 서버에서 문자열 파싱 에러가 발생한 이력이 남아 있었다.
+- 사용자가 보관한 [src/App.tsx.backup](C:/projects/magok/src/App.tsx.backup)을 기준으로 현재 파일 상태를 점검했고, 복구 이후에는 `App.tsx` 자체 파싱은 정상으로 확인됐다.
+- 다만 production build는 [src/components/layout/Header.tsx](C:/projects/magok/src/components/layout/Header.tsx)의 unused import/prop 때문에 별도로 막히고 있었다.
+
+### 반영 내용
+
+- [src/App.tsx](C:/projects/magok/src/App.tsx)
+  - 백업본 기준으로 복구된 상태를 확인했다.
+  - `getZoneLabel`을 포함한 문제 구간이 정상 문자열로 돌아와 더 이상 파싱 에러를 만들지 않음을 재검증했다.
+- [src/components/layout/Header.tsx](C:/projects/magok/src/components/layout/Header.tsx)
+  - 사용되지 않던 `ArrowRight`, `Card`, `CardContent` import를 제거했다.
+  - 실제로 쓰이지 않던 `onOpenUpdatesView` prop 선언과 구조분해를 제거했다.
+
+### 검증
+
+- `npx eslint src/App.tsx src/components/layout/Header.tsx` 통과
+- `Invoke-WebRequest http://localhost:5173` 결과 `200`
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/index.html` 크기 2.90 kB
+  - `dist/assets/index-Dbn1-jj8.js`
+  - `dist/assets/index-CjSIigY3.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - 이번 조치는 앱 미열림 원인 복구와 build 회복 중심이라 화면 구조 자체는 의도적으로 건드리지 않았다.
+
+### 결과 요약
+
+- `App.tsx` 때문에 화면이 안 열리던 직접 원인은 해소됐다.
+- 현재 로컬 dev 서버는 `200`으로 응답하고, production build도 다시 완료된다.
+- 백업본 기준으로 되돌린 상태라 `App.tsx`에 있던 아주 최근 임시 수정이 있었다면 그 부분은 백업 시점 기준으로 정리된 상태다.
+
+---
+
+## 2026-03-23 GA4 구글 태그 설치
+
+### 작업 배경
+
+- 사용자가 제공한 GA4 측정 ID `G-N0XP5S6KXM`를 사이트에 설치해 달라는 요청이 있었다.
+- 현재 프로젝트는 [src/utils/analytics.ts](C:/projects/magok/src/utils/analytics.ts)에서 `window.gtag`와 `dataLayer`를 함께 지원하고 있어, HTML 진입점에 공식 Google tag 스니펫만 추가하면 기존 이벤트 추적 구조와 자연스럽게 연결되는 상태였다.
+
+### 반영 내용
+
+- [index.html](C:/projects/magok/index.html)
+  - `<head>` 최상단에 `https://www.googletagmanager.com/gtag/js?id=G-N0XP5S6KXM` 비동기 로더를 추가했다.
+  - 이어서 `window.dataLayer`, `gtag()` 함수, `gtag('js', new Date())`, `gtag('config', 'G-N0XP5S6KXM')` 초기화 스크립트를 삽입했다.
+
+### 검증
+
+- [index.html](C:/projects/magok/index.html)에서 스니펫 삽입 위치와 측정 ID를 재확인했다.
+- `npm run build` 통과
+  - SEO 정적 페이지 export 성공
+  - `dist/index.html` 크기 3.23 kB
+  - `dist/assets/index-Dbn1-jj8.js`
+  - `dist/assets/index-CjSIigY3.css`
+- 관찰 사항
+  - build 시 plugin timing 경고와 large chunk 경고는 기존처럼 유지됐다.
+  - 이번 변경은 HTML head에 스크립트를 추가한 수준이라 앱 로직과 타입 체크에는 영향이 없었다.
+
+### 결과 요약
+
+- GA4 기본 페이지 추적용 Google tag가 사이트에 설치됐다.
+- 기존 `trackEvent` 호출들은 브라우저에서 `window.gtag`가 잡히는 환경에서 그대로 GA4 이벤트 전송까지 이어질 수 있는 상태다.

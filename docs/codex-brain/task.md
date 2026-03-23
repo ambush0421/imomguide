@@ -1416,3 +1416,20 @@
 - [x] 문제 클래스 제거 및 줄바꿈 보정
 - [x] lint/test/build 재검증
 - [x] walkthrough.md 갱신
+
+## 2026-03-23 App.tsx 파싱 복구 및 Header 빌드 정리
+
+- [x] `App.tsx` 미열림 원인 확인
+- [x] `App.tsx.backup` 기준 현재 파일 상태 점검
+- [x] `App.tsx` 파싱 정상 여부 확인
+- [x] `Header.tsx`의 빌드 차단 unused 코드 정리
+- [x] eslint/build 재검증
+- [x] walkthrough.md 갱신
+
+## 2026-03-23 GA4 구글 태그 설치
+
+- [x] 현재 진입점과 기존 analytics 유틸 구조 확인
+- [x] `implementation_plan.md`에 설치 계획 추가
+- [x] `index.html`에 GA4 태그 삽입
+- [x] 관련 동작 검증
+- [x] walkthrough.md 갱신

@@ -4276,3 +4276,55 @@ src/
 - `npm run lint`
 - `npm run test -- --run`
 - `npm run build`
+
+---
+
+## 2026-03-23 App.tsx 파싱 복구 및 Header 빌드 정리 계획
+
+### 변경 목표
+
+- 수정 중이던 [src/App.tsx](C:/projects/magok/src/App.tsx)가 열리지 않던 직접 원인이 파싱 에러인지 확인하고, 사용자가 보관한 [src/App.tsx.backup](C:/projects/magok/src/App.tsx.backup) 기준으로 복구 상태를 검증한다.
+- 복구 후 남아 있는 빌드 차단 요소가 있으면 최소 수정으로 정리해, dev 서버와 production build가 다시 정상 동작하도록 만든다.
+
+### 구현 메모
+
+1. `src/App.tsx`
+   - 현재 파일이 백업본 기준으로 정상 문자열/구문 상태인지 확인한다.
+   - 파싱 에러가 사라졌는지 `eslint`와 로컬 서버 응답으로 함께 검증한다.
+2. `src/components/layout/Header.tsx`
+   - 백업 복구 이후 더 이상 쓰이지 않아 `tsc`를 막는 unused import/prop만 제거한다.
+   - 레이아웃 구조나 스타일은 건드리지 않는다.
+3. 검증
+   - `npx eslint src/App.tsx src/components/layout/Header.tsx`
+   - `npm run build`
+   - `http://localhost:5173` 응답 확인
+
+### 검증 메모
+
+- `npx eslint src/App.tsx src/components/layout/Header.tsx`
+- `npm run build`
+- `Invoke-WebRequest http://localhost:5173`
+
+---
+
+## 2026-03-23 GA4 구글 태그 설치 계획
+
+### 변경 목표
+
+- 사용자가 제공한 GA4 측정 ID `G-N0XP5S6KXM` 기준으로 [index.html](C:/projects/magok/index.html)에 공식 Google tag 스니펫을 추가한다.
+- 기존 [analytics.ts](C:/projects/magok/src/utils/analytics.ts)의 `trackEvent`가 `window.gtag`를 그대로 활용하고 있으므로, 별도 이벤트 래퍼를 새로 만들지 않고 현재 구조와 자연스럽게 연결되도록 유지한다.
+
+### 구현 메모
+
+1. `index.html`
+   - `<head>` 안에 `gtag.js` 비동기 로더를 추가한다.
+   - `window.dataLayer`, `gtag()` 함수, `gtag('js', new Date())`, `gtag('config', 'G-N0XP5S6KXM')` 초기화 스크립트를 삽입한다.
+   - 기존 메타/애드센스 스크립트와 충돌하지 않도록 head 영역의 상단 스크립트 블록으로 정리한다.
+2. 검증
+   - HTML 진입점에 태그가 정확히 들어갔는지 확인한다.
+   - 필요 시 build를 다시 실행해 정적 빌드에 영향이 없는지 확인한다.
+
+### 검증 메모
+
+- `Get-Content index.html`
+- `npm run build`
