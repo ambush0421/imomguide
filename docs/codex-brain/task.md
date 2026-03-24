@@ -1,3 +1,29 @@
+## 2026-03-24 검색 필터 모바일 한 줄 고정
+
+- [x] 모바일 필터 버튼 줄바꿈 원인 확인
+- [x] 후속 수정 범위를 `docs/codex-brain/implementation_plan.md`에 기록
+- [x] 사용자 직접 수정 요청 확인
+- [x] 모바일 필터 버튼을 3열 한 줄 고정 구조로 조정
+- [x] 모바일에서 더 짧은 필터 라벨 적용
+- [x] 관련 테스트 및 검증
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
+## 2026-03-24 검색 결과 카드 상세보기 제거 + 단일 요약 카드화
+
+- [x] 현재 `상세 보기`/`공통 체크포인트` 구조와 중복 정보 위치 재확인
+- [x] 후속 루프용 `docs/codex-brain/implementation_plan.md` 계획 작성
+- [x] 사용자 승인 대기
+- [x] 검색 결과 단계에서 `상세 보기` 토글과 `공통 체크포인트` 패널 제거
+- [x] 추천 카드를 배지 + 코드 + 업종명 + 단일 요약 + 선택 CTA 중심으로 더 심플하게 정리
+- [x] 관련 테스트를 새 기본 구조에 맞게 갱신
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
 ## 2026-03-24 검색 결과 카드 컴팩트 리스트화
 
 - [x] 검색 결과 카드 렌더링 경로(`industry-discovery-panel`)와 관련 데이터 구조 분석

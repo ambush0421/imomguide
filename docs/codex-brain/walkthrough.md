@@ -1,5 +1,74 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-24 검색 필터 모바일 한 줄 고정
+
+### 반영 내용
+
+- [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)에서 모바일 필터 버튼 영역을 `3열 그리드`로 바꿔, `전체 / 가능 / 주의` 필터가 한 줄에 고정되도록 정리했다.
+- 같은 파일에서 모바일에는 짧은 라벨(`전체`, `가능`, `주의`)을, 데스크톱에는 기존 전체 라벨(`전체 후보`, `바로 검토 가능`, `주의 후보만`)을 보여주도록 분리했다.
+- 버튼에는 `min-w-0`, `truncate`, `whitespace-nowrap` 성격의 제약을 유지해 좁은 폭에서도 줄 안에서 안정적으로 보이게 맞췄다.
+
+### 구현 파일
+
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`14 passed`, `123 passed`)
+- `build` 통과
+- 빌드 시 plugin timing 경고와 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+---
+
+## 2026-03-24 검색 결과 카드 상세보기 제거 + 단일 요약 카드화
+
+### 반영 내용
+
+- [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)에서 검색 결과 카드의 `상세 보기` 흐름을 완전히 제거했다.
+- 같은 파일에서 그룹 사이에 끼던 `공통 체크포인트` 패널도 같이 제거해, 검색 결과가 카드 리스트만 연속해서 보이도록 더 심플하게 정리했다.
+- 추천 카드는 `배지 + 코드 + 업종명 + 짧은 요약 + 이 코드로 확인하기`만 남기고, 중복되던 전략/증빙/연관 코드 설명은 검색 결과 단계에서 더 이상 노출하지 않도록 바꿨다.
+- 필터 버튼에는 `shrink-0`과 `whitespace-nowrap`를 적용해 `전체 후보 8`, `바로 검토 가능 8` 같은 라벨이 가능하면 한 줄로 유지되도록 맞췄다.
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)는 검색 결과에서 `상세 보기`, `공통 체크포인트`가 없어졌고 기본 카드가 심플한 리스트 구조로 보이는지 검증하도록 갱신했다.
+
+### 구현 파일
+
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`14 passed`, `123 passed`)
+- `build` 통과
+- 빌드 시 plugin timing 경고와 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+---
+
 ## 2026-03-24 검색 결과 카드 컴팩트 리스트화
 
 ### 반영 내용

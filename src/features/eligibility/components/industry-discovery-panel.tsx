@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, ChevronDown, ChevronLeft, ChevronUp, SearchCheck } from 'lucide-react'
+import { ArrowRight, ChevronLeft, SearchCheck } from 'lucide-react'
 
 import { AsyncState } from '@/components/async-state'
 import { Badge } from '@/components/ui/badge'
@@ -91,13 +91,8 @@ interface SuggestionGroupDefinition {
 interface SuggestionFilterDefinition {
   key: SuggestionFilterKey
   label: string
+  mobileLabel: string
   description: string
-}
-
-interface SuggestionSharedGuidance {
-  requiredProofs: string[]
-  riskNotes: string[]
-  nextActions: string[]
 }
 
 const SUGGESTION_GROUPS: SuggestionGroupDefinition[] = [
@@ -136,17 +131,20 @@ const SUGGESTION_FILTERS: SuggestionFilterDefinition[] = [
   {
     key: 'all',
     label: '전체 후보',
+    mobileLabel: '전체',
     description:
       '현재 구역 기준 후보를 모두 보며, 어떤 코드를 먼저 설명할지 한 번에 비교합니다.',
   },
   {
     key: 'eligible',
     label: '바로 검토 가능',
+    mobileLabel: '가능',
     description: '현재 구역 기준 가능으로 먼저 검토할 후보만 보고 있습니다.',
   },
   {
     key: 'caution',
     label: '주의 후보만',
+    mobileLabel: '주의',
     description: '조건부·심의 필요·추가 확인이 걸린 후보만 따로 보고 있습니다.',
   },
 ]
@@ -233,191 +231,20 @@ function matchesSuggestionFilter(
   return true
 }
 
-function getSharedItems(valuesList: string[][]) {
-  if (valuesList.length < 2) {
-    return []
-  }
-
-  const [firstValues, ...otherValues] = valuesList
-
-  return firstValues.filter(
-    (value, index) =>
-      firstValues.indexOf(value) === index &&
-      otherValues.every((values) => values.includes(value)),
-  )
-}
-
-function getSuggestionSharedGuidance(suggestions: IndustrySuggestion[]): SuggestionSharedGuidance {
-  return {
-    requiredProofs: getSharedItems(suggestions.map((suggestion) => suggestion.requiredProofs ?? [])),
-    riskNotes: getSharedItems(suggestions.map((suggestion) => suggestion.riskNotes ?? [])),
-    nextActions: getSharedItems(suggestions.map((suggestion) => suggestion.nextActions ?? [])),
-  }
-}
-
-function removeSharedItems(items: string[], sharedItems: string[]) {
-  if (!sharedItems.length) {
-    return items
-  }
-
-  return items.filter((item) => !sharedItems.includes(item))
-}
-
-function hasSuggestionDetails(args: {
-  fitSummary?: string
-  benefitSummary?: string
-  recommendedBusinessAngle?: string
-  reason: string
-  headlineReason: string
-  catalogNote?: string
-  relatedCodeCount: number
-  requiredProofCount: number
-  riskNoteCount: number
-  nextActionCount: number
-}) {
-  return Boolean(
-    args.fitSummary ||
-      args.benefitSummary ||
-      args.recommendedBusinessAngle ||
-      args.catalogNote ||
-      args.reason !== args.headlineReason ||
-      args.relatedCodeCount > 0 ||
-      args.requiredProofCount > 0 ||
-      args.riskNoteCount > 0 ||
-      args.nextActionCount > 0,
-  )
-}
-
-function SuggestionChecklist({
-  title,
-  items,
-  tone = 'neutral',
-  compact = false,
-}: {
-  title: string
-  items: string[]
-  tone?: 'neutral' | 'warning'
-  compact?: boolean
-}) {
-  if (!items.length) {
-    return null
-  }
-
-  return (
-    <div
-      className={
-        tone === 'warning'
-          ? 'rounded-[20px] border border-[var(--warning-border)] bg-[var(--warning-bg)] p-4 shadow-[var(--shadow-sm)]'
-          : 'rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]'
-      }
-    >
-      <div className="text-sm font-semibold text-[var(--foreground)]">{title}</div>
-      {compact ? (
-        <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">{items[0]}</p>
-      ) : (
-        <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--foreground-muted)]">
-          {items.map((item) => (
-            <li key={`${title}-${item}`}>{item}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-function SuggestionSharedGuidancePanel({
-  guidance,
-  expanded,
-  onToggle,
-}: {
-  guidance: SuggestionSharedGuidance
-  expanded: boolean
-  onToggle: () => void
-}) {
-  if (
-    guidance.requiredProofs.length === 0 &&
-    guidance.riskNotes.length === 0 &&
-    guidance.nextActions.length === 0
-  ) {
-    return null
-  }
-
-  return (
-    <section className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3.5 shadow-[var(--shadow-sm)] sm:px-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="muted">공통 체크포인트</Badge>
-          </div>
-          <p className="mt-2 text-xs leading-5 text-[var(--foreground-muted)] sm:text-sm sm:leading-6">
-            이 그룹 후보는 준비 포인트가 많이 겹칩니다. 기본 리스트에서는 접어 두고,
-            필요할 때만 펼쳐서 확인할 수 있습니다.
-          </p>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-center sm:w-auto"
-          onClick={onToggle}
-        >
-          {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-          {expanded ? '체크포인트 접기' : '체크포인트 보기'}
-        </Button>
-      </div>
-      {expanded ? (
-        <div className="mt-4 grid gap-3 xl:grid-cols-3">
-          <SuggestionChecklist title="먼저 준비할 자료" items={guidance.requiredProofs} />
-          <SuggestionChecklist title="꼭 확인할 점" items={guidance.riskNotes} tone="warning" />
-          <SuggestionChecklist
-            title="다음 단계에서 할 일"
-            items={guidance.nextActions}
-            compact={guidance.nextActions.length === 1}
-          />
-        </div>
-      ) : null}
-    </section>
-  )
-}
-
 function SuggestionCard({
   input,
   group,
   suggestion,
   zoneVerdict,
-  sharedGuidance,
-  showDetails,
-  onToggleDetails,
   onSelect,
 }: {
   input: EligibilityInput
   group: SuggestionGroupDefinition
   suggestion: IndustrySuggestion
   zoneVerdict: Verdict
-  sharedGuidance: SuggestionSharedGuidance
-  showDetails: boolean
-  onToggleDetails: () => void
   onSelect: (suggestion: IndustrySuggestion) => void
 }) {
   const headlineReason = suggestion.recommendationReason ?? suggestion.reason
-  const relatedCodes = suggestion.relatedCodes ?? []
-  const requiredProofs = removeSharedItems(
-    suggestion.requiredProofs ?? [],
-    sharedGuidance.requiredProofs,
-  )
-  const riskNotes = removeSharedItems(suggestion.riskNotes ?? [], sharedGuidance.riskNotes)
-  const nextActions = removeSharedItems(suggestion.nextActions ?? [], sharedGuidance.nextActions)
-  const detailAvailable = hasSuggestionDetails({
-    fitSummary: suggestion.fitSummary,
-    benefitSummary: suggestion.benefitSummary,
-    recommendedBusinessAngle: suggestion.recommendedBusinessAngle,
-    reason: suggestion.reason,
-    headlineReason,
-    catalogNote: suggestion.catalogNote,
-    relatedCodeCount: relatedCodes.length,
-    requiredProofCount: requiredProofs.length,
-    riskNoteCount: riskNotes.length,
-    nextActionCount: nextActions.length,
-  })
 
   return (
     <article
@@ -457,102 +284,7 @@ function SuggestionCard({
           <ArrowRight className="size-4" />
           이 코드로 확인하기
         </Button>
-        {detailAvailable ? (
-          <Button variant="ghost" size="sm" className="whitespace-nowrap" onClick={onToggleDetails}>
-            {showDetails ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-            {showDetails ? '상세 접기' : '상세 보기'}
-          </Button>
-        ) : null}
       </div>
-
-      {showDetails ? (
-        <div className="mt-4 space-y-4 border-t border-[var(--border-soft)] pt-4">
-          {suggestion.fitSummary || suggestion.recommendedBusinessAngle ? (
-            <div className="grid gap-3 xl:grid-cols-2">
-              {suggestion.fitSummary ? (
-                <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
-                  <div className="text-sm font-semibold text-[var(--foreground)]">
-                    이 코드가 유력한 이유
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                    {suggestion.fitSummary}
-                  </p>
-                </div>
-              ) : null}
-              {suggestion.benefitSummary || suggestion.recommendedBusinessAngle ? (
-                <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]">
-                  <div className="text-sm font-semibold text-[var(--foreground)]">
-                    입주 전략 포인트
-                  </div>
-                  {suggestion.benefitSummary ? (
-                    <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                      {suggestion.benefitSummary}
-                    </p>
-                  ) : null}
-                  {suggestion.recommendedBusinessAngle ? (
-                    <p className="mt-2 text-sm leading-6 text-[var(--foreground-subtle)]">
-                      설명 포인트: {suggestion.recommendedBusinessAngle}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
-          {suggestion.reason !== headlineReason ? (
-            <p className="hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3.5 py-3 text-xs leading-6 text-[var(--foreground-subtle)] sm:block">
-              추천 근거: {suggestion.reason}
-            </p>
-          ) : null}
-
-          {suggestion.catalogNote ? (
-            <p className="hidden text-xs leading-5 text-[var(--foreground-subtle)] sm:block">
-              참고: {suggestion.catalogNote}
-            </p>
-          ) : null}
-
-          {relatedCodes.length > 0 ? (
-            <section className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="muted">함께 검토할 연관 코드</Badge>
-              </div>
-              <div className="mt-3 grid gap-3">
-                {relatedCodes.map((relatedCode) => (
-                  <div
-                    key={`${suggestion.code}-${relatedCode.code}`}
-                    className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-3.5"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="muted">{relatedCode.code}</Badge>
-                      <div className="text-sm font-semibold text-[var(--foreground)]">
-                        {relatedCode.name}
-                      </div>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                      {relatedCode.reason}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {requiredProofs.length > 0 || riskNotes.length > 0 ? (
-            <div className="grid gap-3 xl:grid-cols-2">
-              <SuggestionChecklist title="먼저 준비할 자료" items={requiredProofs} />
-              <SuggestionChecklist title="꼭 확인할 점" items={riskNotes} tone="warning" />
-            </div>
-          ) : null}
-
-          {nextActions.length > 0 ? (
-            <SuggestionChecklist
-              title="다음 단계에서 할 일"
-              items={nextActions}
-              compact={nextActions.length === 1}
-            />
-          ) : null}
-        </div>
-      ) : null}
     </article>
   )
 }
@@ -575,8 +307,6 @@ export function IndustryDiscoveryPanel({
   const isLoading = status === 'loading'
   const [showAllMobileExamples, setShowAllMobileExamples] = useState(false)
   const [expandedGroupKeys, setExpandedGroupKeys] = useState<string[]>([])
-  const [expandedGuidanceKeys, setExpandedGuidanceKeys] = useState<string[]>([])
-  const [expandedSuggestionIds, setExpandedSuggestionIds] = useState<string[]>([])
   const [activeFilterState, setActiveFilterState] = useState<{
     filterKey: SuggestionFilterKey
     scopeKey: string
@@ -619,16 +349,12 @@ export function IndustryDiscoveryPanel({
       ? items
       : items.slice(0, initialVisibleSuggestionCount)
     const hiddenItemCount = Math.max(items.length - visibleItems.length, 0)
-    const sharedGuidance = getSuggestionSharedGuidance(
-      visibleItems.map((item) => item.suggestion),
-    )
 
     return {
       ...group,
       expansionKey,
       hiddenItemCount,
       isExpanded,
-      sharedGuidance,
       items,
       visibleItems,
     }
@@ -637,20 +363,6 @@ export function IndustryDiscoveryPanel({
   const visibleMobileExamples = showAllMobileExamples
     ? MOBILE_DISCOVERY_EXAMPLES
     : MOBILE_DISCOVERY_EXAMPLES.slice(0, 2)
-  const toggleGuidance = (expansionKey: string) => {
-    setExpandedGuidanceKeys((prev) =>
-      prev.includes(expansionKey)
-        ? prev.filter((key) => key !== expansionKey)
-        : [...prev, expansionKey],
-    )
-  }
-  const toggleSuggestionDetails = (suggestionId: string) => {
-    setExpandedSuggestionIds((prev) =>
-      prev.includes(suggestionId)
-        ? prev.filter((id) => id !== suggestionId)
-        : [...prev, suggestionId],
-    )
-  }
 
   if (screen === 'compose') {
     return (
@@ -954,17 +666,14 @@ export function IndustryDiscoveryPanel({
                   <p className="mt-1 text-xs leading-5 text-[var(--foreground-muted)]">
                     {activeSuggestionFilter.description}
                   </p>
-                  <p className="mt-1 text-xs leading-5 text-[var(--foreground-subtle)]">
-                    카드에는 핵심 요약만 먼저 보여드리고, 자세한 설명은 `상세 보기`에서 확인할 수
-                    있습니다.
-                  </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap">
                   {suggestionFilters.map((filter) => (
                     <Button
                       key={filter.key}
                       variant={activeSuggestionFilter.key === filter.key ? 'default' : 'secondary'}
                       size="sm"
+                      className="min-w-0 px-2 sm:shrink-0 sm:px-3.5"
                       aria-pressed={activeSuggestionFilter.key === filter.key}
                       disabled={filter.key !== 'all' && filter.count === 0}
                       onClick={() =>
@@ -974,8 +683,9 @@ export function IndustryDiscoveryPanel({
                         })
                       }
                     >
-                      {filter.label}
-                      <span className="ml-1 text-xs opacity-80">{filter.count}</span>
+                      <span className="truncate sm:hidden">{filter.mobileLabel}</span>
+                      <span className="hidden truncate sm:inline">{filter.label}</span>
+                      <span className="ml-1 shrink-0 text-xs opacity-80">{filter.count}</span>
                     </Button>
                   ))}
                 </div>
@@ -1018,11 +728,6 @@ export function IndustryDiscoveryPanel({
                       </p>
                     </div>
                   </div>
-                  <SuggestionSharedGuidancePanel
-                    guidance={group.sharedGuidance}
-                    expanded={expandedGuidanceKeys.includes(group.expansionKey)}
-                    onToggle={() => toggleGuidance(group.expansionKey)}
-                  />
                   <div className="grid gap-3 xl:grid-cols-2">
                     {group.visibleItems.map(({ suggestion, zoneVerdict }) => (
                       <SuggestionCard
@@ -1031,9 +736,6 @@ export function IndustryDiscoveryPanel({
                         group={group}
                         suggestion={suggestion}
                         zoneVerdict={zoneVerdict}
-                        sharedGuidance={group.sharedGuidance}
-                        showDetails={expandedSuggestionIds.includes(suggestion.id)}
-                        onToggleDetails={() => toggleSuggestionDetails(suggestion.id)}
                         onSelect={onSuggestionSelect}
                       />
                     ))}

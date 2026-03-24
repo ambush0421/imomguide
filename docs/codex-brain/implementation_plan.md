@@ -1,3 +1,85 @@
+## 2026-03-24 검색 필터 모바일 한 줄 고정
+
+### 목표
+
+- 모바일 검색 결과 화면에서 필터 버튼 3개가 항상 한 줄에 보이도록 정리한다.
+- 버튼 자체가 줄바꿈되어 검색 결과 첫 화면 밀도가 깨지는 문제를 줄인다.
+- 데스크톱 라벨은 유지하면서 모바일에서만 더 짧고 안정적인 표현을 사용한다.
+
+### 현재 구조 진단
+
+1. [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L648) 부근 필터 영역은 `flex flex-wrap gap-2` 구조라, 모바일 폭에서는 세 번째 버튼이 다음 줄로 떨어질 수 있다.
+2. 현재 필터 라벨은 `전체 후보`, `바로 검토 가능`, `주의 후보만`으로 길이가 제각각이라, 같은 크기 버튼으로도 모바일 한 줄 고정이 어렵다.
+3. 직전 루프에서 `whitespace-nowrap`는 넣었지만, 이 조합만으로는 "줄 안에서 안 깨짐"만 보장할 뿐, 세 버튼이 한 행에 모두 들어오는 것은 보장하지 못한다.
+
+### 구현 방향
+
+1. 모바일에서는 필터 버튼 컨테이너를 3열 그리드로 바꿔 한 줄 고정한다.
+2. 모바일에서만 짧은 라벨을 사용한다.
+   - 예: `전체`, `검토`, `주의`
+3. 데스크톱에서는 기존 전체 라벨을 유지한다.
+4. 버튼 안 텍스트는 `truncate`나 `whitespace-nowrap`를 유지해 예외적인 폭에서도 깨짐을 줄인다.
+
+### 예상 영향 범위
+
+- [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)
+- 필요 시 [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 승인 후 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+## 2026-03-24 검색 결과 카드 상세보기 제거 + 단일 요약 카드화
+
+### 목표
+
+- 1단계 검색 결과를 "비교용 리스트"로 더 단순화해, 카드 하나당 핵심 정보만 빠르게 읽히게 만든다.
+- `상세 보기`를 눌러도 중복 정보가 많다는 피드백을 반영해, 검색 결과 단계에서는 상세 패널 자체를 제거한다.
+- 사용자가 후보를 고르는 순간까지는 `배지 + 코드 + 업종명 + 짧은 설명 + 선택 버튼` 흐름만 남기고, 나머지 전략 정보는 다음 단계로 책임을 넘긴다.
+
+### 현재 구조 진단
+
+1. 현재 [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L328)~[`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L378)에는 그룹 단위 `공통 체크포인트` 패널이 남아 있고, 기본 접힘으로 바뀌었지만 검색 리스트 화면에 여전히 별도 정보 블록으로 보인다.
+2. 같은 파일의 [`SuggestionCard`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L382)~[`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L556)은 기본 카드 자체는 짧아졌지만, 여전히 `상세 보기` 토글과 확장 상태를 유지하고 있다.
+3. 실제 펼쳐지는 상세 내용은 `headlineReason`과 가까운 맥락의 `fitSummary`, `benefitSummary`, `recommendedBusinessAngle`, `catalogNote`, 체크리스트가 다시 이어져, 사용자가 느끼는 "상세를 열어도 결국 비슷한 말" 문제를 완전히 해소하지 못한다.
+4. 사용자가 첨부한 예시처럼 검색 결과 단계에서는 카드 하나당 짧은 요약 문장 하나만 있어도 충분하고, 상세 전략은 여기서 억지로 보여주지 않는 편이 전체 흐름상 더 자연스럽다.
+5. 따라서 이번 후속 루프는 "상세를 더 잘 접는 방법"보다 "검색 결과 단계에서 상세 자체를 제거하는 것"에 초점을 맞추는 편이 맞다.
+
+### 구현 방향
+
+1. 검색 결과 카드에서 상세 패널 제거
+   - `showDetails`, `onToggleDetails`, `detailAvailable` 같은 확장 상태와 `상세 보기` 버튼을 제거한다.
+   - 카드 본문은 배지, 코드, 업종명, 짧은 요약, `이 코드로 확인하기` 버튼만 남긴다.
+2. 공통 체크포인트 패널 제거
+   - `SuggestionSharedGuidancePanel`과 관련 확장 상태(`expandedGuidanceKeys`)를 제거해 검색 리스트 사이에 추가 블록이 끼지 않도록 한다.
+   - 공통 체크포인트가 없어져도 2단계/3단계에서 필요한 전략 정보는 계속 확인 가능하므로, 검색 결과 단계 역할은 후보 선택에만 집중시킨다.
+3. 상단 안내 문구도 더 심플하게 유지
+   - 필터 패널 보조 문구는 "핵심 요약만 먼저 본다" 수준의 짧은 안내만 남기고, 상세 보기 전제를 설명하는 문장은 제거한다.
+4. 테스트 갱신
+   - [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)에서 `상세 보기`, `체크포인트 보기`, 상세 체크리스트 노출 기대값을 제거하고, 심플한 리스트 구조가 기본값임을 검증하도록 바꾼다.
+
+### 예상 영향 범위
+
+- [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 승인 후 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+### 메모
+
+1. 이번 루프에서는 검색 결과 단계의 정보량을 더 줄이는 데 집중하고, 2단계 예비판정/3단계 결과 화면 상세 구조는 그대로 둔다.
+2. 만약 이후에도 문구 길이 피드백이 남으면, 그때는 `headlineReason` 자체를 더 짧게 생성하는 데이터 계층 조정으로 넘어간다.
+
 ## 2026-03-24 검색 결과 카드 컴팩트 리스트화
 
 ### 목표
