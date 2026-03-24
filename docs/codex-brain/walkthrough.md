@@ -1,5 +1,42 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-24 검색 결과 카드 컴팩트 리스트화
+
+### 반영 내용
+
+- [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)에서 추천 결과 상단의 긴 설명 배너를 제거하고, 필터 패널 안에서 "핵심 요약 우선 / 상세는 펼침" 흐름만 짧게 안내하도록 정리했다.
+- 같은 파일의 추천 카드 기본 레이아웃을 배지, 코드, 업종명, 짧은 요약, 선택 CTA 중심으로 축약해 검색 결과가 리스트처럼 빠르게 훑히도록 바꿨다.
+- 카드 안의 `fitSummary`, `benefitSummary`, `recommendedBusinessAngle`, `catalogNote`, 연관 코드, 체크리스트는 기본 노출에서 빼고 `상세 보기`를 눌렀을 때만 보이도록 접었다.
+- 그룹 단위 `공통 체크포인트`도 기본 펼침을 없애고 `체크포인트 보기` 버튼으로 열도록 바꿔, 검색 결과 첫 화면에서 반복 정보가 길게 쌓이지 않게 했다.
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)는 기본 리스트에서 체크리스트가 숨겨져 있다가 `상세 보기` 또는 `체크포인트 보기` 후 노출되는 새 상호작용을 검증하도록 갱신했다.
+
+### 구현 파일
+
+- `src/features/eligibility/components/industry-discovery-panel.tsx`
+- `src/App.test.tsx`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`14 passed`, `123 passed`)
+- `build` 통과
+- 첫 번째 `npm run test`에서는 Vitest thread worker timeout이 한 번 있었지만, 동일 명령 재실행에서는 정상 통과했다.
+- 빌드 시 plugin timing 경고와 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+---
+
 ## 2026-03-23 네이버 사이트 인증 메타 태그 추가
 
 ### 반영 내용

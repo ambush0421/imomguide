@@ -190,14 +190,23 @@ describe('App', () => {
     expect(
       await within(finderSection).findByText('먼저 볼 코드'),
     ).toBeInTheDocument()
-    expect(within(finderSection).getAllByText('먼저 준비할 자료').length).toBeGreaterThan(0)
-    expect(within(finderSection).getAllByText('꼭 확인할 점').length).toBeGreaterThan(0)
-    expect(within(finderSection).getAllByText('다음 단계에서 할 일').length).toBeGreaterThan(0)
+    expect(
+      within(finderSection).getAllByRole('button', { name: '상세 보기' }).length,
+    ).toBeGreaterThan(0)
+    expect(within(finderSection).queryByText('먼저 준비할 자료')).not.toBeInTheDocument()
+    expect(within(finderSection).queryByText('꼭 확인할 점')).not.toBeInTheDocument()
+    expect(within(finderSection).queryByText('다음 단계에서 할 일')).not.toBeInTheDocument()
     expect(
       within(finderSection).queryByText(
         '주업종과 부업종 중 무엇으로 설명하는 게 더 실제 사업에 가까운지 비교해 보세요.',
       ),
     ).not.toBeInTheDocument()
+
+    await user.click(within(finderSection).getAllByRole('button', { name: '상세 보기' })[0])
+
+    expect(within(finderSection).getAllByText('먼저 준비할 자료').length).toBeGreaterThan(0)
+    expect(within(finderSection).getAllByText('꼭 확인할 점').length).toBeGreaterThan(0)
+    expect(within(finderSection).getAllByText('다음 단계에서 할 일').length).toBeGreaterThan(0)
 
     await user.click(
       within(finderSection).getAllByRole('button', { name: '이 코드로 확인하기' })[0],
@@ -368,6 +377,14 @@ describe('App', () => {
       await within(finderSection).findByRole('button', { name: /더 보기 \(\d+개 더\)/ }),
     ).toBeInTheDocument()
     expect(await within(finderSection).findByText('공통 체크포인트')).toBeInTheDocument()
+    expect(
+      within(finderSection).queryByText(
+        '실제 하지 않는 업무를 혜택 때문에 추가하면 심사나 사후 확인 단계에서 불리할 수 있습니다.',
+      ),
+    ).not.toBeInTheDocument()
+
+    await user.click(within(finderSection).getAllByRole('button', { name: '체크포인트 보기' })[0])
+
     expect(
       within(finderSection).getAllByText(
         '실제 하지 않는 업무를 혜택 때문에 추가하면 심사나 사후 확인 단계에서 불리할 수 있습니다.',

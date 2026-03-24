@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, ChevronLeft, SearchCheck } from 'lucide-react'
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronUp, SearchCheck } from 'lucide-react'
 
 import { AsyncState } from '@/components/async-state'
 import { Badge } from '@/components/ui/badge'
@@ -59,6 +59,22 @@ const MOBILE_DISCOVERY_EXAMPLES = [
 ] as const
 
 const initialVisibleSuggestionCount = 3
+
+const multiLineClampStyle = {
+  display: '-webkit-box',
+  overflow: 'hidden',
+  WebkitBoxOrient: 'vertical' as const,
+}
+
+const suggestionTitleClampStyle = {
+  ...multiLineClampStyle,
+  WebkitLineClamp: 2,
+}
+
+const suggestionSummaryClampStyle = {
+  ...multiLineClampStyle,
+  WebkitLineClamp: 3,
+}
 
 type SuggestionGroupKey = 'priority' | 'secondary' | 'caution'
 type SuggestionFilterKey = 'all' | 'eligible' | 'caution'
@@ -247,6 +263,31 @@ function removeSharedItems(items: string[], sharedItems: string[]) {
   return items.filter((item) => !sharedItems.includes(item))
 }
 
+function hasSuggestionDetails(args: {
+  fitSummary?: string
+  benefitSummary?: string
+  recommendedBusinessAngle?: string
+  reason: string
+  headlineReason: string
+  catalogNote?: string
+  relatedCodeCount: number
+  requiredProofCount: number
+  riskNoteCount: number
+  nextActionCount: number
+}) {
+  return Boolean(
+    args.fitSummary ||
+      args.benefitSummary ||
+      args.recommendedBusinessAngle ||
+      args.catalogNote ||
+      args.reason !== args.headlineReason ||
+      args.relatedCodeCount > 0 ||
+      args.requiredProofCount > 0 ||
+      args.riskNoteCount > 0 ||
+      args.nextActionCount > 0,
+  )
+}
+
 function SuggestionChecklist({
   title,
   items,
@@ -286,8 +327,12 @@ function SuggestionChecklist({
 
 function SuggestionSharedGuidancePanel({
   guidance,
+  expanded,
+  onToggle,
 }: {
   guidance: SuggestionSharedGuidance
+  expanded: boolean
+  onToggle: () => void
 }) {
   if (
     guidance.requiredProofs.length === 0 &&
@@ -298,22 +343,38 @@ function SuggestionSharedGuidancePanel({
   }
 
   return (
-    <section className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow-sm)] sm:p-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="muted">공통 체크포인트</Badge>
+    <section className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3.5 shadow-[var(--shadow-sm)] sm:px-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="muted">공통 체크포인트</Badge>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[var(--foreground-muted)] sm:text-sm sm:leading-6">
+            이 그룹 후보는 준비 포인트가 많이 겹칩니다. 기본 리스트에서는 접어 두고,
+            필요할 때만 펼쳐서 확인할 수 있습니다.
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-center sm:w-auto"
+          onClick={onToggle}
+        >
+          {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+          {expanded ? '체크포인트 접기' : '체크포인트 보기'}
+        </Button>
       </div>
-      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-        이 후보 묶음은 아래 준비 포인트가 거의 같습니다. 카드에서는 코드별 차이만 보시면 됩니다.
-      </p>
-      <div className="mt-4 grid gap-3 xl:grid-cols-3">
-        <SuggestionChecklist title="먼저 준비할 자료" items={guidance.requiredProofs} />
-        <SuggestionChecklist title="꼭 확인할 점" items={guidance.riskNotes} tone="warning" />
-        <SuggestionChecklist
-          title="다음 단계에서 할 일"
-          items={guidance.nextActions}
-          compact={guidance.nextActions.length === 1}
-        />
-      </div>
+      {expanded ? (
+        <div className="mt-4 grid gap-3 xl:grid-cols-3">
+          <SuggestionChecklist title="먼저 준비할 자료" items={guidance.requiredProofs} />
+          <SuggestionChecklist title="꼭 확인할 점" items={guidance.riskNotes} tone="warning" />
+          <SuggestionChecklist
+            title="다음 단계에서 할 일"
+            items={guidance.nextActions}
+            compact={guidance.nextActions.length === 1}
+          />
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -324,6 +385,8 @@ function SuggestionCard({
   suggestion,
   zoneVerdict,
   sharedGuidance,
+  showDetails,
+  onToggleDetails,
   onSelect,
 }: {
   input: EligibilityInput
@@ -331,6 +394,8 @@ function SuggestionCard({
   suggestion: IndustrySuggestion
   zoneVerdict: Verdict
   sharedGuidance: SuggestionSharedGuidance
+  showDetails: boolean
+  onToggleDetails: () => void
   onSelect: (suggestion: IndustrySuggestion) => void
 }) {
   const headlineReason = suggestion.recommendationReason ?? suggestion.reason
@@ -341,10 +406,22 @@ function SuggestionCard({
   )
   const riskNotes = removeSharedItems(suggestion.riskNotes ?? [], sharedGuidance.riskNotes)
   const nextActions = removeSharedItems(suggestion.nextActions ?? [], sharedGuidance.nextActions)
+  const detailAvailable = hasSuggestionDetails({
+    fitSummary: suggestion.fitSummary,
+    benefitSummary: suggestion.benefitSummary,
+    recommendedBusinessAngle: suggestion.recommendedBusinessAngle,
+    reason: suggestion.reason,
+    headlineReason,
+    catalogNote: suggestion.catalogNote,
+    relatedCodeCount: relatedCodes.length,
+    requiredProofCount: requiredProofs.length,
+    riskNoteCount: riskNotes.length,
+    nextActionCount: nextActions.length,
+  })
 
   return (
     <article
-      className={`rounded-[24px] border p-4 sm:rounded-[26px] sm:p-5 ${group.cardClassName}`}
+      className={`rounded-[22px] border p-3.5 sm:rounded-[24px] sm:p-4 ${group.cardClassName}`}
     >
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={group.badgeVariant}>{group.badgeLabel}</Badge>
@@ -357,108 +434,125 @@ function SuggestionCard({
         </Badge>
       </div>
 
-      <h3 className="mt-3 font-display text-lg font-semibold leading-[1.22] text-[var(--foreground)] sm:mt-4 sm:text-xl">
+      <h3
+        className="mt-3 font-display text-base font-semibold leading-[1.28] text-[var(--foreground)] sm:text-lg"
+        style={suggestionTitleClampStyle}
+      >
         {suggestion.name}
       </h3>
-      <p className="mt-2 max-w-[38rem] text-sm leading-7 text-[var(--foreground-muted)]">
+      <p
+        className="mt-2 max-w-[38rem] text-sm leading-6 text-[var(--foreground-muted)]"
+        style={suggestionSummaryClampStyle}
+      >
         {headlineReason}
       </p>
 
-      {suggestion.fitSummary || suggestion.recommendedBusinessAngle ? (
-        <div className="mt-4 grid gap-3 xl:grid-cols-2">
-          {suggestion.fitSummary ? (
-            <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
-              <div className="text-sm font-semibold text-[var(--foreground)]">
-                이 코드가 유력한 이유
-              </div>
-              <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                {suggestion.fitSummary}
-              </p>
-            </div>
-          ) : null}
-          {suggestion.benefitSummary || suggestion.recommendedBusinessAngle ? (
-            <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]">
-              <div className="text-sm font-semibold text-[var(--foreground)]">
-                입주 전략 포인트
-              </div>
-              {suggestion.benefitSummary ? (
-                <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                  {suggestion.benefitSummary}
-                </p>
-              ) : null}
-              {suggestion.recommendedBusinessAngle ? (
-                <p className="mt-2 text-sm leading-6 text-[var(--foreground-subtle)]">
-                  설명 포인트: {suggestion.recommendedBusinessAngle}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {suggestion.reason !== headlineReason ? (
-        <p className="mt-3 hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3.5 py-3 text-xs leading-6 text-[var(--foreground-subtle)] sm:block">
-          추천 근거: {suggestion.reason}
-        </p>
-      ) : null}
-
-      {suggestion.catalogNote ? (
-        <p className="mt-2 hidden text-xs leading-5 text-[var(--foreground-subtle)] sm:block">
-          참고: {suggestion.catalogNote}
-        </p>
-      ) : null}
-
-      {relatedCodes.length > 0 ? (
-        <section className="mt-4 rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="muted">함께 검토할 연관 코드</Badge>
-          </div>
-          <div className="mt-3 grid gap-3">
-            {relatedCodes.map((relatedCode) => (
-              <div
-                key={`${suggestion.code}-${relatedCode.code}`}
-                className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-3.5"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="muted">{relatedCode.code}</Badge>
-                  <div className="text-sm font-semibold text-[var(--foreground)]">
-                    {relatedCode.name}
-                  </div>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                  {relatedCode.reason}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {requiredProofs.length > 0 || riskNotes.length > 0 ? (
-        <div className="mt-4 grid gap-3 xl:grid-cols-2">
-          <SuggestionChecklist title="먼저 준비할 자료" items={requiredProofs} />
-          <SuggestionChecklist title="꼭 확인할 점" items={riskNotes} tone="warning" />
-        </div>
-      ) : null}
-
-      {nextActions.length > 0 ? (
-        <SuggestionChecklist
-          title="다음 단계에서 할 일"
-          items={nextActions}
-          compact={nextActions.length === 1}
-        />
-      ) : null}
-
-      <div className="mt-5">
+      <div className="mt-4 flex flex-wrap gap-2">
         <Button
           variant={group.key === 'priority' ? 'default' : 'secondary'}
-          className="w-full whitespace-nowrap sm:w-auto"
+          size="sm"
+          className="whitespace-nowrap"
           onClick={() => onSelect(suggestion)}
         >
           <ArrowRight className="size-4" />
           이 코드로 확인하기
         </Button>
+        {detailAvailable ? (
+          <Button variant="ghost" size="sm" className="whitespace-nowrap" onClick={onToggleDetails}>
+            {showDetails ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+            {showDetails ? '상세 접기' : '상세 보기'}
+          </Button>
+        ) : null}
       </div>
+
+      {showDetails ? (
+        <div className="mt-4 space-y-4 border-t border-[var(--border-soft)] pt-4">
+          {suggestion.fitSummary || suggestion.recommendedBusinessAngle ? (
+            <div className="grid gap-3 xl:grid-cols-2">
+              {suggestion.fitSummary ? (
+                <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
+                  <div className="text-sm font-semibold text-[var(--foreground)]">
+                    이 코드가 유력한 이유
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                    {suggestion.fitSummary}
+                  </p>
+                </div>
+              ) : null}
+              {suggestion.benefitSummary || suggestion.recommendedBusinessAngle ? (
+                <div className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]">
+                  <div className="text-sm font-semibold text-[var(--foreground)]">
+                    입주 전략 포인트
+                  </div>
+                  {suggestion.benefitSummary ? (
+                    <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                      {suggestion.benefitSummary}
+                    </p>
+                  ) : null}
+                  {suggestion.recommendedBusinessAngle ? (
+                    <p className="mt-2 text-sm leading-6 text-[var(--foreground-subtle)]">
+                      설명 포인트: {suggestion.recommendedBusinessAngle}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {suggestion.reason !== headlineReason ? (
+            <p className="hidden rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3.5 py-3 text-xs leading-6 text-[var(--foreground-subtle)] sm:block">
+              추천 근거: {suggestion.reason}
+            </p>
+          ) : null}
+
+          {suggestion.catalogNote ? (
+            <p className="hidden text-xs leading-5 text-[var(--foreground-subtle)] sm:block">
+              참고: {suggestion.catalogNote}
+            </p>
+          ) : null}
+
+          {relatedCodes.length > 0 ? (
+            <section className="rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4 shadow-[var(--shadow-sm)]">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="muted">함께 검토할 연관 코드</Badge>
+              </div>
+              <div className="mt-3 grid gap-3">
+                {relatedCodes.map((relatedCode) => (
+                  <div
+                    key={`${suggestion.code}-${relatedCode.code}`}
+                    className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-3.5"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="muted">{relatedCode.code}</Badge>
+                      <div className="text-sm font-semibold text-[var(--foreground)]">
+                        {relatedCode.name}
+                      </div>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                      {relatedCode.reason}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {requiredProofs.length > 0 || riskNotes.length > 0 ? (
+            <div className="grid gap-3 xl:grid-cols-2">
+              <SuggestionChecklist title="먼저 준비할 자료" items={requiredProofs} />
+              <SuggestionChecklist title="꼭 확인할 점" items={riskNotes} tone="warning" />
+            </div>
+          ) : null}
+
+          {nextActions.length > 0 ? (
+            <SuggestionChecklist
+              title="다음 단계에서 할 일"
+              items={nextActions}
+              compact={nextActions.length === 1}
+            />
+          ) : null}
+        </div>
+      ) : null}
     </article>
   )
 }
@@ -481,6 +575,8 @@ export function IndustryDiscoveryPanel({
   const isLoading = status === 'loading'
   const [showAllMobileExamples, setShowAllMobileExamples] = useState(false)
   const [expandedGroupKeys, setExpandedGroupKeys] = useState<string[]>([])
+  const [expandedGuidanceKeys, setExpandedGuidanceKeys] = useState<string[]>([])
+  const [expandedSuggestionIds, setExpandedSuggestionIds] = useState<string[]>([])
   const [activeFilterState, setActiveFilterState] = useState<{
     filterKey: SuggestionFilterKey
     scopeKey: string
@@ -541,6 +637,20 @@ export function IndustryDiscoveryPanel({
   const visibleMobileExamples = showAllMobileExamples
     ? MOBILE_DISCOVERY_EXAMPLES
     : MOBILE_DISCOVERY_EXAMPLES.slice(0, 2)
+  const toggleGuidance = (expansionKey: string) => {
+    setExpandedGuidanceKeys((prev) =>
+      prev.includes(expansionKey)
+        ? prev.filter((key) => key !== expansionKey)
+        : [...prev, expansionKey],
+    )
+  }
+  const toggleSuggestionDetails = (suggestionId: string) => {
+    setExpandedSuggestionIds((prev) =>
+      prev.includes(suggestionId)
+        ? prev.filter((id) => id !== suggestionId)
+        : [...prev, suggestionId],
+    )
+  }
 
   if (screen === 'compose') {
     return (
@@ -835,21 +945,18 @@ export function IndustryDiscoveryPanel({
 
         {status === 'ready' && suggestions.length > 0 ? (
           <div className="space-y-6">
-            <div className="rounded-[20px] border border-[var(--border-accent-strong)] bg-[var(--surface-strong)] px-4 py-3.5 text-xs leading-5 text-[var(--foreground-muted)] shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:py-4 sm:text-sm sm:leading-6">
-              추천 결과를 현재 구역 기준으로 다시 묶었습니다. 이제는 코드 이름만 보지 말고
-              왜 이 코드가 유력한지, 함께 검토할 연관 코드는 무엇인지, 어떤 증빙을 준비해야
-              하는지까지 한 카드에서 같이 읽어 보세요. 빠르게 좁혀보고 싶으면 아래 필터에서
-              현재 구역 기준 가능한 후보만 먼저 볼 수도 있습니다.
-            </div>
-
             <section className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3.5 shadow-[var(--shadow-sm)] sm:rounded-[24px] sm:px-5 sm:py-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="text-sm font-semibold text-[var(--foreground)]">
-                    추천 결과 빠르게 좁혀보기
+                    후보 좁혀보기
                   </div>
                   <p className="mt-1 text-xs leading-5 text-[var(--foreground-muted)]">
                     {activeSuggestionFilter.description}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-[var(--foreground-subtle)]">
+                    카드에는 핵심 요약만 먼저 보여드리고, 자세한 설명은 `상세 보기`에서 확인할 수
+                    있습니다.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -911,7 +1018,11 @@ export function IndustryDiscoveryPanel({
                       </p>
                     </div>
                   </div>
-                  <SuggestionSharedGuidancePanel guidance={group.sharedGuidance} />
+                  <SuggestionSharedGuidancePanel
+                    guidance={group.sharedGuidance}
+                    expanded={expandedGuidanceKeys.includes(group.expansionKey)}
+                    onToggle={() => toggleGuidance(group.expansionKey)}
+                  />
                   <div className="grid gap-3 xl:grid-cols-2">
                     {group.visibleItems.map(({ suggestion, zoneVerdict }) => (
                       <SuggestionCard
@@ -921,6 +1032,8 @@ export function IndustryDiscoveryPanel({
                         suggestion={suggestion}
                         zoneVerdict={zoneVerdict}
                         sharedGuidance={group.sharedGuidance}
+                        showDetails={expandedSuggestionIds.includes(suggestion.id)}
+                        onToggleDetails={() => toggleSuggestionDetails(suggestion.id)}
                         onSelect={onSuggestionSelect}
                       />
                     ))}

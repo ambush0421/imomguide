@@ -1,3 +1,61 @@
+## 2026-03-24 검색 결과 카드 컴팩트 리스트화
+
+### 목표
+
+- 검색 결과 화면을 "길게 읽는 상세 카드 모음"보다 "빠르게 훑는 후보 리스트"에 가깝게 바꾼다.
+- 모바일에서도 한 화면에 더 많은 후보를 보여 주고, 사용자가 코드 선택 전부터 피로감을 느끼지 않게 한다.
+- 로딩/에러/빈 상태와 현재 2단계 진입 흐름은 유지하면서, 1단계 검색 결과의 정보 계층만 더 압축한다.
+
+### 현재 구조 진단
+
+1. [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L836)~[`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L949)은 결과 화면에서 상단 설명 배너, 필터 패널, 공통 체크포인트, 그룹별 상세 카드까지 한 번에 연속 노출한다.
+2. 같은 파일의 [`SuggestionCard`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L321)~[`SuggestionCard`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx#L463)은 배지/제목 아래에 `headlineReason`, `fitSummary`, `benefitSummary`, `recommendedBusinessAngle`, `catalogNote`, 연관 코드, 체크리스트까지 기본 노출한다.
+3. [`src/features/eligibility/data/eligibility-strategy.ts`](C:\projects\magok\src\features\eligibility\data\eligibility-strategy.ts#L472)~[`src/features/eligibility/data/eligibility-strategy.ts`](C:\projects\magok\src\features\eligibility\data\eligibility-strategy.ts#L499)은 추천 데이터에 풍부한 전략 필드를 붙이고 있고, 현재 UI는 그 대부분을 리스트 단계에서 바로 펼쳐 보여 준다.
+4. 직전 루프에서 "중복 정보 제거"는 반영됐지만, 이번 피드백은 중복보다도 "검색 결과 자체가 길다"는 문제에 더 가깝다. 즉 정보의 품질보다 기본 노출 밀도와 계층이 다시 조정돼야 한다.
+5. 사용자가 첨부한 예시처럼 검색 결과 단계에서는 `배지 + 코드 + 업종명 + 짧은 요약` 정도만 보여도 후보 비교가 가능해 보인다. 상세 전략과 준비 자료는 선택 직전 또는 선택 이후에 확인해도 되는 정보다.
+6. 작업 지시에서 먼저 읽으라고 한 `Codex_System_Prompt.md`, `GEMINI.md`는 현재 저장소에서 찾지 못했다. 이번 계획은 실제 확인 가능한 소스와 `docs/pdca/*`, `docs/codex-brain/*` 기록을 기준으로 세운다.
+
+### 구현 방향
+
+1. 추천 결과 화면을 리스트 우선 구조로 축약
+   - 카드 기본 노출은 `배지`, `코드`, `현재 구역 verdict`, `업종명`, `짧은 이유 한 줄` 정도로 제한한다.
+   - `headlineReason`이 너무 길게 보이면 줄 수 제한 또는 더 짧은 보조 문장 선택 규칙을 둬, 모바일 기준 2~3줄 안에서 끊기게 만든다.
+   - 카드 패딩과 블록 수를 줄여 "선택 후보를 나열한 리스트" 느낌에 가깝게 재구성한다.
+2. 상세 정보는 기본 노출에서 한 단계 뒤로 이동
+   - `fitSummary`, `benefitSummary`, `recommendedBusinessAngle`, `catalogNote`, `relatedCodes`, 체크리스트는 기본 리스트에서는 숨기거나 더 작은 보조 정보로 축약한다.
+   - 가능하면 데이터 생성 로직은 유지하고, 우선은 렌더링 계층만 바꿔 2단계 이후 화면과 향후 확장성에 영향이 적게 가도록 한다.
+3. 상단 부가 안내도 함께 압축
+   - 결과 설명 배너는 더 짧은 안내 문장으로 줄이거나 제거해 첫 스크롤부터 후보 리스트가 보이게 한다.
+   - 필터 영역은 유지하되 설명 문장을 축약해 "후보 좁히기" 도구로만 남긴다.
+   - 공통 체크포인트는 기본 펼침 대신 더 작은 안내 블록으로 줄이거나, 상세를 보고 싶을 때만 드러나게 정리한다.
+4. 상태 처리 유지
+   - 현재 존재하는 `idle`, `loading`, `error`, `ready + empty` 상태 처리는 유지한다.
+   - 카드가 짧아져도 선택 CTA(`이 코드로 확인하기`)는 계속 명확하게 보이도록 유지한다.
+5. 테스트 갱신
+   - [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)의 추천 결과 화면 기대값을 새 구조에 맞게 조정한다.
+   - 필요하면 [`src/features/eligibility/data/industry-discovery.test.ts`](C:\projects\magok\src\features\eligibility\data\industry-discovery.test.ts)는 데이터 생성이 유지되는 범위에서 그대로 두고, UI 테스트 중심으로 회귀를 막는다.
+
+### 예상 영향 범위
+
+- [`src/features/eligibility/components/industry-discovery-panel.tsx`](C:\projects\magok\src\features\eligibility\components\industry-discovery-panel.tsx)
+- 필요 시 [`src/features/eligibility/types.ts`](C:\projects\magok\src\features\eligibility\types.ts)
+- 필요 시 [`src/features/eligibility/data/eligibility-strategy.ts`](C:\projects\magok\src\features\eligibility\data\eligibility-strategy.ts)
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)
+- 필요 시 [`src/features/eligibility/data/industry-discovery.test.ts`](C:\projects\magok\src\features\eligibility\data\industry-discovery.test.ts)
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 승인 후 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+### 메모
+
+1. 이번 루프는 "검색 결과 리스트의 기본 노출 밀도"를 줄이는 데 집중하고, 2단계 예비판정/3단계 결과 화면의 정보량은 건드리지 않는다.
+2. 구현 중 짧은 요약 문장을 별도 필드로 분리할 필요가 생기면, 그때만 `eligibility-strategy` 데이터 계층까지 확장한다.
+
 ## 2026-03-23 네이버 사이트 인증 메타 태그 추가
 
 ### 목표
