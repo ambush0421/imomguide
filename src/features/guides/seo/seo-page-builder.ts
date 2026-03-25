@@ -732,6 +732,13 @@ export function buildLibraryIndexSeoDocument(entries: LegalLibraryEntryDetail[])
   const title = '마곡 법령 라이브러리 | 마곡 코드찾기'
   const description =
     '마곡 입주 판정에 쓰이는 산업집적법 시행령과 마곡 관리기본계획을 문서 단위로 정리한 공개 법령 라이브러리입니다.'
+  const latestEffectiveDate = entries.reduce<string | undefined>((latest, entry) => {
+    if (!latest || entry.effectiveDate > latest) {
+      return entry.effectiveDate
+    }
+
+    return latest
+  }, undefined)
   const cards = renderIndexLinkCards(
     entries.map((entry) => ({
       href: `${SITE_URL}/library/${entry.id}/`,
@@ -756,7 +763,7 @@ export function buildLibraryIndexSeoDocument(entries: LegalLibraryEntryDetail[])
           name: title,
           description,
           url: canonicalUrl,
-          dateModified: entries[0]?.effectiveDate,
+          dateModified: latestEffectiveDate,
           publisher: {
             name: BRAND_NAME,
             url: SITE_URL,

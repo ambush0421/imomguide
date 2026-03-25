@@ -1,3 +1,49 @@
+## 2026-03-26 2026-03-19 마곡 관리기본계획 변경 고시 반영
+
+### 목표
+
+- 사용자 제공 PDF인 `서울특별시고시 제2026-144호(2026-03-19)`를 현재 마곡 판정/가이드/법령 라이브러리의 최신 기준 문서로 반영한다.
+- 기존 KSIC 허용 코드 판단 로직은 유지하되, 출처 메타데이터와 사용자 노출 설명을 최신 고시에 맞춰 정렬한다.
+- 이번 고시에서 다시 확인된 운영 규정 중 사용자 혼동이 큰 항목은 결과 화면 또는 법령 라이브러리에서 보강한다.
+
+### 현재 구조 진단
+
+1. 사용자 제공 PDF 74~75쪽의 산업시설구역/지식산업센터 업종표는 현재 `MAGOK_INDUSTRIAL_RULES`, `KNOWLEDGE_INDUSTRY_REVIEW_ROWS`, `docs/codex-brain/magok_permitted_industry_codes.md`와 대체로 일치한다. 즉 이번 루프의 핵심은 허용 코드표 전면 재작성보다 기준 문서와 설명 레이어 정렬에 가깝다.
+2. [`src/features/eligibility/data/legal-bases.ts`](C:\projects\magok\src\features\eligibility\data\legal-bases.ts)와 [`src/features/library/data/legal-library.ts`](C:\projects\magok\src\features\library\data\legal-library.ts)는 아직 `마곡일반산업단지 관리기본계획 고시(제2025-593호)`를 기준 문서로 표기한다. 이번 자료는 이를 다시 변경한 `서울특별시고시 제2026-144호`다.
+3. 현재 앱은 입주업종, 호스팅 심의, 제조시설 조건 중심으로 고시 내용을 소비한다. 반면 이번 PDF에는 용도별 구역면적 변경, 입주자격/심사 절차, 공장설립 승인 기준, 임대차 제한 등 운영 규정도 함께 포함돼 있다.
+4. 따라서 이번 반영은 "허용 코드표 재구축"보다 "최신 고시 출처로 교체 + 이미 제공하는 판정/설명 문구를 최신 고시 기준으로 보강"이 우선순위다.
+5. 작업 지시에서 먼저 읽으라고 한 `Codex_System_Prompt.md`, `GEMINI.md`는 현재 저장소에서 찾지 못했다. 이번 계획은 실제 확인 가능한 소스, 기존 `docs/pdca/*`, 사용자 제공 PDF를 기준으로 세운다.
+
+### 구현 방향
+
+1. 최신 고시 기준으로 출처 메타데이터 갱신
+   - [`src/features/eligibility/data/legal-bases.ts`](C:\projects\magok\src\features\eligibility\data\legal-bases.ts)의 `sourceDocumentTitle`, `citation`, `pageHint`를 `서울특별시고시 제2026-144호` 기준으로 조정한다.
+   - [`src/features/library/data/legal-library.ts`](C:\projects\magok\src\features\library\data\legal-library.ts)의 문서 제목, 문서번호, 공고일, 공식/보조 링크를 새 고시 기준으로 갱신한다.
+2. 최신 고시 기준으로 사용자 노출 문구 정리
+   - 결과 패널, 가이드, 법령 라이브러리에서 오래된 `제2025-593호` 문구가 노출되지 않도록 연결된 근거 표기를 일괄 정리한다.
+   - 빌드 시 파생되는 가이드/FAQ/라이브러리 메타 산출물도 최신 문서명 기준으로 다시 맞출 필요가 있는지 함께 확인한다.
+3. 이번 PDF에서 다시 확인된 운영 규정 중 노출 가치가 큰 항목 보강
+   - 현재 앱이 이미 다루는 `호스팅 심의`, `대학·연구소 심의`, `제조시설 20%`, `연구시설 비율`은 새 고시 문구 기준으로 표현을 다듬는다.
+   - 필요 시 `입주계약/임대차 제한`처럼 사용자가 자주 오해하는 항목을 법령 라이브러리나 결과 보조 문구에 추가한다.
+4. 회귀 검증
+   - `evaluator`, `rulebook-tabs`, `legal-library` 관련 테스트를 최신 출처 문자열과 노출 기준에 맞게 조정한다.
+   - `npm run lint`, `npm run test`, `npm run build`로 검증한다.
+
+### 예상 영향 범위
+
+- [`src/features/eligibility/data/legal-bases.ts`](C:\projects\magok\src\features\eligibility\data\legal-bases.ts)
+- [`src/features/library/data/legal-library.ts`](C:\projects\magok\src\features\library\data\legal-library.ts)
+- 법적 근거를 소비하는 결과/가이드/라이브러리 관련 UI 파일
+- 관련 테스트 파일
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 메모
+
+1. 사용자 제공 PDF의 업종 표 자체는 현행 코드와 거의 맞아, 로직 변경보다 출처 교체와 설명 보강이 우선이다.
+2. 반면 문서명, 문서번호, 발행일, 공식 링크는 현재 앱에서 구버전 고시를 가리키고 있어 최신화 필요성이 분명하다.
+3. 구현 시 공식 고시 URL을 확인할 수 있으면 함께 갱신하고, 확인이 어려우면 문서번호/날짜/제목을 우선 최신화한 뒤 링크는 보수적으로 다룬다.
+
 ## 2026-03-24 검색 필터 모바일 한 줄 고정
 
 ### 목표

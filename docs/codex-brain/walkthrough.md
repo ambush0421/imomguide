@@ -1,5 +1,54 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-26 2026-03-19 마곡 관리기본계획 변경 고시 반영
+
+### 반영 내용
+
+- [`src/features/eligibility/data/legal-bases.ts`](C:\projects\magok\src\features\eligibility\data\legal-bases.ts)에서 마곡 고시 근거 메타데이터를 구 고시 `제2025-593호`에서 최신 `서울특별시고시 제2026-144호` 기준으로 전면 갱신했다.
+- 같은 파일에 `입주계약 변경·임대사업 제한` 근거(`magokLeaseRestriction`)를 추가해, 최신 고시에서 다시 확인된 사후 운영 규정을 법령 라이브러리에서 함께 볼 수 있도록 정리했다.
+- [`src/features/library/data/legal-library.ts`](C:\projects\magok\src\features\library\data\legal-library.ts)에서 마곡 관리기본계획 문서 제목, 기준일, 문서번호, 공식 PDF 링크, 게시 페이지 링크를 최신 고시 기준으로 교체했다.
+- [`src/features/eligibility/evaluator.ts`](C:\projects\magok\src\features\eligibility\evaluator.ts)에서 공통 확인 문구를 최신 고시 기준으로 보강하고, 제조시설 운영 시 `공장설립 승인·완료신고`, `일부 임대 제한`까지 함께 확인하도록 액션 문구를 추가했다.
+- [`src/features/updates/data/update-log.ts`](C:\projects\magok\src\features\updates\data\update-log.ts)에 `최신 마곡 관리기본계획 고시(2026-144호) 반영` 항목을 새로 추가해 홈/업데이트 로그에서 이번 반영 이력을 바로 볼 수 있게 했다.
+- [`src/features/guides/data/guide-catalog.ts`](C:\projects\magok\src\features\guides\data\guide-catalog.ts), [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)에서는 공개 가이드/FAQ/법령/업데이트 페이지의 기준일과 라이브러리 수정일 계산을 최신 반영 시점에 맞게 조정했다.
+- `npm run build`의 prebuild 단계로 `public/` 아래 공개 가이드, FAQ, 법령 라이브러리, 업데이트 로그, 사이트맵을 최신 고시 기준으로 다시 생성했다.
+
+### 구현 파일
+
+- `src/features/eligibility/data/legal-bases.ts`
+- `src/features/library/data/legal-library.ts`
+- `src/features/eligibility/evaluator.ts`
+- `src/features/guides/data/guide-catalog.ts`
+- `src/features/updates/data/update-log.ts`
+- `src/features/guides/seo/seo-page-builder.ts`
+- `src/features/guides/seo/seo-page-builder.test.ts`
+- `public/guides/*`
+- `public/faq/*`
+- `public/library/*`
+- `public/updates/*`
+- `public/sitemaps/*`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`14 passed`, `123 passed`)
+- `build` 통과
+- `build` 중 `467 guide pages`, `1401 faq pages`, `2 library pages`, `5 update pages`를 `public/`에 재생성
+- 빌드 시 plugin timing 경고와 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+---
+
 ## 2026-03-24 검색 필터 모바일 한 줄 고정
 
 ### 반영 내용

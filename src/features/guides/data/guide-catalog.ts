@@ -59,7 +59,7 @@ export interface MagokGuideEntry {
   relatedCodes: GuideRelatedCode[]
 }
 
-const GUIDE_UPDATED_AT = '2026-03-20'
+const GUIDE_UPDATED_AT = '2026-03-26'
 
 const FEATURED_GUIDE_CODES = [
   '71310',

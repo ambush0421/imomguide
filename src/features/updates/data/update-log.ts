@@ -35,6 +35,22 @@ const affiliatePolicySources: SourceReference[] = [
 
 export const UPDATE_LOG_ENTRIES: UpdateLogEntry[] = [
   {
+    id: 'magok-plan-2026-144-refresh',
+    date: '2026-03-26',
+    title: '최신 마곡 관리기본계획 고시(2026-144호) 반영',
+    summary:
+      '서울특별시고시 제2026-144호를 기준으로 법령 라이브러리, 결과 각주, 공개 페이지 출처 메타데이터를 최신화했습니다.',
+    highlights: [
+      '구 고시 제2025-593호 대신 최신 고시 제2026-144호 원문 PDF와 게시 페이지를 연결했습니다.',
+      '법령 라이브러리에 입주계약 변경·임대사업 제한 근거를 추가해 사후 운영 리스크도 함께 볼 수 있게 했습니다.',
+      '가이드와 업데이트 공개 페이지의 기준일을 최신 반영 시점으로 다시 맞췄습니다.',
+    ],
+    affectedAreas: ['법령 라이브러리', '결과 각주', '가이드/FAQ 공개 페이지', '업데이트 로그'],
+    sourceReferences: [magokPlanSource].filter(
+      (source): source is SourceReference => Boolean(source),
+    ),
+  },
+  {
     id: 'legal-library-and-update-log',
     date: '2026-03-20',
     title: '법령 라이브러리와 업데이트 로그 1차 공개',

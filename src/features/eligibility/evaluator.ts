@@ -132,7 +132,7 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
     input.companyName.trim() || SPECIAL_APPLICANT_LABELS[input.applicantType]
 
   const commonActions = [
-    '실제 입주계약 전에는 서울경제진흥원 또는 SH공사 공고문 기준과 사업계획서를 함께 확인하세요.',
+    '실제 입주계약 전에는 서울경제진흥원 또는 SH공사 공고문, 최신 관리기본계획(서울특별시고시 제2026-144호), 사업계획서를 함께 확인하세요.',
     '호실·필지 위치에 따라 세부 배치 가능 여부가 달라질 수 있으니 최종 계약 전 관리기관 확인이 필요합니다.',
   ]
 
@@ -523,6 +523,7 @@ export function evaluateEligibility(input: EligibilityInput): EligibilityResult 
           requiredActions: [
             '연구시설 비율을 유지하고 제조시설 비율은 20% 이하로 설계해 주세요.',
             '연구개발과 생산 간 연계성을 사업계획서와 배치도에서 설명해 주세요.',
+            '공장설립 승인·완료신고, 일부 임대 제한 같은 사후 운영 조건도 최신 고시 기준으로 함께 확인해 주세요.',
             ...commonActions,
           ],
           legalBasisIds: ['magokIndustrialPlan', 'magokManufacturingCondition'],
