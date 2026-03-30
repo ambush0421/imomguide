@@ -88,6 +88,12 @@ npm run desktop:build
 - `wrangler.toml`에는 `pages_build_output_dir = "./dist"`를 반영해 두었다.
 - 현재 Pages 프로젝트명은 기존 운영 이력 때문에 `imomguide`를 유지하고 있지만, 실제 서비스 소스는 loopincode 기준으로 관리한다.
 
+## 광고 설정 메모
+
+- 홈 본문의 수동 AdSense 슬롯은 `VITE_ADSENSE_SLOT_HOME_INLINE` 값을 사용한다.
+- 값은 AdSense `Ads > By ad unit > Display ads`에서 생성한 `data-ad-slot` 숫자를 넣으면 된다.
+- 예시는 `.env.example`에 정리해 두었다.
+
 ## 검증 명령
 
 ```bash

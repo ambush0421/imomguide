@@ -6075,3 +6075,191 @@ npm run test
 
 - 운영 사이트 `loopincode.com`까지 새 배포가 반영됐다.
 - 현재는 코드 기준 설치뿐 아니라, 실제 운영 HTML 응답에서도 GA4 측정 ID `G-N0XP5S6KXM`가 확인되는 상태다.
+
+---
+
+## 2026-03-27 AdSense 활성 상태 점검
+
+### 작업 배경
+
+- 사용자는 현재 사이트에서 AdSense가 살아 있는지 빠르게 확인해 달라고 요청했다.
+- 이번 확인은 코드 수정 없이, 저장소 기준 설정과 실제 운영 응답이 서로 일치하는지 검증하는 작업으로 진행했다.
+
+### 확인 내용
+
+- [index.html](C:/projects/magok/index.html)
+  - `google-adsense-account` meta가 `ca-pub-2916041253392911`로 설정돼 있다.
+  - `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911` async script가 포함돼 있다.
+- [public/ads.txt](C:/projects/magok/public/ads.txt)
+  - `google.com, pub-2916041253392911, DIRECT, f08c47fec0942fa0` 한 줄이 존재한다.
+- 라이브 응답
+  - `https://loopincode.com/` HTML 응답에서도 동일한 AdSense meta와 script가 확인됐다.
+  - `https://loopincode.com/ads.txt`는 `200 OK`로 응답했고, 본문도 로컬 `ads.txt`와 일치했다.
+  - `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911`는 `200 OK`로 응답했다.
+- 소스 전역 점검
+  - `src` 내부에서는 `adsbygoogle`, `data-ad-slot`, `ins.adsbygoogle` 같은 실제 수동 광고 슬롯 코드는 찾지 못했다.
+  - 현재 화면 내 제휴 영역은 AdSense보다 쿠팡 제휴 위젯 중심으로 구성돼 있다.
+
+### 해석
+
+- 현재 기준으로 AdSense 식별 요소 자체는 살아 있다. 즉, `meta + ads.txt + script` 조합은 코드와 운영 배포 양쪽 모두 정상이다.
+- 다만 실제 광고가 반드시 화면에 노출된다고 단정할 수는 없다. 수동 광고 슬롯 코드가 없기 때문에, 자동 광고가 AdSense 콘솔에서 활성화돼 있지 않다면 사용자 화면에는 아무 광고도 안 보일 수 있다.
+- 따라서 이번 결론은 "AdSense 연결 신호는 살아 있음"이고, "광고 노출까지 확인 완료"는 아니다. 마지막 부분은 AdSense 콘솔의 사이트 준비 상태와 자동 광고 설정 여부까지 함께 봐야 확정할 수 있다.
+
+### 검증
+
+- `Get-Content -Raw index.html`
+- `Get-Content -Raw public/ads.txt`
+- `Invoke-WebRequest https://loopincode.com/`
+- `curl.exe -i https://loopincode.com/ads.txt`
+- `curl.exe -I https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911`
+
+### 결과 요약
+
+- `loopincode.com`에는 현재 AdSense 계정 식별 meta, 로더 script, `ads.txt`가 모두 살아 있다.
+- 반면 앱 소스에는 명시적 광고 슬롯이 없어, 실제 광고가 보이는지는 자동 광고 설정 여부에 달려 있는 상태다.
+
+---
+
+## 2026-03-27 loopincode.com 실광고 렌더링 재확인
+
+### 작업 배경
+
+- 사용자는 실제 `loopincode.com`에서 광고가 안 뜨는 것 같다고 말했고, 단순 태그 존재 여부가 아니라 브라우저 기준 실광고 상태를 확인해 달라고 요청했다.
+- 따라서 이번 단계에서는 실제 브라우저 세션에서 AdSense 네트워크 요청, 콘솔 오류, DOM에 생성된 광고 요소 상태를 직접 확인했다.
+
+### 확인 내용
+
+- 브라우저 네트워크
+  - `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911`는 `200 OK`로 로드됐다.
+  - 이후 실제 광고 요청 `https://googleads.g.doubleclick.net/pagead/ads?...`는 `403`으로 응답했다.
+  - 해당 요청의 주요 파라미터에는 `format=0x0`이 포함돼 있었다.
+- 콘솔
+  - 브라우저 콘솔에서 위 `googleads.g.doubleclick.net/pagead/ads` 요청에 대한 `403` 에러가 그대로 기록됐다.
+- DOM
+  - `ins.adsbygoogle` 요소는 1개 생성됐지만 `data-ad-client`, `data-ad-slot`, `data-ad-format` 값은 비어 있었다.
+  - 해당 요소는 `data-ad-status="unfilled"` 상태였고 `display: none !important;`가 적용돼 있었다.
+  - 내부 Google Ads iframe(`aswift_0`)도 생성됐지만 실제 렌더링 크기는 `0x0`이었다.
+- 화면 구성
+  - 사용자에게 보이는 광고성 영역은 AdSense가 아니라 쿠팡 제휴 위젯 섹션이었다.
+  - Playwright 스냅샷 기준 페이지 하단에 노출되는 외부 상품 영역은 모두 쿠팡 링크/iframe이었다.
+
+### 해석
+
+- `loopincode.com` 기준으로 AdSense 스크립트 설치 자체는 정상이다.
+- 하지만 실제 광고 요청은 현재 브라우저 세션에서 `403`으로 거절되고, DOM에 생성된 AdSense 컨테이너도 `unfilled + hidden + 0x0` 상태라 사용자 눈에는 광고가 보이지 않는다.
+- 즉 현재 상태는 "AdSense 코드가 없다"가 아니라 "AdSense가 요청은 시도하지만 실제 채워지지 않아 숨겨지는 상태"에 더 가깝다.
+- 원인 후보는 다음 둘 중 하나로 보는 것이 가장 타당하다.
+  - AdSense 계정/사이트 상태상 아직 해당 요청이 송출 가능 상태가 아님
+  - 자동 광고가 삽입은 시도됐지만 현재 페이지 조건에서 유효한 슬롯 크기를 잡지 못해 `0x0` 요청으로 끝남
+
+### 검증
+
+- Playwright `browser_navigate https://loopincode.com`
+- Playwright `browser_network_requests`
+- Playwright `browser_console_messages`
+- Playwright DOM 평가
+  - `ins.adsbygoogle` 1개
+  - `data-ad-status="unfilled"`
+  - 내부 iframe `aswift_0` rect `0x0`
+
+### 결과 요약
+
+- `loopincode.com`에는 AdSense 스크립트는 살아 있지만, 현재 실광고는 사용자에게 보이지 않는 상태다.
+- 브라우저 기준 직접 확인한 근거는 `googleads` 요청 `403`, `unfilled`, `display:none`, `0x0 iframe`이다.
+
+---
+
+## 2026-03-27 AdSense 콘솔 체크리스트 정리 및 수동 슬롯 도입
+
+### 작업 배경
+
+- 사용자는 먼저 AdSense 콘솔에서 무엇을 확인해야 하는지 정리해 달라고 했고, 이어서 실제 코드 쪽 수동 광고 도입도 진행해 달라고 요청했다.
+- 기존 상태는 `meta + ads.txt + adsbygoogle.js`는 살아 있지만, 실사이트 브라우저에서는 `403` / `unfilled` / `0x0` 상태라 광고가 눈에 보이지 않았다.
+
+### 1. AdSense 콘솔 체크리스트
+
+- `Sites`
+  - `loopincode.com`이 사이트 목록에 있고 상태가 광고 게재 가능 상태인지 확인
+  - 아직 검토 중이거나 연결 이슈가 있으면 광고는 안 뜰 수 있음
+- `Ads`
+  - `Auto ads`가 켜져 있는지 확인
+  - 자동 광고를 믿지 않고 수동 광고로 전환할 경우 `By ad unit > Display ads`로 진입
+- `By ad unit > Display ads`
+  - 새 광고 유닛을 만든 뒤 `data-ad-slot` 값을 확보
+  - 이번 코드 변경은 이 값을 `VITE_ADSENSE_SLOT_HOME_INLINE`에 넣도록 설계
+- `ads.txt`
+  - `ads.txt` 경고가 없는지 확인
+  - 현재 사이트의 `ads.txt` 응답은 정상
+
+### 2. 코드 반영 내용
+
+- [google-adsense-slot.tsx](C:/projects/magok/src/components/google-adsense-slot.tsx)
+  - 수동 Display ads를 렌더링하는 전용 컴포넌트를 추가했다.
+  - 슬롯 ID는 `VITE_ADSENSE_SLOT_HOME_INLINE`에서 읽는다.
+  - 스크립트가 늦게 붙는 경우를 고려해 `adsbygoogle` 준비 상태를 잠깐 재시도한 뒤 요청한다.
+  - 광고가 `unfilled`, `display:none`, `0x0 iframe`이면 자동으로 숨겨 불필요한 빈 박스를 남기지 않도록 했다.
+  - 개발 모드에서는 진단용 empty/error 상태를 볼 수 있게 했다.
+- [google-adsense-slot.test.tsx](C:/projects/magok/src/components/google-adsense-slot.test.tsx)
+  - 슬롯 ID 없음
+  - 슬롯 ID 있음
+  - 진단 모드 empty 상태
+  - 위 세 가지를 단위 테스트로 검증했다.
+- [App.tsx](C:/projects/magok/src/App.tsx)
+  - 홈 본문 하단에서 쿠팡 제휴 섹션과 분리된 독립 광고 섹션으로 새 AdSense 슬롯 컴포넌트를 연결했다.
+  - 현재는 `VITE_ADSENSE_SLOT_HOME_INLINE` 값이 있어야만 실제 슬롯이 나타난다.
+- [.env.example](C:/projects/magok/.env.example)
+  - `VITE_ADSENSE_SLOT_HOME_INLINE` 예시 키를 추가했다.
+- [README.md](C:/projects/magok/README.md)
+  - 수동 AdSense 슬롯 값을 어디에 넣는지 운영 메모를 추가했다.
+
+### 검증
+
+- `npm run lint` 통과
+- `npm run test -- src/components/google-adsense-slot.test.tsx` 통과
+- `npm run build` 통과
+  - `prebuild` 아이콘 생성 및 SEO 페이지 export 성공
+  - `dist/index.html` 3.34 kB
+  - `dist/assets/index-Cj66u6yq.js`
+  - `dist/assets/index-tN0EWg43.css`
+
+### 결과 요약
+
+- 콘솔에서 바로 확인할 체크리스트를 공식 흐름에 맞춰 정리했다.
+- 코드에는 수동 AdSense 슬롯을 꽂을 수 있는 준비가 끝났다.
+- 실제 광고를 켜려면 이제 AdSense에서 발급한 `data-ad-slot` 값을 `VITE_ADSENSE_SLOT_HOME_INLINE`에 넣으면 된다.
+- 이번 단계에서는 운영 배포까지는 진행하지 않았다. 따라서 현재 `loopincode.com` 실사이트에는 아직 이 수동 슬롯 코드가 반영되지 않았다.
+
+---
+
+## 2026-03-30 쿠팡 제휴 영역과 AdSense 겹침 영향 확인
+
+### 작업 배경
+
+- 사용자는 쿠팡 제휴 영역과 AdSense가 서로 겹치면 AdSense가 안 나오는지 확인해 달라고 요청했다.
+- 이 질문은 정책과 실제 런타임 해석이 함께 필요해, Google AdSense 공식 도움말과 현재 사이트 구조를 같이 대조했다.
+
+### 확인 내용
+
+- Google AdSense Help `Use other ad networks together with AdSense`
+  - 비구글 광고를 같은 사이트나 같은 페이지에 둘 수 있다고 안내한다.
+  - 제휴 링크도 허용한다고 명시한다.
+  - 다만 콘텐츠보다 광고가 더 많아지면 안 된다고 안내한다.
+- Google AdSense Help `Ad placement policies`
+  - 광고가 다른 콘텐츠, 메뉴, 링크, 다운로드 버튼처럼 오해될 수 있게 배치하면 안 된다.
+  - 광고 근처에 다른 클릭 요소가 너무 가까워 실수 클릭을 유발하는 배치도 피해야 한다.
+- 현재 `loopincode.com` 구조
+  - 저장소 기준으로 쿠팡 영역은 홈 하단의 별도 섹션 카드이며, AdSense와 같은 DOM 블록에 겹쳐 그려지는 구조는 아니다.
+  - 이전 실사이트 브라우저 관찰에서는 AdSense 요청이 `403`, `unfilled`, `0x0 iframe` 상태였고, 이 증상은 "쿠팡과 같은 페이지에 있어서 자동으로 차단됐다"보다 "AdSense 요청이 실제로 채워지지 않았다" 쪽에 더 가깝다.
+
+### 해석
+
+- 결론부터 말하면, 쿠팡과 AdSense가 같은 페이지에 있다는 사실만으로 AdSense가 안 뜨는 것은 아니다.
+- 다만 둘이 실제로 시각적으로 겹치거나, 사용자가 광고와 상품 카드/링크를 혼동할 정도로 붙어 있으면 정책 리스크가 생길 수 있다.
+- 현재 `loopincode.com`에서 관찰된 `403 / unfilled / 0x0`는 "겹쳐서 숨겨졌다"보다는 AdSense 요청 자체가 채워지지 않는 증상으로 보는 편이 타당하다. 이 부분은 기존 실사이트 관찰과 공식 정책을 바탕으로 한 추론이다.
+
+### 결과 요약
+
+- 쿠팡 제휴 영역과 AdSense의 같은 페이지 공존 자체는 허용된다.
+- 현재 사이트에서 AdSense가 안 보이는 주된 원인을 쿠팡 겹침 하나로 보기는 어렵다.
+- 다만 실제 수동 슬롯을 넣을 때는 쿠팡 카드와 충분한 간격을 두고, 광고 라벨과 시각 구분을 명확히 유지하는 것이 안전하다.

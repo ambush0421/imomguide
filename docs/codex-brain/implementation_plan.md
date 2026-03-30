@@ -4817,3 +4817,125 @@ src/
 - `npx wrangler whoami`
 - `npx wrangler pages deploy dist --project-name imomguide --commit-dirty=true`
 - `Invoke-WebRequest https://loopincode.com/`
+
+---
+
+## 2026-03-27 AdSense 활성 상태 점검 계획
+
+### 점검 목표
+
+- 현재 프로젝트와 실제 운영 도메인 `https://loopincode.com` 기준으로 AdSense 식별 요소가 살아 있는지 확인한다.
+- 단순히 head 메타나 로더 스크립트만 있는 상태인지, 실제 광고 슬롯 또는 자동 광고가 붙을 수 있는 구조인지 구분해서 판단한다.
+- 이번 작업은 코드 수정 없이 현 상태 점검과 근거 정리에 집중한다.
+
+### 점검 메모
+
+1. 로컬 코드 확인
+   - [index.html](C:/projects/magok/index.html)에서 `google-adsense-account` meta와 `adsbygoogle.js` 로더 존재 여부를 확인한다.
+   - [public/ads.txt](C:/projects/magok/public/ads.txt)에서 publisher 정보가 일치하는지 확인한다.
+   - `src` 전역 검색으로 `adsbygoogle`, `data-ad-slot`, `ins.adsbygoogle` 같은 실제 광고 슬롯 코드 존재 여부를 확인한다.
+2. 운영 응답 확인
+   - `https://loopincode.com/` HTML 응답에서 같은 AdSense 메타와 스크립트가 실제 배포에도 포함되는지 확인한다.
+   - `https://loopincode.com/ads.txt`가 `200 OK`로 열리고 본문이 로컬 `ads.txt`와 일치하는지 확인한다.
+   - `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=...`가 외부에서 정상 응답하는지도 확인한다.
+3. 판단 기준
+   - `meta + script + ads.txt`가 모두 있으면 AdSense 식별/검토 신호는 살아 있다고 본다.
+   - 다만 수동 광고 슬롯 코드가 없으면 실제 광고 노출 상태는 별도이며, 자동 광고를 켜 두지 않았다면 화면에 광고가 보이지 않을 수 있다고 판단한다.
+
+### 검증 메모
+
+- `git grep -n -i -E "adsense|googlesyndication|adsbygoogle|ca-pub|ad-client"`
+- `Get-Content -Raw index.html`
+- `Get-Content -Raw public/ads.txt`
+- `Invoke-WebRequest https://loopincode.com/`
+- `curl.exe -i https://loopincode.com/ads.txt`
+- `curl.exe -I https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911`
+
+---
+
+## 2026-03-27 loopincode.com 실광고 렌더링 재확인 계획
+
+### 점검 목표
+
+- `loopincode.com`에서 AdSense 코드가 단순히 존재하는 수준을 넘어 실제 광고 요청과 DOM 렌더링이 어떻게 동작하는지 확인한다.
+- 광고가 안 뜨는 원인이 "스크립트 미설치"인지, "광고 요청 거절"인지, "화면 내 슬롯 부재"인지 구분한다.
+
+### 점검 메모
+
+1. 브라우저 네트워크/콘솔 확인
+   - Playwright로 `https://loopincode.com`에 접속한다.
+   - `adsbygoogle.js` 로더 응답, `googleads.g.doubleclick.net/pagead/ads` 요청 상태, 관련 콘솔 오류를 확인한다.
+2. DOM 확인
+   - `ins.adsbygoogle` 개수와 속성을 확인한다.
+   - 생성된 Google Ads iframe의 크기와 src 파라미터를 확인해 실제 노출 가능한 슬롯인지 본다.
+3. 판단 기준
+   - `adsbygoogle.js`는 `200`인데 실제 광고 요청이 `403`이면, 연결 자체는 살아 있지만 현재 요청 조건 또는 계정 상태상 광고 송출이 거절되는 것으로 본다.
+   - 생성된 iframe이 `0x0`이고 `ins.adsbygoogle`가 `display:none`/`unfilled`이면, 사용자 화면에는 광고가 보이지 않는 상태로 판단한다.
+   - 페이지 본문에서 눈에 보이는 광고 영역이 쿠팡 제휴 위젯뿐이면 AdSense는 사실상 비가시 상태라고 정리한다.
+
+### 검증 메모
+
+- Playwright `browser_navigate https://loopincode.com`
+- Playwright `browser_network_requests`
+- Playwright `browser_console_messages`
+- Playwright `browser_evaluate` for `ins.adsbygoogle`
+- Playwright `browser_evaluate` for Google Ads iframes
+
+---
+
+## 2026-03-27 AdSense 콘솔 체크리스트 정리 및 수동 슬롯 도입 계획
+
+### 목표
+
+- 현재 `loopincode.com`에서 광고가 보이지 않는 이유를 AdSense 공식 체크 흐름 기준으로 바로 점검할 수 있게 정리한다.
+- 코드 측면에서는 자동 광고만 기대하지 않고, 홈 본문에 수동 Display ads 슬롯을 꽂을 수 있는 컴포넌트와 설정 경로를 만든다.
+- 실제 광고 송출은 AdSense에서 생성한 슬롯 ID가 필요하므로, 이번 단계에서는 슬롯 ID를 환경변수로 주입하는 구조까지 구현한다.
+
+### 구현 메모
+
+1. 콘솔 체크리스트
+   - `Sites`에서 `loopincode.com` 상태가 광고 게재 가능 상태인지 확인한다.
+   - `Ads`에서 `Auto ads` 활성 여부와 사이트 연결 상태를 확인한다.
+   - 수동 광고를 쓸 경우 `Ads > By ad unit > Display ads`에서 슬롯을 생성해 `data-ad-slot` 값을 확보한다.
+   - `ads.txt` 경고나 사이트 연결 경고가 없는지 함께 확인한다.
+2. 코드 구조
+   - 새 컴포넌트 [google-adsense-slot.tsx](C:/projects/magok/src/components/google-adsense-slot.tsx)를 추가한다.
+   - 슬롯 ID는 `VITE_ADSENSE_SLOT_HOME_INLINE`로 받고, 값이 없으면 프로덕션에서는 조용히 숨기고 개발 모드에서는 안내 상태를 보여준다.
+   - 광고 요청 후 `unfilled`, `display:none`, `0x0 iframe` 여부를 점검해 채워지지 않은 슬롯은 자동으로 접는다.
+3. 배치 위치
+   - 홈 본문 하단에서 쿠팡 제휴 섹션과 분리된 독립 광고 카드로 배치한다.
+   - 기존 쿠팡 제휴 섹션은 유지하고, AdSense 슬롯이 설정되었을 때만 별도 섹션이 위쪽에 노출되게 한다.
+4. 설정 경로
+   - `.env.example`에 `VITE_ADSENSE_SLOT_HOME_INLINE` 예시를 남긴다.
+   - `README.md`에도 어떤 값을 넣어야 하는지 짧게 기록한다.
+
+### 검증 메모
+
+- `npm run lint`
+- `npm run test -- src/components/google-adsense-slot.test.tsx`
+- `npm run build`
+
+---
+
+## 2026-03-30 쿠팡 제휴 영역과 AdSense 겹침 영향 확인 계획
+
+### 목표
+
+- 쿠팡 제휴 영역과 AdSense가 같은 페이지에 있으면 광고가 안 뜨는지 공식 기준과 현재 사이트 구조를 함께 보고 판단한다.
+- 단순한 "같은 페이지 동시 노출"과 실제 "겹침/혼동 유발 배치"를 분리해서 설명한다.
+
+### 점검 메모
+
+1. 공식 기준 확인
+   - Google AdSense Help의 `Use other ad networks together with AdSense`에서 비구글 광고/제휴 링크와 동시 노출이 허용되는지 확인한다.
+   - `Ad placement policies`에서 광고를 다른 콘텐츠처럼 보이게 하거나 클릭 혼동을 유발하는 배치가 금지되는지 확인한다.
+2. 현재 사이트 해석
+   - 현재 저장소 구조상 쿠팡 영역은 별도 섹션 카드로 분리돼 있는지 확인한다.
+   - 기존 실사이트 관찰 결과의 `403`, `unfilled`, `0x0 iframe`이 "겹침" 때문인지, 아니면 AdSense 요청 자체 문제인지 구분한다.
+
+### 검증 메모
+
+- Google AdSense Help
+  - `Use other ad networks together with AdSense`
+  - `Ad placement policies`
+  - `Set up ads on your site`

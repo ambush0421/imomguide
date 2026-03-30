@@ -1571,3 +1571,37 @@
 - [x] 운영 배포 실행
 - [x] 배포 URL 확인
 - [x] walkthrough.md 갱신
+
+## 2026-03-27 AdSense 활성 상태 점검
+
+- [x] 현재 저장소에서 AdSense 관련 코드 위치 확인
+- [x] 라이브 사이트 `loopincode.com` HTML에 AdSense 메타/스크립트 존재 여부 확인
+- [x] 라이브 사이트 `ads.txt` 응답 확인
+- [x] 실제 광고 슬롯 코드 존재 여부 점검
+- [x] 점검 결과를 `implementation_plan.md`와 `walkthrough.md`에 기록
+
+## 2026-03-27 loopincode.com 실광고 렌더링 재확인
+
+- [x] 브라우저 기준 실제 광고 관련 네트워크 요청 확인
+- [x] AdSense 관련 콘솔 오류 확인
+- [x] DOM에 생성된 `adsbygoogle`/Google Ads iframe 상태 확인
+- [x] 화면에 노출되는 광고 영역 유형 확인
+- [x] 추가 점검 결과를 `implementation_plan.md`와 `walkthrough.md`에 기록
+
+## 2026-03-27 AdSense 콘솔 체크리스트 정리 및 수동 슬롯 도입
+
+- [x] AdSense 공식 도움말 기준 콘솔 점검 순서 정리
+- [x] 현재 사이트 상태와 공식 체크 항목 매칭
+- [x] 홈 본문에 넣을 수동 AdSense 슬롯 컴포넌트 설계
+- [x] `VITE_ADSENSE_SLOT_HOME_INLINE` 기반 슬롯 주입점 구현
+- [x] 쿠팡 제휴 영역과 분리된 독립 광고 섹션으로 재배치
+- [x] `.env.example` 및 README에 슬롯 입력 경로 정리
+- [x] lint / 단위 테스트 / build 검증
+- [x] 결과를 `implementation_plan.md`와 `walkthrough.md`에 기록
+
+## 2026-03-30 쿠팡 제휴 영역과 AdSense 겹침 영향 확인
+
+- [x] AdSense 공식 문서에서 타 광고 네트워크 동시 노출 가능 여부 확인
+- [x] Ad placement 정책에서 겹침/혼동 가능 배치 기준 확인
+- [x] 현재 `loopincode.com` 구조와 기존 관찰 결과 기준으로 원인 해석 정리
+- [x] 점검 결과를 `implementation_plan.md`와 `walkthrough.md`에 기록

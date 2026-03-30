@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { GoogleAdSenseSlot } from '@/components/google-adsense-slot'
 
 const CodeDirectoryPage = lazy(() =>
   import('@/features/eligibility/components/code-directory-page').then((m) => ({
@@ -231,6 +232,9 @@ const brandAssets = {
   symbol: '/brand/magok-codefinder-symbol.svg',
   wordmark: '/brand/magok-codefinder-logo-horizontal.svg',
 } as const
+
+const homeInlineAdSlotId =
+  import.meta.env.VITE_ADSENSE_SLOT_HOME_INLINE?.trim() ?? ''
 
 interface HashState {
   view: AppView
@@ -1664,6 +1668,14 @@ function HomeSections({
           ))}
         </div>
       </section>
+
+      <GoogleAdSenseSlot
+        slotId={homeInlineAdSlotId}
+        title="상담 준비에 도움이 되는 스폰서 정보"
+        description="쿠팡 제휴 링크와는 분리된 독립 광고 영역입니다. AdSense Display ads 슬롯이 연결되면 이 위치에 반응형 광고가 표시됩니다."
+        className="rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6"
+        showDiagnostics={import.meta.env.DEV}
+      />
 
       <section
         id="affiliate"
