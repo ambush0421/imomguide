@@ -1,3 +1,83 @@
+## 2026-03-30 AdSense 정책 위반 대응 계획
+
+### 목표
+
+- Google 정책 위반 가능성이 큰 페이지 구조를 코드베이스 기준으로 줄여, 애드센스 검토에서 문제 될 수 있는 얇은 콘텐츠와 과도한 광고/제휴 노출을 정리한다.
+- 홈 화면의 수익화 요소는 사용자 콘텐츠보다 앞서 보이지 않도록 재구성한다.
+- 공개 색인 범위를 실제로 가치가 있는 페이지 중심으로 줄이고, `sitemap`/`robots`/정적 export가 그 축소 범위를 그대로 반영하도록 맞춘다.
+
+### 참고한 정책 문서
+
+1. Google Publisher Policies `More ads or paid promotional material than publisher-content`
+   - 광고나 유료 홍보물이 게시자 콘텐츠보다 많거나 앞서는 화면에는 Google 광고를 허용하지 않는다.
+2. Google Publisher Policies `Google-served ads on screens without publisher-content`
+   - 게시자 콘텐츠가 없거나 가치가 낮은 화면에 Google 광고를 두면 안 된다.
+3. Search Console Help `Thin content with little or no added value`
+   - thin affiliate pages, doorway pages, 부가가치가 거의 없는 중복/얕은 페이지는 스팸 정책 위반 대상이 될 수 있다.
+
+### 현재 구조 진단
+
+1. 홈 화면 [`src/App.tsx`](C:\projects\magok\src\App.tsx)에는 AdSense 슬롯 [`src/components/google-adsense-slot.tsx`](C:\projects\magok\src\components\google-adsense-slot.tsx)과 쿠팡 제휴 섹션이 모두 남아 있다.
+   - 제휴 섹션은 현재도 홈 본문 안에서 실제 외부 위젯 `iframe` 4개와 외부 제휴 링크를 제공한다.
+   - 정책 문서 기준으로는 "게시자 콘텐츠 대비 유료 홍보 요소 비중"과 "광고가 콘텐츠보다 먼저 눈에 띄는지"를 보수적으로 다루는 편이 안전하다.
+2. 정적 SEO export는 현재 공개 범위를 과도하게 넓힌 상태다.
+   - [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts) 실행 결과 `public/guides` 467개, `public/faq` 1401개, `public/library` 2개, `public/updates` 5개가 생성된다.
+   - [`public/sitemaps/guides.xml`](C:\projects\magok\public\sitemaps\guides.xml)과 [`public/sitemaps/faq.xml`](C:\projects\magok\public\sitemaps\faq.xml)은 이 대량 페이지를 전부 색인 대상으로 제출하고 있다.
+3. 가이드/FAQ 페이지는 대부분 같은 템플릿에 요약 문장만 바뀌는 구조라 정책상 얇은 콘텐츠로 해석될 여지가 크다.
+   - 예: [`public/guides/63112/index.html`](C:\projects\magok\public\guides\63112\index.html)은 구역별 verdict와 요약 FAQ만 템플릿으로 반복한다.
+   - 예: [`public/faq/63112-faq-1/index.html`](C:\projects\magok\public\faq\63112-faq-1\index.html)은 가이드 본문을 사실상 한 문장으로 다시 노출하는 구조다.
+   - 특히 FAQ 1401개는 가이드 내용을 분절 재포장한 페이지에 가까워, `little or no added value` 신호를 줄 가능성이 높다.
+4. `robots.txt`와 sitemap index도 현재 공개 범위를 모두 열어 두고 있다.
+   - [`public/robots.txt`](C:\projects\magok\public\robots.txt)은 전체 허용 상태다.
+   - [`public/sitemap.xml`](C:\projects\magok\public\sitemap.xml)은 guides/faq/library/updates sitemap을 모두 노출한다.
+5. 작업 지시에서 먼저 읽으라고 한 `Codex_System_Prompt.md`, `GEMINI.md`는 저장소에서 찾지 못했다. 이번 계획은 실제 확인 가능한 소스와 사용자 제공 정책 링크를 기준으로 세운다.
+
+### 구현 방향
+
+1. 홈 수익화 요소 축소
+   - [`src/App.tsx`](C:\projects\magok\src\App.tsx)에서 홈 AdSense 슬롯과 쿠팡 제휴 섹션을 정책 대응 모드에 맞게 제거하거나 기본 비노출 처리한다.
+   - 단순 CSS 숨김이 아니라 렌더 경로 자체를 정리해, 빌드 산출물과 사용자 화면에서 모두 수익화 노출이 사라지도록 맞춘다.
+   - 관련 안내 문구와 업데이트 로그의 제휴 홍보성 표현도 함께 재검토한다.
+2. 얇은 공개 페이지 대폭 축소
+   - FAQ 상세 페이지 생성은 중단하는 쪽을 우선 검토한다.
+   - 가이드 상세 페이지는 `FEATURED_GUIDE_CODES` 같은 소수의 실제 대표 업종만 공개 대상으로 제한하고, 나머지는 앱 내부 탐색용 데이터로만 유지한다.
+   - 가이드 색인 페이지도 축소된 공개 집합만 보여 주도록 바꾼다.
+3. 정적 export와 색인 파일 재정렬
+   - [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts)와 [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)를 수정해, 실제 공개하려는 고품질 페이지 집합만 생성하도록 바꾼다.
+   - `faq.xml`, `guides.xml`, sitemap index, 필요 시 `robots.txt`를 축소된 공개 범위 기준으로 다시 생성한다.
+4. 남겨지는 페이지 품질 보강
+   - 소수의 공개 가이드에는 단순 verdict 나열 대신 "이 업종을 왜 먼저 보는지", "실무에서 확인할 증빙/주의점", "앱에서 이어서 확인할 행동" 같은 더 명확한 사용자 가치 문장을 보강한다.
+   - 공개 페이지 CTA도 해시 링크 재사용 수준에 머무르지 않게, 앱 내부 탐색으로 자연스럽게 이어지는 문구와 구조를 재정리한다.
+5. 회귀 검증
+   - 정적 export 관련 테스트와 필요한 UI 테스트를 갱신한다.
+   - `npm run lint`, `npm run test`, `npm run build`로 검증한다.
+
+### 예상 영향 범위
+
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx)
+- [`src/components/google-adsense-slot.tsx`](C:\projects\magok\src\components\google-adsense-slot.tsx)
+- [`src/components/google-adsense-slot.test.tsx`](C:\projects\magok\src\components\google-adsense-slot.test.tsx)
+- [`src/features/guides/data/guide-catalog.ts`](C:\projects\magok\src\features\guides\data\guide-catalog.ts)
+- [`src/features/guides/components/guide-page.tsx`](C:\projects\magok\src\features\guides\components\guide-page.tsx)
+- [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)
+- [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts)
+- [`public/robots.txt`](C:\projects\magok\public\robots.txt)
+- `public/guides`, `public/faq`, `public/sitemaps/*` 재생성 산출물
+- `docs/codex-brain/task.md`
+- 승인 후 `docs/codex-brain/walkthrough.md`
+
+### 승인 후 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+### 메모
+
+1. 현재 가장 큰 리스크는 "광고 자체가 있다"보다 "얇은 템플릿 페이지를 대량 색인에 태우는 구조"에 가깝다.
+2. 따라서 이번 루프는 메타 태그 몇 개 보강보다, 공개 인벤토리 자체를 줄이는 방향이 정책 대응에 더 직접적이다.
+3. 사용자 승인이 오면 우선순위는 `FAQ 전면 축소 -> 가이드 공개 범위 축소 -> 홈 수익화 요소 축소 -> 산출물 재생성` 순으로 진행하는 것이 안전하다.
+
 ## 2026-03-26 2026-03-19 마곡 관리기본계획 변경 고시 반영
 
 ### 목표

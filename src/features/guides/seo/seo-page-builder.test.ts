@@ -13,6 +13,7 @@ import {
 } from '@/features/guides/seo/seo-page-builder'
 import {
   MAGOK_GUIDE_CATALOG,
+  PUBLIC_GUIDE_CATALOG,
   getGuideFaqIndex,
 } from '@/features/guides/data/guide-catalog'
 import { getLegalLibraryEntryDetails } from '@/features/library/data/legal-library'
@@ -30,6 +31,8 @@ describe('seo-page-builder', () => {
     expect(document.html).toContain('"@type":"FAQPage"')
     expect(document.html).toContain('"@type":"BreadcrumbList"')
     expect(document.html).toContain('71310 광고 대행업 마곡 입주 가이드')
+    expect(document.html).toContain('실무 체크포인트')
+    expect(document.html).toContain('앱에서 이어서 확인하기')
   })
 
   it('FAQ 공개 페이지 HTML에 질문별 canonical을 넣는다', () => {
@@ -52,7 +55,7 @@ describe('seo-page-builder', () => {
   })
 
   it('가이드 색인과 사이트맵 XML을 만들 수 있다', () => {
-    const guideIndex = buildGuideIndexSeoDocument(MAGOK_GUIDE_CATALOG.slice(0, 2))
+    const guideIndex = buildGuideIndexSeoDocument(PUBLIC_GUIDE_CATALOG.slice(0, 2))
     const sitemap = buildSitemapXml([
       {
         url: 'https://loopincode.com/',
@@ -69,6 +72,19 @@ describe('seo-page-builder', () => {
     expect(guideIndex.html).toContain('마곡 업종별 입주 가이드 모음')
     expect(sitemap).toContain('<loc>https://loopincode.com/</loc>')
     expect(sitemap).toContain('<loc>https://loopincode.com/guides/</loc>')
+  })
+
+  it('공개 가이드 카탈로그는 전체 카탈로그보다 작은 대표 집합만 노출한다', () => {
+    expect(PUBLIC_GUIDE_CATALOG.length).toBeGreaterThan(0)
+    expect(PUBLIC_GUIDE_CATALOG.length).toBeLessThan(MAGOK_GUIDE_CATALOG.length)
+    expect(PUBLIC_GUIDE_CATALOG.map((entry) => entry.code)).toEqual([
+      '71310',
+      '72121',
+      '63111',
+      '63112',
+      '70201',
+      '72922',
+    ])
   })
 
   it('사이트맵 인덱스 XML을 만들 수 있다', () => {

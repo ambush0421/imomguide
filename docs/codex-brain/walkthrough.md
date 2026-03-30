@@ -1,5 +1,66 @@
 # 입주가능판별기 구현 결과
 
+## 2026-03-30 AdSense 정책 위반 대응(얇은 콘텐츠 + 광고/제휴 축소)
+
+### 반영 내용
+
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx)에서 홈 본문에 있던 AdSense 슬롯과 쿠팡 제휴 섹션 렌더 경로를 제거했다.
+- 같은 파일 기준으로 광고/제휴 관련 상태, 토글 핸들러, 외부 위젯 `iframe` 로딩 로직도 함께 정리해 공개 화면에서 수익화 요소가 보이지 않도록 맞췄다.
+- [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts)를 수정해 FAQ 정적 페이지 생성을 중단하고, 공개 가이드도 대표 업종 6개만 export 하도록 축소했다.
+- [`src/features/guides/data/guide-catalog.ts`](C:\projects\magok\src\features\guides\data\guide-catalog.ts)에 `PUBLIC_GUIDE_CATALOG`를 추가해 "앱 내부 전체 가이드 데이터"와 "검색엔진에 공개할 대표 가이드 집합"을 분리했다.
+- [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)에서 대표 공개 가이드에 `실무 체크포인트`, `앱에서 이어서 확인하기` 섹션을 추가해 남겨지는 페이지의 설명 밀도를 보강했다.
+- [`README.md`](C:\projects\magok\README.md)와 [`.env.example`](C:\projects\magok\.env.example)에서 더 이상 쓰지 않는 AdSense 환경변수 안내를 제거하고, 현재 정책 대응 상태를 문서화했다.
+- 빌드 prebuild 결과 `public/faq` 디렉터리가 제거되고, `public/sitemap.xml`에서 FAQ sitemap 제출도 빠지도록 재생성됐다.
+
+### 구현 파일
+
+- `src/App.tsx`
+- `src/App.test.tsx`
+- `src/features/guides/data/guide-catalog.ts`
+- `src/features/guides/seo/seo-page-builder.ts`
+- `src/features/guides/seo/seo-page-builder.test.ts`
+- `scripts/export-magok-seo-pages.mts`
+- `README.md`
+- `.env.example`
+- `public/guides/*`
+- `public/sitemap.xml`
+- `public/sitemaps/core.xml`
+- `public/sitemaps/guides.xml`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`15 passed`, `127 passed`)
+- `build` 통과
+- `export:seo-pages` 결과 `6 guide pages`, `2 library pages`, `5 update pages`만 `public/`에 재생성
+- `public/faq` 제거 확인
+- `public/guides` 대표 공개 가이드 디렉터리 수 `6`개 확인
+- `public/sitemap.xml`에서 `faq.xml` 제외 확인
+- `public/sitemaps/guides.xml`의 `<loc>` 항목 수 `6`개 확인
+- `public/guides/71310/index.html`에 `실무 체크포인트`, `앱에서 이어서 확인하기` 섹션 반영 확인
+- 빌드 시 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+### 배포 후 수동 마무리
+
+- [ ] `https://loopincode.com/sitemap.xml`과 대표 가이드 URL이 새 sitemap/export 결과와 일치하는지 확인
+- [ ] 기존 `/faq/*` URL이 404 또는 비색인 상태로 처리되는지 확인
+- [ ] Search Console에서 `/faq/` 경로 제거 요청과 sitemap 재제출 진행
+- [ ] AdSense 재검토는 새 배포와 색인 반영 확인 후 진행하고, 승인 전까지 공개 수익화 요소는 다시 켜지 않음
+
+---
+
 ## 2026-03-26 2026-03-19 마곡 관리기본계획 변경 고시 반영
 
 ### 반영 내용

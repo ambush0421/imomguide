@@ -1,3 +1,20 @@
+## 2026-03-30 AdSense 정책 위반 대응(얇은 콘텐츠 + 광고/제휴 축소)
+
+- [x] 사용자 제공 Google 정책 링크 검토
+- [x] 현재 홈 광고/제휴 구조와 정적 SEO 산출물 구조 분석
+- [x] `public/guides` / `public/faq` 대량 생성 현황 확인
+- [x] `docs/codex-brain/implementation_plan.md` 승인 대기용 계획 작성
+- [x] 사용자 승인 대기
+- [x] 홈의 AdSense/쿠팡 제휴 노출 정책 대응 방향으로 재구성
+- [x] 대량 생성된 가이드/FAQ 공개 페이지를 정책 친화적 범위로 축소
+- [x] sitemap / robots / SEO export 흐름을 축소된 공개 범위에 맞게 재정렬
+- [x] 남겨지는 공개 페이지의 품질 신호(콘텐츠 밀도, 내부 연결, 안내 문구) 보강
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] 빌드 산출물 기준 정책 대응 체크(`public/faq` 제거, `guides.xml` 6개, FAQ sitemap 제외) 확인
+- [x] `docs/codex-brain/walkthrough.md` 기록
+
 ## 2026-03-26 2026-03-19 마곡 관리기본계획 변경 고시 반영
 
 - [x] 사용자 제공 PDF(`서울특별시고시 제2026-144호`, `2026-03-19`) 핵심 내용 확인

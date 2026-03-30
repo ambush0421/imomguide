@@ -303,12 +303,18 @@ export const FEATURED_GUIDE_ENTRIES = FEATURED_GUIDE_CODES.map((code) =>
   MAGOK_GUIDE_CATALOG_BY_CODE.get(code),
 ).filter((entry): entry is MagokGuideEntry => Boolean(entry))
 
+export const PUBLIC_GUIDE_CATALOG = [...FEATURED_GUIDE_ENTRIES]
+
 export function getGuideEntryByCode(code: string) {
   return MAGOK_GUIDE_CATALOG_BY_CODE.get(code.trim()) ?? null
 }
 
 export function getFeaturedGuideEntries(limit = 3) {
   return FEATURED_GUIDE_ENTRIES.slice(0, limit)
+}
+
+export function getPublicGuideEntries(limit = PUBLIC_GUIDE_CATALOG.length) {
+  return PUBLIC_GUIDE_CATALOG.slice(0, limit)
 }
 
 export function getGuideFaqIndex() {

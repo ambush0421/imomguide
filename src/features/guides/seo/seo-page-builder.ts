@@ -300,6 +300,11 @@ function buildGuideSchema(guide: MagokGuideEntry, canonicalUrl: string) {
 }
 
 function renderGuideBody(guide: MagokGuideEntry, canonicalUrl: string) {
+  const practicalChecks = [
+    `${guide.recommendedZoneLabel} 기준으로 먼저 검토하고, 다른 구역 결과와 차이가 나는지 함께 비교합니다.`,
+    ...guide.zoneSummaries.flatMap((zoneSummary) => zoneSummary.notes.slice(0, 1)),
+  ].filter((item, index, items) => item && items.indexOf(item) === index)
+
   const zoneCards = guide.zoneSummaries
     .map(
       (zoneSummary) => `
@@ -351,6 +356,14 @@ function renderGuideBody(guide: MagokGuideEntry, canonicalUrl: string) {
     )
     .join('')
 
+  const followUpActions = [
+    `${guide.code} 코드를 기준으로 앱에서 조건 보정과 구역 비교를 다시 확인합니다.`,
+    `${guide.legalBases[0]?.citation ?? '관련 법령'}부터 읽고 실제 사업 설명과 맞는지 검토합니다.`,
+    guide.relatedCodes[0]
+      ? `연관 코드 ${guide.relatedCodes[0].code}와 비교해 더 가까운 설명이 있는지 확인합니다.`
+      : '연관 코드와 비교해 더 가까운 설명이 있는지 확인합니다.',
+  ]
+
   return `
     <section class="hero">
       <div class="eyebrow">업종별 입주 가이드</div>
@@ -377,6 +390,20 @@ function renderGuideBody(guide: MagokGuideEntry, canonicalUrl: string) {
     </section>
 
     <section class="section">
+      <h2>실무 체크포인트</h2>
+      <div class="grid two">
+        ${practicalChecks
+          .map(
+            (item) => `
+          <article class="card">
+            <p>${escapeHtml(item)}</p>
+          </article>`,
+          )
+          .join('')}
+      </div>
+    </section>
+
+    <section class="section">
       <h2>자주 묻는 질문</h2>
       ${faqItems}
     </section>
@@ -389,6 +416,11 @@ function renderGuideBody(guide: MagokGuideEntry, canonicalUrl: string) {
     <section class="section">
       <h2>연관 코드</h2>
       <div class="link-row">${relatedLinks}</div>
+      <h2 style="margin-top: 24px;">앱에서 이어서 확인하기</h2>
+      <ul>
+        ${followUpActions.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+      </ul>
+      <p><a class="text-link" href="${SITE_URL}/#guides/${guide.code}">앱에서 이 가이드 열기</a></p>
       <p><a class="text-link" href="${SITE_URL}/#directory">전수 코드 사전으로 돌아가기</a></p>
       <p><a class="text-link" href="${canonicalUrl}">${escapeHtml(canonicalUrl)}</a></p>
     </section>

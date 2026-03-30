@@ -3,9 +3,7 @@ import {
   ArrowRight,
   BookOpenText,
   CheckCircle2,
-  ChevronDown,
   Clock3,
-  ExternalLink,
   FileSearch,
   LibraryBig,
   Lock,
@@ -20,7 +18,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { GoogleAdSenseSlot } from '@/components/google-adsense-slot'
 
 const CodeDirectoryPage = lazy(() =>
   import('@/features/eligibility/components/code-directory-page').then((m) => ({
@@ -175,53 +172,6 @@ const heroBenefitCards = [
   },
 ] as const
 
-const coupangDisclosureText =
-  '이 게시물은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.'
-
-const affiliateActions = [
-  {
-    title: '참고 상품 모음 보기',
-    href: 'https://link.coupang.com/a/d7nWco',
-    variant: 'secondary' as const,
-  },
-  {
-    title: '추가 참고 링크 보기',
-    href: 'https://link.coupang.com/a/d7n7ta',
-    variant: 'outline' as const,
-  },
-]
-
-const affiliateWidgets = [
-  {
-    src: 'https://coupa.ng/clX5tE',
-    href: 'https://link.coupang.com/a/d7p5U5',
-    title: '쿠팡 파트너스 추천 위젯 모바일기기',
-    badge: '모바일 기기',
-    headline: '핸드폰과 태블릿',
-  },
-  {
-    src: 'https://coupa.ng/clX3qg',
-    href: 'https://link.coupang.com/a/d7nWcq',
-    title: '쿠팡 파트너스 추천 위젯 생수',
-    badge: '탕비실 추천',
-    headline: '생수와 비품',
-  },
-  {
-    src: 'https://coupa.ng/clX5vK',
-    href: 'https://link.coupang.com/a/d7p79Q',
-    title: '쿠팡 파트너스 추천 위젯 업무기기',
-    badge: '업무 기기',
-    headline: '디지털 업무 기기',
-  },
-  {
-    src: 'https://coupa.ng/clX5EI',
-    href: 'https://link.coupang.com/a/d7qiaA',
-    title: '쿠팡 파트너스 추천 위젯 소모품',
-    badge: '사무 소모품',
-    headline: '복사용지와 소모품',
-  },
-] as const
-
 const footerFacts = [
   '운영: Loopin Lab',
   '문의: contact.loopinlab@gmail.com',
@@ -232,9 +182,6 @@ const brandAssets = {
   symbol: '/brand/magok-codefinder-symbol.svg',
   wordmark: '/brand/magok-codefinder-logo-horizontal.svg',
 } as const
-
-const homeInlineAdSlotId =
-  import.meta.env.VITE_ADSENSE_SLOT_HOME_INLINE?.trim() ?? ''
 
 interface HashState {
   view: AppView
@@ -527,10 +474,6 @@ function HomeSections({
     status === 'loading' || status === 'error' || canShowResult
   const safeCurrentStep =
     currentStep === 'result' && !canStayOnResultStep ? 'adjust' : currentStep
-  const [isAffiliateExpanded, setIsAffiliateExpanded] = useState(true)
-  const [affiliateWidgetLoadedMap, setAffiliateWidgetLoadedMap] = useState<
-    Record<string, boolean>
-  >({})
   const [viewportTier, setViewportTier] = useState<ViewportTier>('desktop')
   const activeDiscoverScreen =
     discoveryStatus === 'idle' &&
@@ -580,8 +523,6 @@ function HomeSections({
       : input.zoneType === 'knowledgeIndustryCenter'
         ? '지식산업센터'
         : '지원시설구역'
-  const canLoadAffiliateEmbeds =
-    typeof navigator === 'undefined' || !navigator.userAgent.includes('jsdom')
   const isDesktopViewport = viewportTier === 'desktop'
   const isCompactWizardFocused = isWizardFocused && !isDesktopViewport
   const isDesktopWizardFocused = isWizardFocused && isDesktopViewport
@@ -709,27 +650,6 @@ function HomeSections({
       discoverScreen: 'compose',
       historyMode: 'push',
     })
-  }
-
-  function handleAffiliateWidgetLoad(title: string) {
-    setAffiliateWidgetLoadedMap((current) => {
-      if (current[title]) {
-        return current
-      }
-
-      return {
-        ...current,
-        [title]: true,
-      }
-    })
-  }
-
-  function handleAffiliateToggle() {
-    if (isAffiliateExpanded) {
-      setAffiliateWidgetLoadedMap({})
-    }
-
-    setIsAffiliateExpanded((current) => !current)
   }
 
   function handleWizardStepSelect(step: EligibilityStep) {
@@ -1669,181 +1589,6 @@ function HomeSections({
         </div>
       </section>
 
-      <GoogleAdSenseSlot
-        slotId={homeInlineAdSlotId}
-        title="상담 준비에 도움이 되는 스폰서 정보"
-        description="쿠팡 제휴 링크와는 분리된 독립 광고 영역입니다. AdSense Display ads 슬롯이 연결되면 이 위치에 반응형 광고가 표시됩니다."
-        className="rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6"
-        showDiagnostics={import.meta.env.DEV}
-      />
-
-      <section
-        id="affiliate"
-        className="rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-6"
-      >
-        <div className="flex flex-col gap-4">
-          <div className="max-w-3xl">
-            <Badge variant="muted">사무실 준비 참고 링크</Badge>
-            <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--foreground)] sm:text-[2rem]">
-              사무실 준비에 자주 찾는 상품을 한 번에 확인할 수 있습니다
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[var(--foreground-muted)]">
-              사무기기, 탕비용품, 소모품처럼 상담 뒤에 자주 찾게 되는 품목을 모아둔
-              외부 링크입니다. 위젯이 보이지 않더라도 새 창으로 바로 확인할 수 있습니다.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-[18px] border border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]">
-          <button
-            type="button"
-            onClick={handleAffiliateToggle}
-            className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-            aria-expanded={isAffiliateExpanded}
-            aria-controls="affiliate-links-panel"
-          >
-            <div>
-              <div className="text-sm font-semibold text-[var(--foreground)]">
-                참고 상품 {isAffiliateExpanded ? '숨기기' : '보기'}
-              </div>
-              <p className="mt-1 text-xs leading-5 text-[var(--foreground-muted)]">
-                사무실 준비에 자주 찾는 품목을 빠르게 확인할 수 있습니다.
-              </p>
-            </div>
-            <ChevronDown
-              className={`size-4 text-[var(--foreground-subtle)] transition-transform ${
-                isAffiliateExpanded ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
-
-          {isAffiliateExpanded ? (
-            <div
-              id="affiliate-links-panel"
-              className="border-t border-[var(--border)] px-4 py-4 sm:px-5 sm:py-5"
-            >
-              <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:items-start">
-                <Card className="border-[var(--border)] bg-[var(--surface-soft)] shadow-[var(--shadow-sm)]">
-                  <CardContent className="space-y-4 p-5">
-                    <div>
-                      <div className="text-sm font-semibold text-[var(--foreground)]">
-                        사무실 준비 참고
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                        상담이 끝난 뒤 바로 찾는 품목만 모아뒀습니다. 자세한 상품 정보는
-                        각 카드 아래 버튼이나 쿠팡 페이지에서 확인할 수 있습니다.
-                      </p>
-                    </div>
-
-                    <div className="rounded-[14px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4">
-                      <div className="flex items-start gap-3">
-                        <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-strong)] shadow-[var(--shadow-sm)]">
-                          <ExternalLink className="size-4" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[var(--foreground)]">
-                            제휴 링크 안내
-                          </div>
-                          <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-                            {coupangDisclosureText}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {affiliateActions.map((item) => (
-                        <Button key={item.title} asChild variant={item.variant} size="sm">
-                          <a
-                            href={item.href}
-                            target="_blank"
-                            rel="nofollow sponsored noopener"
-                            referrerPolicy="unsafe-url"
-                          >
-                            {item.title}
-                          </a>
-                        </Button>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-4">
-                  {affiliateWidgets.map((widget) => (
-                    <Card
-                      key={widget.src}
-                      className="border-[var(--border)] bg-[var(--surface-strong)] shadow-[var(--shadow-sm)]"
-                    >
-                      <CardContent className="flex flex-col p-4 sm:p-5">
-                        <div className="flex items-start justify-between gap-2">
-                          <Badge
-                            variant="muted"
-                            className="shrink-0 whitespace-nowrap px-2.5 py-1 text-[11px] tracking-normal sm:text-xs"
-                          >
-                            {widget.badge}
-                          </Badge>
-                          <span className="shrink-0 whitespace-nowrap pt-1 text-[11px] text-[var(--foreground-subtle)] sm:text-xs">
-                            외부 상품
-                          </span>
-                        </div>
-                        <div className="mt-3 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--foreground)] sm:text-base">
-                          {widget.headline}
-                        </div>
-                        <div className="relative mt-3 flex min-h-[264px] items-center justify-center rounded-[14px] border border-[var(--border)] bg-[var(--surface-soft)] px-2 py-3">
-                          <div
-                            className={`pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] border border-dashed border-[var(--border)] bg-[var(--surface-strong)] px-4 text-center transition-opacity ${
-                              affiliateWidgetLoadedMap[widget.title] ? 'opacity-0' : 'opacity-100'
-                            }`}
-                            aria-hidden={affiliateWidgetLoadedMap[widget.title]}
-                          >
-                            <div className="space-y-2 text-xs leading-5 text-[var(--foreground-muted)]">
-                              <div className="font-semibold text-[var(--foreground)]">
-                                상품 위젯을 불러오는 중입니다.
-                              </div>
-                              <p>보이지 않으면 아래 버튼으로 새 창에서 확인하세요.</p>
-                            </div>
-                          </div>
-                          <iframe
-                            src={canLoadAffiliateEmbeds ? widget.src : undefined}
-                            title={widget.title}
-                            width="120"
-                            height="240"
-                            frameBorder="0"
-                            scrolling="no"
-                            referrerPolicy="unsafe-url"
-                            loading="lazy"
-                            onLoad={() => handleAffiliateWidgetLoad(widget.title)}
-                            className={`relative z-10 overflow-hidden rounded-[12px] bg-[var(--surface-strong)] transition-opacity ${
-                              affiliateWidgetLoadedMap[widget.title] ? 'opacity-100' : 'opacity-0'
-                            }`}
-                          />
-                        </div>
-                        <div className="mt-3 space-y-2">
-                          <Button asChild variant="outline" size="sm" className="w-full">
-                            <a
-                              href={widget.href}
-                              target="_blank"
-                              rel="nofollow sponsored noopener"
-                              referrerPolicy="unsafe-url"
-                              aria-label={`${widget.headline} 새 창에서 보기`}
-                            >
-                              {widget.headline} 새 창에서 보기
-                              <ExternalLink className="size-4" />
-                            </a>
-                          </Button>
-                          <p className="text-xs leading-5 text-[var(--foreground-muted)]">
-                            위젯이 비어 보이면 새 창으로 바로 확인할 수 있습니다.
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </section>
         </>
       ) : null}
     </>

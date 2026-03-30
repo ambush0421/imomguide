@@ -3,12 +3,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import {
-  MAGOK_GUIDE_CATALOG,
-  getGuideFaqIndex,
+  PUBLIC_GUIDE_CATALOG,
 } from '../src/features/guides/data/guide-catalog'
 import {
-  buildFaqIndexSeoDocument,
-  buildFaqSeoDocument,
   buildGuideIndexSeoDocument,
   buildGuideSeoDocument,
   buildLibraryDetailSeoDocument,
@@ -32,18 +29,17 @@ async function writeSeoPage(rootDir: string, filePath: string, html: string) {
 }
 
 async function main() {
-  const faqIndex = getGuideFaqIndex()
   const libraryEntries = getLegalLibraryEntryDetails()
-  const guideDocuments = MAGOK_GUIDE_CATALOG.map((guide) => buildGuideSeoDocument(guide))
-  const faqDocuments = faqIndex.map((faqEntry) => buildFaqSeoDocument(faqEntry))
+  const guideDocuments = PUBLIC_GUIDE_CATALOG.map((guide) =>
+    buildGuideSeoDocument(guide),
+  )
   const libraryDocuments = libraryEntries.map((entry) =>
     buildLibraryDetailSeoDocument(entry),
   )
   const updateDocuments = UPDATE_LOG_ENTRIES.map((entry) =>
     buildUpdateDetailSeoDocument(entry),
   )
-  const guideIndexDocument = buildGuideIndexSeoDocument(MAGOK_GUIDE_CATALOG)
-  const faqIndexDocument = buildFaqIndexSeoDocument(faqIndex)
+  const guideIndexDocument = buildGuideIndexSeoDocument(PUBLIC_GUIDE_CATALOG)
   const libraryIndexDocument = buildLibraryIndexSeoDocument(libraryEntries)
   const updatesIndexDocument = buildUpdatesIndexSeoDocument(UPDATE_LOG_ENTRIES)
 
@@ -54,15 +50,10 @@ async function main() {
   await rm(path.join(publicDir, 'sitemaps'), { recursive: true, force: true })
 
   await writeSeoPage(publicDir, guideIndexDocument.filePath, guideIndexDocument.html)
-  await writeSeoPage(publicDir, faqIndexDocument.filePath, faqIndexDocument.html)
   await writeSeoPage(publicDir, libraryIndexDocument.filePath, libraryIndexDocument.html)
   await writeSeoPage(publicDir, updatesIndexDocument.filePath, updatesIndexDocument.html)
 
   for (const document of guideDocuments) {
-    await writeSeoPage(publicDir, document.filePath, document.html)
-  }
-
-  for (const document of faqDocuments) {
     await writeSeoPage(publicDir, document.filePath, document.html)
   }
 
@@ -83,14 +74,8 @@ async function main() {
     },
     {
       url: guideIndexDocument.url,
-      lastmod: '2026-03-20',
+      lastmod: '2026-03-30',
       priority: '0.9',
-      changefreq: 'weekly',
-    },
-    {
-      url: faqIndexDocument.url,
-      lastmod: '2026-03-20',
-      priority: '0.8',
       changefreq: 'weekly',
     },
     {
@@ -112,15 +97,6 @@ async function main() {
       url: document.url,
       lastmod: '2026-03-20',
       priority: '0.8',
-      changefreq: 'weekly',
-    })),
-  )
-
-  const faqSitemap = buildSitemapXml(
-    faqDocuments.map((document) => ({
-      url: document.url,
-      lastmod: document.filePath.includes('/index.html') ? '2026-03-20' : '2026-03-20',
-      priority: '0.7',
       changefreq: 'weekly',
     })),
   )
@@ -150,11 +126,7 @@ async function main() {
     },
     {
       url: 'https://loopincode.com/sitemaps/guides.xml',
-      lastmod: '2026-03-20',
-    },
-    {
-      url: 'https://loopincode.com/sitemaps/faq.xml',
-      lastmod: '2026-03-20',
+      lastmod: '2026-03-30',
     },
     {
       url: 'https://loopincode.com/sitemaps/library.xml',
@@ -168,13 +140,12 @@ async function main() {
 
   await writeSeoPage(publicDir, 'sitemaps/core.xml', coreSitemap)
   await writeSeoPage(publicDir, 'sitemaps/guides.xml', guideSitemap)
-  await writeSeoPage(publicDir, 'sitemaps/faq.xml', faqSitemap)
   await writeSeoPage(publicDir, 'sitemaps/library.xml', librarySitemap)
   await writeSeoPage(publicDir, 'sitemaps/updates.xml', updatesSitemap)
   await writeFile(path.join(publicDir, 'sitemap.xml'), sitemapIndex, 'utf8')
 
   console.log(
-    `exported ${guideDocuments.length} guide pages, ${faqDocuments.length} faq pages, ${libraryDocuments.length} library pages, ${updateDocuments.length} update pages to public/`,
+    `exported ${guideDocuments.length} guide pages, ${libraryDocuments.length} library pages, ${updateDocuments.length} update pages to public/`,
   )
 }
 

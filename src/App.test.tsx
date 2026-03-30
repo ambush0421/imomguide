@@ -75,7 +75,6 @@ describe('App', () => {
 
   it('초기에는 컨설턴트용 히어로 검색과 주요 안내 섹션이 함께 보인다', async () => {
     render(<App />)
-    const user = userEvent.setup()
     const finderSection = screen.getByRole('region', {
       name: '업종코드 분석 위저드',
     })
@@ -126,33 +125,12 @@ describe('App', () => {
     expect(within(finderSection).getByText('이렇게 시작하세요')).toBeInTheDocument()
     expect(within(finderSection).getAllByText('검색 후 활성화').length).toBeGreaterThan(0)
     expect(screen.getByText('마곡 입주 가능성을 근거와 함께 확인합니다.')).toBeInTheDocument()
-    expect(screen.getByText('사무실 준비 참고 링크')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /참고 상품 숨기기/i })).toBeInTheDocument()
-    expect(screen.getByText('제휴 링크 안내')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 모바일기기')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 생수')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 업무기기')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 소모품')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '핸드폰과 태블릿 새 창에서 보기' })).toBeInTheDocument()
-    expect(screen.queryAllByText(/쿠팡 파트너스 사이드 배너/i)).toHaveLength(0)
-
-    await user.click(screen.getByRole('button', { name: /참고 상품 숨기기/i }))
-
+    expect(screen.queryByText('사무실 준비 참고 링크')).not.toBeInTheDocument()
     expect(screen.queryByText('제휴 링크 안내')).not.toBeInTheDocument()
     expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 모바일기기')).not.toBeInTheDocument()
-    expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 생수')).not.toBeInTheDocument()
-    expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 업무기기')).not.toBeInTheDocument()
-    expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 소모품')).not.toBeInTheDocument()
+    expect(screen.queryByText('상담 준비에 도움이 되는 스폰서 정보')).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /참고 상품 보기/i }))
-
-    expect(screen.getByText('제휴 링크 안내')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 모바일기기')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 생수')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 업무기기')).toBeInTheDocument()
-    expect(screen.getByTitle('쿠팡 파트너스 추천 위젯 소모품')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('tab', { name: '지식산업센터' }))
+    await userEvent.setup().click(screen.getByRole('tab', { name: '지식산업센터' }))
     expect(screen.getByText('시행령 제6조제2항 1~27호 대응표')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '전수 코드 사전 열기' })).toBeInTheDocument()
   })
