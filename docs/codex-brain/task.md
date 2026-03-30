@@ -15,6 +15,20 @@
 - [x] 빌드 산출물 기준 정책 대응 체크(`public/faq` 제거, `guides.xml` 6개, FAQ sitemap 제외) 확인
 - [x] `docs/codex-brain/walkthrough.md` 기록
 
+## 2026-03-30 AdSense 재검토 전 마감 조치(소프트 404 + 신뢰 페이지)
+
+- [x] 라이브 사이트 기준 남은 재검토 리스크 점검(소프트 404, 신뢰 페이지 부재, 공개 가이드 내부 링크)
+- [x] `docs/codex-brain/implementation_plan.md`에 후속 마감 계획 기록
+- [x] 공개 가이드 내부 링크를 실제 공개 집합 기준으로 제한
+- [x] 정적 신뢰 페이지(`/about`, `/contact`, `/privacy`, `/terms`) 추가
+- [x] 최상위 `404.html` 추가로 누락 URL의 SPA fallback 완화
+- [x] 홈 raw HTML 신뢰 신호 보강(`noscript` 링크 블록)
+- [x] `npm run lint`
+- [x] `npm run test`
+- [x] `npm run build`
+- [x] 배포 후 라이브 도메인에서 신뢰 페이지/404 응답 검증
+- [x] `docs/codex-brain/walkthrough.md`에 최종 검증 및 운영 체크리스트 반영
+
 ## 2026-03-26 2026-03-19 마곡 관리기본계획 변경 고시 반영
 
 - [x] 사용자 제공 PDF(`서울특별시고시 제2026-144호`, `2026-03-19`) 핵심 내용 확인

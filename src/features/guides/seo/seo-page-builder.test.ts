@@ -6,8 +6,10 @@ import {
   buildGuideIndexSeoDocument,
   buildLibraryDetailSeoDocument,
   buildLibraryIndexSeoDocument,
+  buildNotFoundSeoPage,
   buildSitemapIndexXml,
   buildSitemapXml,
+  buildStaticSeoDocuments,
   buildUpdateDetailSeoDocument,
   buildUpdatesIndexSeoDocument,
 } from '@/features/guides/seo/seo-page-builder'
@@ -33,6 +35,7 @@ describe('seo-page-builder', () => {
     expect(document.html).toContain('71310 광고 대행업 마곡 입주 가이드')
     expect(document.html).toContain('실무 체크포인트')
     expect(document.html).toContain('앱에서 이어서 확인하기')
+    expect(document.html).not.toContain('https://loopincode.com/guides/70111/')
   })
 
   it('FAQ 공개 페이지 HTML에 질문별 canonical을 넣는다', () => {
@@ -123,5 +126,20 @@ describe('seo-page-builder', () => {
     expect(updateDetail.html).toContain('최신 마곡 관리기본계획 고시(2026-144호) 반영')
     expect(updateDetail.html).toContain('서울특별시 고시문 PDF')
     expect(updateDetail.html).toContain('"isBasedOn"')
+  })
+
+  it('신뢰 페이지와 404 페이지를 만들 수 있다', () => {
+    const staticDocuments = buildStaticSeoDocuments()
+    const aboutPage = staticDocuments.find((entry) => entry.filePath === 'about/index.html')
+    const privacyPage = staticDocuments.find((entry) => entry.filePath === 'privacy/index.html')
+    const notFoundPage = buildNotFoundSeoPage()
+
+    expect(staticDocuments).toHaveLength(4)
+    expect(aboutPage?.html).toContain('마곡 코드찾기는 무엇을 하는 서비스인가요?')
+    expect(aboutPage?.html).toContain('<link rel="canonical" href="https://loopincode.com/about/" />')
+    expect(privacyPage?.html).toContain('개인정보와 이용 정보 처리 안내')
+    expect(privacyPage?.html).toContain('Google Analytics 4')
+    expect(notFoundPage).toContain('페이지를 찾을 수 없습니다')
+    expect(notFoundPage).toContain('<meta name="robots" content="noindex,nofollow" />')
   })
 })

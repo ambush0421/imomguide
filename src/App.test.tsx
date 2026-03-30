@@ -129,6 +129,15 @@ describe('App', () => {
     expect(screen.queryByText('제휴 링크 안내')).not.toBeInTheDocument()
     expect(screen.queryByTitle('쿠팡 파트너스 추천 위젯 모바일기기')).not.toBeInTheDocument()
     expect(screen.queryByText('상담 준비에 도움이 되는 스폰서 정보')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '서비스 소개' })).toHaveAttribute('href', '/about/')
+    expect(screen.getByRole('link', { name: '문의' })).toHaveAttribute('href', '/contact/')
+    expect(screen.getByRole('link', { name: '개인정보처리방침' })).toHaveAttribute('href', '/privacy/')
+    expect(screen.getByRole('link', { name: '이용약관' })).toHaveAttribute('href', '/terms/')
+    expect(
+      screen.getByText(
+        '공개 페이지에서는 서비스 소개, 문의, 개인정보처리방침, 이용약관을 함께 제공해 운영 정보와 책임 범위를 바로 확인할 수 있습니다.',
+      ),
+    ).toBeInTheDocument()
 
     await userEvent.setup().click(screen.getByRole('tab', { name: '지식산업센터' }))
     expect(screen.getByText('시행령 제6조제2항 1~27호 대응표')).toBeInTheDocument()

@@ -59,6 +59,68 @@ npm run build
 - [ ] Search Console에서 `/faq/` 경로 제거 요청과 sitemap 재제출 진행
 - [ ] AdSense 재검토는 새 배포와 색인 반영 확인 후 진행하고, 승인 전까지 공개 수익화 요소는 다시 켜지 않음
 
+## 2026-03-30 AdSense 재검토 전 마감 조치(소프트 404 + 신뢰 페이지)
+
+### 반영 내용
+
+- [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)에서 공개 가이드의 `연관 코드`와 후속 CTA를 `PUBLIC_GUIDE_CATALOG` 기준으로만 노출하도록 바꿔, 비공개 코드 URL로 빠지는 링크를 제거했다.
+- 같은 파일에 정적 신뢰 페이지 정의를 추가해 [`public/about/index.html`](C:\projects\magok\public\about\index.html), [`public/contact/index.html`](C:\projects\magok\public\contact\index.html), [`public/privacy/index.html`](C:\projects\magok\public\privacy\index.html), [`public/terms/index.html`](C:\projects\magok\public\terms\index.html)을 생성하도록 했다.
+- 같은 파일에 [`public/404.html`](C:\projects\magok\public\404.html) 생성용 404 SEO 문서를 추가해, 이전에 홈으로 fallback 되던 비공개 가이드 URL이 `noindex,nofollow` 404 문서로 응답하도록 했다.
+- [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts)에서 신뢰 페이지와 404 문서까지 함께 export 하도록 정리하고, [`public/sitemaps/core.xml`](C:\projects\magok\public\sitemaps\core.xml)에 신뢰 페이지 4개를 추가했다.
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx) footer에 서비스 소개/문의/개인정보처리방침/이용약관 링크와 운영 신뢰 문구를 추가했다.
+- [`index.html`](C:\projects\magok\index.html)에 `noscript` 블록을 추가해 JavaScript 렌더 전에도 서비스 설명과 주요 공개 링크를 확인할 수 있도록 보강했다.
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx), [`src/features/guides/seo/seo-page-builder.test.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.test.ts)에 신뢰 링크/404/비공개 가이드 링크 제거 회귀 테스트를 추가했다.
+
+### 구현 파일
+
+- `src/features/guides/seo/seo-page-builder.ts`
+- `src/features/guides/seo/seo-page-builder.test.ts`
+- `scripts/export-magok-seo-pages.mts`
+- `src/App.tsx`
+- `src/App.test.tsx`
+- `index.html`
+- `public/about/*`
+- `public/contact/*`
+- `public/privacy/*`
+- `public/terms/*`
+- `public/404.html`
+- `public/guides/*`
+- `public/sitemaps/core.xml`
+- `docs/codex-brain/task.md`
+- `docs/codex-brain/implementation_plan.md`
+
+### 검증 결과
+
+실행한 명령:
+
+```bash
+npm run lint
+npm run test
+npm run build
+npx wrangler pages deploy dist --project-name imomguide --branch main
+```
+
+결과:
+
+- `lint` 통과
+- `test` 통과 (`15 files`, `128 tests`)
+- `build` 통과
+- `export:seo-pages` 결과 `6 guide pages`, `2 library pages`, `5 update pages`, `4 trust pages`를 `public/`에 재생성
+- Cloudflare Pages 배포 완료: `https://ebfea440.imomguide.pages.dev`
+- 운영 도메인 `https://loopincode.com/about/`, `/contact/`, `/privacy/`, `/terms/`에서 각각 독립 title과 본문 렌더 확인
+- 운영 도메인 `https://loopincode.com/guides/70111/`에서 `페이지를 찾을 수 없습니다 | 마곡 코드찾기` title과 실제 `404` 네트워크 응답 확인
+- 운영 도메인 `https://loopincode.com/sitemaps/core.xml`에서 `/about/`, `/contact/`, `/privacy/`, `/terms/` URL 포함 확인
+- 홈 footer에서 신뢰 페이지 링크 4개 노출 확인
+- 빌드 시 `500 kB` 초과 chunk 경고는 기존과 동일하게 유지
+
+### 운영 후속 체크
+
+- [ ] Search Console에서 `/faq/` 경로 제거 요청
+- [ ] Search Console에 최신 `sitemap.xml` 재제출
+- [ ] AdSense 재검토 버튼 `문제를 수정했음을 확인합니다` 클릭
+- [ ] AdSense 승인 전까지 공개 광고/제휴 요소 비활성 유지
+- [ ] 필요 시 Search Console 색인 검사에서 `/about/`, `/contact/`, `/privacy/`, `/terms/` 재수집 요청
+
 ---
 
 ## 2026-03-26 2026-03-19 마곡 관리기본계획 변경 고시 반영

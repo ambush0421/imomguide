@@ -78,6 +78,72 @@
 2. 따라서 이번 루프는 메타 태그 몇 개 보강보다, 공개 인벤토리 자체를 줄이는 방향이 정책 대응에 더 직접적이다.
 3. 사용자 승인이 오면 우선순위는 `FAQ 전면 축소 -> 가이드 공개 범위 축소 -> 홈 수익화 요소 축소 -> 산출물 재생성` 순으로 진행하는 것이 안전하다.
 
+## 2026-03-30 AdSense 재검토 전 마감 조치 계획(소프트 404 + 신뢰 페이지)
+
+### 목표
+
+- 라이브 사이트에서 여전히 남아 있던 soft-404 성격의 200 fallback과 운영 신뢰 페이지 부재를 정리해, AdSense 재검토 전에 "실제 공개 URL 집합"과 "검색엔진이 보는 응답"을 더 일치시키는 것이다.
+- 대표 공개 가이드에서 더 이상 비공개 코드 URL을 링크하지 않도록 정리해, 사용자가 200 홈 fallback으로 빠지는 흐름을 줄인다.
+- 홈 raw HTML에도 기본 서비스 설명과 운영 페이지 링크를 남겨, JavaScript 렌더 이전 상태에서도 최소한의 신뢰 신호를 제공한다.
+
+### 현재 남은 리스크
+
+1. 라이브 `https://loopincode.com/guides/70111/`, `https://loopincode.com/guides/63910/` 같은 비공개 가이드 URL이 404 대신 홈 200으로 응답하고 있다.
+   - 크롤러 입장에서는 실제 문서가 없는 URL이 홈으로 대체되는 soft 404로 해석될 수 있다.
+2. `/about`, `/contact`, `/privacy`, `/terms`도 현재는 실페이지가 없어 홈 200 fallback으로 보인다.
+   - AdSense 검토 관점에서는 운영 주체, 문의 채널, 개인정보 처리, 이용 조건을 확인할 독립 페이지가 없는 상태다.
+3. 대표 가이드 내부 `연관 코드` 영역이 전체 카탈로그 기준으로 링크를 만들고 있어, 이미 공개에서 제외된 코드 URL로 이동할 수 있다.
+4. 홈 `index.html`의 raw HTML은 앱 루트만 두는 SPA 형태라, JavaScript 실행 전에는 실질 콘텐츠와 신뢰 링크가 거의 보이지 않는다.
+
+### 구현 방향
+
+1. 공개 가이드 내부 링크 정리
+   - [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)에서 `relatedCodes`, `다음 행동` CTA를 `PUBLIC_GUIDE_CATALOG` 기준으로 다시 필터링한다.
+   - 공개 집합에 없는 코드는 HTML 링크를 만들지 않고 안내 문장으로 대체한다.
+2. 신뢰 페이지 정적 생성
+   - 같은 SEO 빌더에 정적 페이지 정의를 추가해 `/about/`, `/contact/`, `/privacy/`, `/terms/` HTML을 직접 생성한다.
+   - 각 페이지는 독립 title, description, canonical, 본문 요약, CTA를 가진다.
+3. 404 fallback 명시
+   - [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts)에서 최상위 [`public/404.html`](C:\projects\magok\public\404.html)을 함께 생성한다.
+   - 문서에는 `noindex,nofollow`를 주고 홈/가이드/법령/업데이트/문의로 돌아가는 링크를 둔다.
+   - Cloudflare Pages 공식 동작 기준으로 top-level `404.html`이 있어야 누락 경로가 SPA 홈 fallback 대신 404 문서로 처리될 가능성이 높다.
+4. 홈 raw HTML 보강
+   - [`index.html`](C:\projects\magok\index.html)에 `noscript` 블록을 추가해 서비스 설명과 주요 공개 링크를 남긴다.
+   - 앱 내부 footer에도 같은 운영/정책 링크를 추가해 사용자와 크롤러가 신뢰 문서를 쉽게 찾게 한다.
+5. sitemap 재정렬 유지
+   - core sitemap에 신뢰 페이지 4개를 포함한다.
+   - 가이드 sitemap은 기존처럼 대표 공개 가이드 6개만 유지한다.
+
+### 예상 영향 범위
+
+- [`src/features/guides/seo/seo-page-builder.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.ts)
+- [`src/features/guides/seo/seo-page-builder.test.ts`](C:\projects\magok\src\features\guides\seo\seo-page-builder.test.ts)
+- [`scripts/export-magok-seo-pages.mts`](C:\projects\magok\scripts\export-magok-seo-pages.mts)
+- [`src/App.tsx`](C:\projects\magok\src\App.tsx)
+- [`src/App.test.tsx`](C:\projects\magok\src\App.test.tsx)
+- [`index.html`](C:\projects\magok\index.html)
+- `public/about/*`
+- `public/contact/*`
+- `public/privacy/*`
+- `public/terms/*`
+- [`public/404.html`](C:\projects\magok\public\404.html)
+- [`public/sitemaps/core.xml`](C:\projects\magok\public\sitemaps\core.xml)
+- `docs/codex-brain/task.md`
+- 검증 후 `docs/codex-brain/walkthrough.md`
+
+### 검증 계획
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+- 배포 후 `https://loopincode.com/about/`, `/contact/`, `/privacy/`, `/terms/`의 title 분리 확인
+- 배포 후 비공개 가이드 URL이 홈 200이 아닌 404 문서 또는 명확한 비색인 응답으로 바뀌었는지 확인
+
+### 메모
+
+1. 이번 후속 범위는 "광고 코드 제거"보다 "검색엔진과 심사자가 실제로 보는 응답 품질"을 마감하는 작업이다.
+2. soft 404와 신뢰 페이지 부재가 남아 있으면, 앞선 대량 페이지 축소만으로는 AdSense 재검토 통과 가능성을 충분히 끌어올렸다고 보기 어렵다.
+
 ## 2026-03-26 2026-03-19 마곡 관리기본계획 변경 고시 반영
 
 ### 목표

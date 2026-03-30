@@ -6,12 +6,14 @@ import {
   PUBLIC_GUIDE_CATALOG,
 } from '../src/features/guides/data/guide-catalog'
 import {
+  buildNotFoundSeoPage,
   buildGuideIndexSeoDocument,
   buildGuideSeoDocument,
   buildLibraryDetailSeoDocument,
   buildLibraryIndexSeoDocument,
   buildSitemapIndexXml,
   buildSitemapXml,
+  buildStaticSeoDocuments,
   buildUpdateDetailSeoDocument,
   buildUpdatesIndexSeoDocument,
 } from '../src/features/guides/seo/seo-page-builder'
@@ -39,6 +41,7 @@ async function main() {
   const updateDocuments = UPDATE_LOG_ENTRIES.map((entry) =>
     buildUpdateDetailSeoDocument(entry),
   )
+  const staticDocuments = buildStaticSeoDocuments()
   const guideIndexDocument = buildGuideIndexSeoDocument(PUBLIC_GUIDE_CATALOG)
   const libraryIndexDocument = buildLibraryIndexSeoDocument(libraryEntries)
   const updatesIndexDocument = buildUpdatesIndexSeoDocument(UPDATE_LOG_ENTRIES)
@@ -47,11 +50,16 @@ async function main() {
   await rm(path.join(publicDir, 'faq'), { recursive: true, force: true })
   await rm(path.join(publicDir, 'library'), { recursive: true, force: true })
   await rm(path.join(publicDir, 'updates'), { recursive: true, force: true })
+  await rm(path.join(publicDir, 'about'), { recursive: true, force: true })
+  await rm(path.join(publicDir, 'contact'), { recursive: true, force: true })
+  await rm(path.join(publicDir, 'privacy'), { recursive: true, force: true })
+  await rm(path.join(publicDir, 'terms'), { recursive: true, force: true })
   await rm(path.join(publicDir, 'sitemaps'), { recursive: true, force: true })
 
   await writeSeoPage(publicDir, guideIndexDocument.filePath, guideIndexDocument.html)
   await writeSeoPage(publicDir, libraryIndexDocument.filePath, libraryIndexDocument.html)
   await writeSeoPage(publicDir, updatesIndexDocument.filePath, updatesIndexDocument.html)
+  await writeFile(path.join(publicDir, '404.html'), buildNotFoundSeoPage(), 'utf8')
 
   for (const document of guideDocuments) {
     await writeSeoPage(publicDir, document.filePath, document.html)
@@ -62,6 +70,10 @@ async function main() {
   }
 
   for (const document of updateDocuments) {
+    await writeSeoPage(publicDir, document.filePath, document.html)
+  }
+
+  for (const document of staticDocuments) {
     await writeSeoPage(publicDir, document.filePath, document.html)
   }
 
@@ -90,6 +102,12 @@ async function main() {
       priority: '0.7',
       changefreq: 'weekly',
     },
+    ...staticDocuments.map((document) => ({
+      url: document.url,
+      lastmod: '2026-03-30',
+      priority: '0.5',
+      changefreq: 'monthly' as const,
+    })),
   ])
 
   const guideSitemap = buildSitemapXml(
@@ -145,7 +163,7 @@ async function main() {
   await writeFile(path.join(publicDir, 'sitemap.xml'), sitemapIndex, 'utf8')
 
   console.log(
-    `exported ${guideDocuments.length} guide pages, ${libraryDocuments.length} library pages, ${updateDocuments.length} update pages to public/`,
+    `exported ${guideDocuments.length} guide pages, ${libraryDocuments.length} library pages, ${updateDocuments.length} update pages, ${staticDocuments.length} trust pages to public/`,
   )
 }
 

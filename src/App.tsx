@@ -178,6 +178,13 @@ const footerFacts = [
   '활동 페이지: https://loopincode.com',
 ]
 
+const footerLinks = [
+  { label: '서비스 소개', href: '/about/' },
+  { label: '문의', href: '/contact/' },
+  { label: '개인정보처리방침', href: '/privacy/' },
+  { label: '이용약관', href: '/terms/' },
+] as const
+
 const brandAssets = {
   symbol: '/brand/magok-codefinder-symbol.svg',
   wordmark: '/brand/magok-codefinder-logo-horizontal.svg',
@@ -2535,8 +2542,20 @@ function App() {
               ))}
             </div>
 
+            <div className="flex flex-wrap gap-2">
+              {footerLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface)]"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+
             <div className="rounded-[16px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4 text-sm leading-6 text-[var(--info-foreground)]">
-              제휴 링크가 포함된 영역에서는 대가성 안내를 함께 표기합니다.
+              공개 페이지에서는 서비스 소개, 문의, 개인정보처리방침, 이용약관을 함께 제공해 운영 정보와 책임 범위를 바로 확인할 수 있습니다.
             </div>
           </footer>
         </main>
