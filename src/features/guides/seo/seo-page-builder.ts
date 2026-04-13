@@ -41,6 +41,14 @@ const DEFAULT_ROBOTS_CONTENT =
   'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'
 
 const PUBLIC_GUIDE_CODE_SET = new Set(PUBLIC_GUIDE_CATALOG.map((entry) => entry.code))
+const TRUST_PAGE_LINKS = [
+  { href: `${SITE_URL}/about/`, label: '서비스 소개' },
+  { href: `${SITE_URL}/methodology/`, label: '판정 기준' },
+  { href: `${SITE_URL}/editorial-policy/`, label: '편집 정책' },
+  { href: `${SITE_URL}/contact/`, label: '문의' },
+  { href: `${SITE_URL}/privacy/`, label: '개인정보처리방침' },
+  { href: `${SITE_URL}/terms/`, label: '이용약관' },
+] as const
 
 const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
   {
@@ -57,10 +65,21 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
     sections: [
       {
         heading: '무엇을 제공하나요',
+        paragraphs: [
+          '마곡 코드찾기는 마곡 일반산업단지 입주 상담 과정에서 가장 자주 막히는 세 가지 질문, 즉 어떤 업종코드를 먼저 봐야 하는지, 지식산업센터와 산업시설구역 중 어디부터 검토해야 하는지, 실제 근거 문서는 무엇인지에 답하도록 설계된 서비스입니다.',
+          '단순히 코드 이름만 보여주는 사전이 아니라, 상담 과정에서 그대로 설명할 수 있도록 추천 이유, 구역별 판단 차이, 원문 문서 위치, 최근 업데이트 이력을 함께 제공합니다.',
+        ],
         bullets: [
           '사업 설명을 바탕으로 먼저 볼 업종코드를 추천합니다.',
           '지식산업센터와 산업시설구역 기준을 나눠 예비판정을 정리합니다.',
           '관련 법령, 업데이트 로그, 대표 업종 가이드를 함께 제공합니다.',
+        ],
+      },
+      {
+        heading: '왜 이 사이트가 필요한가요',
+        paragraphs: [
+          '마곡 입주 검토는 코드표만으로 끝나지 않고, 실제 영위 업무와 구역별 허용 기준을 함께 읽어야 하는 경우가 많습니다. 같은 업종처럼 보여도 설명 방식이나 입주 목적에 따라 먼저 확인해야 할 구역과 준비 서류가 달라집니다.',
+          '이 서비스는 그 차이를 실무 언어로 풀어 적어, 중개사·운영 담당자·사업 준비자가 상담 초반에 방향을 잘못 잡지 않도록 돕는 데 초점을 둡니다.',
         ],
       },
       {
@@ -69,6 +88,7 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
           '서울특별시 고시와 산업집적법 시행령을 기준으로 공개 설명을 갱신합니다.',
           '검색엔진에 공개하는 페이지는 대표 업종과 핵심 문서만 남기고 주기적으로 정리합니다.',
           '실무에서 바로 확인할 수 있는 체크포인트와 다음 행동을 함께 안내합니다.',
+          '원문을 그대로 복제하지 않고, 상담 흐름에 맞는 해설과 비교 포인트를 덧붙입니다.',
         ],
       },
       {
@@ -76,6 +96,13 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
         paragraphs: [
           '마곡 입주 상담을 준비하는 컨설턴트, 중개사, 운영 담당자가 빠르게 기준을 확인할 때 적합합니다.',
           '최종 법률 판단이나 행정 확정은 관할 기관 안내와 제출 서류 검토를 함께 거치는 것을 권장합니다.',
+        ],
+      },
+      {
+        heading: '신뢰 정보는 어디서 확인하나요',
+        paragraphs: [
+          '서비스 소개, 판정 기준, 편집 정책, 문의, 개인정보처리방침, 이용약관을 별도 공개 페이지로 제공해 운영 주체와 콘텐츠 관리 방식을 쉽게 확인할 수 있게 했습니다.',
+          '최근에 어떤 기준이 바뀌었는지는 업데이트 로그에서, 실제 원문 출처는 법령 라이브러리에서 다시 확인할 수 있습니다.',
         ],
       },
     ],
@@ -94,6 +121,9 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
     sections: [
       {
         heading: '문의 채널',
+        paragraphs: [
+          '운영 문의와 콘텐츠 수정 요청은 현재 이메일 한 채널로 받습니다. 공개 페이지 오류, 설명 보완, 링크 깨짐, 업데이트 제안처럼 사이트 품질과 직접 관련된 요청을 우선 확인합니다.',
+        ],
         bullets: [
           '이메일: contact.loopinlab@gmail.com',
           '오류 제보 시 URL, 업종코드, 화면 캡처를 함께 보내 주시면 확인이 빠릅니다.',
@@ -105,6 +135,21 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
         paragraphs: [
           '서비스 동작 오류, 공개 콘텐츠 수정 요청, 운영 문의를 우선 확인합니다.',
           '개별 사건의 법률 자문이나 행정 확답은 제공하지 않으며, 필요한 경우 관할 기관 확인을 안내합니다.',
+        ],
+      },
+      {
+        heading: '수정 요청 시 함께 보내면 좋은 정보',
+        bullets: [
+          '문제가 발생한 페이지 주소와 확인한 날짜',
+          '어떤 문장이나 판정 설명이 실제와 다르다고 느꼈는지에 대한 메모',
+          '가능하면 원문 출처 URL, 고시 번호, 페이지 힌트',
+        ],
+      },
+      {
+        heading: '운영 원칙',
+        paragraphs: [
+          '의견이 접수되면 원문 출처와 현재 공개 설명을 대조한 뒤, 공개 업데이트 로그에 반영 가능한 항목을 우선 수정합니다.',
+          '광고 문의보다 사용자 오류 제보와 콘텐츠 품질 개선 요청을 먼저 처리합니다.',
         ],
       },
     ],
@@ -123,6 +168,9 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
     sections: [
       {
         heading: '수집 및 저장 정보',
+        paragraphs: [
+          '현재 서비스는 회원 가입이나 결제 기능 없이 공개 웹 서비스로 운영됩니다. 사용자가 입력한 내용은 예비판정 흐름을 이어가기 위한 목적에서 브라우저 로컬 저장소에만 임시 보관될 수 있습니다.',
+        ],
         bullets: [
           '입력한 업종 설명과 예비판정 값은 브라우저 로컬 저장소에 임시로 저장될 수 있습니다.',
           '공유 링크를 만들면 사용자가 입력한 값 일부가 URL 해시에 포함될 수 있습니다.',
@@ -134,6 +182,14 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
         bullets: [
           '서비스는 Google Analytics 4를 사용해 방문 흐름과 화면 사용 패턴을 익명 통계 수준으로 확인합니다.',
           '광고 게재 준비를 위한 AdSense 계정 확인 스크립트가 포함될 수 있으나, 승인 전까지 공개 광고 노출은 비활성 상태를 기본값으로 유지합니다.',
+        ],
+      },
+      {
+        heading: '사용자 제어 방법',
+        bullets: [
+          '브라우저 저장소에 남은 입력값은 앱 내 초기화 기능으로 직접 삭제할 수 있습니다.',
+          '공유 링크를 만들지 않으면 입력값이 외부 URL에 포함되지 않습니다.',
+          '브라우저 설정에서 쿠키와 로컬 저장소를 정리하면 기기 내 임시 데이터도 함께 삭제할 수 있습니다.',
         ],
       },
       {
@@ -158,6 +214,9 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
     sections: [
       {
         heading: '서비스 성격',
+        paragraphs: [
+          '마곡 코드찾기는 공개 정보와 자체 정리 기준을 바탕으로 입주 검토를 돕는 참고용 서비스입니다. 사용자는 공개 페이지와 앱에서 제공되는 요약 설명을 초기 검토 자료로 활용할 수 있지만, 최종 판단은 반드시 원문 문서와 관할 기관 확인을 함께 거쳐야 합니다.',
+        ],
         bullets: [
           '본 서비스는 입주 검토를 돕는 참고용 도구입니다.',
           '최종 입주 가능 여부는 제출 서류, 사업 실질, 심의 결과에 따라 달라질 수 있습니다.',
@@ -176,6 +235,102 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
         paragraphs: [
           '서비스 이용 과정에서 발생한 개별 계약, 입주 심의, 행정 결과에 대한 최종 책임은 이용자와 관련 기관 확인 절차에 있습니다.',
           '중대한 오류 제보가 접수되면 확인 후 가능한 범위에서 수정 이력을 공개합니다.',
+        ],
+      },
+      {
+        heading: '금지되는 이용 방식',
+        bullets: [
+          '서비스 설명을 원문 확인 없이 법률 확정 답변으로 재판매하거나 단정적으로 안내하는 행위',
+          '자동 판정 결과만으로 계약 또는 신고 절차를 완료했다고 오인하게 만드는 행위',
+          '공개 콘텐츠를 출처 표기 없이 그대로 복제해 재게시하는 행위',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'methodology',
+    title: '판정 기준',
+    description:
+      '마곡 코드찾기가 어떤 원문과 절차를 바탕으로 업종코드 추천과 예비판정을 만드는지 설명합니다.',
+    eyebrow: '판정 기준',
+    heroTitle: '업종코드 추천과 예비판정은 이렇게 만듭니다',
+    heroSummary:
+      '마곡 코드찾기는 원문 고시, 시행령, 코드 사전 데이터를 바탕으로 추천 후보를 좁히고, 구역별 판단 포인트를 설명형 문서로 다시 정리합니다.',
+    ctaLabel: '법령 라이브러리 보기',
+    ctaHref: `${SITE_URL}/library/`,
+    sections: [
+      {
+        heading: '기본 데이터 원문',
+        bullets: [
+          '산업집적활성화 및 공장설립에 관한 법률 시행령',
+          '마곡일반산업단지 관리기본계획 변경 고시',
+          'KSIC 11차 업종 코드 텍스트와 내부 매핑 데이터',
+        ],
+      },
+      {
+        heading: '추천 코드 생성 방식',
+        paragraphs: [
+          '사용자가 입력한 업태·종목·업무 설명에서 핵심 표현을 추출해 내부 업종 사전과 대조한 뒤, 먼저 검토할 후보 코드를 보여줍니다.',
+          '정확한 코드가 이미 있는 경우에는 수동 입력으로 바로 넘어갈 수 있고, 모호한 표현일 때는 유사 코드와 비교 포인트를 함께 제공합니다.',
+        ],
+      },
+      {
+        heading: '구역별 예비판정 방식',
+        bullets: [
+          '지식산업센터와 산업시설구역 기준을 분리해 각각의 이유와 메모를 보여줍니다.',
+          '조건부 가능, 심의 필요, 추가 확인처럼 실무에서 헷갈리기 쉬운 상태를 별도 라벨로 구분합니다.',
+          '원문 조문과 페이지 힌트를 함께 붙여 사용자가 근거를 다시 추적할 수 있게 합니다.',
+        ],
+      },
+      {
+        heading: '한계와 주의사항',
+        paragraphs: [
+          '자동 추천과 예비판정은 실제 사업 설명의 품질에 영향을 받습니다. 같은 코드라도 영위 방식, 입주 목적, 제조시설 계획, 임대 구조에 따라 해석이 달라질 수 있습니다.',
+          '따라서 이 서비스는 최종 확정 대신 초기 검토와 설명 정리를 돕는 데 목적이 있으며, 계약·신고·심의 전에는 반드시 원문과 관할 기관 안내를 다시 확인해야 합니다.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'editorial-policy',
+    title: '편집 정책',
+    description:
+      '공개 가이드와 법령 요약 페이지를 어떤 원칙으로 작성·수정·검증하는지 설명합니다.',
+    eyebrow: '편집 정책',
+    heroTitle: '공개 콘텐츠는 이런 원칙으로 관리합니다',
+    heroSummary:
+      '마곡 코드찾기의 공개 페이지는 원문 복제가 아니라, 실무에서 바로 써야 하는 설명과 비교 포인트를 덧붙인 편집형 콘텐츠를 목표로 운영합니다.',
+    ctaLabel: '업데이트 로그 보기',
+    ctaHref: `${SITE_URL}/updates/`,
+    sections: [
+      {
+        heading: '고유 콘텐츠 원칙',
+        bullets: [
+          '원문 문서를 그대로 복사하지 않고, 상담에 필요한 요약·비교·체크포인트를 자체 문장으로 작성합니다.',
+          '비슷한 주제라도 각 공개 페이지가 답하는 질문과 다음 행동이 겹치지 않도록 구성합니다.',
+          '광고보다 본문과 탐색 구조가 먼저 보이도록 유지합니다.',
+        ],
+      },
+      {
+        heading: '출처 검증 방식',
+        paragraphs: [
+          '법령과 고시 관련 페이지는 공식 원문 URL을 먼저 확인하고, 공개 설명과 원문 표현이 어긋나는 부분이 없는지 대조합니다.',
+          '업데이트가 확인되면 법령 라이브러리, 대표 가이드, 업데이트 로그를 함께 수정해 한 화면만 낡지 않도록 관리합니다.',
+        ],
+      },
+      {
+        heading: '수정과 이력 공개',
+        bullets: [
+          '중요한 기준 변경이나 페이지 구조 변경은 업데이트 로그에 날짜와 영향 범위를 남깁니다.',
+          '오류 제보가 들어오면 수정 가능한 범위부터 순차적으로 반영합니다.',
+          '근거가 불충분한 내용은 추정 표현을 줄이고, 확인이 필요한 조건으로 명시합니다.',
+        ],
+      },
+      {
+        heading: '광고와 사용자 경험 원칙',
+        paragraphs: [
+          '광고 수익을 목적으로 페이지를 늘리지 않으며, 정보 가치가 낮은 템플릿성 페이지는 공개 색인에서 제외하거나 정리합니다.',
+          '완성도 낮은 화면이나 오류 상태 화면에서는 광고보다 복구 안내와 탐색 링크를 먼저 제공하는 것을 기본 원칙으로 둡니다.',
         ],
       },
     ],
@@ -323,7 +478,7 @@ function buildDocument({
         line-height: 1.25;
       }
       p, li { color: var(--muted); line-height: 1.8; }
-      ul { margin: 0; padding-left: 20px; }
+      ul, ol { margin: 0; padding-left: 20px; }
       .meta-row, .chip-row, .link-row {
         display: flex;
         flex-wrap: wrap;
@@ -454,6 +609,12 @@ function buildFaqSchema(items: Array<{ question: string; answer: string }>) {
   }
 }
 
+function renderTrustLinkRow() {
+  return TRUST_PAGE_LINKS.map(
+    (item) => `<a class="link-chip" href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`,
+  ).join('')
+}
+
 function buildGuideSchema(guide: MagokGuideEntry, canonicalUrl: string) {
   return {
     '@context': 'https://schema.org',
@@ -477,9 +638,27 @@ function renderGuideBody(guide: MagokGuideEntry, canonicalUrl: string) {
   const publicRelatedCodes = guide.relatedCodes.filter((entry) =>
     PUBLIC_GUIDE_CODE_SET.has(entry.code),
   )
+  const primaryZone = guide.zoneSummaries[0]
+  const secondaryZone = guide.zoneSummaries[1]
   const practicalChecks = [
     `${guide.recommendedZoneLabel} 기준으로 먼저 검토하고, 다른 구역 결과와 차이가 나는지 함께 비교합니다.`,
     ...guide.zoneSummaries.flatMap((zoneSummary) => zoneSummary.notes.slice(0, 1)),
+    secondaryZone
+      ? `${secondaryZone.zoneLabel}에서는 ${secondaryZone.verdictLabel}로 정리되므로, 계약 대상 구역과 실제 영위 업무 설명이 어긋나지 않는지 함께 확인합니다.`
+      : '',
+  ].filter((item, index, items) => item && items.indexOf(item) === index)
+  const readingOrder = [
+    `${primaryZone?.zoneLabel ?? guide.recommendedZoneLabel} 결과부터 읽고 왜 ${primaryZone?.verdictLabel ?? '해당 판정'}으로 분류됐는지 확인합니다.`,
+    secondaryZone
+      ? `${secondaryZone.zoneLabel} 비교 결과를 이어서 읽어 같은 업종이지만 어디서 더 보수적으로 보는지 정리합니다.`
+      : '다른 구역과의 비교 포인트를 함께 확인합니다.',
+    `${guide.legalBases[0]?.citation ?? '관련 법령'}와 페이지 힌트를 따라 원문을 다시 확인합니다.`,
+  ]
+  const preparationItems = [
+    `${guide.name} 실제 수행 업무가 드러나는 서비스 소개서 또는 제안서`,
+    `${guide.recommendedZoneLabel} 입주 목적과 공간 사용 계획을 설명할 수 있는 사업 개요 메모`,
+    ...guide.zoneSummaries.flatMap((zoneSummary) => zoneSummary.notes.slice(0, 1)),
+    `${guide.legalBases[0]?.citation ?? '관련 법령'} 원문 확인 메모`,
   ].filter((item, index, items) => item && items.indexOf(item) === index)
 
   const zoneCards = guide.zoneSummaries
@@ -555,8 +734,28 @@ function renderGuideBody(guide: MagokGuideEntry, canonicalUrl: string) {
     </section>
 
     <section class="section">
+      <h2>이 가이드가 다루는 범위</h2>
+      <p>${escapeHtml(
+        `${guide.name}(${guide.code})는 ${guide.sectionName} 안에서 ${guide.browseCategory} 흐름으로 분류되는 업종입니다.`,
+      )}</p>
+      <p>${escapeHtml(
+        `${guide.recommendedZoneLabel}를 먼저 보되, 다른 구역 결과와 이유를 함께 놓고 비교해야 실제 상담에서 설명이 흔들리지 않습니다.`,
+      )}</p>
+      <p>${escapeHtml(
+        '이 페이지는 원문 문서 전체를 그대로 옮긴 것이 아니라, 실제 상담과 검토 과정에서 바로 쓸 수 있도록 판단 순서와 체크포인트를 덧붙인 편집형 가이드입니다.',
+      )}</p>
+    </section>
+
+    <section class="section">
       <h2>구역별 판단 요약</h2>
       <div class="grid two">${zoneCards}</div>
+    </section>
+
+    <section class="section">
+      <h2>이렇게 읽으면 빠릅니다</h2>
+      <ol>
+        ${readingOrder.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+      </ol>
     </section>
 
     <section class="section">
@@ -581,6 +780,13 @@ function renderGuideBody(guide: MagokGuideEntry, canonicalUrl: string) {
     </section>
 
     <section class="section">
+      <h2>준비 자료 체크리스트</h2>
+      <ul>
+        ${preparationItems.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+      </ul>
+    </section>
+
+    <section class="section">
       <h2>자주 묻는 질문</h2>
       ${faqItems}
     </section>
@@ -601,6 +807,8 @@ function renderGuideBody(guide: MagokGuideEntry, canonicalUrl: string) {
       <ul>
         ${followUpActions.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
       </ul>
+      <h2 style="margin-top: 24px;">운영 정보</h2>
+      <div class="link-row">${renderTrustLinkRow()}</div>
       <p><a class="text-link" href="${SITE_URL}/#guides/${guide.code}">앱에서 이 가이드 열기</a></p>
       <p><a class="text-link" href="${SITE_URL}/#directory">전수 코드 사전으로 돌아가기</a></p>
       <p><a class="text-link" href="${canonicalUrl}">${escapeHtml(canonicalUrl)}</a></p>
@@ -676,6 +884,7 @@ function renderStaticSeoPageBody(page: StaticSeoPageDefinition, canonicalUrl: st
         <a class="link-chip" href="${SITE_URL}/guides/">대표 가이드</a>
         <a class="link-chip" href="${SITE_URL}/library/">법령 라이브러리</a>
         <a class="link-chip" href="${SITE_URL}/updates/">업데이트 로그</a>
+        ${renderTrustLinkRow()}
       </div>
       <p><a class="text-link" href="${canonicalUrl}">${escapeHtml(canonicalUrl)}</a></p>
     </section>
@@ -881,8 +1090,21 @@ export function buildGuideIndexSeoDocument(guides: MagokGuideEntry[]): SeoPageDo
           <a class="cta" href="${SITE_URL}/#finder">앱에서 바로 판정하기</a>
         </section>
         <section class="section">
+          <h2>이 색인은 이렇게 쓰면 좋습니다</h2>
+          <ol>
+            <li>자주 검토하는 업종부터 골라 구역별 판단 차이를 먼저 읽습니다.</li>
+            <li>해당 가이드의 법령 섹션에서 원문 근거를 확인합니다.</li>
+            <li>코드가 애매하면 앱의 전체 코드 사전과 예비판정 화면으로 이어서 비교합니다.</li>
+          </ol>
+        </section>
+        <section class="section">
           <h2>전체 가이드</h2>
           <div class="grid two">${cards}</div>
+        </section>
+        <section class="section">
+          <h2>운영 정보</h2>
+          <p>대표 가이드는 실무에서 자주 찾는 업종만 선별해 공개하며, 기준 변경이나 설명 수정은 업데이트 로그에 남깁니다.</p>
+          <div class="link-row">${renderTrustLinkRow()}</div>
         </section>
       `,
     }),
@@ -1047,6 +1269,11 @@ function renderLibraryBody(
     </section>
 
     <section class="section">
+      <h2>운영 정보</h2>
+      <div class="link-row">${renderTrustLinkRow()}</div>
+    </section>
+
+    <section class="section">
       <h2>공개 주소</h2>
       <p><a class="text-link" href="${canonicalUrl}">${escapeHtml(canonicalUrl)}</a></p>
     </section>
@@ -1108,8 +1335,21 @@ export function buildLibraryIndexSeoDocument(entries: LegalLibraryEntryDetail[])
           <a class="cta" href="${SITE_URL}/#library">앱에서 라이브러리 열기</a>
         </section>
         <section class="section">
+          <h2>문서별 역할</h2>
+          <ul>
+            <li>시행령은 상위 범주와 기본 자격 요건을 확인할 때 먼저 봅니다.</li>
+            <li>마곡 고시문은 실제 구역 운영 기준, 예외 허용, 제조시설 조건을 좁혀 읽을 때 중요합니다.</li>
+            <li>공개 페이지에서는 문서별 요약과 함께 원문 URL을 함께 제공합니다.</li>
+          </ul>
+        </section>
+        <section class="section">
           <h2>문서 목록</h2>
           <div class="grid two">${cards}</div>
+        </section>
+        <section class="section">
+          <h2>운영 정보</h2>
+          <p>원문이 갱신되면 법령 라이브러리, 대표 가이드, 업데이트 로그를 함께 수정하는 것을 기본 원칙으로 둡니다.</p>
+          <div class="link-row">${renderTrustLinkRow()}</div>
         </section>
       `,
     }),
@@ -1206,6 +1446,11 @@ function renderUpdateBody(
     </section>
 
     <section class="section">
+      <h2>운영 정보</h2>
+      <div class="link-row">${renderTrustLinkRow()}</div>
+    </section>
+
+    <section class="section">
       <h2>공개 주소</h2>
       <p><a class="text-link" href="${canonicalUrl}">${escapeHtml(canonicalUrl)}</a></p>
     </section>
@@ -1257,8 +1502,17 @@ export function buildUpdatesIndexSeoDocument(entries: UpdateLogEntry[]): SeoPage
           <a class="cta" href="${SITE_URL}/#updates">앱에서 업데이트 로그 열기</a>
         </section>
         <section class="section">
+          <h2>왜 변경 이력을 공개하나요</h2>
+          <p>입주 판단 기준과 설명 문장은 작은 표현 차이에도 의미가 달라질 수 있어, 어떤 기준이 언제 바뀌었는지 추적할 수 있도록 공개 로그를 유지합니다.</p>
+          <p>중요한 수정은 영향 범위와 참고한 출처를 함께 남겨 사이트 운영 투명성을 높이는 데 목적이 있습니다.</p>
+        </section>
+        <section class="section">
           <h2>최근 변경 내역</h2>
           <div class="grid two">${cards}</div>
+        </section>
+        <section class="section">
+          <h2>운영 정보</h2>
+          <div class="link-row">${renderTrustLinkRow()}</div>
         </section>
       `,
     }),

@@ -122,9 +122,9 @@ describe('seo-page-builder', () => {
     expect(libraryDetail.html).toContain('대통령령 제35221호')
     expect(updatesIndex.filePath).toBe('updates/index.html')
     expect(updatesIndex.html).toContain('<link rel="canonical" href="https://loopincode.com/updates/" />')
-    expect(updateDetail.filePath).toBe('updates/magok-plan-2026-144-refresh/index.html')
-    expect(updateDetail.html).toContain('최신 마곡 관리기본계획 고시(2026-144호) 반영')
-    expect(updateDetail.html).toContain('서울특별시 고시문 PDF')
+    expect(updateDetail.filePath).toBe('updates/content-quality-trust-refresh/index.html')
+    expect(updateDetail.html).toContain('콘텐츠 품질·운영 신뢰 페이지 정비')
+    expect(updateDetail.html).toContain('AdSense 도움말: 최소 콘텐츠 요건')
     expect(updateDetail.html).toContain('"isBasedOn"')
   })
 
@@ -132,13 +132,21 @@ describe('seo-page-builder', () => {
     const staticDocuments = buildStaticSeoDocuments()
     const aboutPage = staticDocuments.find((entry) => entry.filePath === 'about/index.html')
     const privacyPage = staticDocuments.find((entry) => entry.filePath === 'privacy/index.html')
+    const methodologyPage = staticDocuments.find(
+      (entry) => entry.filePath === 'methodology/index.html',
+    )
+    const editorialPolicyPage = staticDocuments.find(
+      (entry) => entry.filePath === 'editorial-policy/index.html',
+    )
     const notFoundPage = buildNotFoundSeoPage()
 
-    expect(staticDocuments).toHaveLength(4)
+    expect(staticDocuments).toHaveLength(6)
     expect(aboutPage?.html).toContain('마곡 코드찾기는 무엇을 하는 서비스인가요?')
     expect(aboutPage?.html).toContain('<link rel="canonical" href="https://loopincode.com/about/" />')
     expect(privacyPage?.html).toContain('개인정보와 이용 정보 처리 안내')
     expect(privacyPage?.html).toContain('Google Analytics 4')
+    expect(methodologyPage?.html).toContain('업종코드 추천과 예비판정은 이렇게 만듭니다')
+    expect(editorialPolicyPage?.html).toContain('공개 콘텐츠는 이런 원칙으로 관리합니다')
     expect(notFoundPage).toContain('페이지를 찾을 수 없습니다')
     expect(notFoundPage).toContain('<meta name="robots" content="noindex,nofollow" />')
   })

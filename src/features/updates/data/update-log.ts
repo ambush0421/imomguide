@@ -33,7 +33,52 @@ const affiliatePolicySources: SourceReference[] = [
   },
 ]
 
+const contentQualityPolicySources: SourceReference[] = [
+  {
+    title: 'AdSense 도움말: 최소 콘텐츠 요건',
+    url: 'https://support.google.com/adsense/answer/9335564#minimum_content_requirements',
+    authority: 'Google AdSense Help',
+    description:
+      '고유 콘텐츠, 쉬운 탐색, 우수한 사용자 환경을 확인하라는 공식 안내 문서입니다.',
+  },
+  {
+    title: 'AdSense 도움말: 가치가 별로 없는 콘텐츠',
+    url: 'https://support.google.com/adsense/answer/10015918',
+    authority: 'Google AdSense Help',
+    description:
+      '사이트가 충분한 부가가치를 제공하지 못할 때 확인해야 하는 대표 원인을 설명합니다.',
+  },
+  {
+    title: '웹마스터 품질 가이드라인: 내용이 빈약한 콘텐츠',
+    url: 'https://support.google.com/webmasters/answer/9044175#thin-content',
+    authority: 'Google Search Central',
+    description:
+      '사용자에게 실질적 가치를 더하지 못하는 페이지 유형을 설명하는 검색 품질 가이드입니다.',
+  },
+  {
+    title: 'AdSense 도움말: 사이트 검토 요청 전 확인 사항',
+    url: 'https://support.google.com/adsense/answer/1348737',
+    authority: 'Google AdSense Help',
+    description:
+      '위반 사항 수정 후 사이트 검토를 요청하기 전에 확인해야 하는 항목을 안내합니다.',
+  },
+]
+
 export const UPDATE_LOG_ENTRIES: UpdateLogEntry[] = [
+  {
+    id: 'content-quality-trust-refresh',
+    date: '2026-04-13',
+    title: '콘텐츠 품질·운영 신뢰 페이지 정비',
+    summary:
+      '대표 가이드 설명을 보강하고, 판정 기준·편집 정책·문의 경로를 독립 공개 페이지로 분리해 저가치 콘텐츠 리스크를 줄였습니다.',
+    highlights: [
+      '대표 가이드와 색인 페이지에 판단 순서, 준비 자료, 운영 정보 링크를 추가했습니다.',
+      '판정 기준과 편집 정책 페이지를 새로 공개해 어떤 원문과 원칙으로 콘텐츠를 관리하는지 설명했습니다.',
+      '홈 첫 응답 HTML에도 서비스 요약, 주요 링크, 운영 신뢰 정보를 넣어 JS 렌더링 전에도 핵심 내용을 읽을 수 있게 정리했습니다.',
+    ],
+    affectedAreas: ['홈 초기 HTML', '대표 가이드 공개 페이지', '신뢰 페이지', '업데이트 로그'],
+    sourceReferences: contentQualityPolicySources,
+  },
   {
     id: 'magok-plan-2026-144-refresh',
     date: '2026-03-26',

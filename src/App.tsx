@@ -180,6 +180,8 @@ const footerFacts = [
 
 const footerLinks = [
   { label: '서비스 소개', href: '/about/' },
+  { label: '판정 기준', href: '/methodology/' },
+  { label: '편집 정책', href: '/editorial-policy/' },
   { label: '문의', href: '/contact/' },
   { label: '개인정보처리방침', href: '/privacy/' },
   { label: '이용약관', href: '/terms/' },
@@ -2555,7 +2557,13 @@ function App() {
             </div>
 
             <div className="rounded-[16px] border border-[var(--info-border)] bg-[var(--info-bg)] px-4 py-4 text-sm leading-6 text-[var(--info-foreground)]">
-              공개 페이지에서는 서비스 소개, 문의, 개인정보처리방침, 이용약관을 함께 제공해 운영 정보와 책임 범위를 바로 확인할 수 있습니다.
+              <p>
+                공개 페이지에서는 서비스 소개, 문의, 개인정보처리방침, 이용약관을 함께 제공해 운영 정보와 책임 범위를 바로 확인할 수 있습니다.
+              </p>
+              <p className="mt-2">
+                판정 기준과 편집 정책도 별도 페이지로 공개해 어떤 문서를 바탕으로
+                업데이트하는지, 오류 제보를 받으면 어떻게 수정하는지 함께 안내합니다.
+              </p>
             </div>
           </footer>
         </main>

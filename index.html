@@ -41,9 +41,10 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2916041253392911"
       crossorigin="anonymous"
     ></script>
+    <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
     <meta
       name="description"
-      content="마곡 일반산업단지 업종코드 찾기와 입주 가능성 예비판정을 한 화면에서 확인하는 서비스"
+      content="마곡 일반산업단지 업종코드 추천, 구역별 입주 예비판정, 법령 라이브러리, 업데이트 로그를 함께 제공하는 실무형 안내 서비스"
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="마곡 코드찾기" />
@@ -53,7 +54,7 @@
     />
     <meta
       property="og:description"
-      content="사업 설명이나 사업자등록증의 업태·종목을 넣으면 업종코드 추천과 마곡 입주 예비판정을 한 번에 확인할 수 있습니다."
+      content="사업 설명이나 사업자등록증의 업태·종목을 넣으면 업종코드 추천, 구역별 판단, 법령 근거, 업데이트 이력을 한 번에 확인할 수 있습니다."
     />
     <meta property="og:url" content="https://loopincode.com/" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -63,12 +64,205 @@
     />
     <meta
       name="twitter:description"
-      content="마곡 일반산업단지 전용 업종코드 추천과 입주 가능성 예비판정 서비스"
+      content="마곡 일반산업단지 전용 업종코드 추천, 입주 예비판정, 법령 근거 정리 서비스"
     />
     <title>마곡 코드찾기 | 업종코드 추천 · 입주 예비판정</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "마곡 코드찾기",
+            "url": "https://loopincode.com/",
+            "email": "contact.loopinlab@gmail.com"
+          },
+          {
+            "@type": "WebSite",
+            "name": "마곡 코드찾기",
+            "url": "https://loopincode.com/",
+            "inLanguage": "ko-KR"
+          },
+          {
+            "@type": "CollectionPage",
+            "name": "마곡 코드찾기 홈",
+            "url": "https://loopincode.com/",
+            "description": "마곡 일반산업단지 업종코드 추천, 구역별 입주 예비판정, 법령 라이브러리, 업데이트 로그를 함께 제공하는 홈 페이지",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "마곡 코드찾기",
+              "url": "https://loopincode.com/"
+            }
+          }
+        ]
+      }
+    </script>
+    <style>
+      .boot-shell {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+        font-family: "IBM Plex Sans KR", "Noto Sans KR", sans-serif;
+        color: #1f2a3d;
+      }
+      .boot-hero,
+      .boot-section {
+        border: 1px solid rgba(43, 109, 255, 0.14);
+        border-radius: 26px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 20px 50px rgba(28, 33, 43, 0.08);
+        padding: 24px;
+      }
+      .boot-section {
+        margin-top: 16px;
+      }
+      .boot-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(43, 109, 255, 0.08);
+        color: #2b6dff;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .boot-shell h1 {
+        margin: 16px 0 0;
+        font-size: clamp(32px, 5vw, 48px);
+        line-height: 1.12;
+        letter-spacing: -0.04em;
+      }
+      .boot-shell h2 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        line-height: 1.25;
+      }
+      .boot-shell p,
+      .boot-shell li {
+        color: #5a6a82;
+        line-height: 1.8;
+      }
+      .boot-shell ul,
+      .boot-shell ol {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .boot-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+      .boot-card {
+        border: 1px solid rgba(43, 109, 255, 0.14);
+        border-radius: 22px;
+        background: rgba(248, 251, 255, 0.92);
+        padding: 20px;
+      }
+      .boot-link-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .boot-link,
+      .boot-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 9px 13px;
+        border-radius: 999px;
+        border: 1px solid rgba(43, 109, 255, 0.14);
+        background: rgba(239, 245, 255, 0.9);
+        color: #1f2a3d;
+        font-size: 13px;
+        text-decoration: none;
+      }
+      .boot-cta {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 18px;
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: #2b6dff;
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      @media (max-width: 720px) {
+        .boot-shell {
+          width: min(100% - 20px, 1100px);
+          padding-top: 20px;
+        }
+        .boot-hero,
+        .boot-section {
+          padding: 18px;
+          border-radius: 22px;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main class="boot-shell" aria-label="마곡 코드찾기 안내">
+        <section class="boot-hero">
+          <div class="boot-eyebrow">마곡 입주 실무 안내</div>
+          <h1>업종코드 추천부터 법령 근거 확인까지 한 흐름으로 정리한 마곡 입주 안내 서비스</h1>
+          <p>
+            마곡 코드찾기는 마곡 일반산업단지 입주 상담을 준비할 때 필요한 업종코드 추천,
+            지식산업센터·산업시설구역 비교, 대표 가이드, 법령 라이브러리, 업데이트 로그를 함께
+            제공하는 실무형 사이트입니다.
+          </p>
+          <div class="boot-link-row">
+            <span class="boot-chip">업종코드 추천</span>
+            <span class="boot-chip">구역별 예비판정</span>
+            <span class="boot-chip">법령 라이브러리</span>
+            <span class="boot-chip">업데이트 로그</span>
+          </div>
+          <a class="boot-cta" href="https://loopincode.com/#finder">홈에서 바로 시작하기</a>
+        </section>
+
+        <section class="boot-section">
+          <h2>이 사이트에서 바로 할 수 있는 일</h2>
+          <div class="boot-grid">
+            <article class="boot-card">
+              <h2>1. 업종코드 후보 좁히기</h2>
+              <p>사업 설명, 업태·종목, 실무 메모를 바탕으로 먼저 볼 코드를 추천합니다.</p>
+            </article>
+            <article class="boot-card">
+              <h2>2. 구역별 판단 비교하기</h2>
+              <p>지식산업센터와 산업시설구역에서 왜 결과가 다른지 이유와 메모를 함께 보여줍니다.</p>
+            </article>
+            <article class="boot-card">
+              <h2>3. 원문과 변경 이력 확인하기</h2>
+              <p>법령 라이브러리와 업데이트 로그에서 기준 문서와 최근 수정 내역을 다시 확인할 수 있습니다.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="boot-section">
+          <h2>콘텐츠 운영 원칙</h2>
+          <ol>
+            <li>서울특별시 고시와 산업집적법 시행령을 기준으로 공개 설명을 갱신합니다.</li>
+            <li>원문을 그대로 복제하지 않고 상담에 필요한 비교 포인트와 다음 행동을 덧붙입니다.</li>
+            <li>운영 주체, 문의 경로, 판정 기준, 편집 정책을 별도 공개 페이지로 제공합니다.</li>
+          </ol>
+        </section>
+
+        <section class="boot-section">
+          <h2>주요 공개 페이지</h2>
+          <div class="boot-link-row">
+            <a class="boot-link" href="https://loopincode.com/guides/">대표 가이드</a>
+            <a class="boot-link" href="https://loopincode.com/library/">법령 라이브러리</a>
+            <a class="boot-link" href="https://loopincode.com/updates/">업데이트 로그</a>
+            <a class="boot-link" href="https://loopincode.com/about/">서비스 소개</a>
+            <a class="boot-link" href="https://loopincode.com/methodology/">판정 기준</a>
+            <a class="boot-link" href="https://loopincode.com/editorial-policy/">편집 정책</a>
+            <a class="boot-link" href="https://loopincode.com/contact/">문의</a>
+            <a class="boot-link" href="https://loopincode.com/privacy/">개인정보처리방침</a>
+            <a class="boot-link" href="https://loopincode.com/terms/">이용약관</a>
+          </div>
+        </section>
+      </main>
+    </div>
     <noscript>
       <main
         style="
@@ -90,6 +284,8 @@
           <li><a href="https://loopincode.com/library/">법령 라이브러리</a></li>
           <li><a href="https://loopincode.com/updates/">업데이트 로그</a></li>
           <li><a href="https://loopincode.com/about/">서비스 소개</a></li>
+          <li><a href="https://loopincode.com/methodology/">판정 기준</a></li>
+          <li><a href="https://loopincode.com/editorial-policy/">편집 정책</a></li>
           <li><a href="https://loopincode.com/contact/">문의</a></li>
           <li><a href="https://loopincode.com/privacy/">개인정보처리방침</a></li>
           <li><a href="https://loopincode.com/terms/">이용약관</a></li>
