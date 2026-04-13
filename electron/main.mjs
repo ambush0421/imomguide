@@ -1,11 +1,12 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const windowIconPath = path.join(__dirname, 'assets', 'app-icon.ico')
+const preloadPath = path.join(__dirname, 'preload.mjs')
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
@@ -20,6 +21,7 @@ function createMainWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: preloadPath,
       sandbox: true,
     },
   })
@@ -37,6 +39,21 @@ function createMainWindow() {
 }
 
 app.whenReady().then(() => {
+  ipcMain.handle('magok:open-devtools', (event) => {
+    const senderWindow = BrowserWindow.fromWebContents(event.sender)
+
+    if (!senderWindow) {
+      return false
+    }
+
+    try {
+      senderWindow.webContents.openDevTools({ mode: 'detach', activate: true })
+      return true
+    } catch {
+      return false
+    }
+  })
+
   createMainWindow()
 
   app.on('activate', () => {

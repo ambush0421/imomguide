@@ -1,3 +1,13 @@
+## 2026-04-03 `korean-law-mcp` 도입 적합성 검토
+
+- [x] 현재 법령 데이터 소비 구조(`legal-bases.ts`, `legal-library.ts`, 법령 라이브러리 UI) 재확인
+- [x] 외부 저장소 [`chrisryugj/korean-law-mcp`](https://github.com/chrisryugj/korean-law-mcp) 기능/도입 방식 검토
+- [x] `docs/codex-brain/implementation_plan.md`에 도입 판단 기준 및 권장 방향 기록
+- [x] 사용자 승인 대기
+- [x] 승인 시 도입 범위 확정
+- [x] `README.md`와 `docs/codex-brain/korean-law-mcp-workflow.md`에 최소 범위 문서화 반영
+- [ ] 검증 및 `docs/codex-brain/walkthrough.md` 기록
+
 ## 2026-03-30 AdSense 정책 위반 대응(얇은 콘텐츠 + 광고/제휴 축소)
 
 - [x] 사용자 제공 Google 정책 링크 검토

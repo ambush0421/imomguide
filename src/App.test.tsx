@@ -38,6 +38,7 @@ describe('App', () => {
     window.history.replaceState(null, '', '#top')
     window.dataLayer = []
     window.gtag = undefined
+    window.magokDesktop = undefined
     window.scrollTo = vi.fn()
     Element.prototype.scrollIntoView = vi.fn()
     Object.defineProperty(window, 'matchMedia', {
@@ -53,6 +54,18 @@ describe('App', () => {
         dispatchEvent: vi.fn(),
       })),
     })
+  })
+
+  it('Electron 브리지에서는 우측 상단 개발도구 버튼으로 DevTools를 열 수 있다', async () => {
+    const openDevTools = vi.fn().mockResolvedValue(true)
+    window.magokDesktop = { openDevTools }
+
+    render(<App />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: '개발도구 열기' }))
+
+    expect(openDevTools).toHaveBeenCalledTimes(1)
   })
 
   it('`#finder?mode=overview`로 진입하면 홈 개요 화면을 유지한다', () => {

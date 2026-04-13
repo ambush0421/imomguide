@@ -1,3 +1,61 @@
+## 2026-04-03 `korean-law-mcp` 도입 검토
+
+### 목표
+
+- 현재 프로젝트에 [`korean-law-mcp`](https://github.com/chrisryugj/korean-law-mcp)를 붙이는 것이 실제로 도움이 되는지 먼저 판단한다.
+- 붙인다면 "실서비스 런타임 의존성"이 아니라 "개발/운영용 법령 조사 도구"로 두는 것이 맞는지 기준을 분명히 한다.
+- 승인 후 구현 범위가 생기더라도, 사용자 서비스 응답의 안정성과 현재 정적 법령 근거 구조를 깨지 않는 방향으로 진행한다.
+
+### 현재 구조 진단
+
+1. 현재 앱은 [`src/features/eligibility/data/legal-bases.ts`](C:\projects\magok\src\features\eligibility\data\legal-bases.ts)와 [`src/features/library/data/legal-library.ts`](C:\projects\magok\src\features\library\data\legal-library.ts)에 정리해 둔 "검증된 근거 데이터"를 직접 소비한다.
+   - 즉 사용자가 앱을 열 때마다 법제처 API를 실시간 조회하는 구조가 아니다.
+   - 이 덕분에 판정 문구, 테스트, 정적 SEO 산출물, Electron 패키징 결과가 모두 안정적으로 맞물린다.
+2. 현재 저장소의 실행 구조는 Vite + React + Electron 중심이며, MCP 서버를 앱 런타임에 직접 붙이는 백엔드 계층이 없다.
+   - 프론트엔드/데스크톱 앱에서 MCP를 바로 호출하는 방식은 현재 구조와 맞지 않는다.
+   - 특히 법령 API 키(`LAW_OC`)를 사용자 배포 앱 안에 싣는 방식은 운영상 안전하지 않다.
+3. [`korean-law-mcp`](https://github.com/chrisryugj/korean-law-mcp) 저장소는 2026-04-03 확인 기준, 법제처 Open API를 바탕으로 한 법령/판례/해석례용 MCP 서버이며 README에서 총 87개 도구를 제공한다고 안내한다.
+   - 로컬 설치형 MCP 서버(`npm install -g korean-law-mcp`)와 원격 MCP(`https://korean-law-mcp.fly.dev/mcp`) 둘 다 지원한다.
+   - 사용에는 법제처 Open API 키(`LAW_OC`)가 필요하다.
+4. 따라서 이 저장소는 현재 프로젝트에서 "사용자 화면에 직접 붙이는 기능"보다는 "운영자가 최신 법령·판례를 확인해 내부 근거 데이터를 갱신하는 보조 도구"로 쓸 때 가장 적합하다.
+
+### 권장 방향
+
+1. 1차 권장안: 개발/운영용 조사 도구로만 도입
+   - Codex/Claude/Cursor 같은 MCP 클라이언트에 `korean-law-mcp`를 연결해, 법령 변경이나 판례 확인이 필요할 때만 사용한다.
+   - 실제 서비스 코드는 계속 정제된 내부 데이터(`legal-bases.ts`, `legal-library.ts`)를 기준으로 동작하게 유지한다.
+2. 2차 권장안: 저장소 안에는 "도입 문서 + 업데이트 절차"만 남긴다.
+   - 예: 어떤 상황에서 `search_law`, `get_law_text`, `compare_old_new`를 쓰는지 운영 체크리스트를 남긴다.
+   - API 키나 사용자별 MCP 설정 파일 자체는 저장소에 커밋하지 않는다.
+3. 비권장안: 현재 프론트엔드/Electron 앱에 MCP를 직접 런타임 의존성으로 붙이는 것
+   - 배포 앱에 API 키가 필요해지고,
+   - 네트워크/외부 서비스 가용성에 따라 결과가 흔들릴 수 있으며,
+   - 테스트와 정적 산출물의 재현성이 약해진다.
+
+### 승인 후 구현 후보
+
+1. 최소 범위
+   - [`README.md`](C:\projects\magok\README.md)에 "개발용 법령 조사 워크플로" 섹션을 추가한다.
+   - `docs/codex-brain`에 MCP 사용 목적과 갱신 절차를 짧게 기록한다.
+2. 중간 범위
+   - 법령 갱신 루프에서 어떤 파일을 업데이트해야 하는지 체크리스트를 추가한다.
+   - 예: `legal-bases.ts`, `legal-library.ts`, 관련 테스트, `docs/codex-brain/*`
+3. 큰 범위
+   - 향후 실시간 법령 조회 기능이 정말 필요하다면 별도 백엔드/Worker/API 계층을 먼저 설계한다.
+   - 이 경우에도 MCP를 사용자 런타임에 직접 노출하지 않고, 서버 측 동기화 또는 운영자용 관리 기능으로 우회하는 편이 안전하다.
+
+### 예상 영향 범위
+
+- [`README.md`](C:\projects\magok\README.md)
+- `docs/codex-brain/*`
+- 필요 시 사용자 로컬 MCP 설정 파일(저장소 밖, 커밋 제외)
+
+### 메모
+
+1. 현재 판단으로는 "`필요하긴 한데`, 서비스 기능보다 운영자용 조사 도구로 필요하다"가 가장 정확하다.
+2. 즉 "도입 여부"보다 "어디에 붙일지"가 핵심이며, 기본값은 앱 코드 밖이 맞다.
+3. 승인받으면 문서화부터 최소 범위로 진행한 뒤, 원하시면 그다음에 실제 MCP 클라이언트 설정까지 같이 정리한다.
+
 ## 2026-03-30 AdSense 정책 위반 대응 계획
 
 ### 목표

@@ -4,6 +4,7 @@ import {
   BookOpenText,
   CheckCircle2,
   Clock3,
+  Code2,
   FileSearch,
   LibraryBig,
   Lock,
@@ -1652,11 +1653,15 @@ function App() {
   )
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const [isOpeningDesktopDevTools, setIsOpeningDesktopDevTools] = useState(false)
   const [recentHistory, setRecentHistory] = useState<RecentEligibilityHistoryEntry[]>(
     () => loadRecentEligibilityHistory(),
   )
   const lastTrackedResultKeyRef = useRef<string | null>(null)
   const pendingFinderHistoryModeRef = useRef<HistoryMode>('replace')
+  const canOpenDesktopDevTools =
+    typeof window !== 'undefined' &&
+    typeof window.magokDesktop?.openDevTools === 'function'
 
   const syncFromHash = useCallback(() => {
     const nextHashState = getHashState(window.location.hash)
@@ -2018,6 +2023,28 @@ function App() {
     printWindow.document.close()
   }
 
+  async function handleOpenDesktopDevTools() {
+    const desktopBridge = typeof window !== 'undefined' ? window.magokDesktop : undefined
+
+    if (!desktopBridge || isOpeningDesktopDevTools) {
+      return
+    }
+
+    setIsOpeningDesktopDevTools(true)
+
+    try {
+      const opened = await desktopBridge.openDevTools()
+
+      if (opened) {
+        trackEvent('desktop_devtools_open_requested', {
+          surface: 'header',
+        })
+      }
+    } finally {
+      setIsOpeningDesktopDevTools(false)
+    }
+  }
+
   function handleToggleHistory() {
     setRecentHistory(loadRecentEligibilityHistory())
     setIsHistoryOpen((prev) => !prev)
@@ -2232,6 +2259,19 @@ function App() {
             </nav>
 
             <div className="hidden flex-wrap items-center gap-2 md:flex">
+              {canOpenDesktopDevTools ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  loading={isOpeningDesktopDevTools}
+                  onClick={handleOpenDesktopDevTools}
+                  className="whitespace-nowrap border-[var(--border)]"
+                  aria-label="개발도구 열기"
+                >
+                  <Code2 className="size-4" />
+                  개발도구
+                </Button>
+              ) : null}
               <Button
                 variant={isHistoryOpen ? 'secondary' : 'ghost'}
                 size="sm"

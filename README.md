@@ -93,6 +93,38 @@ npm run desktop:build
 - 현재 공개 버전에서는 홈의 AdSense/제휴 영역을 노출하지 않는다.
 - 공개 SEO 페이지도 대표 가이드와 핵심 문서만 export 하도록 축소해 둔다.
 
+## 개발용 법령 조사 워크플로
+
+이 프로젝트는 사용자 화면에서 법령 API를 실시간 조회하지 않습니다.
+대신 검증한 법적 근거를 코드에 고정해 두고, 법령 변경이 있을 때만 개발/운영자가 별도로 확인해 반영합니다.
+
+현재 기준으로 [`korean-law-mcp`](https://github.com/chrisryugj/korean-law-mcp)는 이 "개발용 조사 도구" 용도에 가장 잘 맞습니다.
+
+- 용도: 법령, 판례, 해석례, 자치법규를 조사해서 내부 근거 데이터 갱신
+- 비권장: 앱 프론트엔드/Electron 런타임에 직접 연결
+- 이유: API 키 노출, 네트워크 의존성 증가, 테스트/정적 산출물 재현성 저하
+
+권장 흐름:
+
+1. `korean-law-mcp`로 최신 법령/판례/해석례 확인
+2. 프로젝트 코드의 근거 데이터 갱신
+3. 관련 테스트와 문서까지 함께 갱신
+
+주요 반영 파일:
+
+- `src/features/eligibility/data/legal-bases.ts`
+- `src/features/library/data/legal-library.ts`
+- 법령 노출 UI/테스트
+- `docs/codex-brain/*`
+
+중요 원칙:
+
+- `LAW_OC` 같은 법제처 API 키는 저장소에 커밋하지 않는다.
+- 개인 MCP 설정 파일(`Claude Desktop`, `Cursor`, `Continue` 등)도 저장소에 넣지 않는다.
+- 실서비스 판정 로직은 계속 내부 정적 데이터 기준으로 유지한다.
+
+자세한 절차는 `docs/codex-brain/korean-law-mcp-workflow.md`에 정리했다.
+
 ## 검증 명령
 
 ```bash
