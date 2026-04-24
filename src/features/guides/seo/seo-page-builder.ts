@@ -39,15 +39,32 @@ interface StaticSeoPageDefinition {
 
 const DEFAULT_ROBOTS_CONTENT =
   'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'
+const TRUST_PAGE_LASTMOD = '2026-04-24'
 
 const PUBLIC_GUIDE_CODE_SET = new Set(PUBLIC_GUIDE_CATALOG.map((entry) => entry.code))
+const SITE_NAV_LINKS = [
+  { label: '홈', href: `${SITE_URL}/` },
+  { label: '대표 가이드', href: `${SITE_URL}/guides/` },
+  { label: '법령 라이브러리', href: `${SITE_URL}/library/` },
+  { label: '업데이트 로그', href: `${SITE_URL}/updates/` },
+  { label: '검토 방법론', href: `${SITE_URL}/methodology/` },
+  { label: '편집 정책', href: `${SITE_URL}/editorial-policy/` },
+  { label: '문의', href: `${SITE_URL}/contact/` },
+] as const
+
+const SITE_FOOTER_LINKS = [
+  { label: '서비스 소개', href: `${SITE_URL}/about/` },
+  { label: '개인정보처리방침', href: `${SITE_URL}/privacy/` },
+  { label: '이용약관', href: `${SITE_URL}/terms/` },
+] as const
+
 const TRUST_PAGE_LINKS = [
-  { href: `${SITE_URL}/about/`, label: '서비스 소개' },
-  { href: `${SITE_URL}/methodology/`, label: '판정 기준' },
-  { href: `${SITE_URL}/editorial-policy/`, label: '편집 정책' },
-  { href: `${SITE_URL}/contact/`, label: '문의' },
-  { href: `${SITE_URL}/privacy/`, label: '개인정보처리방침' },
-  { href: `${SITE_URL}/terms/`, label: '이용약관' },
+  { label: '서비스 소개', href: `${SITE_URL}/about/` },
+  { label: '검토 방법론', href: `${SITE_URL}/methodology/` },
+  { label: '편집 정책', href: `${SITE_URL}/editorial-policy/` },
+  { label: '문의', href: `${SITE_URL}/contact/` },
+  { label: '개인정보처리방침', href: `${SITE_URL}/privacy/` },
+  { label: '이용약관', href: `${SITE_URL}/terms/` },
 ] as const
 
 const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
@@ -101,8 +118,96 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
       {
         heading: '신뢰 정보는 어디서 확인하나요',
         paragraphs: [
-          '서비스 소개, 판정 기준, 편집 정책, 문의, 개인정보처리방침, 이용약관을 별도 공개 페이지로 제공해 운영 주체와 콘텐츠 관리 방식을 쉽게 확인할 수 있게 했습니다.',
+          '서비스 소개, 검토 방법론, 편집 정책, 문의, 개인정보처리방침, 이용약관을 별도 공개 페이지로 제공해 운영 주체와 콘텐츠 관리 방식을 쉽게 확인할 수 있게 했습니다.',
           '최근에 어떤 기준이 바뀌었는지는 업데이트 로그에서, 실제 원문 출처는 법령 라이브러리에서 다시 확인할 수 있습니다.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'methodology',
+    title: '검토 방법론',
+    description:
+      '마곡 코드찾기가 법령 원문, 업종코드 데이터, 실무 확인 항목을 어떻게 연결해 예비판정을 만드는지 공개합니다.',
+    eyebrow: '검토 방법론',
+    heroTitle: '업종코드 추천과 예비판정은 어떻게 만들어지나요?',
+    heroSummary:
+      '마곡 코드찾기는 사업 설명을 바로 결론으로 단정하지 않고, 업종코드 후보 탐색, 구역별 기준 비교, 법령 근거 확인, 추가 확인 포인트 정리 순서로 결과를 만듭니다.',
+    ctaLabel: '법령 라이브러리 보기',
+    ctaHref: `${SITE_URL}/library/`,
+    sections: [
+      {
+        heading: '자료 기준',
+        bullets: [
+          '마곡 일반산업단지 관리기본계획, 산업집적활성화 및 공장설립에 관한 법률 시행령, 공개 업종코드 설명을 함께 봅니다.',
+          '업종명 하나만 보지 않고 사업 실질, 연구개발 비중, 제조시설 계획, 지원시설 여부를 분리해 검토합니다.',
+          '대표 공개 가이드는 상담 빈도가 높고 기준 차이가 큰 업종을 중심으로 운영합니다.',
+        ],
+      },
+      {
+        heading: '판정 흐름',
+        bullets: [
+          '1단계: 사용자가 입력한 사업 설명에서 후보 업종코드와 유사 표현을 찾습니다.',
+          '2단계: 지식산업센터와 산업시설구역 기준을 나눠 가능, 조건부 가능, 심의 필요, 추가 확인, 불가를 비교합니다.',
+          '3단계: 결과에 근거 조문, 실무 체크포인트, 관할 기관 확인이 필요한 항목을 붙입니다.',
+        ],
+      },
+      {
+        heading: '한계와 사용 방식',
+        paragraphs: [
+          '이 서비스는 상담 전 사전 검토를 돕는 참고 도구입니다. 최종 입주 가능 여부, 입주계약 변경, 임대사업 제한 판단은 제출 서류와 관할 기관 확인을 거쳐야 합니다.',
+          '사업 내용이 여러 업종에 걸치거나 제조·연구·판매 비중이 모호한 경우에는 단정 판정보다 심의 필요 또는 추가 확인으로 보수적으로 안내합니다.',
+        ],
+      },
+      {
+        heading: '업데이트 기준',
+        bullets: [
+          '고시나 시행령 기준이 바뀌면 법령 라이브러리와 업데이트 로그에 반영 범위를 남깁니다.',
+          '오류 제보가 들어오면 원문 확인 후 수정하고, 공개 페이지에서 확인 가능한 형태로 업데이트 이력을 남깁니다.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'editorial-policy',
+    title: '편집 정책',
+    description:
+      '마곡 코드찾기 공개 콘텐츠의 작성 원칙, 출처 표시, 수정 이력, 광고와 제휴 노출 기준을 안내합니다.',
+    eyebrow: '편집 정책',
+    heroTitle: '공개 콘텐츠는 어떤 기준으로 작성하나요?',
+    heroSummary:
+      '마곡 코드찾기는 검색 노출만을 위한 얇은 페이지를 늘리지 않고, 이용자가 입주 검토에서 바로 확인할 수 있는 근거, 한계, 다음 행동을 함께 제공하는 방향으로 콘텐츠를 관리합니다.',
+    ctaLabel: '업데이트 로그 보기',
+    ctaHref: `${SITE_URL}/updates/`,
+    sections: [
+      {
+        heading: '작성 원칙',
+        bullets: [
+          '원문 법령과 고시 내용을 단순 복사하지 않고, 마곡 입주 상담에서 실제로 확인해야 할 질문과 판단 순서로 다시 정리합니다.',
+          '가능성 표현은 보수적으로 사용하며, 최종 행정 판단을 대신하는 확정 문구는 피합니다.',
+          '자동 생성 페이지를 대량으로 늘리기보다 대표 업종, 법령 라이브러리, 업데이트 로그처럼 탐색 가능한 핵심 페이지를 우선 유지합니다.',
+        ],
+      },
+      {
+        heading: '출처와 검토',
+        bullets: [
+          '법령 라이브러리와 업데이트 로그에는 확인한 공식 문서명, 발행 기관, 기준일, 원문 링크를 함께 남깁니다.',
+          '외부 자료를 사용할 때는 자체 해설과 실무 체크포인트를 추가해 원문 링크만 나열하지 않도록 관리합니다.',
+          '사용자가 오류를 제보하면 출처 문서를 다시 확인한 뒤 수정 범위와 이유를 기록합니다.',
+        ],
+      },
+      {
+        heading: '광고와 제휴 노출',
+        bullets: [
+          'AdSense 승인 전에는 본문보다 광고가 먼저 보이도록 만드는 광고 단위를 배치하지 않습니다.',
+          '광고가 도입되더라도 내비게이션, 다운로드, 결과 버튼처럼 오해될 수 있는 위치와 표현은 사용하지 않습니다.',
+          '제휴성 안내는 본문 가치를 대체하지 않도록 보조 정보로만 두고, 이용자가 실제 판단에 쓸 수 있는 콘텐츠를 우선합니다.',
+        ],
+      },
+      {
+        heading: '수정 요청',
+        paragraphs: [
+          '콘텐츠 오류, 누락된 근거, 오래된 고시 반영 요청은 contact.loopinlab@gmail.com으로 보낼 수 있습니다. 제보에는 URL, 관련 업종코드, 확인한 원문 위치를 함께 적어 주시면 검토가 빠릅니다.',
         ],
       },
     ],
@@ -247,94 +352,6 @@ const STATIC_SEO_PAGES: StaticSeoPageDefinition[] = [
       },
     ],
   },
-  {
-    slug: 'methodology',
-    title: '판정 기준',
-    description:
-      '마곡 코드찾기가 어떤 원문과 절차를 바탕으로 업종코드 추천과 예비판정을 만드는지 설명합니다.',
-    eyebrow: '판정 기준',
-    heroTitle: '업종코드 추천과 예비판정은 이렇게 만듭니다',
-    heroSummary:
-      '마곡 코드찾기는 원문 고시, 시행령, 코드 사전 데이터를 바탕으로 추천 후보를 좁히고, 구역별 판단 포인트를 설명형 문서로 다시 정리합니다.',
-    ctaLabel: '법령 라이브러리 보기',
-    ctaHref: `${SITE_URL}/library/`,
-    sections: [
-      {
-        heading: '기본 데이터 원문',
-        bullets: [
-          '산업집적활성화 및 공장설립에 관한 법률 시행령',
-          '마곡일반산업단지 관리기본계획 변경 고시',
-          'KSIC 11차 업종 코드 텍스트와 내부 매핑 데이터',
-        ],
-      },
-      {
-        heading: '추천 코드 생성 방식',
-        paragraphs: [
-          '사용자가 입력한 업태·종목·업무 설명에서 핵심 표현을 추출해 내부 업종 사전과 대조한 뒤, 먼저 검토할 후보 코드를 보여줍니다.',
-          '정확한 코드가 이미 있는 경우에는 수동 입력으로 바로 넘어갈 수 있고, 모호한 표현일 때는 유사 코드와 비교 포인트를 함께 제공합니다.',
-        ],
-      },
-      {
-        heading: '구역별 예비판정 방식',
-        bullets: [
-          '지식산업센터와 산업시설구역 기준을 분리해 각각의 이유와 메모를 보여줍니다.',
-          '조건부 가능, 심의 필요, 추가 확인처럼 실무에서 헷갈리기 쉬운 상태를 별도 라벨로 구분합니다.',
-          '원문 조문과 페이지 힌트를 함께 붙여 사용자가 근거를 다시 추적할 수 있게 합니다.',
-        ],
-      },
-      {
-        heading: '한계와 주의사항',
-        paragraphs: [
-          '자동 추천과 예비판정은 실제 사업 설명의 품질에 영향을 받습니다. 같은 코드라도 영위 방식, 입주 목적, 제조시설 계획, 임대 구조에 따라 해석이 달라질 수 있습니다.',
-          '따라서 이 서비스는 최종 확정 대신 초기 검토와 설명 정리를 돕는 데 목적이 있으며, 계약·신고·심의 전에는 반드시 원문과 관할 기관 안내를 다시 확인해야 합니다.',
-        ],
-      },
-    ],
-  },
-  {
-    slug: 'editorial-policy',
-    title: '편집 정책',
-    description:
-      '공개 가이드와 법령 요약 페이지를 어떤 원칙으로 작성·수정·검증하는지 설명합니다.',
-    eyebrow: '편집 정책',
-    heroTitle: '공개 콘텐츠는 이런 원칙으로 관리합니다',
-    heroSummary:
-      '마곡 코드찾기의 공개 페이지는 원문 복제가 아니라, 실무에서 바로 써야 하는 설명과 비교 포인트를 덧붙인 편집형 콘텐츠를 목표로 운영합니다.',
-    ctaLabel: '업데이트 로그 보기',
-    ctaHref: `${SITE_URL}/updates/`,
-    sections: [
-      {
-        heading: '고유 콘텐츠 원칙',
-        bullets: [
-          '원문 문서를 그대로 복사하지 않고, 상담에 필요한 요약·비교·체크포인트를 자체 문장으로 작성합니다.',
-          '비슷한 주제라도 각 공개 페이지가 답하는 질문과 다음 행동이 겹치지 않도록 구성합니다.',
-          '광고보다 본문과 탐색 구조가 먼저 보이도록 유지합니다.',
-        ],
-      },
-      {
-        heading: '출처 검증 방식',
-        paragraphs: [
-          '법령과 고시 관련 페이지는 공식 원문 URL을 먼저 확인하고, 공개 설명과 원문 표현이 어긋나는 부분이 없는지 대조합니다.',
-          '업데이트가 확인되면 법령 라이브러리, 대표 가이드, 업데이트 로그를 함께 수정해 한 화면만 낡지 않도록 관리합니다.',
-        ],
-      },
-      {
-        heading: '수정과 이력 공개',
-        bullets: [
-          '중요한 기준 변경이나 페이지 구조 변경은 업데이트 로그에 날짜와 영향 범위를 남깁니다.',
-          '오류 제보가 들어오면 수정 가능한 범위부터 순차적으로 반영합니다.',
-          '근거가 불충분한 내용은 추정 표현을 줄이고, 확인이 필요한 조건으로 명시합니다.',
-        ],
-      },
-      {
-        heading: '광고와 사용자 경험 원칙',
-        paragraphs: [
-          '광고 수익을 목적으로 페이지를 늘리지 않으며, 정보 가치가 낮은 템플릿성 페이지는 공개 색인에서 제외하거나 정리합니다.',
-          '완성도 낮은 화면이나 오류 상태 화면에서는 광고보다 복구 안내와 탐색 링크를 먼저 제공하는 것을 기본 원칙으로 둡니다.',
-        ],
-      },
-    ],
-  },
 ]
 
 function escapeHtml(value: string) {
@@ -415,6 +432,8 @@ function buildDocument({
   structuredData: unknown[]
   robotsContent?: string
 }) {
+  const normalizedBody = body.trim()
+
   return `<!doctype html>
 <html lang="ko">
   <head>
@@ -442,10 +461,42 @@ function buildDocument({
         background: linear-gradient(180deg, #f7faff 0%, #eef4ff 100%);
         color: var(--text);
       }
-      main {
+      .site-header, main, .site-footer {
         width: min(1120px, calc(100% - 32px));
         margin: 0 auto;
-        padding: 40px 0 64px;
+      }
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 0 0;
+      }
+      .brand-link {
+        color: var(--text);
+        font-size: 18px;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .site-nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .site-nav a {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.78);
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 700;
+        padding: 8px 11px;
+        text-decoration: none;
+      }
+      main {
+        padding: 24px 0 40px;
       }
       .hero, .section {
         background: var(--panel);
@@ -470,7 +521,7 @@ function buildDocument({
         margin: 18px 0 0;
         font-size: clamp(32px, 5vw, 48px);
         line-height: 1.12;
-        letter-spacing: -0.04em;
+        letter-spacing: 0;
       }
       h2 {
         margin: 0 0 12px;
@@ -527,18 +578,57 @@ function buildDocument({
         text-decoration: none;
         font-weight: 700;
       }
+      .site-footer {
+        margin-bottom: 40px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(255,255,255,0.82);
+        padding: 20px 24px;
+      }
+      .site-footer p {
+        margin: 8px 0 0;
+        font-size: 14px;
+      }
       @media (max-width: 720px) {
-        main { width: min(100% - 20px, 1120px); padding-top: 24px; }
+        .site-header, main, .site-footer { width: min(100% - 20px, 1120px); }
+        .site-header { align-items: flex-start; flex-direction: column; }
+        .site-nav { justify-content: flex-start; }
+        main { padding-top: 16px; }
         .hero, .section { padding: 18px; border-radius: 22px; }
       }
     </style>
   </head>
   <body>
+    ${renderSiteHeader()}
     <main>
-      ${body}
+      ${normalizedBody}
     </main>
+    ${renderSiteFooter()}
   </body>
 </html>`
+}
+
+function renderSiteHeader() {
+  return `<header class="site-header">
+      <a class="brand-link" href="${SITE_URL}/">마곡 코드찾기</a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        ${SITE_NAV_LINKS.map(
+          (link) => `<a href="${link.href}">${escapeHtml(link.label)}</a>`,
+        ).join('')}
+      </nav>
+    </header>`
+}
+
+function renderSiteFooter() {
+  return `<footer class="site-footer">
+      <strong>Loopin Lab 공개 정보</strong>
+      <p>마곡 입주 검토용 업종코드 추천, 법령 근거, 변경 이력을 함께 제공합니다. 문의: contact.loopinlab@gmail.com</p>
+      <div class="link-row">
+        ${SITE_FOOTER_LINKS.map(
+          (link) => `<a class="link-chip" href="${link.href}">${escapeHtml(link.label)}</a>`,
+        ).join('')}
+      </div>
+    </footer>`
 }
 
 function buildWebPageSchema({
@@ -900,7 +990,7 @@ export function buildStaticSeoDocuments(): SeoPageDocument[] {
         name: `${page.title} | ${BRAND_NAME}`,
         description: page.description,
         url: canonicalUrl,
-        dateModified: '2026-03-30',
+        dateModified: TRUST_PAGE_LASTMOD,
         publisher: { name: BRAND_NAME, url: SITE_URL },
       }),
       buildBreadcrumbList([

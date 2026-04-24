@@ -23,6 +23,7 @@ import { UPDATE_LOG_ENTRIES } from '../src/features/updates/data/update-log'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
 const publicDir = path.join(projectRoot, 'public')
+const contentQualityLastmod = '2026-04-24'
 
 async function writeSeoPage(rootDir: string, filePath: string, html: string) {
   const fullPath = path.join(rootDir, filePath)
@@ -80,7 +81,7 @@ async function main() {
   const coreSitemap = buildSitemapXml([
     {
       url: 'https://loopincode.com/',
-      lastmod: '2026-03-20',
+      lastmod: contentQualityLastmod,
       priority: '1.0',
       changefreq: 'weekly',
     },
@@ -104,7 +105,7 @@ async function main() {
     },
     ...staticDocuments.map((document) => ({
       url: document.url,
-      lastmod: '2026-03-30',
+      lastmod: contentQualityLastmod,
       priority: '0.5',
       changefreq: 'monthly' as const,
     })),
@@ -129,9 +130,9 @@ async function main() {
   )
 
   const updatesSitemap = buildSitemapXml(
-    updateDocuments.map((document) => ({
+    updateDocuments.map((document, index) => ({
       url: document.url,
-      lastmod: '2026-03-20',
+      lastmod: UPDATE_LOG_ENTRIES[index]?.date ?? '2026-03-20',
       priority: '0.6',
       changefreq: 'weekly',
     })),
@@ -140,7 +141,7 @@ async function main() {
   const sitemapIndex = buildSitemapIndexXml([
     {
       url: 'https://loopincode.com/sitemaps/core.xml',
-      lastmod: '2026-03-20',
+      lastmod: contentQualityLastmod,
     },
     {
       url: 'https://loopincode.com/sitemaps/guides.xml',
@@ -152,7 +153,7 @@ async function main() {
     },
     {
       url: 'https://loopincode.com/sitemaps/updates.xml',
-      lastmod: '2026-03-20',
+      lastmod: UPDATE_LOG_ENTRIES[0]?.date ?? '2026-03-20',
     },
   ])
 

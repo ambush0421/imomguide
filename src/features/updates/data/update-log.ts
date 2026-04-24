@@ -35,45 +35,59 @@ const affiliatePolicySources: SourceReference[] = [
 
 const contentQualityPolicySources: SourceReference[] = [
   {
-    title: 'AdSense 도움말: 최소 콘텐츠 요건',
-    url: 'https://support.google.com/adsense/answer/9335564#minimum_content_requirements',
+    title: 'AdSense 페이지 준비 가이드',
+    url: 'https://support.google.com/adsense/answer/7299563?hl=ko',
     authority: 'Google AdSense Help',
     description:
-      '고유 콘텐츠, 쉬운 탐색, 우수한 사용자 환경을 확인하라는 공식 안내 문서입니다.',
+      '고유 콘텐츠, 쉬운 탐색, 좋은 사용자 경험을 갖춘 페이지인지 점검하는 AdSense 공식 안내입니다.',
   },
   {
-    title: 'AdSense 도움말: 가치가 별로 없는 콘텐츠',
-    url: 'https://support.google.com/adsense/answer/10015918',
+    title: 'AdSense 계정 미승인 사유와 해결 방법',
+    url: 'https://support.google.com/adsense/answer/81904?hl=ko',
     authority: 'Google AdSense Help',
     description:
-      '사이트가 충분한 부가가치를 제공하지 못할 때 확인해야 하는 대표 원인을 설명합니다.',
+      '불충분한 콘텐츠, 콘텐츠 품질 문제, 사이트 탐색 문제를 수정한 뒤 재검토를 요청하는 흐름을 설명합니다.',
   },
   {
-    title: '웹마스터 품질 가이드라인: 내용이 빈약한 콘텐츠',
-    url: 'https://support.google.com/webmasters/answer/9044175#thin-content',
+    title: '유용하고 신뢰할 수 있는 사용자 우선 콘텐츠',
+    url: 'https://developers.google.com/search/docs/fundamentals/creating-helpful-content?hl=ko',
     authority: 'Google Search Central',
     description:
-      '사용자에게 실질적 가치를 더하지 못하는 페이지 유형을 설명하는 검색 품질 가이드입니다.',
+      '콘텐츠의 원본성, 신뢰성, 누가·어떻게·왜 만들었는지를 공개하는 기준을 설명합니다.',
   },
   {
-    title: 'AdSense 도움말: 사이트 검토 요청 전 확인 사항',
-    url: 'https://support.google.com/adsense/answer/1348737',
-    authority: 'Google AdSense Help',
+    title: 'Google 검색 스팸 정책',
+    url: 'https://developers.google.com/search/docs/essentials/spam-policies?hl=ko',
+    authority: 'Google Search Central',
     description:
-      '위반 사항 수정 후 사이트 검토를 요청하기 전에 확인해야 하는 항목을 안내합니다.',
+      '대량 자동 생성, 얇은 제휴, 스크래핑처럼 낮은 가치로 판단될 수 있는 공개 콘텐츠 위험을 정리합니다.',
   },
 ]
 
 export const UPDATE_LOG_ENTRIES: UpdateLogEntry[] = [
   {
+    id: 'adsense-content-review-20260424',
+    date: '2026-04-24',
+    title: 'AdSense 콘텐츠 품질 재검토 준비 보강',
+    summary:
+      '가치가 별로 없는 콘텐츠 지적에 대응해 공개 신뢰 페이지, 공통 탐색, 편집 기준, 검토 방법론, 빌드 후 콘텐츠 품질 점검을 보강했습니다.',
+    highlights: [
+      '검토 방법론과 편집 정책 페이지를 추가해 누가, 어떻게, 왜 콘텐츠를 운영하는지 공개했습니다.',
+      '대표 가이드, 법령 라이브러리, 업데이트 로그, 문의/약관/개인정보 페이지를 모든 공개 SEO 페이지에서 이동할 수 있게 공통 내비게이션을 붙였습니다.',
+      '승인 전 광고보다 원본 콘텐츠와 근거 자료가 먼저 보이도록 콘텐츠 품질 점검 스크립트를 추가했습니다.',
+    ],
+    affectedAreas: ['공개 SEO 페이지', '신뢰 페이지', '사이트맵', 'AdSense 재검토 체크'],
+    sourceReferences: contentQualityPolicySources,
+  },
+  {
     id: 'content-quality-trust-refresh',
     date: '2026-04-13',
     title: '콘텐츠 품질·운영 신뢰 페이지 정비',
     summary:
-      '대표 가이드 설명을 보강하고, 판정 기준·편집 정책·문의 경로를 독립 공개 페이지로 분리해 저가치 콘텐츠 리스크를 줄였습니다.',
+      '대표 가이드 설명을 보강하고, 검토 방법론·편집 정책·문의 경로를 독립 공개 페이지로 분리해 저가치 콘텐츠 리스크를 줄였습니다.',
     highlights: [
       '대표 가이드와 색인 페이지에 판단 순서, 준비 자료, 운영 정보 링크를 추가했습니다.',
-      '판정 기준과 편집 정책 페이지를 새로 공개해 어떤 원문과 원칙으로 콘텐츠를 관리하는지 설명했습니다.',
+      '검토 방법론과 편집 정책 페이지를 새로 공개해 어떤 원문과 원칙으로 콘텐츠를 관리하는지 설명했습니다.',
       '홈 첫 응답 HTML에도 서비스 요약, 주요 링크, 운영 신뢰 정보를 넣어 JS 렌더링 전에도 핵심 내용을 읽을 수 있게 정리했습니다.',
     ],
     affectedAreas: ['홈 초기 HTML', '대표 가이드 공개 페이지', '신뢰 페이지', '업데이트 로그'],

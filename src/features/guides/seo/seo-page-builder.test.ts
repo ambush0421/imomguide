@@ -112,7 +112,14 @@ describe('seo-page-builder', () => {
     const libraryIndex = buildLibraryIndexSeoDocument(libraryEntries)
     const libraryDetail = buildLibraryDetailSeoDocument(libraryEntries[0]!)
     const updatesIndex = buildUpdatesIndexSeoDocument(UPDATE_LOG_ENTRIES)
-    const updateDetail = buildUpdateDetailSeoDocument(UPDATE_LOG_ENTRIES[0]!)
+    const contentTrustUpdate = UPDATE_LOG_ENTRIES.find(
+      (entry) => entry.id === 'content-quality-trust-refresh',
+    )!
+    const contentQualityUpdate = UPDATE_LOG_ENTRIES.find(
+      (entry) => entry.id === 'adsense-content-review-20260424',
+    )!
+    const updateDetail = buildUpdateDetailSeoDocument(contentTrustUpdate)
+    const contentQualityUpdateDetail = buildUpdateDetailSeoDocument(contentQualityUpdate)
 
     expect(libraryIndex.filePath).toBe('library/index.html')
     expect(libraryIndex.html).toContain('<link rel="canonical" href="https://loopincode.com/library/" />')
@@ -124,29 +131,33 @@ describe('seo-page-builder', () => {
     expect(updatesIndex.html).toContain('<link rel="canonical" href="https://loopincode.com/updates/" />')
     expect(updateDetail.filePath).toBe('updates/content-quality-trust-refresh/index.html')
     expect(updateDetail.html).toContain('콘텐츠 품질·운영 신뢰 페이지 정비')
-    expect(updateDetail.html).toContain('AdSense 도움말: 최소 콘텐츠 요건')
+    expect(updateDetail.html).toContain('AdSense 페이지 준비 가이드')
     expect(updateDetail.html).toContain('"isBasedOn"')
+    expect(contentQualityUpdateDetail.filePath).toBe(
+      'updates/adsense-content-review-20260424/index.html',
+    )
+    expect(contentQualityUpdateDetail.html).toContain('AdSense 콘텐츠 품질 재검토 준비 보강')
+    expect(contentQualityUpdateDetail.html).toContain('AdSense 페이지 준비 가이드')
   })
 
   it('신뢰 페이지와 404 페이지를 만들 수 있다', () => {
     const staticDocuments = buildStaticSeoDocuments()
     const aboutPage = staticDocuments.find((entry) => entry.filePath === 'about/index.html')
-    const privacyPage = staticDocuments.find((entry) => entry.filePath === 'privacy/index.html')
-    const methodologyPage = staticDocuments.find(
-      (entry) => entry.filePath === 'methodology/index.html',
-    )
+    const methodologyPage = staticDocuments.find((entry) => entry.filePath === 'methodology/index.html')
     const editorialPolicyPage = staticDocuments.find(
       (entry) => entry.filePath === 'editorial-policy/index.html',
     )
+    const privacyPage = staticDocuments.find((entry) => entry.filePath === 'privacy/index.html')
     const notFoundPage = buildNotFoundSeoPage()
 
     expect(staticDocuments).toHaveLength(6)
     expect(aboutPage?.html).toContain('마곡 코드찾기는 무엇을 하는 서비스인가요?')
     expect(aboutPage?.html).toContain('<link rel="canonical" href="https://loopincode.com/about/" />')
+    expect(methodologyPage?.html).toContain('업종코드 추천과 예비판정은 어떻게 만들어지나요?')
+    expect(editorialPolicyPage?.html).toContain('공개 콘텐츠는 어떤 기준으로 작성하나요?')
+    expect(editorialPolicyPage?.html).toContain('https://loopincode.com/methodology/')
     expect(privacyPage?.html).toContain('개인정보와 이용 정보 처리 안내')
     expect(privacyPage?.html).toContain('Google Analytics 4')
-    expect(methodologyPage?.html).toContain('업종코드 추천과 예비판정은 이렇게 만듭니다')
-    expect(editorialPolicyPage?.html).toContain('공개 콘텐츠는 이런 원칙으로 관리합니다')
     expect(notFoundPage).toContain('페이지를 찾을 수 없습니다')
     expect(notFoundPage).toContain('<meta name="robots" content="noindex,nofollow" />')
   })

@@ -92,6 +92,8 @@ npm run desktop:build
 
 - 현재 공개 버전에서는 홈의 AdSense/제휴 영역을 노출하지 않는다.
 - 공개 SEO 페이지도 대표 가이드와 핵심 문서만 export 하도록 축소해 둔다.
+- AdSense 재검토 전에는 `npm run build` 후 `npm run audit:adsense-content`로 공개 HTML의 본문 길이, 메타 태그, 공통 탐색, ads.txt를 확인한다.
+- 신뢰 보강 페이지는 `/methodology/`, `/editorial-policy/`, `/about/`, `/contact/`, `/privacy/`, `/terms/`를 기준으로 운영한다.
 
 ## 개발용 법령 조사 워크플로
 
@@ -129,6 +131,7 @@ npm run desktop:build
 
 ```bash
 npm run lint
+npm run audit:adsense-content
 npx vitest run src/App.test.tsx --reporter=verbose --pool=threads --maxWorkers=1 --testTimeout=5000
 npx vitest run src/features/eligibility/evaluator.test.ts src/features/eligibility/industry-discovery.test.ts --reporter=verbose --pool=threads --maxWorkers=1 --testTimeout=5000
 npm run build
