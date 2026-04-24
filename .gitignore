@@ -15,6 +15,7 @@ release
 .electron-builder-cache
 tmp_*
 *.local
+deploy_main_temp/
 
 # Editor directories and files
 .vscode/*
